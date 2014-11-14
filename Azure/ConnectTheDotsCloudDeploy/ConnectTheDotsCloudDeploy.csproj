@@ -7,8 +7,8 @@
     <ProjectGuid>{C5D904A1-BD1C-4A76-9BD5-B7D4AB4FC5D4}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CloudPIDeploy</RootNamespace>
-    <AssemblyName>CloudPIDeploy</AssemblyName>
+    <RootNamespace>ConnectTheDotsCloudDeploy</RootNamespace>
+    <AssemblyName>ConnectTheDotsCloudDeploy</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>9462ad2b</NuGetPackageImportStamp>
