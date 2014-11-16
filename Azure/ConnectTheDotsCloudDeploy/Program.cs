@@ -44,7 +44,7 @@ using Microsoft.WindowsAzure.Management.ServiceBus.Models;
 
 using Newtonsoft.Json;
 
-namespace CloudPIDeploy
+namespace ConnectTheDotsCloudDeploy
 {
     class Program
     {
@@ -527,7 +527,7 @@ namespace CloudPIDeploy
 
             if (bParseError)
             {
-                Console.WriteLine("Usage: CloudPIDeploy  -PublishSettingsFile <settingsfile> [-NamePrefix <prefix>] [-Location <location>] [-website <websitedir>]");
+                Console.WriteLine("Usage: ConnectTheDotsCloudDeploy  -PublishSettingsFile <settingsfile> [-NamePrefix <prefix>] [-Location <location>] [-website <websitedir>]");
                 return 1;
             }
 

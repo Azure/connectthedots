@@ -36,7 +36,7 @@
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="https://code.highcharts.com/highcharts.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.3/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="js/cloudpi.js"></script>
+    <script type="text/javascript" src="js/connectthedots.js"></script>
 </head>
 <body>
     <form id="form1" runat="server">

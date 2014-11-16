@@ -38,7 +38,7 @@ using Amqp.Types;
 
 using Newtonsoft.Json;
 
-namespace CloudPI
+namespace RaspberryPiGateway
 {
 	class MainClass
 	{
@@ -405,7 +405,7 @@ namespace CloudPI
 
 			if (bParseError)
 			{
-				Console.WriteLine ("Usage: CloudPI -forever | -tracelevel verbose information error frame warning | -deviceid <deviceid> | -devicename <devicename> | -serial <serial port name> | -frequency <frequency in ms> | -address <address> | -target <target>");
+                Console.WriteLine("Usage: RaspberryPiGateway -forever | -tracelevel verbose information error frame warning | -deviceid <deviceid> | -devicename <devicename> | -serial <serial port name> | -frequency <frequency in ms> | -address <address> | -target <target>");
 				return 1;
 			}
 			return 0;
