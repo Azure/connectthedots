@@ -1,6 +1,7 @@
 set puttydir=d:\software\putty\
 set prjdir=..\
-set rpi_ip=192.168.1.107
+set rpi_ip=raspberrypi
+rem set rpi_ip=192.168.1.107
 set rpi_usr=pi
 set rpi_pw=raspberry
 %puttydir%pscp -pw %rpi_pw% %prjdir%bin\Debug\RaspberryPiGateway.exe %rpi_usr%@%rpi_ip%:RaspberryPiGateway/
