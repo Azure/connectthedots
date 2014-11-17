@@ -187,8 +187,6 @@ namespace RaspberryPiGateway
                 message.Properties.Subject = "wthrerr";
             }
 
-            // TODO Check if previous message has been sent. If not: cancel, so we optimize for sending the latest value always
-            // Current code however provides maximum throughput (AMQP streaming without waiting for invididual ack)
             sender.Send(message, SendOutcome, null); // Send to the cloud asynchronously
 
 #if LOG_MESSAGE_RATE
