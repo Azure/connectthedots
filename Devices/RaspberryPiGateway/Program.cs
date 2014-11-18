@@ -140,11 +140,11 @@ namespace RaspberryPiGateway
 
         void GetSampleAndSendAmqpMessage(SenderLink sender)
         {
-            // sensor data is continuously sampled by a background thread
-            // Obtain the last sample
+            // Obtain the last sample as gathered by the background thread 
+            // Interlocked.Exchange guarantees that changes are done atomically between main and background thread
             var sample = Interlocked.Exchange(ref lastDataSample, null);
 
-            // No new sample since we checked last time: don't send
+            // No new sample since we checked last time: don't send anything
             if (sample == null) return;
 
             Message message = new Message();
@@ -184,6 +184,7 @@ namespace RaspberryPiGateway
             }
             else
             {
+                // No data: send an empty message with message type "weather error" to help diagnose problems "from the cloud"
                 message.Properties.Subject = "wthrerr";
             }
 

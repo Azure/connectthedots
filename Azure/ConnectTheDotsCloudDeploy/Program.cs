@@ -152,7 +152,7 @@ namespace ConnectTheDotsCloudDeploy
             {
                 PartitionCount = 8,
             };
-            ehDescriptionDevices.Authorization.Add(new SharedAccessAuthorizationRule("D1", new List<AccessRights> { AccessRights.Send })); // SharedAccessAuthorizationRule.GenerateRandomKey();
+            ehDescriptionDevices.Authorization.Add(new SharedAccessAuthorizationRule("D1", new List<AccessRights> { AccessRights.Send }));
             ehDescriptionDevices.Authorization.Add(new SharedAccessAuthorizationRule("D2", new List<AccessRights> { AccessRights.Send }));
             ehDescriptionDevices.Authorization.Add(new SharedAccessAuthorizationRule("D3", new List<AccessRights> { AccessRights.Send }));
             ehDescriptionDevices.Authorization.Add(new SharedAccessAuthorizationRule("D4", new List<AccessRights> { AccessRights.Send }));
