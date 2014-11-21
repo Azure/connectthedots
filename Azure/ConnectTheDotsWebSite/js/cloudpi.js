@@ -22,12 +22,17 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-var myChart;
+var tempChart;
+var humChart;
+//var lightChart;
+
 var updateChart = true;
 
 var websocket;
 
 $(document).ready(function () {
+
+// Set up jQuery DataTable to show alerts
     var table = $('#alertTable').DataTable(
     {
         "columnDefs":
@@ -65,13 +70,14 @@ $(document).ready(function () {
         ]
     });
 
-    table.order([1, 'desc']);
+    table.order([0, 'desc']);
 
-    myChart = new Highcharts.Chart(
+    // Set up chart to show real time temperature
+    tempChart = new Highcharts.Chart(
     {
         chart:
         {
-            renderTo: 'chartContainer',
+            renderTo: 'tempchartContainer',
             type: 'line'
         },
         title:
@@ -91,7 +97,44 @@ $(document).ready(function () {
         ]
     });
 
-    var sss = (window.location.protocol.indexOf('s')>0 ? "s" : "");
+    // Set up chart to show real time humidity
+    humChart = new Highcharts.Chart(
+    {
+        chart:
+        {
+            renderTo: 'humchartContainer',
+            type: 'line'
+        },
+        title:
+        {
+            text: 'Humidity'
+        },
+        xAxis:
+        {
+            labels: { format: '{value:%H:%M:%S}' }
+        }
+    });
+
+    // Set up chart to show real time light
+    //lightChart = new Highcharts.Chart(
+    //{
+    //    chart:
+    //    {
+    //        renderTo: 'lightchartContainer',
+    //        type: 'line'
+    //    },
+    //    title:
+    //    {
+    //        text: 'Light'
+    //    },
+    //    xAxis:
+    //    {
+    //        labels: { format: '{value:%H:%M:%S}' }
+    //    }
+    //});
+
+    // Set up websocket client
+    var sss = (window.location.protocol.indexOf('s') > 0 ? "s" : "");
     var uri = 'ws'+ sss +'://' + window.location.host + '/api/websocketconnect?clientId=none';
     
     websocket = new WebSocket(uri);
@@ -108,11 +151,12 @@ $(document).ready(function () {
         $('#messages').prepend('<div>ERROR '+ event.error+'</div>');
     }
 
-
+    // Deal with message received on WebSocket
     websocket.onmessage = function (event)
     {
         try
         {
+            // Parse the JSON package
             var eventObject = JSON.parse(event.data);
         }
         catch (e)
@@ -120,65 +164,73 @@ $(document).ready(function () {
             $('#messages').prepend('<div>Malformed message: '+event.data+"</div>");
         }
 
+        // Seems like we have valid data
         try
         {
+            // If the message is an alert, we need to display it in the datatable
             if (eventObject.alerttype != null)
             {
                 var table = $('#alertTable').DataTable();
+                var time = new Date(eventObject.timestart);
 
-                var startTime = new Date(eventObject.timestart);
-                var endTime = new Date(eventObject.timeend);
+                // Log the alert in the rawalerts div
+                $('#rawalerts').prepend('<div>' + time + ': ' + eventObject.dsplalert + ' ' + eventObject.alerttype + ' ' + eventObject.message + '</div>');
+                $('#rawalerts').contents().filter(':gt(20)').remove();
 
-                var indexes = table.rows().eq(0).filter(function (rowIdx)
-                {
+                // Check if we already have this one in the table already to prevent duplicates
+                var indexes = table.rows().eq(0).filter(function (rowIdx) {
                     if (
-                        table.cell(rowIdx, 0).data() == eventObject.alerttype + ' ' + eventObject.dsplalert
-                        && table.cell(rowIdx, 1).data().getTime() == startTime.getTime()
-                        && table.cell(rowIdx, 2).data().getTime() == endTime.getTime()
-                    )
-                    {
+                        table.cell(rowIdx, 0).data().getTime() == time.getTime()
+                        && table.cell(rowIdx, 1).data() == eventObject.dsplalert
+                        && table.cell(rowIdx, 2).data() == eventObject.alerttype
+                    ) {
                         return true;
                     }
                     return false;
                 });
 
-
-                if (indexes.length==0)
+                // The alert is a new one, lets display it
+                if (indexes.length == 0)
                 {
-                    if (table.data().length > 200)
-                    {
+                    // For performance reasons, we want to limit the number of items in the table to a max of 20. 
+                    // We will remove the oldest from the list
+                    if (table.data().length > 19) {
+                        // Search for the oldest time in the list of alerts
                         var minTime = table.data().sort(
-                            function(a,b)
-                            {
-                                return (a[1] > b[1]) - (a[1] < b[1])
+                            function (a, b) {
+                                return (a[0] > b[0]) - (a[0] < b[0])
                             }
-                            )[0][1];
+                            )[0][0];
+                        // Delete the oldest row
                         table.rows(
-                            function (idx, data, node)
-                            {
-                                return data[1] == minTime;
+                            function (idx, data, node) {
+                                return data[0].getTime() == minTime.getTime();
                             }
                         ).remove();
                     }
 
+                    // Add the new alert to the table
+                    var message = 'message';
+                    if (eventObject.message != null) message = eventObject.message;
                     table.row.add([
-                        eventObject.alerttype+' '+ eventObject.dsplalert,
-                        startTime,
-                        endTime,
-                        eventObject.tempmax,
-                        eventObject.tempavg,
-                        eventObject.tempmin,
+                        time,
+                        eventObject.dsplalert,
+                        eventObject.alerttype,
+                        message
                     ]).draw();
                 }
             }
             else
             {
+                // Message received is not an alert. let's display it in the charts
                 if (eventObject.tempavg != null)
                 {
-                    AddPointToChartSeries(myChart, 0, eventObject.time, eventObject.tempavg);
+                    // In the case of an average temperature ingo, we are adding the point to the tempavg series in the temp chart
+                    AddPointToChartSeries(tempChart, 0, eventObject.time, eventObject.tempavg);
                 }
                 else if (eventObject.bulkData != null)
                 {
+                    // if the bulkData key is set to false in the message, we will trigger the update for the chart. 
                     if (eventObject.bulkData == true)
                     {
                         updateChart = false;
@@ -186,33 +238,50 @@ $(document).ready(function () {
                     else
                     {
                         updateChart = true;
-                        myChart.redraw();
+                        tempChart.redraw();
+                        humChart.redraw();
+                        //lightChart.redraw();
                     }
                 }
                 else
                 {
-                    if (updateChart)
-                    {
-                        $('#messages').prepend('<div>' + eventObject.time + ': ' + eventObject.dspl + ' ' + eventObject.temp + '</div>');
-                        $('#messages').contents().filter(':gt(100)').remove();
-                    }
-                    for (var i = 1; i < myChart.series.length; i++)
-                    {
-                        if (myChart.series[i].name == eventObject.dspl)
-                        {
-                            break;
+                    // the message is data for the charts
+                    // we make sure the dspl field is in the message, meaning the data is coming from a known device or service
+                    if (eventObject.dspl != null) {
+                        if (updateChart) {
+                            //$('#messages').prepend('<div>' + eventObject.time + ': ' + eventObject.dspl + ' ' + eventObject.temp + ' ' + eventObject.hmdt + ' ' + eventObject.lght + '</div>');
+                            //$('#messages').contents().filter(':gt(100)').remove();
                         }
-                    }
-                    if (i >= myChart.series.length)
-                    {
-                        myChart.addSeries(
-                            {
-                                name: eventObject.dspl,
-                                data: []
-                            });
-                    }
 
-                    AddPointToChartSeries(myChart, i, eventObject.time, eventObject.temp);
+                        // We first check if the device is already in the chart or if we need to add a new series to the charts
+                        for (var i = 1; i < tempChart.series.length; i++) {
+                            if (tempChart.series[i].name == eventObject.dspl) {
+                                break;
+                            }
+                        }
+                        if (i >= tempChart.series.length) {
+                            tempChart.addSeries(
+                                {
+                                    name: eventObject.dspl,
+                                    data: []
+                                });
+                            humChart.addSeries(
+                                {
+                                    name: eventObject.dspl,
+                                    data: []
+                                });
+                            //lightChart.addSeries(
+                            //    {
+                            //        name: eventObject.dspl,
+                            //        data: []
+                            //    });
+                        }
+
+                        // Now we can add the point to the series
+                        AddPointToChartSeries(tempChart, i, eventObject.time, eventObject.temp);
+                        AddPointToChartSeries(humChart, i - 1, eventObject.time, eventObject.hmdt);
+                        //AddPointToChartSeries(lightChart, i - 1, eventObject.time, eventObject.lght);
+                    }
                 }
             }
         }
@@ -235,14 +304,15 @@ function AddPointToChartSeries(chart, seriesIndex, dateString, y)
     var insert = true;
     if (chart.series[seriesIndex].points.length > 0)
     {
-        if (myChart.series[seriesIndex].points[chart.series[seriesIndex].points.length - 1].x >= lastTimeInTicks)
-        {
+//        if (tempChart.series[seriesIndex].points[chart.series[seriesIndex].points.length - 1].x >= lastTimeInTicks) {
+        if (chart.series[seriesIndex].points[chart.series[seriesIndex].points.length - 1].x >= lastTimeInTicks) {
             // The new datapoint is older than the last one we already have for this series: ignore!
             insert = false;
         }
         else
         {
-            if (myChart.series[seriesIndex].points[0].x < lastTimeToShowInTicks - 5 * 60000)
+//            if (tempChart.series[seriesIndex].points[0].x < lastTimeToShowInTicks - 5 * 60000)
+            if (chart.series[seriesIndex].points[0].x < lastTimeToShowInTicks - 5 * 60000)
             {
                 shift = true;
             }
@@ -250,8 +320,12 @@ function AddPointToChartSeries(chart, seriesIndex, dateString, y)
     }
     if (insert)
     {
-        myChart.xAxis[0].setExtremes(lastTimeToShowInTicks, null, updateChart); // Only show last n minutes
-        myChart.series[seriesIndex].addPoint([lastTimeInTicks, y],
+        //tempChart.xAxis[0].setExtremes(lastTimeToShowInTicks, null, updateChart); // Only show last n minutes
+        //tempChart.series[seriesIndex].addPoint([lastTimeInTicks, y],
+        //    updateChart,
+        //    shift); // Shift out older value
+        chart.xAxis[0].setExtremes(lastTimeToShowInTicks, null, updateChart); // Only show last n minutes
+        chart.series[seriesIndex].addPoint([lastTimeInTicks, y],
             updateChart,
             shift); // Shift out older value
     }
@@ -266,17 +340,35 @@ function SensorSelectionChanged(dropDown)
         var x = { MessageType: "LiveDataSelection", DeviceName: newSensor };
         websocket.send(JSON.stringify(x));
     }
-    for (var i = 1; i < myChart.series.length; i++)
+    for (var i = 1; i < tempChart.series.length; i++)
     {
-        if (newSensor == "All" || myChart.series[i].name == newSensor)
+        if (newSensor == "All" || tempChart.series[i].name == newSensor)
         {
-            myChart.series[i].show();
+            tempChart.series[i].show();
         }
         else
         {
-            myChart.series[i].hide();
+            tempChart.series[i].hide();
         }
     }
+    for (var i = 1; i < humChart.series.length; i++)
+    {
+        if (newSensor == "All" || humChart.series[i].name == newSensor) {
+            humChart.series[i].show();
+        }
+        else {
+            humChart.series[i].hide();
+        }
+    }
+
+    //for (var i = 1; i < lightChart.series.length; i++) {
+    //    if (newSensor == "All" || lightChart.series[i].name == newSensor) {
+    //        lightChart.series[i].show();
+    //    }
+    //    else {
+    //        lightChart.series[i].hide();
+    //    }
+    //}
 }
 
 function ShowHide(tHtml)

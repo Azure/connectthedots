@@ -29,7 +29,7 @@
 <!DOCTYPE html>
 <html>
 <head runat="server">
-    <title>Default</title>
+    <title>Connect The Dots</title>
     
 	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.3/css/jquery.dataTables.css">
 
@@ -39,12 +39,12 @@
     <script type="text/javascript" src="js/cloudpi.js"></script>
 </head>
 <body>
-    <form id="form1" runat="server">
-    <div id="chartContainer" style="width: 100%; height: 400px;"></div>
-
     <div>
-        <input type="button" onclick="ShowHide(alerts)" value="Show/Hide Alerts" />
-
+        <div style="float:left;"><img src="img/ConnectTheDotsLogo.png" /></div>
+        <div><img src="img/MSOpenTechLogo.png" /></div>
+    </div>
+    <form id="form1" runat="server">
+    <div>
         Select Sensor/R-PI:
         <asp:DropDownList ID="DropDownList1" runat="server" 
             DataSourceID="SensorInventoryData"
@@ -52,18 +52,25 @@
         </asp:DropDownList>
         <asp:ObjectDataSource ID="SensorInventoryData" runat="server" SelectMethod="GetSensorList" TypeName="WebClient.SensorInventory"></asp:ObjectDataSource>
     </div>
+    <div>
+        <div id="tempchartContainer" style="width: 50%; height: 400px; float: left;"></div>
+        <div id="humchartContainer" style="width: 50%; height: 400px; float:right;"></div>
+<%--        <div id="lightchartContainer" style="width: 33%; height: 400px;float: right"></div>--%>
+    </div>
+    <div>
+        <input type="button" onclick="ShowHide(alerts)" value="Show/Hide Alerts" />
+
+    </div>
 
 
     <div id="alerts">
         <table id="alertTable" class="display">
             <thead>
                 <tr>
-                    <th>Alert Type</th>
-                    <th class="timeFromDate" >Start</th>
-                    <th class="timeFromDate" >End</th>
-                    <th class="numberFixed">Temp Max</th>
-                    <th class="numberFixed">Temp Average</th>
-                    <th class="numberFixed">Temp Min</th>
+                    <th class="timeFromDate" >Time</th>
+                    <th>Device</th>
+                    <th>Alert</th>
+                    <th>Message</th>
                 </tr>
             </thead>
             <tbody>
@@ -72,7 +79,9 @@
 
     </div>
 
-    <input type="button" onclick="ShowHide(messages)" value="Show/Hide Live Data Table" />
+    <input type="button" onclick="ShowHide(rawalerts)" value="Show/Hide Raw Alerts" />
+
+    <div id="rawalerts" style="display:none"></div>
 
     <div id="messages" style="display:none"></div>
 
