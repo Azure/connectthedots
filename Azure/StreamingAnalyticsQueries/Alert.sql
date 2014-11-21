@@ -21,7 +21,14 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------*/
-Select 'TempSpike' as alertType, dspl as dsplAlert, min(time) as timeStart, max(time) as timeEnd, Max(temp) as tempMax, Min(temp) as tempMin, Avg(temp) AS tempAvg
+Select 'TempSpike' as alertType, 
+       'Temperature over 75F' as message, 
+       dspl as dsplAlert, 
+       max(time) as timeStart, 
+       max(time) as timeEnd, 
+       Max(temp) as tempMax, 
+       Min(temp) as tempMin, 
+       Avg(temp) AS tempAvg
 From DevicesInput TIMESTAMP BY time
-Group by dspl, TumblingWindow(Minute, 1)
+Group by dspl, TumblingWindow(Second, 20)
 Having tempMax > 75

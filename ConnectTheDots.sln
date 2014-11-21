@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "StreamingAnalyticsQueries",
 	ProjectSection(SolutionItems) = preProject
 		Azure\StreamingAnalyticsQueries\Aggregates.sql = Azure\StreamingAnalyticsQueries\Aggregates.sql
 		Azure\StreamingAnalyticsQueries\Alert.sql = Azure\StreamingAnalyticsQueries\Alert.sql
+		Azure\StreamingAnalyticsQueries\LightSensor.sql = Azure\StreamingAnalyticsQueries\LightSensor.sql
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectTheDotsCloudDeploy", "Azure\ConnectTheDotsCloudDeploy\ConnectTheDotsCloudDeploy.csproj", "{C5D904A1-BD1C-4A76-9BD5-B7D4AB4FC5D4}"
