@@ -44,7 +44,7 @@ using Microsoft.WindowsAzure.Management.ServiceBus.Models;
 
 using Newtonsoft.Json;
 
-namespace CloudPIDeploy
+namespace ConnectTheDotsCloudDeploy
 {
     class Program
     {
@@ -152,7 +152,7 @@ namespace CloudPIDeploy
             {
                 PartitionCount = 8,
             };
-            ehDescriptionDevices.Authorization.Add(new SharedAccessAuthorizationRule("D1", new List<AccessRights> { AccessRights.Send })); // SharedAccessAuthorizationRule.GenerateRandomKey();
+            ehDescriptionDevices.Authorization.Add(new SharedAccessAuthorizationRule("D1", new List<AccessRights> { AccessRights.Send }));
             ehDescriptionDevices.Authorization.Add(new SharedAccessAuthorizationRule("D2", new List<AccessRights> { AccessRights.Send }));
             ehDescriptionDevices.Authorization.Add(new SharedAccessAuthorizationRule("D3", new List<AccessRights> { AccessRights.Send }));
             ehDescriptionDevices.Authorization.Add(new SharedAccessAuthorizationRule("D4", new List<AccessRights> { AccessRights.Send }));
@@ -527,7 +527,7 @@ namespace CloudPIDeploy
 
             if (bParseError)
             {
-                Console.WriteLine("Usage: CloudPIDeploy  -PublishSettingsFile <settingsfile> [-NamePrefix <prefix>] [-Location <location>] [-website <websitedir>]");
+                Console.WriteLine("Usage: ConnectTheDotsCloudDeploy  -PublishSettingsFile <settingsfile> [-NamePrefix <prefix>] [-Location <location>] [-website <websitedir>]");
                 return 1;
             }
 

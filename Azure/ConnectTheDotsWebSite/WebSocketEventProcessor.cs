@@ -229,7 +229,7 @@ namespace WebClient
         static List<WebSocketEventProcessor> g_processors = new List<WebSocketEventProcessor>();
 
         // Retrieve buffered messages from all EH partitions (= processor instances)
-        // TODO: This needs to be partitioned and/or turned into a distributed call/cache 
+        // Note: This needs to be partitioned and/or turned into a distributed call/cache 
         //  to support effective scale-out to multiple web client machines/VMs for large number of devices
         public static IEnumerable<IDictionary<string, object>> GetAllBufferedMessages()
         {

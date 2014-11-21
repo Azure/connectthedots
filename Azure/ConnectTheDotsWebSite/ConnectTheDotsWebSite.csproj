@@ -105,7 +105,7 @@
   <ItemGroup>
     <Content Include="img\ConnectTheDotsLogo.png" />
     <Content Include="img\msopentechlogo.png" />
-    <Content Include="js\cloudpi.js" />
+    <Content Include="js\connectthedots.js" />
     <Content Include="Global.asax" />
     <Content Include="web.config">
       <SubType>Designer</SubType>

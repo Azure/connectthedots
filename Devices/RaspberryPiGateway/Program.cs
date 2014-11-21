@@ -38,7 +38,7 @@ using Amqp.Types;
 
 using Newtonsoft.Json;
 
-namespace CloudPI
+namespace RaspberryPiGateway
 {
 	class MainClass
 	{
@@ -140,11 +140,11 @@ namespace CloudPI
 
         void GetSampleAndSendAmqpMessage(SenderLink sender)
         {
-            // sensor data is continuously sampled by a background thread
-            // Obtain the last sample
+            // Obtain the last sample as gathered by the background thread 
+            // Interlocked.Exchange guarantees that changes are done atomically between main and background thread
             var sample = Interlocked.Exchange(ref lastDataSample, null);
 
-            // No new sample since we checked last time: don't send
+            // No new sample since we checked last time: don't send anything
             if (sample == null) return;
 
             Message message = new Message();
@@ -184,11 +184,10 @@ namespace CloudPI
             }
             else
             {
+                // No data: send an empty message with message type "weather error" to help diagnose problems "from the cloud"
                 message.Properties.Subject = "wthrerr";
             }
 
-            // TODO Check if previous message has been sent. If not: cancel, so we optimize for sending the latest value always
-            // Current code however provides maximum throughput (AMQP streaming without waiting for invididual ack)
             sender.Send(message, SendOutcome, null); // Send to the cloud asynchronously
 
 #if LOG_MESSAGE_RATE
@@ -405,7 +404,7 @@ namespace CloudPI
 
 			if (bParseError)
 			{
-				Console.WriteLine ("Usage: CloudPI -forever | -tracelevel verbose information error frame warning | -deviceid <deviceid> | -devicename <devicename> | -serial <serial port name> | -frequency <frequency in ms> | -address <address> | -target <target>");
+                Console.WriteLine("Usage: RaspberryPiGateway -forever | -tracelevel verbose information error frame warning | -deviceid <deviceid> | -devicename <devicename> | -serial <serial port name> | -frequency <frequency in ms> | -address <address> | -target <target>");
 				return 1;
 			}
 			return 0;
