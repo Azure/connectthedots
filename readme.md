@@ -1,4 +1,4 @@
-ConnectTheDots.io is an open source project created to help you get tiny devices connected to Microsoft Azure and implement great IoT solutions taking advantage of Microsoft Azure services such as Azure Stream Analytics, Machine Learning or HD Insight.
+ConnectTheDots.io is an open source project by <a href="http://msopentech.com">Microsoft Open Technologies</a> created to help you get tiny devices connected to Microsoft Azure and implement great IoT solutions taking advantage of Microsoft Azure services such as Azure Stream Analytics, Machine Learning or HD Insight.
 
 As part of the project you will find code samples, configuration scripts and guides that will help you set up tiny devices and configure Microsoft Azure services to make the most out of the data produced by your devices.
 
@@ -8,4 +8,4 @@ As a first sample, we have created a simple end to end solution, from device all
 We are using a Raspberry Pi, acting as a gateway, to send the data from the sensor up to Microsoft Azure Event Hub service.
 Azure Stream Analytics 
 
-Check out the ConnectTheDots Quick Start guide document to try out your first project!
+Check out the <a href="https://github.com/MSOpenTech/connectthedots-pr/blob/master/Connect%20the%20Dots%20-%20Quick%20Start.docx">ConnectTheDots Quick Start guide</a> document to try out your first project!
