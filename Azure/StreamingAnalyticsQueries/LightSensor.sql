@@ -26,7 +26,7 @@ SELECT 'LightSensor' as alerttype,
     dspl as dsplalert, 
     'The Light is turned OFF' as message,
     max(time) as timestart
-FROM StreamInput timestamp by time
+FROM DevicesInput timestamp by time
 Group by TumblingWindow(s, 5), dspl
 having avg(lght) < 0.02 
     and count(*) > 3

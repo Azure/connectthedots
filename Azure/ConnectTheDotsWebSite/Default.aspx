@@ -83,7 +83,7 @@
 
     <div id="rawalerts" style="display:none"></div>
 
-    <div id="messages" style="display:none"></div>
+    <div id="messages"></div>
 
     </form>
 </body>
