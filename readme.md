@@ -8,4 +8,4 @@ As a first sample, we have created a simple end to end solution, from device all
 We are using a Raspberry Pi, acting as a gateway, to send the data from the sensor up to Microsoft Azure Event Hub service.
 Azure Stream Analytics 
 
-Check out the <a href="https://github.com/MSOpenTech/connectthedots-pr/blob/master/Connect%20the%20Dots%20-%20Quick%20Start.docx">ConnectTheDots Quick Start guide</a> document to try out your first project!
+Check out the <a href="https://github.com/MSOpenTech/connectthedots/blob/master/Connect%20the%20Dots%20-%20Quick%20Start.pdf">ConnectTheDots Quick Start guide</a> document to try out your first project!
