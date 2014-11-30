@@ -58,7 +58,7 @@ namespace RaspberryPiGateway
 #region Commandline Parameters
 
         string deviceId = Guid.NewGuid().ToString ("N"); // Unique identifier for the device
-		string deviceDisplayName = "RPI001 C-LABS";   // Human readable name for the device
+		string deviceDisplayName = "RPi 001 MS Open Tech";   // Human readable name for the device
 
         // AMQP address string syntax is an example for Azure Service Bus/Event Hub
         // Any AMQP broker can be used by using the proper address/target
