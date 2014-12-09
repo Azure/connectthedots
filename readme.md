@@ -1,3 +1,5 @@
+![](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/CTD-logo-v5-02.png)
+
 ConnectTheDots.io is an open source project by <a href="http://msopentech.com">Microsoft Open Technologies</a> created to help you get tiny devices connected to Microsoft Azure and implement great IoT solutions taking advantage of Microsoft Azure services such as Azure Stream Analytics, Machine Learning or HD Insight.
 
 As part of the project you will find code samples, configuration scripts and guides that will help you set up tiny devices and configure Microsoft Azure services to make the most out of the data produced by your devices.
