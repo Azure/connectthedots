@@ -24,7 +24,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectTheDotsCloudDeploy",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{CE0759E4-E699-4FC3-88FF-36673ACF7BD4}"
 	ProjectSection(SolutionItems) = preProject
-		Connect the Dots - Quick Start.docx = Connect the Dots - Quick Start.docx
 		license.txt = license.txt
 		notice.txt = notice.txt
 	EndProjectSection

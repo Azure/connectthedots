@@ -31,8 +31,6 @@ using System.Diagnostics;
 using System.IO.Ports;
 using System.Text;
 using System.Threading;
-using System.Net;
-using System.Net.NetworkInformation;
 
 using Amqp;
 using Amqp.Framing;
@@ -171,7 +169,6 @@ namespace RaspberryPiGateway
             message.ApplicationProperties["time"] = message.Properties.CreationTime;
             message.ApplicationProperties["from"] = deviceId; // Originating device
             message.ApplicationProperties["dspl"] = deviceDisplayName;      // Display name for originating device
-            message.ApplicationProperties["IP"] = "127.0.0.0";    // IP address of originating device
 
             if (sample != null && sample.Count > 0)
             {
@@ -181,7 +178,6 @@ namespace RaspberryPiGateway
                 outDictionary["time"] = message.Properties.CreationTime;
                 outDictionary["from"] = deviceId; // Originating device
                 outDictionary["dspl"] = deviceDisplayName;      // Display name for originating device
-                outDictionary["IP"] = deviceAddress;    // IP address of originating device
                 message.Properties.ContentType = "text/json";
                 message.Body = new Data() { Binary = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(outDictionary)) };
 #else
@@ -219,7 +215,7 @@ namespace RaspberryPiGateway
 			if (outcome is Accepted)
 			{
 #if DEBUG
-                logger.Info("Sent message {0} - {1} from {2}", message.ApplicationProperties["time"], message.Properties.Subject, message.ApplicationProperties["IP"]);
+                logger.Info("Sent message {0} - {1}", message.ApplicationProperties["time"], message.Properties.Subject);
 #endif
 #if LOG_MESSAGE_RATE
                 g_messageCount++;
