@@ -23,7 +23,7 @@
 #  ---------------------------------------------------------------------------------
 #!/bin/bash
 echo "Running gateway"
-sudo -u pi /usr/bin/mono /home/pi/RaspberryPiGateway/RaspberryPiGateway.exe -forever -deviceid C8CA5B13-A550-4FF0-B823-46D8A2640880 -devicename "R-Pi SS dev device" -address amqps://D2:WxEVuhSvRzm2bX7TZt9QjOZKhsG5yr69Yl8PcHKPcf4%3D@myiot-ns.servicebus.windows.net -target ehdevices &
+sudo -u pi /usr/bin/mono /home/pi/RaspberryPiGateway/RaspberryPiGateway.exe -forever -deviceid A1B2C3D4-A123-4FF0-B823-46A1B2640880 -devicename "R-Pi dev device" -address amqps://D1:xxxxx@yyyyy.servicebus.windows.net -target ehdevices &
 
 # Add the below line to /etc/rc.local
 #   /home/pi/RaspberryPiGateway/autorun.sh &
