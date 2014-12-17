@@ -6,7 +6,7 @@ set rpi_ip=10.121.204.230
 set rpi_usr=pi
 set rpi_pw=raspberry
 
-echo Creating RaspberryPiGateway directory
+rem echo Creating RaspberryPiGateway directory
 echo mkdir RaspberryPiGateway > %temp%\rpigatewaymkdir.tmp
 %puttydir%putty %rpi_usr%@%rpi_ip% -pw %rpi_pw% -m %temp%\rpigatewaymkdir.tmp
 
@@ -15,6 +15,7 @@ echo Copying Gateway and logging files
 %puttydir%pscp -pw %rpi_pw% %prjdir%bin\Release\Amqp.Net.dll %rpi_usr%@%rpi_ip%:RaspberryPiGateway/
 %puttydir%pscp -pw %rpi_pw% %prjdir%bin\Release\Newtonsoft.Json.dll %rpi_usr%@%rpi_ip%:RaspberryPiGateway/
 %puttydir%pscp -pw %rpi_pw% %prjdir%bin\Release\NLog.config %rpi_usr%@%rpi_ip%:RaspberryPiGateway/
+%puttydir%pscp -pw %rpi_pw% %prjdir%bin\Release\RaspberryPiGateway.exe.config %rpi_usr%@%rpi_ip%:RaspberryPiGateway/
 %puttydir%pscp -pw %rpi_pw% %prjdir%bin\Release\NLog.dll %rpi_usr%@%rpi_ip%:RaspberryPiGateway/
 %puttydir%pscp -pw %rpi_pw% %prjdir%Scripts\autorun.sh %rpi_usr%@%rpi_ip%:RaspberryPiGateway/
 
