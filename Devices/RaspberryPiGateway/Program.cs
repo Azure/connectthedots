@@ -38,48 +38,95 @@ using Amqp.Types;
 
 using Newtonsoft.Json;
 
+// include System.Configuration to read config file
+using System.Configuration;
+using System.Collections.Specialized;
 
 // include NLog logging library. See https://github.com/NLog/NLog/wiki/Tutorial for information on adding NLog to project file and configuring NLog.conf
 using NLog;
 
+
 namespace RaspberryPiGateway
 {
+
 	class MainClass
 	{
+        // Set up config file reads
+        public static string AppSubject;
+        public static string AppSensor;
+        public static string AppEdgeGateway;
+        public static Address AppAMQPAddress;
+        public static string sAppAMQPAddress;
+        public static string AppEHTarget;
+        public static string AppDeviceDisplayName;
+        public static Int32 sendFrequency;
+        public static bool bForever;
+        public static string serialPortName;
+        public static string AppKey1;
+        public static string AppKey2;
+        public static string AppKey3;
+
 
         // Set up logging
         private static Logger logger = NLog.LogManager.GetCurrentClassLogger();
-
+        
 		public static int Main (string[] args)
 		{
 
             var main = new MainClass ();
 
-			int result = main.Parse (args);
+            // Open RaspberryPiGateway.exe.config file for device information
+            try
+            {
+                string applicationName = "RaspberryPiGateway.exe";
+                string exePath = System.IO.Path.Combine(Environment.CurrentDirectory, applicationName);
+                var configFile = ConfigurationManager.OpenExeConfiguration(exePath);
+                var appSettings = ConfigurationManager.AppSettings;
+                if (appSettings.Count == 0)
+                {
+                    logger.Info("AppSettings is empty.");
+                }
+                else
+                {
+                    foreach (var key in appSettings.AllKeys)
+                    {
+                        logger.Info("Key: {0} Value: {1}", key, appSettings[key]);
+                    }
+                }
+            }
+            catch (ConfigurationErrorsException)
+            {
+                logger.Info("Error reading app settings");
+            }
+
+            // Read a particular key from the config file
+            AppSubject = ConfigurationManager.AppSettings.Get("Subject");
+            AppSensor = ConfigurationManager.AppSettings.Get("Sensor");
+            AppEdgeGateway = ConfigurationManager.AppSettings.Get("EdgeGateway");
+            AppDeviceDisplayName = ConfigurationManager.AppSettings.Get("DeviceDisplayName");
+            sAppAMQPAddress = ConfigurationManager.AppSettings.Get("AMQPAddress");
+            AppAMQPAddress = new Address(sAppAMQPAddress);
+            AppEHTarget = ConfigurationManager.AppSettings.Get("EHTarget");
+            sendFrequency = Convert.ToInt32(ConfigurationManager.AppSettings.Get("SendFrequency"));
+            serialPortName = ConfigurationManager.AppSettings.Get("serialPortName");
+            bForever = Convert.ToBoolean(ConfigurationManager.AppSettings.Get("Forever"));
+            AppKey1 = ConfigurationManager.AppSettings.Get("Key1");
+            AppKey2 = ConfigurationManager.AppSettings.Get("Key2");
+            AppKey3 = ConfigurationManager.AppSettings.Get("Key3");
+
+            int result = main.Parse (args);
 			if (result != 0)
 			{
 				return result;
 			}
-
 			return main.Run ();
 		}
 
 #region Commandline Parameters
 
         string deviceId = Guid.NewGuid().ToString ("N"); // Unique identifier for the device
-		string deviceDisplayName = "OpenTech";   // Will store human readable name for the device, to be displayed in Azure dashboard.
-        string deviceAddress = ""; // Will store IP address of device
 
-        // AMQP address string syntax is an example for Azure Service Bus/Event Hub
-        // Any AMQP broker can be used by using the proper address/target
-        Address address = new Address("amqps://<keyname>:<key>=@<namespace>.servicebus.windows.net");
-        string target = "<eventhub name>";
-
-        int sendFrequency = 1000;
-        bool bForever = true;
-#if !USE_WINDOWS_SERIAL_PORT
-		string serialPortName ="/dev/ttyACM0";
-#else
+#if USE_WINDOWS_SERIAL_PORT
         string serialPortName ="COM10";
 #endif
 
@@ -109,9 +156,9 @@ namespace RaspberryPiGateway
 #endif
 				try
 				{
-					connection = new Connection (address);
+					connection = new Connection (AppAMQPAddress);
 					session = new Session (connection);
-					sender = new SenderLink (session, "send-link", target);
+					sender = new SenderLink (session, "send-link", AppEHTarget);
 
 					for (int i = 0; bForever || i < 20; i++)
 					{
@@ -157,18 +204,17 @@ namespace RaspberryPiGateway
 
             message.Properties = new Properties()
             {
-                Subject = "wthr",              // Message type: Weather
+                Subject = AppSubject,              // Message type defined in App.config file for sensor
                 CreationTime = DateTime.UtcNow, // Time of data sampling
             };
 
             message.MessageAnnotations = new MessageAnnotations();
             // Event Hub partition key: device id - ensures that all messages from this device go to the same partition and thus preserve order/co-location at processing time
             message.MessageAnnotations[new Symbol("x-opt-partition-key")] = deviceId;
-
             message.ApplicationProperties = new ApplicationProperties();
             message.ApplicationProperties["time"] = message.Properties.CreationTime;
             message.ApplicationProperties["from"] = deviceId; // Originating device
-            message.ApplicationProperties["dspl"] = deviceDisplayName;      // Display name for originating device
+            message.ApplicationProperties["dspl"] = AppDeviceDisplayName;      // Display name for originating device
 
             if (sample != null && sample.Count > 0)
             {
@@ -177,7 +223,7 @@ namespace RaspberryPiGateway
                 outDictionary["Subject"] = message.Properties.Subject; // Message Type
                 outDictionary["time"] = message.Properties.CreationTime;
                 outDictionary["from"] = deviceId; // Originating device
-                outDictionary["dspl"] = deviceDisplayName;      // Display name for originating device
+                outDictionary["dspl"] = AppDeviceDisplayName;      // Display name for originating device
                 message.Properties.ContentType = "text/json";
                 message.Body = new Data() { Binary = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(outDictionary)) };
 #else
@@ -214,16 +260,17 @@ namespace RaspberryPiGateway
 		{
 			if (outcome is Accepted)
 			{
-#if DEBUG
-                logger.Info("Sent message {0} - {1}", message.ApplicationProperties["time"], message.Properties.Subject);
-#endif
+//#if DEBUG
+                logger.Info("Sent message from {0} {1} at {2}", AppEdgeGateway, AppSensor, message.ApplicationProperties["time"]);
+//#endif
 #if LOG_MESSAGE_RATE
                 g_messageCount++;
 #endif
 			}
 			else
 			{
-                logger.Error("Error sending message {0} - {1}, outcome {2}", message.ApplicationProperties["time"], outcome, message.Properties.Subject);
+                logger.Error("Error sending message {0} - {1}, outcome {2}", message.ApplicationProperties["time"],  message.Properties.Subject,outcome);
+                logger.Error("Error sending to {0} at {1}", AppEHTarget, AppAMQPAddress);
 			}
 		}
 
@@ -264,9 +311,9 @@ namespace RaspberryPiGateway
                             if (valueDict != null)
                             {
                                 Interlocked.Exchange(ref lastDataSample, valueDict);
-#if DEBUG
-                                logger.Info("Parsed data from serial port as: {0}", JsonConvert.SerializeObject(valueDict));
-#endif
+//#if DEBUG
+                                logger.Info("Parsed data from serial port on {0} as: {1}", AppDeviceDisplayName, JsonConvert.SerializeObject(valueDict));
+//#endif
                             }
 						}
 						catch (Exception e)
@@ -294,6 +341,7 @@ namespace RaspberryPiGateway
 
 		#region CommandLineParsing
 
+        // not used in current sample code, but portion left in, commented out, for easy re-implementation
 		int Parse (string[] args)
 		{
 
@@ -302,93 +350,31 @@ namespace RaspberryPiGateway
 			{
 				switch (args [i].ToLowerInvariant ())
 				{
-					case "-forever":
-						bForever = true;
-						break;
-					case "-address":
-						i++;
-						if (i < args.Length)
-						{
-							address = new Address (args [i]);
-						}
-						else
-						{
-							Console.WriteLine ("Error: missing address");
-							bParseError = true;
-						}
-						break;
-					case "-target":
-						i++;
-						if (i < args.Length)
-						{
-							target = args [i];
-						}
-						else
-						{
-							Console.WriteLine ("Error: missing target");
-							bParseError = true;
-						}
-						break;
-					case "-deviceid":
-						i++;
-						if (i < args.Length)
-						{
-							deviceId = args [i];
-						}
-						else
-						{
-							Console.WriteLine ("Error: missing device id");
-							bParseError = true;
-						}
-						break;
-					case "-devicename":
-						i++;
-						if (i < args.Length)
-						{
-							deviceDisplayName = args [i];
-						}
-						else
-						{
-							Console.WriteLine ("Error: missing device name");
-							bParseError = true;
-						}
-						break;
-					case "-serial":
-						i++;
-						if (i < args.Length)
-						{
-							serialPortName = args [i];
-						}
-						else
-						{
-							Console.WriteLine ("Error: missing serial port name");
-							bParseError = true;
-						}
-						break;
-					case "-frequency":
-						i++;
-						if (i < args.Length)
-						{
-							sendFrequency = Convert.ToInt32 (args [i]);
-						}
-						else
-						{
-							Console.WriteLine ("Error: missing frequency value");
-							bParseError = true;
-						}
-						break;
-
-					default:
-						Console.WriteLine ("Error: unrecognized argument: {0}", args [i]);
-						bParseError = true;
-						break;
+				//	case "-serial":
+				//		i++;
+				//		if (i < args.Length)
+				//		{
+				//			serialPortName = args [i];
+				//		}
+				//		else
+				//		{
+				//			Console.WriteLine ("Error: missing serial port name");
+				//			bParseError = true;
+				//		}
+				//		break;
+				//	default:
+				//		Console.WriteLine ("Error: unrecognized argument: {0}", args [i]);
+				//		bParseError = true;
+				//		break;
 				}
 			}
 
 			if (bParseError)
 			{
-                Console.WriteLine("Usage: RaspberryPiGateway -forever | -deviceid <deviceid> | -devicename <devicename> | -serial <serial port name> | -frequency <frequency in ms> | -address <address> | -target <target>");
-				return 1;
+                // Provide guidance on correct autorun.sh command line if necessary, e.g
+                //Console.WriteLine("Usage: RaspberryPiGateway -serial <serial port name> ");
+                Console.WriteLine("Error: parsing error");
+ 				return 1;
 			}
 			return 0;
 		}
