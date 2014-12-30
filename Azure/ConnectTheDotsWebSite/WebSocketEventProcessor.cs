@@ -88,6 +88,11 @@ namespace WebClient
                         
                         // Azure Stream Analytics Preview generates invalid JSON for some multi-values queries
                         // Workaround: turn concatenated json objects (ivalid JSON) into array of json objects (valid JSON)
+                        if (eventBodyAsString.IndexOf("[{") >= 0 && eventBodyAsString.IndexOf("}]") < 0)
+                        {
+                            eventBodyAsString = eventBodyAsString + "]";
+                        }
+
                         if (eventBodyAsString.IndexOf("}{") >= 0)
                         {
                             eventBodyAsString = eventBodyAsString.Replace("}{", "},{");
