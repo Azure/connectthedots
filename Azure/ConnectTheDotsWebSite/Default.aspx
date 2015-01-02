@@ -40,8 +40,7 @@
 </head>
 <body>
     <div>
-        <div style="float:left;"><img src="img/ConnectTheDotsLogo.png" /></div>
-        <div><img src="img/MSOpenTechLogo.png" /></div>
+        <div style="width:400px;"><img src="img/ConnectTheDotsLogo.png" /></div>
     </div>
     <form id="form1" runat="server">
     <div>
