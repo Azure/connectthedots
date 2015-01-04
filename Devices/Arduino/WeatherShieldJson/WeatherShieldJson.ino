@@ -20,7 +20,6 @@
  This example code assumes the GPS module is not used.
  
  */
-
 #include <Wire.h> //I2C needed for sensors
 #include "MPL3115A2.h" //Pressure sensor
 #include "HTU21D.h" //Humidity sensor
@@ -31,6 +30,19 @@
 
 MPL3115A2 myPressure; //Create an instance of the pressure sensor
 HTU21D myHumidity; //Create an instance of the humidity sensor
+
+// Constants used for the ConnectTheDots project
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// SensorSubject value determines how Azure website will chart the data
+// DeviceDisplayName value will be the label for the curve on the chart
+// DeviceGUID ensures all the data from this sensor appears on the same chart
+// You can use Visual Studio to create DeviceGUID and copy it here. In VS, On the Tools menu, click Create GUID. The Create GUID
+// tool appears with a GUID in the Result box. Click Copy, and paste below.
+//
+char SensorSubject[] = "wthr";
+char DeviceDisplayName[] = "Weather Shield 02";
+char DeviceGUID[] = "81E79059-A393-4797-8A7E-526C3EF9D64B";
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 //Hardware pin definitions
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -388,7 +400,19 @@ void printWeather()
 
   //MYSERIAL.println();
   MYSERIAL.print("{");
-  MYSERIAL.print("\"millis\":");
+  MYSERIAL.print("\"dspl\":");
+  MYSERIAL.print("\"");
+  MYSERIAL.print(DeviceDisplayName);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"Subject\":");
+  MYSERIAL.print("\"");
+  MYSERIAL.print(SensorSubject);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"DeviceGUID\":");
+  MYSERIAL.print("\"");
+  MYSERIAL.print(DeviceGUID);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"millis\":");
   MYSERIAL.print(millis());
   MYSERIAL.print(",\"seqno\":");
   MYSERIAL.print(sequenceNumber++);

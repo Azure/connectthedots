@@ -25,12 +25,14 @@
 // #define DEBUG
 // #define SIMULATEDATA
 // #define LOG_MESSAGE_RATE
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Ports;
 using System.Text;
 using System.Threading;
+using System.IO;
 
 using Amqp;
 using Amqp.Framing;
@@ -48,163 +50,261 @@ using NLog;
 
 namespace RaspberryPiGateway
 {
+    /// <summary>
+    /// Class used to list the running threads listening to Serial Ports
+    /// </summary>
+    class SerialPortListeningThread
+    {
+        public SerialPortListeningThread(string name, Thread thread)
+        {
+            portName = name;
+            listeningThread = thread;
+        }
+        public string portName { get; set; }
+        public Thread listeningThread { get; set; }
+    }
 
-	class MainClass
-	{
-        // Set up config file reads
-        public static string AppSubject;
-        public static string AppSensor;
+    /// <summary>
+    /// Main class of the application
+    /// </summary>
+    class MainClass
+    {
+        // Below parameters are read from the app config file
         public static string AppEdgeGateway;
         public static Address AppAMQPAddress;
         public static string sAppAMQPAddress;
         public static string AppEHTarget;
-        public static string AppDeviceDisplayName;
-        public static Int32 sendFrequency;
-        public static bool bForever;
-        public static string serialPortName;
-        public static string AppKey1;
-        public static string AppKey2;
-        public static string AppKey3;
 
+        // Unique identifier for the gateway (will be generated when app starts)
+        // You might want to hard code it or put this ID in the configuration file if you need the Gateway to not change ID at each reboot
+        public static string deviceId;
+
+        // Variables for AMQPs connection
+        public static Connection connection = null;
+        public static Session session = null;
+        public static SenderLink sender = null;
+        // We have several threads that will use the same SenderLink object
+        // we will protect the access using InterLock.Exchange 0 for false, 1 for true. 
+        private static int sendingMessage = 0;
+
+        // Below variables will be used to detect and work with the serial ports (sensors boards connected to the Gateway)
+        public static List<SerialPortListeningThread> listeningThreads = new List<SerialPortListeningThread>();
 
         // Set up logging
-        private static Logger logger = NLog.LogManager.GetCurrentClassLogger();
-        
-		public static int Main (string[] args)
-		{
+        public static Logger logger = NLog.LogManager.GetCurrentClassLogger();
+#if LOG_MESSAGE_RATE
+        static int g_messageCount = 0;
+#endif
 
-            var main = new MainClass ();
+        // boolean switch used to manage threads accross the app
+        public static bool MAINSWITCH = true;
 
+        /// <summary>
+        /// Main function of the application
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns>
+        /// -1 when an error occured during initialization
+        /// result of the run function which is a loop returning 0 when ended
+        /// </returns>
+        public static int Main(string[] args)
+        {
+            var main = new MainClass();
+
+            // Initialize application by reading configuration file
+            if (!InitAppSettings(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location), "RaspberryPiGateway.exe")) return -1;
+            // Initializa AMQP connection
+            if (!InitAMQPConnection()) return -1;
+
+            // start main routine
+            return main.Run();
+        }
+
+        /// <summary>
+        /// Initialize AMQP connection
+        /// we are using the connection to send data to Azure Event Hubs
+        /// Connection information is retreived from the app configuration file
+        /// </summary>
+        /// <returns>
+        /// true when successful
+        /// false when unsuccessful
+        /// </returns>
+        public static bool InitAMQPConnection()
+        {
+            // Initialize AMQPS connection
+            try
+            {
+                connection = new Connection(AppAMQPAddress);
+                session = new Session(connection);
+                sender = new SenderLink(session, "send-link", AppEHTarget);
+            }
+            catch (Exception e)
+            {
+                logger.Error("Error connecting to Azure Event Hub: {0}", e.Message);
+                if (sender != null) sender.Close();
+                if (session != null) session.Close();
+                if (connection != null) connection.Close();
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Get application settings from configuration file
+        /// the configuration file contains information for the Gateway to connect to Azure Event Hubs.
+        /// </summary>
+        /// <param name="currentDirectory">Current directory the app is running in</param>
+        /// <param name="applicationName">Name of the application</param>
+        /// <returns>
+        /// true when successful
+        /// false when unsuccessful
+        /// </returns>
+        public static bool InitAppSettings(string currentDirectory, string applicationName)
+        {
             // Open RaspberryPiGateway.exe.config file for device information
             try
             {
-                string applicationName = "RaspberryPiGateway.exe";
-                string exePath = System.IO.Path.Combine(Environment.CurrentDirectory, applicationName);
+                logger.Info("Trying to open configuration file.");
+                logger.Info("Current Directory {0}", currentDirectory);
+                logger.Info("Application Name {0}", applicationName);
+                string exePath = System.IO.Path.Combine(currentDirectory, applicationName);
                 var configFile = ConfigurationManager.OpenExeConfiguration(exePath);
                 var appSettings = ConfigurationManager.AppSettings;
                 if (appSettings.Count == 0)
                 {
+                    // We cannot run without the connection parameters from 
                     logger.Info("AppSettings is empty.");
+                    return false;
                 }
                 else
                 {
                     foreach (var key in appSettings.AllKeys)
                     {
-                        logger.Info("Key: {0} Value: {1}", key, appSettings[key]);
+                        logger.Info("Gateway config file key: {0} Value: {1}", key, appSettings[key]);
                     }
+                    // Read relevant keys from the config file and store in a variable
+                    AppEdgeGateway = ConfigurationManager.AppSettings.Get("EdgeGateway");
+                    sAppAMQPAddress = ConfigurationManager.AppSettings.Get("AMQPAddress");
+                    AppAMQPAddress = new Address(sAppAMQPAddress);
+                    AppEHTarget = ConfigurationManager.AppSettings.Get("EHTarget");
+                    // All settings retreived, we can return
+                    return true;
                 }
             }
-            catch (ConfigurationErrorsException)
+            catch (ConfigurationErrorsException e)
             {
-                logger.Info("Error reading app settings");
+                logger.Error("Error reading app settings: {0}{1}", e.Message, e.InnerException.Message);
             }
 
-            // Read a particular key from the config file
-            AppSubject = ConfigurationManager.AppSettings.Get("Subject");
-            AppSensor = ConfigurationManager.AppSettings.Get("Sensor");
-            AppEdgeGateway = ConfigurationManager.AppSettings.Get("EdgeGateway");
-            AppDeviceDisplayName = ConfigurationManager.AppSettings.Get("DeviceDisplayName");
-            sAppAMQPAddress = ConfigurationManager.AppSettings.Get("AMQPAddress");
-            AppAMQPAddress = new Address(sAppAMQPAddress);
-            AppEHTarget = ConfigurationManager.AppSettings.Get("EHTarget");
-            sendFrequency = Convert.ToInt32(ConfigurationManager.AppSettings.Get("SendFrequency"));
-            serialPortName = ConfigurationManager.AppSettings.Get("serialPortName");
-            bForever = Convert.ToBoolean(ConfigurationManager.AppSettings.Get("Forever"));
-            AppKey1 = ConfigurationManager.AppSettings.Get("Key1");
-            AppKey2 = ConfigurationManager.AppSettings.Get("Key2");
-            AppKey3 = ConfigurationManager.AppSettings.Get("Key3");
+            // Something didn't go right...
+            return false;
+        }
 
-            int result = main.Parse (args);
-			if (result != 0)
-			{
-				return result;
-			}
-			return main.Run ();
-		}
-
-#region Commandline Parameters
-
-        string deviceId = Guid.NewGuid().ToString ("N"); // Unique identifier for the device
-
-#if USE_WINDOWS_SERIAL_PORT
-        string serialPortName ="COM10";
-#endif
-
-#endregion
-
-        Dictionary<string, object> lastDataSample = null;
-
-#if LOG_MESSAGE_RATE
-        static int g_messageCount = 0;
-#endif
-
-		int Run ()
-		{
-
-			var sampleThread = new Thread (SampleLoop);
-			sampleThread.Start ();
-
-			Connection connection = null;
-			Session session = null;
-			SenderLink sender = null;
-
-			do
-			{
+        /// <summary>
+        /// Main thread of the application
+        /// The Thread is monitoring serial ports and loops every 5 seconds
+        /// When a new COM port is available, it starts a new listening thread
+        /// When a COM port is no longer available, it kills the corresponding thread that has been created previously
+        /// </summary>
+        /// <returns>
+        /// 0 when thread ends
+        /// </returns>
+        public int Run()
+        {
 
 #if LOG_MESSAGE_RATE
                 var stopWatch = Stopwatch.StartNew();
 #endif
-				try
-				{
-					connection = new Connection (AppAMQPAddress);
-					session = new Session (connection);
-					sender = new SenderLink (session, "send-link", AppEHTarget);
+            do
+            {
+                // We will monitor available COM ports and create listening thread for each new valid port
+#if !SIMULATEDATA
+                // Identify which serial ports are connected to sensors
+                var ports = GetPortNames();
 
-					for (int i = 0; bForever || i < 20; i++)
-					{
-						GetSampleAndSendAmqpMessage(sender);
-                        Thread.Sleep (sendFrequency); // Wait until next sample
-					}
-
-					Thread.Sleep (10000);
-				}
-				catch (Exception e)
-				{
-                    logger.Error("Error connecting or sending message: {0}", e.Message);
+                // First we make sure we kill listening threads for COM port that are no longer available
+                var threadsKilled = new List<SerialPortListeningThread>();
+                foreach (SerialPortListeningThread serialPortThread in listeningThreads)
+                {
+                    if (Array.IndexOf(ports, serialPortThread.portName) == -1)
+                    {
+                        // Serial port is no longer valid. Abort the listening process
+                        serialPortThread.listeningThread.Abort();
+                        threadsKilled.Add(serialPortThread);
+                    }
                 }
-				finally
-				{
-					if (sender!=null) sender.Close ();
-					if (session!=null) session.Close ();
-					if (connection!=null) connection.Close ();
-				}
-				if (bForever)
-				{
-#if DEBUG
-                    logger.Info("Restarting send loop...");
+
+                // we cannot remove a list item in a foreach loop
+                foreach (SerialPortListeningThread threadKilled in threadsKilled)
+                {
+                    listeningThreads.Remove(threadKilled);
+                }
+
+                // For each of the valid serial ports, start a new listening thread if not already created
+                foreach (string serialPortName in ports)
+                {
+                    if (!listeningThreads.Exists(x => x.portName.Equals(serialPortName))
+                        )
+                    {
+                        logger.Info("Found serial port with Normal attribute: {0}", serialPortName);
+
+                        // Start a listening thread for each serial port
+                        var listeningThread = new Thread(() => ListeningForSensors(serialPortName));
+                        listeningThread.Start();
+                        listeningThreads.Add(new SerialPortListeningThread(serialPortName, listeningThread));
+                    }
+                }
+
+                // If we have no serial port connect, log it
+                if (listeningThreads.Count == 0)
+                {
+                    logger.Error("No connected serial ports");
+                }
+#else
+                if (listeningThreads.Count == 0)
+                {
+                    // Start a unique thread simulating data
+                    var listeningThread = new Thread(() => ListeningForSensors("Simulated"));
+                    listeningThread.Start();
+                    listeningThreads.Add(new SerialPortListeningThread("Simulated", listeningThread));
+                }
 #endif
-					Thread.Sleep (sendFrequency); // Wait until next sample
-				}
+                // Every 5 seconds we scan Serial COM ports
+                Thread.Sleep(5000);
+            } while (MAINSWITCH);
+            return 0;
+        }
 
-			} while (bForever);
-            MAINSWITCH = false;
-			return 0;
-		}
-
-        void GetSampleAndSendAmqpMessage(SenderLink sender)
+        /// <summary>
+        /// Send a string as an AMQP message to Azure Event Hub
+        /// </summary>
+        /// <param name="valuesJson">
+        /// String to be sent as an AMQP message to Event Hub
+        /// </param>
+        public static void SendAmqpMessage(string valuesJson)
         {
-            // Obtain the last sample as gathered by the background thread 
-            // Interlocked.Exchange guarantees that changes are done atomically between main and background thread
-            var sample = Interlocked.Exchange(ref lastDataSample, null);
+            // If there is no value passed as parameter, do nothing
+            if (valuesJson == null) return;
 
-            // No new sample since we checked last time: don't send anything
-            if (sample == null) return;
+            // Deserialize Json message
+            var sample = JsonConvert.DeserializeObject<Dictionary<string, object>>(valuesJson);
+            if (sample == null)
+            {
+                logger.Info("Error parsing JSON message {0}", valuesJson);
+                return;
+            }
+#if DEBUG
+            logger.Info("Parsed data from serial port: {0}", valuesJson);
+#endif
+
+            // Convert JSON data in 'sample' into body of AMQP message
+            // Only data added by gateway is time of message (since sensor may not have clock) 
+            deviceId = Convert.ToString(sample["DeviceGUID"]);      // Unique identifier from sensor, to group items in event hub
 
             Message message = new Message();
-
             message.Properties = new Properties()
             {
-                Subject = AppSubject,              // Message type defined in App.config file for sensor
+                Subject = Convert.ToString(sample["Subject"]),              // Message type (e.g. "wthr") defined in sensor code, sent in JSON payload
                 CreationTime = DateTime.UtcNow, // Time of data sampling
             };
 
@@ -214,16 +314,17 @@ namespace RaspberryPiGateway
             message.ApplicationProperties = new ApplicationProperties();
             message.ApplicationProperties["time"] = message.Properties.CreationTime;
             message.ApplicationProperties["from"] = deviceId; // Originating device
-            message.ApplicationProperties["dspl"] = AppDeviceDisplayName;      // Display name for originating device
+            message.ApplicationProperties["dspl"] = sample["dspl"];      // Display name for originating device defined in sensor code, sent in JSON payload
 
             if (sample != null && sample.Count > 0)
             {
 #if! SENDAPPPROPERTIES
+
                 var outDictionary = new Dictionary<string, object>(sample);
                 outDictionary["Subject"] = message.Properties.Subject; // Message Type
                 outDictionary["time"] = message.Properties.CreationTime;
                 outDictionary["from"] = deviceId; // Originating device
-                outDictionary["dspl"] = AppDeviceDisplayName;      // Display name for originating device
+                outDictionary["dspl"] = sample["dspl"];      // Display name for originating device
                 message.Properties.ContentType = "text/json";
                 message.Body = new Data() { Binary = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(outDictionary)) };
 #else
@@ -239,7 +340,13 @@ namespace RaspberryPiGateway
                 message.Properties.Subject = "wthrerr";
             }
 
-            sender.Send(message, SendOutcome, null); // Send to the cloud asynchronously
+            // Send to the cloud asynchronously
+            // Obtain handle on AMQP sender-link object
+            if (0 == Interlocked.Exchange(ref sendingMessage, 1))
+            {
+                sender.Send(message, SendOutcome, null);
+                Interlocked.Exchange(ref sendingMessage, 0);
+            }
 
 #if LOG_MESSAGE_RATE
             if (g_messageCount >= 500)
@@ -255,49 +362,62 @@ namespace RaspberryPiGateway
 #endif
         }
 
-
-		public static void SendOutcome (Message message, Outcome outcome, object state)
-		{
-			if (outcome is Accepted)
-			{
-//#if DEBUG
-                logger.Info("Sent message from {0} {1} at {2}", AppEdgeGateway, AppSensor, message.ApplicationProperties["time"]);
-//#endif
+        /// <summary>
+        /// Callback function used to report on AMQP message send 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="outcome"></param>
+        /// <param name="state"></param>
+        public static void SendOutcome(Message message, Outcome outcome, object state)
+        {
+            if (outcome is Accepted)
+            {
+                //#if DEBUG
+                logger.Info("Sent message from {0} at {1}", AppEdgeGateway, message.ApplicationProperties["time"]);
+                //#endif
 #if LOG_MESSAGE_RATE
                 g_messageCount++;
 #endif
-			}
-			else
-			{
-                logger.Error("Error sending message {0} - {1}, outcome {2}", message.ApplicationProperties["time"],  message.Properties.Subject,outcome);
+            }
+            else
+            {
+                logger.Error("Error sending message {0} - {1}, outcome {2}", message.ApplicationProperties["time"], message.Properties.Subject, outcome);
                 logger.Error("Error sending to {0} at {1}", AppEHTarget, AppAMQPAddress);
-			}
-		}
+            }
+        }
 
-        bool MAINSWITCH = true;
+        /// <summary>
+        /// Thread function for listening on a specific COM port for a JSON message.
+        /// When a new message is received, send it directly to Azure Event Hubs using the SendAMQPMessage function
+        /// </summary>
+        /// <param name="port">COM port name to listen on</param>
+        public static void ListeningForSensors(string port)
+        {
+            string serialPortName = port;
+            SerialPort serialPort = null;
 
-		public void SampleLoop ()
-		{
-			SerialPort serialPort = null;
-			while (MAINSWITCH)
-			{
-				try
-				{
+            // We want the thread to restart listening on the serial port if it crashed
+            while (MAINSWITCH)
+            {
+                logger.Info("Starting listening loop for serial port {0}", serialPortName);
+                try
+                {
 #if !SIMULATEDATA
-					Debug.WriteLine ("Opening Serial Port {0}", serialPortName);
-					serialPort = new SerialPort (serialPortName, 9600);
-					serialPort.DtrEnable = true;
-					serialPort.Open ();
+                    serialPort = new SerialPort(serialPortName, 9600);
+                    serialPort.DtrEnable = true;
+                    serialPort.Open();
 #if DEBUG
                     logger.Info("Opened Serial Port {0}", serialPortName);
 #endif
 #endif
                     while (MAINSWITCH)
-					{
+                    {
+                        // When simulating data, we will generate random data
+                        // when not simulating, we read the serial port
 #if! SIMULATEDATA
-                        Debug.WriteLine ("Reading from Serial Port");
-                        var valuesJson = serialPort.ReadLine ();
-						Debug.WriteLine ("Read Data from Serial Port: {0}", valuesJson);
+                        Debug.WriteLine("Reading from Serial Port");
+                        var valuesJson = serialPort.ReadLine();
+                        Debug.WriteLine("Read Data from Serial Port: {0}", valuesJson);
 #else
 						Random r = new Random ();
 						string valuesJson = String.Format("{{ \"temp\" : {0}, \"hmdt\" : {1}, \"lght\" : {2}}}", 
@@ -305,80 +425,70 @@ namespace RaspberryPiGateway
 						    (r.NextDouble() * 100),
 						    (r.NextDouble() * 100));
 #endif
-						try
-						{
-							var valueDict = JsonConvert.DeserializeObject<Dictionary<string, object>> (valuesJson);
-                            if (valueDict != null)
-                            {
-                                Interlocked.Exchange(ref lastDataSample, valueDict);
-//#if DEBUG
-                                logger.Info("Parsed data from serial port on {0} as: {1}", AppDeviceDisplayName, JsonConvert.SerializeObject(valueDict));
-//#endif
-                            }
-						}
-						catch (Exception e)
-						{
-                            logger.Error("Error parsing data from serial port: {0}, Data: {1}", e.Message, valuesJson);
-						}
-						Thread.Sleep (Math.Min(100, sendFrequency));
-					}
-				}
-				catch (Exception e)
-				{
+                        try
+                        {
+                            // Send JSON message to the Cloud
+                            SendAmqpMessage(valuesJson);
+                        }
+                        catch (Exception e)
+                        {
+                            logger.Error("Error parsing and sending data from serial port {2} : {0}, Data: {1}", e.Message, valuesJson, serialPortName);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
                     logger.Error("Error processing data from serial port: {0} ", e.Message);
-					if (serialPort != null && serialPort.IsOpen)
-					{
-#if DEBUG
-                        logger.Info("Closing Serial Port");
-#endif
-						serialPort.Close ();
-						serialPort = null;
-					}
-					Thread.Sleep (800);
-				}
-			}
-		}
+                }
 
-		#region CommandLineParsing
+                // When we are reaching this point, that means whether the COM port reading failled or the sensors has been disconnected
+                // we will try to close the port properly, but if the device has been disconnected, this will trigger an exception
+                try
+                {
+                    if (serialPort.IsOpen) serialPort.Close();
+                    if (serialPort != null) serialPort = null;
+                }
+                catch (Exception e)
+                {
+                    logger.Error("Error when trying to close the serial port: {0} ", e.Message);
+                }
+                // We restart the thread if there has been some failure when reading from serial port
+                Thread.Sleep(800);
+            }
+        }
 
-        // not used in current sample code, but portion left in, commented out, for easy re-implementation
-		int Parse (string[] args)
-		{
+        /// <summary>
+        /// GetPortNames is redefined to support Unix systems as well.
+        /// On Windows it will just use the SerialPort.GetPortNames function
+        /// On Unix systems it will parse IO Files and look for the ones with names containing tty*
+        /// </summary>
+        /// <returns>
+        /// Array of strings with the list of available COM ports
+        /// </returns>
+        private static string[] GetPortNames()
+        {
+            int p = (int)Environment.OSVersion.Platform;
+            List<string> serial_ports = new List<string>();
 
-            bool bParseError = false;
-			for (int i = 0; i < args.Length; i++)
-			{
-				switch (args [i].ToLowerInvariant ())
-				{
-				//	case "-serial":
-				//		i++;
-				//		if (i < args.Length)
-				//		{
-				//			serialPortName = args [i];
-				//		}
-				//		else
-				//		{
-				//			Console.WriteLine ("Error: missing serial port name");
-				//			bParseError = true;
-				//		}
-				//		break;
-				//	default:
-				//		Console.WriteLine ("Error: unrecognized argument: {0}", args [i]);
-				//		bParseError = true;
-				//		break;
-				}
-			}
+            // Are we on Unix?
+            if (p == 4 || p == 128 || p == 6)
+            {
+                string[] ttys = System.IO.Directory.GetFiles("/dev/", "tty*");
+                foreach (string dev in ttys)
+                {
+                    //Arduino MEGAs show up as ttyACM due to their different USB<->RS232 chips
+                    if (dev.StartsWith("/dev/ttyS") || dev.StartsWith("/dev/ttyUSB") || dev.StartsWith("/dev/ttyACM"))
+                    {
+                        serial_ports.Add(dev);
+                    }
+                }
+            }
+            else
+            {
+                serial_ports.AddRange(SerialPort.GetPortNames());
+            }
 
-			if (bParseError)
-			{
-                // Provide guidance on correct autorun.sh command line if necessary, e.g
-                //Console.WriteLine("Usage: RaspberryPiGateway -serial <serial port name> ");
-                Console.WriteLine("Error: parsing error");
- 				return 1;
-			}
-			return 0;
-		}
-
-		#endregion
-	}
+            return serial_ports.ToArray();
+        }
+    }
 }

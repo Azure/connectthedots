@@ -22,7 +22,7 @@
 #  THE SOFTWARE.
 #  ---------------------------------------------------------------------------------
 #!/bin/bash
-echo "Started gateway"
+echo "Starting gateway"
 sudo -u pi /usr/bin/mono /home/pi/RaspberryPiGateway/RaspberryPiGateway.exe &
 
 # Add the below line to /etc/rc.local
