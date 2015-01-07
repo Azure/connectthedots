@@ -111,6 +111,7 @@
       <Link>Docs\license.txt</Link>
     </Content>
     <Content Include="packages.config" />
+    <Content Include="Docs\Temp and Humidity Website setup.md" />
     <None Include="Properties\PublishProfiles\ConnectTheDotsWebSite %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\ConnectTheDotsWebSite.pubxml" />
     <None Include="Web.Debug.config">

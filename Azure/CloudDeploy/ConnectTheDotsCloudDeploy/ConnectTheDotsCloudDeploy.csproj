@@ -111,6 +111,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Docs\Temp and Humidity Azure setup.md" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

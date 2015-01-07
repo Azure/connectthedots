@@ -1,0 +1,40 @@
+Third Party Notices for Connect the Dots
+
+This project incorporates material from the project(s) listed below (collectively, “Third Party Code”).
+Microsoft Open Technologies, Inc. (“Microsoft Open Tech”) is not the original author of the Third Party Code.
+The original copyright notice and license, under which Microsoft Open Tech received such Third Party Code, 
+are set out below.  These notices and licenses are provided for informational purposes only.  
+This Third Party Code is licensed to you under the terms set forth in the licenses set forth below.  
+Microsoft Open Tech reserves all other rights not expressly granted, whether by implication, estoppel or otherwise.  
+
+1.	Weather Shield Example, obtained from https://learn.sparkfun.com/tutorials/weather-shield-hookup-guide   
+
+/*
+Weather Shield Example
+By: Nathan Seidle
+SparkFun Electronics
+Date: November 16th, 2013
+License: This code is public domain but you buy me a beer if you use this and we meet someday (Beerware license).
+
+Much of this is based on Mike Grusin's USB Weather Board code: https://www.sparkfun.com/products/10586
+
+This code reads all the various sensors (wind speed, direction, rain gauge, humidty, pressure, light, batt_lvl)
+and reports it over the serial comm port. This can be easily routed to an datalogger (such as OpenLog) or
+a wireless transmitter (such as Electric Imp).
+
+Measurements are reported once a second but windspeed and rain gauge are tied to interrupts that are
+calcualted at each report.
+
+This example code assumes the GPS module is not used.
+
+*/
+
+2.	AnalogReadSerial, obtained from http://arduino.cc/en/Tutorial/AnalogReadSerial 
+
+/*
+  AnalogReadSerial
+  Reads an analog input on pin 0, prints the result to the serial monitor.
+  Attach the center pin of a potentiometer to pin A0, and the outside pins to +5V and ground.
+
+ This example code is in the public domain.
+*/
