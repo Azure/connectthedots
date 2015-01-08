@@ -40,7 +40,7 @@ HTU21D myHumidity; //Create an instance of the humidity sensor
 // tool appears with a GUID in the Result box. Click Copy, and paste below.
 //
 char SensorSubject[] = "wthr";
-char DeviceDisplayName[] = "Weather Shield 02";
+char DeviceDisplayName[] = "Weather Shield 01";
 char DeviceGUID[] = "81E79059-A393-4797-8A7E-526C3EF9D64B";
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
