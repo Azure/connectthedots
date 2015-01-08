@@ -20,9 +20,11 @@ Note: Only the models above have been tested. The Weather Shield sample code fro
 * Download the Weather Shield libraries from [here](https://dlnmh9ip6v2uc.cloudfront.net/assets/b/5/9/7/f/52cd8187ce395fa7158b456c.zip) (as per the instruction in the [Weather Shield Hookup guide](https://learn.sparkfun.com/tutorials/weather-shield-hookup-guide)).
     * Extract all files from the ZIP file to a temporary location, then import the two folders (HTU21D_Humidity and MPL3115A2_Pressure) in the Arduino IDE by clicking Sketch, Import Library, Add Library and selecting the folder (once for each folder).
 * In the Arduino IDE open Devices\Arduino\WeathershieldJson.ino (it is modified from the original Spark fun sample to send data in JSON format). Edit the code to set your own name for the sensor (which will be displayed in the website):
+
 ```c
 char DeviceDisplayName[] = "MySensorName"; 
 ```
+
 * Compile and upload the Weather Shield sketch to the Arduino: File/Upload or Crtl-U or press the Right Arrow. 
 * Open the serial monitor (shift-ctrl-m). You should now see temperature and other data on the serial monitor. Note the format of the data being sent out the serial port of the Arduino – in the next section you’ll see the same data being read from the serial port of the Raspberry Pi:
 ![](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/ArduinoCOMCapture.png)

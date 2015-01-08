@@ -14,12 +14,15 @@ Make sure you have all software installed and necessary subscriptions:
     * Go to https://manage.windowsazure.com/publishsettings/ and save to local disk `<publishsettingsfile>` (contains keys to manage all resources in your subscriptions, so handle with care). Save this to a folder of your choice such as C:\MyTempFolder\MyAzureSubscription.publishsettings
     * **If you have access to multiple subscriptions, make sure the file only contains the subscription that you want to use. Otherwise, edit and remove the other XML elements for the other subscriptions**.
 * Run ConnectTheDotsCloudDeploy from an elevated command prompt (“Run as administrator”) , passing a name to be used for all cloud resources, and the publishsetting file (including its full path if not in the same folder as the exe).
-    * Chose a `<name>` that has only letters and numbers – no spaces, dashes, underlines, etc. (If the publishsettingsfile filename has spaces in it, you will get an error saying the file cannot be found. Surround just the publishsettingsfile with quotation marks and re-run ConnectTheDotsCloudDeploy.exe.)
+    * Chose a `<name>` that has only letters and numbers – no spaces, dashes, underlines, etc and should be **at least 3 characters and less than 47**. (If the publishsettingsfile filename has spaces in it, you will get an error saying the file cannot be found. Surround just the publishsettingsfile with quotation marks and re-run ConnectTheDotsCloudDeploy.exe.)
+	
 ```
 cd ConnectTheDots\Azure\CloudDeploy\ConnecTheDotsCloudDeploy\bin\debug\
 ConnectTheDotsCloudDeploy.exe –n <name> -ps <publishsettingsfile>
 ```
+
 * Note the device connection strings displayed by the tool, highlighted below, as you will need them to provision the devices later. You might copy and paste into Notepad for easy retrieval.
+
 ```
 C:\MyProjectLocation\connectthedots\Azure\CloudDeploy\ConnectTheDotsCloudDeploy\bin\Debug> 
 ConnectTheDotsCloudDeploy.exe -n ctdtest1 -ps C:\MyTempFolder\MyAzureSubscription.publishsettings
@@ -46,6 +49,7 @@ amqps://D4:xxxxxxxx@yyyyyyyy.servicebus.windows.net
 
 Web.Config saved to C:\MyProjectLocation\connectthedots\Azure\CloudDeploy\ConnectTheDotsWebSite\web.config
 ```
+
 As you can see above, the ConnectTheDotsCloudDeploy command created two Event Hubs, EHDevices and EHAlerts, also shown in the ConnectTheDots.IO architecture (on the home page of the wiki). It also created four endpoints for AMQP connections from your remote devices such as Raspberry Pi devices. If you did not copy the output above to the a file and closed the window, you can retrieve the endpoint strings by 
 
 1. launching http://manage.windowsazure.com
@@ -79,7 +83,8 @@ As you can see above, the ConnectTheDotsCloudDeploy command created two Event Hu
     * Create an output
         * Select the Output tab in the Aggregates job
             * Output tab -> Add an Output, Event Hub,
-        * Choose the namespace <name>-ns, 
+        * Output Alias: "AlertsOutput"
+		* Choose the namespace <name>-ns, 
         * Event Hub “ehalerts”
         * Policy name “StreamingAnalytics”
         * Serialization “JSON”, UTF8

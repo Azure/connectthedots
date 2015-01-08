@@ -21,7 +21,7 @@ To go through the below steps, make sure you have all the following software ins
 ##Websockets setting
 * Enable WebSockets for the new Azure Web site
     * Browse to https://manage.windowsazure.com and select your Azure Web Site.
-    * Click on the Configure tag. Then set WebSockets to  On
+    * Click on the Configure tag. Then set WebSockets to On and Click "Save"
 	
 ##Running the site
 * Open the site in a browser to verify it has deployed correctly. 

@@ -117,7 +117,8 @@
     <None Include="Resources\small.tinyfnt" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Docs\license.txt" />
-    <Content Include="Docs\notice.txt" />
+    <Content Include="..\..\..\license.txt">
+      <Link>Docs\license.txt</Link>
+    </Content>
   </ItemGroup>
 </Project>

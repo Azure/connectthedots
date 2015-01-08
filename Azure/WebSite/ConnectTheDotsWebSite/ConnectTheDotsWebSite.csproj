@@ -114,6 +114,7 @@
     <Content Include="Docs\Temp and Humidity Website setup.md" />
     <None Include="Properties\PublishProfiles\ConnectTheDotsWebSite %282%29.pubxml" />
     <None Include="Properties\PublishProfiles\ConnectTheDotsWebSite.pubxml" />
+    <None Include="Properties\PublishProfiles\Olivier-ConnectTheDots.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

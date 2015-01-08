@@ -34,7 +34,7 @@ mkdir /home/pi/RaspberryPiGateway
 
 * Open the connectthedots\Devices\RaspberryPiGateway\RaspberryPiGateway.sln solution in Visual Studio
 * In Visual Studio, update RaspberryPiGateway.exe.config with any one of the four amqp address strings returned by ConnectTheDotsCloudDeploy.exe, i.e. amqps://D1:xxxxxxxx@yyyyyyyy.servicebus.windows.net, and the 
-name that you want assigned to your gateway. 
+name that you want assigned to your gateway. It is important that the key is being url-encoded, meaning all special characters should be replaced by their ASCII code (e.g. "=" should be replaced by "%3D". You can use tools like [http://meyerweb.com/eric/tools/dencoder/](http://meyerweb.com/eric/tools/dencoder/) to url-encode the key 
 
 ```
 <add key ="EdgeGateway" value="RaspberryPi"/>

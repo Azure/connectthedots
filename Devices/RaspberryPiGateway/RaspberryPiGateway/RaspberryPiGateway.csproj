@@ -78,9 +78,6 @@
     <Content Include="..\..\..\license.txt">
       <Link>Docs\license.txt</Link>
     </Content>
-    <Content Include="..\..\..\notice.txt">
-      <Link>Docs\notice.txt</Link>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
