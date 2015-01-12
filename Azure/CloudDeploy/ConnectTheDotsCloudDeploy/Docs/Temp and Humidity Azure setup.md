@@ -3,7 +3,6 @@ The below instructions will help you setup the Azure services to implement the T
 ##Prerequisites
 
 Make sure you have all software installed and necessary subscriptions:
-
 1. Microsoft Azure subscription ([free trial subscription](http://azure.microsoft.com/en-us/pricing/free-trial/)is sufficient)
 1. Access to the [Azure Streaming Analytics Preview](https://account.windowsazure.com/PreviewFeatures)
 1. Visual Studio 2013 – [Community Edition](http://www.visualstudio.com/downloads/download-visual-studio-vs)
