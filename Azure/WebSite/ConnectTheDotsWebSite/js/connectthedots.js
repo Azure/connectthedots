@@ -210,7 +210,7 @@ function InsertNewDatapoint(data, time, val)
 function AddToD3(D3_set, chart_name, series_name, val, time) {
 
     // if the time is not within 10 minutes of the current time, don't even bother
-    var t = new Date(time);
+    /*var t = new Date(time);
     var cutoff = new Date(freshestTime[chart_name] - WINDOW_MINUTES * MS_PER_MINUTE);
 
     
@@ -220,7 +220,7 @@ function AddToD3(D3_set, chart_name, series_name, val, time) {
         console.log(cutoff);
         console.log(series_name);
         return;
-    }
+    }*/
 
 
     var data = null;
@@ -238,18 +238,64 @@ function AddToD3(D3_set, chart_name, series_name, val, time) {
     // insert the new datapoint into the dataset
 
     InsertNewDatapoint(data, time, val);
+}
 
-    // update fresh meters    
+//
+// PruneOld3DData
+//
+//  Removes any datapoints that are older than 10 minutes.
+//  If any datasets are completely empty afterwards, clear
+//  that sensor entirely from the list.  This function is
+//  needed to clear sensors that have gone offline and are
+//  not producing any more data.
+//
 
-    if (freshestTime[chart_name] == null) {
-        freshestTime[chart_name] = new Date(time);
-    }
-    else {
-        if (time > freshestTime[chart_name]) {
-            freshestTime[chart_name] = new Date(time);
+function PruneOldD3Data(D3_set, chart_name)
+{    
+
+    for (var i = 0; i < D3_set.length; i++) {
+        var data = D3_set[i].data;
+
+        var now = new Date();
+        var cutoff = new Date(now - WINDOW_MINUTES * MS_PER_MINUTE)
+
+        while (data.length >= 1 && data[0].time < cutoff) {
+            data.shift();
+        }
+    }    
+
+    var idxToRemove = [];
+
+    for (var i = 0; i < D3_set.length ; i++) {
+
+        if (D3_set[i].data.length == 0) {
+
+            if (path[chart_name] == null) {
+                continue;
+            }
+
+            if (path[chart_name][D3_set[i].name] != null) {
+                path[chart_name][D3_set[i].name].remove();
+                path[chart_name][D3_set[i].name] = null;
+            }
+
+            if (legend[chart_name][D3_set[i].name] != null) {
+                legend[chart_name][D3_set[i].name].remove();
+                legend[chart_name][D3_set[i].name] = null;
+            }
+
+            if (legend_r[chart_name][D3_set[i].name] != null) {
+                legend_r[chart_name][D3_set[i].name].remove();
+                legend_r[chart_name][D3_set[i].name] = null;
+            }
+
+            idxToRemove.push(i);
         }
     }
 
+    for (var i = 0; i < idxToRemove.length; i++) {
+        D3_set.splice(idxToRemove[i], 1);
+    }
 }
 
 //
@@ -368,6 +414,7 @@ function UpdateD3Charts(D3_set, chart_name)
     }
 }
 
+
 //
 // ClearD3Charts
 //
@@ -419,6 +466,13 @@ function ClearD3Charts() {
 //
 
 $(document).ready(function () {
+
+    // 
+    //  Handle a sensor selection change
+    // 'All' means all dataset are shown.
+    //  Anything else toggles that particular
+    //  dataset
+    //
 
     $('#sensorList').on('click', 'li', function () {
         var device = $(this).text();
@@ -494,6 +548,11 @@ $(document).ready(function () {
         }
     });
 
+    // 
+    //  Mouseover: highlight the sensor with its color
+    //  and make the text bold.
+    //
+
     $('#sensorList').on('mouseover', 'li', function(e) {            
         var device = $(this).text();
 
@@ -516,7 +575,10 @@ $(document).ready(function () {
     
     $('#loading').hide();
 
+    //
     // Set up jQuery DataTable to show alerts
+    //
+
     var table = $('#alertTable').DataTable(
     {
         "bAutoWidth": false,
@@ -592,9 +654,7 @@ $(document).ready(function () {
         if (receivedFirstMessage == false) {
             var x = { MessageType: "LiveDataSelection", DeviceName: 'All' };
 
-            console.log(x);
             websocket.send(JSON.stringify(x));
-
             receivedFirstMessage = true;
 
             // make 'All' the active sensor
@@ -609,6 +669,35 @@ $(document).ready(function () {
 
             if (eventObject.dspl != null) {
 
+
+                // Remove any sensors that have gone stale
+                /*$('#sensorList li').each(function () {
+
+                    var t = $(this).text();
+                    var found = false;
+                    for (var i = 0; i < D3_tmp.length; i++) {
+                        if (D3_tmp[i].name == t) {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (found == false) {
+                        for (var i = 0; i < D3_hum.length; i++) {
+                            if (D3_hum[i].name == t) {
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (found == false) {
+                        $(this).remove();
+                    }
+                    
+                });*/
+
+                // if we have a new sensor, add it to the list
                 var exists = true;
                 if ($('#sensorList').data(eventObject.dspl) == undefined) {
                     exists = false;
@@ -685,14 +774,12 @@ $(document).ready(function () {
                     AddToD3(D3_tmp, "Temperature", "avg", eventObject.tempavg, eventObject.time);
 
                     if (!isBulking) {
+                        PruneOldD3Data(D3_tmp, "Temperature");
                         UpdateD3Charts(D3_tmp, "Temperature");
                     }
                     else {
                         $('#loading-sensor').text("avg");
                     }
-                }
-                else if (eventObject.Dummy != null) {
-                    console.log("DUMMY!");
                 }
                 else if (eventObject.bulkData != null) {
 
@@ -704,6 +791,9 @@ $(document).ready(function () {
                         isBulking = true;                                               
                     }
                     else {
+
+                        PruneOldD3Data(D3_tmp, "Temperature");
+                        PruneOldD3Data(D3_hum, "Humidity");
 
                         UpdateD3Charts(D3_tmp, "Temperature");
                         UpdateD3Charts(D3_hum, "Humidity");
@@ -722,6 +812,9 @@ $(document).ready(function () {
                         AddToD3(D3_hum, "Humidity", eventObject.dspl, eventObject.hmdt, eventObject.time);
 
                         if (!isBulking) {
+                            PruneOldD3Data(D3_tmp, "Temperature");
+                            PruneOldD3Data(D3_hum, "Humidity");
+
                             UpdateD3Charts(D3_tmp, "Temperature");
                             UpdateD3Charts(D3_hum, "Humidity");
                         } else {

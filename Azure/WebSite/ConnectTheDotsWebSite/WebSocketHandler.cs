@@ -75,11 +75,6 @@ namespace ConnectTheDotsWebSite
                 }
             ));
 
-            this.Send(JsonConvert.SerializeObject(new Dictionary<string, object> 
-                { 
-                    { "Dummy", true }
-                }
-            ));
 
             foreach (var message in bufferedMessages)
             {
