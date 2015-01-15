@@ -83,7 +83,6 @@ As you can see above, the ConnectTheDotsCloudDeploy command created two Event Hu
     * Create an output
         * Select the Output tab in the Aggregates job
             * Output tab -> Add an Output, Event Hub,
-        * Output Alias: "AlertsOutput"
 		* Choose the namespace <name>-ns, 
         * Event Hub “ehalerts”
         * Policy name “StreamingAnalytics”
