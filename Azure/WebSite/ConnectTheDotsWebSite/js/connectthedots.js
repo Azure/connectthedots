@@ -29,7 +29,7 @@ var receivedFirstMessage = false;
 
 // constants
 
-var MAX_ARRAY_SIZE = 1000;
+var MAX_ARRAY_SIZE = 2000;
 
 var MS_MIN_INTERVAL = 100;
 var MS_PER_MINUTE = 60000;
@@ -167,6 +167,20 @@ function MakeNewD3Series(d3_data, series_name) {
 
 function InsertNewDatapoint(data, time, val)
 {
+    var t = new Date(time);
+    if (isNaN(t.getTime())) {
+        //console.log("invalid date");
+        return;
+    }
+
+    var now = new Date();
+    var cutoff = new Date(now - WINDOW_MINUTES * MS_PER_MINUTE)
+
+    if (t < cutoff) {
+        //console.log("too old");
+        return;
+    }
+
     data.push({ data: val, time: new Date(time) });
 
     if (data.length >= MAX_ARRAY_SIZE) {  //should never be greater, but...
@@ -175,7 +189,6 @@ function InsertNewDatapoint(data, time, val)
     }
 
     if (data.length <= 2) {
-        data.push({ data: val, time: new Date(time) });
         data.sort(function (a, b) { return a.time - b.time; });
         return;
     }
@@ -208,20 +221,6 @@ function InsertNewDatapoint(data, time, val)
 //
 
 function AddToD3(D3_set, chart_name, series_name, val, time) {
-
-    // if the time is not within 10 minutes of the current time, don't even bother
-    /*var t = new Date(time);
-    var cutoff = new Date(freshestTime[chart_name] - WINDOW_MINUTES * MS_PER_MINUTE);
-
-    
-    if (t < cutoff)
-    {
-        console.log(time);
-        console.log(cutoff);
-        console.log(series_name);
-        return;
-    }*/
-
 
     var data = null;
     for (var i = 0; i < D3_set.length; i++) {
@@ -261,7 +260,7 @@ function PruneOldD3Data(D3_set, chart_name)
 
         while (data.length >= 1 && data[0].time < cutoff) {
             data.shift();
-        }
+        }        
     }    
 
     var idxToRemove = [];
@@ -376,41 +375,48 @@ function UpdateD3Charts(D3_set, chart_name)
 
     for (var i = 0; i < D3_set.length; i++) {
 
-        var data = D3_set[i].data;
-        var name = D3_set[i].name;
+        try{
 
-        if (path[chart_name][name] == null) {
-            path[chart_name][name] = svg[chart_name].append("g")
-                .append("path")
-                    .datum(data)
-                    .attr("class", "line")
-                    .attr("d", line)
-                    .style("stroke", function (d) { return color(name); });
+            var data = D3_set[i].data;
+            var name = D3_set[i].name;
 
+            if (path[chart_name][name] == null) {
+                path[chart_name][name] = svg[chart_name].append("g")
+                    .append("path")
+                        .datum(data)
+                        .attr("class", "line")
+                        .attr("d", line)
+                        .style("stroke", function (d) { return color(name); });
+
+            }
+
+            path[chart_name][name].datum(data)
+                .attr("d", line);
+
+            if (legend[chart_name][name] == null) {
+
+                legend_r[chart_name][name] = svg[chart_name]
+                        .append("rect")
+                            .attr("class", "legend")
+                            .attr("width", 10)
+                            .attr("height", 10)
+                            .attr("x", width + 10)
+                            .attr("y", 20 + (20 * i))
+                            .style("fill", color(name))
+                            .style("stroke", color(name));
+
+                legend[chart_name][name] = svg[chart_name].append("text")
+                            .attr("x", width + 25)
+                            .attr("y", 20 + (20 * i) + 5)
+                            .attr("class", "legend")
+                            .style("fill", color(name))
+                            .text(name == 'avg' ? 'avg (of all sensors)' : name);
+            }   
         }
-
-        path[chart_name][name].datum(data)
-            .attr("d", line);
-
-        if (legend[chart_name][name] == null) {
-
-            legend_r[chart_name][name] = svg[chart_name]
-                    .append("rect")
-                        .attr("class", "legend")
-                        .attr("width", 10)
-                        .attr("height", 10)
-                        .attr("x", width + 10)
-                        .attr("y", 20 + (20 * i))
-                        .style("fill", color(name))
-                        .style("stroke", color(name));
-
-            legend[chart_name][name] = svg[chart_name].append("text")
-                        .attr("x", width + 25)
-                        .attr("y", 20 + (20 * i) + 5)
-                        .attr("class", "legend")
-                        .style("fill", color(name))
-                        .text(name == 'avg' ? 'avg (of all sensors)' : name);
-        }        
+        catch(e)
+        {
+            console.log(e);
+        }
     }
 }
 
@@ -669,7 +675,6 @@ $(document).ready(function () {
 
             if (eventObject.dspl != null) {
 
-
                 // Remove any sensors that have gone stale
                 /*$('#sensorList li').each(function () {
 
@@ -716,7 +721,7 @@ $(document).ready(function () {
             }
 
             // If the message is an alert, we need to display it in the datatable
-            if (eventObject.alerttype != null) {
+            if (eventObject.alerttype != null && isBulking == false) {
                 var table = $('#alertTable').DataTable();
                 var time = new Date(eventObject.timestart);
 
