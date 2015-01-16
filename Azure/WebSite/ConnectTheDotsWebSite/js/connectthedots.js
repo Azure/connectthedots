@@ -29,7 +29,7 @@ var receivedFirstMessage = false;
 
 // constants
 
-var MAX_ARRAY_SIZE = 2000;
+var MAX_ARRAY_SIZE = 1000;
 
 var MS_MIN_INTERVAL = 100;
 var MS_PER_MINUTE = 60000;
@@ -182,25 +182,25 @@ function InsertNewDatapoint(data, time, val)
     }
 
     data.push({ data: val, time: new Date(time) });
+    //data.sort(function (a, b) { return a.time - b.time; });
 
     if (data.length >= MAX_ARRAY_SIZE) {  //should never be greater, but...
         data.shift();
         return;
     }
 
-    if (data.length <= 2) {
-        data.sort(function (a, b) { return a.time - b.time; });
+    if (data.length <= 2) {        
         return;
     }
 
-    if (val < data[data.length - 1].data) {
-        return;
-    }
+    //if (val < data[data.length - 1].data) {
+     //   return;
+    //}
 
     // The datapoints come in out-of-order during the
     // initial burst of data.
 
-    data.sort(function (a, b) { return a.time - b.time; });
+    //data.sort(function (a, b) { return a.time - b.time; });
 
     // prune any datapoints that are older than
     // WINDOW_MINUTES
@@ -293,6 +293,7 @@ function PruneOldD3Data(D3_set, chart_name)
     }
 
     for (var i = 0; i < idxToRemove.length; i++) {
+        console.log("splicing");
         D3_set.splice(idxToRemove[i], 1);
     }
 }
@@ -370,10 +371,13 @@ function UpdateD3Charts(D3_set, chart_name)
 
     line = d3.svg.line()
             .interpolate("linear")
-            .x(function (d) { return x(new Date(d.time)); })
+            //.x(function (d) { return x(new Date(d.time)); })
+        .x(function (d) { return x(d.time); })
             .y(function (d) { return y(d.data); });    
 
     for (var i = 0; i < D3_set.length; i++) {
+
+        //console.log("length " + D3_set[i].data.length);
 
         try{
 
@@ -421,6 +425,25 @@ function UpdateD3Charts(D3_set, chart_name)
 }
 
 
+function RemoveFromChart(chart_name, series_name) {
+
+    path[chart_name][series_name].remove();
+    path[chart_name][series_name] = null;
+
+    legend[chart_name][series_name].remove();
+    legend[chart_name][series_name] = null;
+
+    legend_r[chart_name][series_name].remove();
+    legend_r[chart_name][series_name] = null;
+}
+
+function ResetChart(chart_name)
+{
+    path[chart_name] = {};
+    legend[chart_name] = {};
+    legend_r[chart_name] = {};
+}
+
 //
 // ClearD3Charts
 //
@@ -432,39 +455,19 @@ function UpdateD3Charts(D3_set, chart_name)
 function ClearD3Charts() {
 
     for (var i = 0; i < D3_tmp.length; i++) {
-        path["Temperature"][D3_tmp[i].name].remove();
-        path["Temperature"][D3_tmp[i].name] = null;
-
-        legend["Temperature"][D3_tmp[i].name].remove();
-        legend["Temperature"][D3_tmp[i].name] = null;
-
-        legend_r["Temperature"][D3_tmp[i].name].remove();
-        legend_r["Temperature"][D3_tmp[i].name] = null;
+        RemoveFromChart("Temperature", D3_tmp[i].name);
     }
 
-    path["Temperature"] = {};
-    legend["Temperature"] = {};
-    legend_r["Temperature"] = {};
+    ResetChart("Temperature");    
 
     for (var i = 0; i < D3_hum.length; i++) {
-        path["Humidity"][D3_hum[i].name].remove();
-        path["Humidity"][D3_hum[i].name] = null;
-
-        legend["Humidity"][D3_hum[i].name].remove();
-        legend["Humidity"][D3_hum[i].name] = null;
-
-        legend_r["Humidity"][D3_hum[i].name].remove();
-        legend_r["Humidity"][D3_hum[i].name] = null;
-
+        RemoveFromChart("Humidity", D3_hum[i].name);
     }
 
-    path["Humidity"] = {};
-    legend["Humidity"] = {};
-    legend_r["Humidity"] = {};
+    ResetChart("Humidity");
 
     D3_tmp = [];
     D3_hum = [];
-
 }
 
 //
@@ -489,7 +492,7 @@ $(document).ready(function () {
 
             if (device == 'All') {
 
-                var c = { MessageType: "LiveDataSelection", DeviceName: 'clear' };
+                var c = { MessageType: "LiveDataSelection", DeviceName: "clear" };
                 websocket.send(JSON.stringify(x));
 
                 var x = { MessageType: "LiveDataSelection", DeviceName: device };
@@ -628,9 +631,9 @@ $(document).ready(function () {
 
     var sss = (window.location.protocol.indexOf('s') > 0 ? "s" : "");    
     
-    var uri = 'ws'+ sss +'://' + window.location.host + '/api/websocketconnect?clientId=none';
+    //var uri = 'ws'+ sss +'://' + window.location.host + '/api/websocketconnect?clientId=none';
 
-    // var uri = 'ws' + sss + '://' + 'connectthedots.msopentech.com' + '/api/websocketconnect?clientId=none';
+    var uri = 'ws' + sss + '://' + 'connectthedots.msopentech.com' + '/api/websocketconnect?clientId=none';
 
     websocket = new WebSocket(uri);
 
@@ -722,7 +725,7 @@ $(document).ready(function () {
 
             // If the message is an alert, we need to display it in the datatable
             if (eventObject.alerttype != null && isBulking == false) {
-                var table = $('#alertTable').DataTable();
+                /*var table = $('#alertTable').DataTable();
                 var time = new Date(eventObject.timestart);
 
                 // Log the alert in the rawalerts div
@@ -769,7 +772,7 @@ $(document).ready(function () {
                         eventObject.alerttype,
                         message
                     ]).draw();
-                }
+                }*/
             }
             else {
 
