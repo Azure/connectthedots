@@ -369,7 +369,7 @@ function UpdateD3Charts(D3_set, chart_name)
             .call(xAxis);
 
     line = d3.svg.line()
-            .interpolate("linear")
+            .interpolate("basis")
             .x(function (d) { return x(new Date(d.time)); })
             .y(function (d) { return y(d.data); });    
 

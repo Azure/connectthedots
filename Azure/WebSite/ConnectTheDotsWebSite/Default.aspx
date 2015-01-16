@@ -196,8 +196,9 @@
         <div class="big-block">
             <h3>Live Sensor Data</h3>
 
-            <div style="float: left; width: 200px">
-            
+<%--        Hiding device selection while issues with this feature pers    <div style="float: left; width: 200px">--%>
+                <div style="float: left; width: 200px; display: none;">
+
                 <p><strong>Select Sensor/R-PI:</strong></p>
 
                 <ul id="sensorList">
@@ -207,7 +208,8 @@
             </div>
 
 
-            <div style="margin-left: 200px">
+<%--            <div style="margin-left: 200px">--%>
+            <div>    
                 <div id="Temperature">
                     <script>
                         (function () {
