@@ -1,4 +1,3 @@
-<<<<<<< HEAD:Azure/ConnectTheDotsWebSite/js/connectthedots.js
 ﻿//  ---------------------------------------------------------------------------------
 //  Copyright (c) Microsoft Open Technologies, Inc.  All rights reserved.
 // 
@@ -30,7 +29,7 @@ var receivedFirstMessage = false;
 
 // constants
 
-var MAX_ARRAY_SIZE = 1000;
+var MAX_ARRAY_SIZE = 2000;
 
 var MS_MIN_INTERVAL = 100;
 var MS_PER_MINUTE = 60000;
@@ -43,7 +42,9 @@ var D3_hum = [];
 
 // keep track of absolute freshest sample point
 
-var freshestTime = new Date();
+var freshestTime = [];
+freshestTime["Temperature"] = null;
+freshestTime["Humidity"] = null;
 
 // globals used with D3
 
@@ -59,7 +60,11 @@ var svg = {};
 var color = null;
 var sensorNames = [];
 
+// initialize color
+
+sensorNames.push("avg")
 color = d3.scale.category10();
+color.domain(sensorNames);
 
 // worker-related
 
@@ -162,6 +167,20 @@ function MakeNewD3Series(d3_data, series_name) {
 
 function InsertNewDatapoint(data, time, val)
 {
+    var t = new Date(time);
+    if (isNaN(t.getTime())) {
+        //console.log("invalid date");
+        return;
+    }
+
+    var now = new Date();
+    var cutoff = new Date(now - WINDOW_MINUTES * MS_PER_MINUTE)
+
+    if (t < cutoff) {
+        //console.log("too old");
+        return;
+    }
+
     data.push({ data: val, time: new Date(time) });
 
     if (data.length >= MAX_ARRAY_SIZE) {  //should never be greater, but...
@@ -170,7 +189,6 @@ function InsertNewDatapoint(data, time, val)
     }
 
     if (data.length <= 2) {
-        data.push({ data: val, time: new Date(time) });
         data.sort(function (a, b) { return a.time - b.time; });
         return;
     }
@@ -182,7 +200,7 @@ function InsertNewDatapoint(data, time, val)
     // The datapoints come in out-of-order during the
     // initial burst of data.
 
-     data.sort(function (a, b) { return a.time - b.time; });
+    data.sort(function (a, b) { return a.time - b.time; });
 
     // prune any datapoints that are older than
     // WINDOW_MINUTES
@@ -202,7 +220,7 @@ function InsertNewDatapoint(data, time, val)
 // dataset.
 //
 
-function AddToD3(D3_set, series_name, val, time) {
+function AddToD3(D3_set, chart_name, series_name, val, time) {
 
     var data = null;
     for (var i = 0; i < D3_set.length; i++) {
@@ -219,6 +237,64 @@ function AddToD3(D3_set, series_name, val, time) {
     // insert the new datapoint into the dataset
 
     InsertNewDatapoint(data, time, val);
+}
+
+//
+// PruneOld3DData
+//
+//  Removes any datapoints that are older than 10 minutes.
+//  If any datasets are completely empty afterwards, clear
+//  that sensor entirely from the list.  This function is
+//  needed to clear sensors that have gone offline and are
+//  not producing any more data.
+//
+
+function PruneOldD3Data(D3_set, chart_name)
+{    
+
+    for (var i = 0; i < D3_set.length; i++) {
+        var data = D3_set[i].data;
+
+        var now = new Date();
+        var cutoff = new Date(now - WINDOW_MINUTES * MS_PER_MINUTE)
+
+        while (data.length >= 1 && data[0].time < cutoff) {
+            data.shift();
+        }        
+    }    
+
+    var idxToRemove = [];
+
+    for (var i = 0; i < D3_set.length ; i++) {
+
+        if (D3_set[i].data.length == 0) {
+
+            if (path[chart_name] == null) {
+                continue;
+            }
+
+            if (path[chart_name][D3_set[i].name] != null) {
+                path[chart_name][D3_set[i].name].remove();
+                path[chart_name][D3_set[i].name] = null;
+            }
+
+            if (legend[chart_name][D3_set[i].name] != null) {
+                legend[chart_name][D3_set[i].name].remove();
+                legend[chart_name][D3_set[i].name] = null;
+            }
+
+            if (legend_r[chart_name][D3_set[i].name] != null) {
+                legend_r[chart_name][D3_set[i].name].remove();
+                legend_r[chart_name][D3_set[i].name] = null;
+            }
+
+            idxToRemove.push(i);
+        }
+    }
+
+    for (var i = 0; i < idxToRemove.length; i++) {
+        D3_set.splice(idxToRemove[i], 1);
+    }
 }
 
 //
@@ -293,49 +369,57 @@ function UpdateD3Charts(D3_set, chart_name)
             .call(xAxis);
 
     line = d3.svg.line()
-            .interpolate("linear")
+            .interpolate("basis")
             .x(function (d) { return x(new Date(d.time)); })
             .y(function (d) { return y(d.data); });    
 
     for (var i = 0; i < D3_set.length; i++) {
 
-        var data = D3_set[i].data;
-        var name = D3_set[i].name;
+        try{
 
-        if (path[chart_name][name] == null) {
-            path[chart_name][name] = svg[chart_name].append("g")
-                .append("path")
-                    .datum(data)
-                    .attr("class", "line")
-                    .attr("d", line)
-                    .style("stroke", function (d) { return color(name); });
+            var data = D3_set[i].data;
+            var name = D3_set[i].name;
 
+            if (path[chart_name][name] == null) {
+                path[chart_name][name] = svg[chart_name].append("g")
+                    .append("path")
+                        .datum(data)
+                        .attr("class", "line")
+                        .attr("d", line)
+                        .style("stroke", function (d) { return color(name); });
+
+            }
+
+            path[chart_name][name].datum(data)
+                .attr("d", line);
+
+            if (legend[chart_name][name] == null) {
+
+                legend_r[chart_name][name] = svg[chart_name]
+                        .append("rect")
+                            .attr("class", "legend")
+                            .attr("width", 10)
+                            .attr("height", 10)
+                            .attr("x", width + 10)
+                            .attr("y", 20 + (20 * i))
+                            .style("fill", color(name))
+                            .style("stroke", color(name));
+
+                legend[chart_name][name] = svg[chart_name].append("text")
+                            .attr("x", width + 25)
+                            .attr("y", 20 + (20 * i) + 5)
+                            .attr("class", "legend")
+                            .style("fill", color(name))
+                            .text(name == 'avg' ? 'avg (of all sensors)' : name);
+            }   
         }
-
-        path[chart_name][name].datum(data)
-            .attr("d", line);
-
-        if (legend[chart_name][name] == null) {
-
-            legend_r[chart_name][name] = svg[chart_name]
-                    .append("rect")
-                        .attr("class", "legend")
-                        .attr("width", 10)
-                        .attr("height", 10)
-                        .attr("x", width + 10)
-                        .attr("y", 20 + (20 * i))
-                        .style("fill", color(name))
-                        .style("stroke", color(name));
-
-            legend[chart_name][name] = svg[chart_name].append("text")
-                        .attr("x", width + 25)
-                        .attr("y", 20 + (20 * i) + 5)
-                        .attr("class", "legend")
-                        .style("fill", color(name))
-                        .text(name);
-        }        
+        catch(e)
+        {
+            console.log(e);
+        }
     }
 }
+
 
 //
 // ClearD3Charts
@@ -389,11 +473,121 @@ function ClearD3Charts() {
 
 $(document).ready(function () {
 
+    // 
+    //  Handle a sensor selection change
+    // 'All' means all dataset are shown.
+    //  Anything else toggles that particular
+    //  dataset
+    //
+
+    $('#sensorList').on('click', 'li', function () {
+        var device = $(this).text();
+        if (websocket != null) {            
+
+
+            ClearD3Charts();
+
+            if (device == 'All') {
+
+                var c = { MessageType: "LiveDataSelection", DeviceName: 'clear' };
+                websocket.send(JSON.stringify(x));
+
+                var x = { MessageType: "LiveDataSelection", DeviceName: device };
+                websocket.send(JSON.stringify(x));
+
+                $('#sensorList li').each(function () {
+                    //this now refers to each li
+                    //do stuff to each
+
+                    var d = $(this).text();
+
+                    if (d == device) {
+                        $(this).addClass('selected');
+                        $(this).css('color', color(d == 'All' ? 'avg' : d));
+                        $(this).css('font-weight', 'bold');
+                    }
+                    else {
+                        $(this).removeClass('selected');
+                        $(this).css('color', '');
+                        $(this).css('font-weight', 'normal');
+                    }
+                });
+
+            }
+            else {
+
+                // not 'All' so general case
+
+                var j = $('#sensorList li').eq(0);
+                j.removeClass('selected');
+                j.css('color', '');
+                j.css('font-weight', 'normal');
+
+                var d = $(this).text();
+                if ($(this).hasClass('selected')) {
+                    $(this).removeClass('selected');
+                    $(this).css('color', '');
+                    $(this).css('font-weight', 'normal');
+                }
+                else {
+                    $(this).addClass('selected');
+                    $(this).css('color', color(d == 'All' ? 'avg' : d));
+                    $(this).css('font-weight', 'bold');
+                }
+
+                var x = { MessageType: "LiveDataSelection", DeviceName: "clear" };
+                websocket.send(JSON.stringify(x));
+
+                $('#sensorList li').each(function () {
+                    //this now refers to each li
+                    //do stuff to each
+
+                    var d = $(this).text();
+
+                    if ($(this).hasClass('selected')) {
+                        var x = { MessageType: "LiveDataSelection", DeviceName: $(this).text() };
+                        websocket.send(JSON.stringify(x));
+                    }
+                });
+            }
+
+        }
+    });
+
+    // 
+    //  Mouseover: highlight the sensor with its color
+    //  and make the text bold.
+    //
+
+    $('#sensorList').on('mouseover', 'li', function(e) {            
+        var device = $(this).text();
+
+        if (device == 'All') {
+            device = 'avg';
+        }
+
+        if ($(this).hasClass('selected') == false)
+        {
+            $(this).css('color', color(device));
+            $(this).css('font-weight', 'bold');
+        }        
+        
+    }).on('mouseout', 'li', function (e) {
+        if ($(this).hasClass('selected') == false) {
+            $(this).css('color', '');
+            $(this).css('font-weight', 'normal');
+        }
+    });
+    
     $('#loading').hide();
 
+    //
     // Set up jQuery DataTable to show alerts
+    //
+
     var table = $('#alertTable').DataTable(
     {
+        "bAutoWidth": false,
         "columnDefs":
         [
             {
@@ -430,18 +624,13 @@ $(document).ready(function () {
     table.order([0, 'desc']);
 
 
-    var sss = (window.location.protocol.indexOf('s') > 0 ? "s" : "");
-
-
     // Set up websocket client
 
-    
+    var sss = (window.location.protocol.indexOf('s') > 0 ? "s" : "");    
     
     var uri = 'ws'+ sss +'://' + window.location.host + '/api/websocketconnect?clientId=none';
 
     // var uri = 'ws' + sss + '://' + 'connectthedots.msopentech.com' + '/api/websocketconnect?clientId=none';
-
-    //var uri = 'ws' + sss + '://' + 'olivier-connectthedots.azurewebsites.net' + '/api/websocketconnect?clientId=none';
 
     websocket = new WebSocket(uri);
 
@@ -452,6 +641,7 @@ $(document).ready(function () {
     }
 
     websocket.onerror = function (event) {
+        console.log(event);
         $('#messages').prepend('<div>ERROR ' + event.error + '</div>');
     }
 
@@ -465,43 +655,73 @@ $(document).ready(function () {
             $('#messages').prepend('<div>Malformed message: ' + event.data + "</div>");
         }
 
+        // initialize the page with all sensors
 
         if (receivedFirstMessage == false) {
             var x = { MessageType: "LiveDataSelection", DeviceName: 'All' };
-            websocket.send(JSON.stringify(x));
 
+            websocket.send(JSON.stringify(x));
             receivedFirstMessage = true;
+
+            // make 'All' the active sensor
+
+            var j = $('#sensorList li').eq(0);
+            j.css('color', color('avg'));
+            j.css('font-weight', 'bold');
         }
 
         // Seems like we have valid data
         try {
 
-            /*if (eventObject.dspl != null) {
+            if (eventObject.dspl != null) {
 
-                var exists = false;
-                $('#DropDownList1 option').each(function () {
+                // Remove any sensors that have gone stale
+                /*$('#sensorList li').each(function () {
 
-                    //console.log(this.value);
-                    if (this.value == eventObject.dspl) {
-                        exists = true;
-                        return false;
+                    var t = $(this).text();
+                    var found = false;
+                    for (var i = 0; i < D3_tmp.length; i++) {
+                        if (D3_tmp[i].name == t) {
+                            found = true;
+                            break;
+                        }
                     }
-                });
+
+                    if (found == false) {
+                        for (var i = 0; i < D3_hum.length; i++) {
+                            if (D3_hum[i].name == t) {
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (found == false) {
+                        $(this).remove();
+                    }
+                    
+                });*/
+
+                // if we have a new sensor, add it to the list
+                var exists = true;
+                if ($('#sensorList').data(eventObject.dspl) == undefined) {
+                    exists = false;
+                }
 
                 if (exists == false){
 
-                    console.log(eventObject.dspl);
+                    var ul = document.getElementById("sensorList");
+                    var li = document.createElement("li");
+                    li.appendChild(document.createTextNode(eventObject.dspl));
+                    ul.appendChild(li);
 
-                    var ddl = $('#DropDownList1');
-                    ddl.append(
-                        $('<option></option>').val(eventObject.dspl).html(eventObject.dspl)
-                    );
+                    $('#sensorList').data(eventObject.dspl, eventObject.dspl);
 
                 }
-            }*/
+            }
 
             // If the message is an alert, we need to display it in the datatable
-            if (eventObject.alerttype != null) {
+            if (eventObject.alerttype != null && isBulking == false) {
                 var table = $('#alertTable').DataTable();
                 var time = new Date(eventObject.timestart);
 
@@ -556,10 +776,14 @@ $(document).ready(function () {
                 // Message received is not an alert. let's display it in the charts
 
                 if (eventObject.tempavg != null) {                    
-                    AddToD3(D3_tmp, "avg", eventObject.tempavg, eventObject.time);
+                    AddToD3(D3_tmp, "Temperature", "avg", eventObject.tempavg, eventObject.time);
 
                     if (!isBulking) {
+                        PruneOldD3Data(D3_tmp, "Temperature");
                         UpdateD3Charts(D3_tmp, "Temperature");
+                    }
+                    else {
+                        $('#loading-sensor').text("avg");
                     }
                 }
                 else if (eventObject.bulkData != null) {
@@ -569,9 +793,12 @@ $(document).ready(function () {
 
                     if (eventObject.bulkData == true) {
                         $('#loading').show();
-                        isBulking = true;
+                        isBulking = true;                                               
                     }
                     else {
+
+                        PruneOldD3Data(D3_tmp, "Temperature");
+                        PruneOldD3Data(D3_hum, "Humidity");
 
                         UpdateD3Charts(D3_tmp, "Temperature");
                         UpdateD3Charts(D3_hum, "Humidity");
@@ -586,12 +813,17 @@ $(document).ready(function () {
                     // we make sure the dspl field is in the message, meaning the data is coming from a known device or service
                     if (eventObject.dspl != null) {
 
-                        AddToD3(D3_tmp, eventObject.dspl, eventObject.temp, eventObject.time);
-                        AddToD3(D3_hum, eventObject.dspl, eventObject.hmdt, eventObject.time);
+                        AddToD3(D3_tmp, "Temperature", eventObject.dspl, eventObject.temp, eventObject.time);
+                        AddToD3(D3_hum, "Humidity", eventObject.dspl, eventObject.hmdt, eventObject.time);
 
                         if (!isBulking) {
+                            PruneOldD3Data(D3_tmp, "Temperature");
+                            PruneOldD3Data(D3_hum, "Humidity");
+
                             UpdateD3Charts(D3_tmp, "Temperature");
                             UpdateD3Charts(D3_hum, "Humidity");
+                        } else {
+                            $('#loading-sensor').text(name);
                         }
                     }
                 }
@@ -615,31 +847,7 @@ function SensorSelectionChanged(dropDown) {
         var x = { MessageType: "LiveDataSelection", DeviceName: newSensor };
         websocket.send(JSON.stringify(x));        
     }
-    /*for (var i = 1; i < tempChart.series.length; i++) {
-        if (newSensor == "All" || tempChart.series[i].name == newSensor) {
-            tempChart.series[i].show();
-        }
-        else {
-            tempChart.series[i].hide();
-        }
-    }
-    for (var i = 1; i < humChart.series.length; i++) {
-        if (newSensor == "All" || humChart.series[i].name == newSensor) {
-            humChart.series[i].show();
-        }
-        else {
-            humChart.series[i].hide();
-        }
-    }*/
-
-    //for (var i = 1; i < lightChart.series.length; i++) {
-    //    if (newSensor == "All" || lightChart.series[i].name == newSensor) {
-    //        lightChart.series[i].show();
-    //    }
-    //    else {
-    //        lightChart.series[i].hide();
-    //    }
-    //}
+    
 }
 
 function ShowHide(tHtml) {
@@ -650,388 +858,3 @@ function ShowHide(tHtml) {
             tHtml.style.display = '';
     }
 }
-=======
-﻿//  ---------------------------------------------------------------------------------
-//  Copyright (c) Microsoft Open Technologies, Inc.  All rights reserved.
-// 
-//  The MIT License (MIT)
-// 
-//  Permission is hereby granted, free of charge, to any person obtaining a copy
-//  of this software and associated documentation files (the "Software"), to deal
-//  in the Software without restriction, including without limitation the rights
-//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//  copies of the Software, and to permit persons to whom the Software is
-//  furnished to do so, subject to the following conditions:
-// 
-//  The above copyright notice and this permission notice shall be included in
-//  all copies or substantial portions of the Software.
-// 
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  THE SOFTWARE.
-//  ---------------------------------------------------------------------------------
-
-var tempChart;
-var humChart;
-//var lightChart;
-
-var updateChart = true;
-
-var websocket;
-
-$(document).ready(function () {
-
-// Set up jQuery DataTable to show alerts
-    var table = $('#alertTable').DataTable(
-    {
-        "columnDefs":
-        [
-            {
-                "targets": "timeFromDate",
-                "data":
-                    function (row, type, val, meta)
-                    {
-                        if (type === 'set') {
-                            row[meta.col]= val;
-                            return;
-                        }
-                        else if (type === 'display') {
-                            return row[meta.col].toLocaleTimeString();
-                        }
-                        return row[meta.col];
-                    }
-            },
-            {
-                "targets": "numberFixed",
-                "data":
-                    function (row, type, val, meta)
-                    {
-                        if (type === 'set') {
-                            row[meta.col]= val;
-                            return;
-                        }
-                        else if (type === 'display') {
-                            return row[meta.col].toFixed(1);
-                        }
-                        return row[meta.col];
-                    }
-            },
-        ]
-    });
-
-    table.order([0, 'desc']);
-
-    // Set up chart to show real time temperature
-    tempChart = new Highcharts.Chart(
-    {
-        chart:
-        {
-            renderTo: 'tempchartContainer',
-            type: 'line'
-        },
-        title:
-        {
-            text: 'Temperature'
-        },
-        xAxis:
-        {
-            labels: { format: '{value:%H:%M:%S}' }
-        },
-        series:
-        [
-            {
-                name: 'Average',
-                data: []
-            }
-        ]
-    });
-
-    // Set up chart to show real time humidity
-    humChart = new Highcharts.Chart(
-    {
-        chart:
-        {
-            renderTo: 'humchartContainer',
-            type: 'line'
-        },
-        title:
-        {
-            text: 'Humidity'
-        },
-        xAxis:
-        {
-            labels: { format: '{value:%H:%M:%S}' }
-        }
-    });
-
-    // Set up chart to show real time light
-    //lightChart = new Highcharts.Chart(
-    //{
-    //    chart:
-    //    {
-    //        renderTo: 'lightchartContainer',
-    //        type: 'line'
-    //    },
-    //    title:
-    //    {
-    //        text: 'Light'
-    //    },
-    //    xAxis:
-    //    {
-    //        labels: { format: '{value:%H:%M:%S}' }
-    //    }
-    //});
-
-    // Set up websocket client
-    var sss = (window.location.protocol.indexOf('s') > 0 ? "s" : "");
-    var uri = 'ws'+ sss +'://' + window.location.host + '/api/websocketconnect?clientId=none';
-    
-    websocket = new WebSocket(uri);
-
-    $('#messages').prepend('<div> Connecting to ' + uri + '<div>');
-
-    websocket.onopen = function ()
-    {
-        $('#messages').prepend('<div>Connected.</div>');
-    }
-
-    websocket.onerror = function (event)
-    {
-        $('#messages').prepend('<div>ERROR '+ event.error+'</div>');
-    }
-
-    // Deal with message received on WebSocket
-    websocket.onmessage = function (event)
-    {
-        try
-        {
-            // Parse the JSON package
-            var eventObject = JSON.parse(event.data);
-        }
-        catch (e)
-        {
-            $('#messages').prepend('<div>Malformed message: '+event.data+"</div>");
-        }
-
-        // Seems like we have valid data
-        try
-        {
-            // If the message is an alert, we need to display it in the datatable
-            if (eventObject.alerttype != null)
-            {
-                var table = $('#alertTable').DataTable();
-                var time = new Date(eventObject.timestart);
-
-                // Log the alert in the rawalerts div
-                $('#rawalerts').prepend('<div>' + time + ': ' + eventObject.dsplalert + ' ' + eventObject.alerttype + ' ' + eventObject.message + '</div>');
-                $('#rawalerts').contents().filter(':gt(20)').remove();
-
-                // Check if we already have this one in the table already to prevent duplicates
-                var indexes = table.rows().eq(0).filter(function (rowIdx) {
-                    if (
-                        table.cell(rowIdx, 0).data().getTime() == time.getTime()
-                        && table.cell(rowIdx, 1).data() == eventObject.dsplalert
-                        && table.cell(rowIdx, 2).data() == eventObject.alerttype
-                    ) {
-                        return true;
-                    }
-                    return false;
-                });
-
-                // The alert is a new one, lets display it
-                if (indexes.length == 0)
-                {
-                    // For performance reasons, we want to limit the number of items in the table to a max of 20. 
-                    // We will remove the oldest from the list
-                    if (table.data().length > 19) {
-                        // Search for the oldest time in the list of alerts
-                        var minTime = table.data().sort(
-                            function (a, b) {
-                                return (a[0] > b[0]) - (a[0] < b[0])
-                            }
-                            )[0][0];
-                        // Delete the oldest row
-                        table.rows(
-                            function (idx, data, node) {
-                                return data[0].getTime() == minTime.getTime();
-                            }
-                        ).remove();
-                    }
-
-                    // Add the new alert to the table
-                    var message = 'message';
-                    if (eventObject.message != null) message = eventObject.message;
-                    table.row.add([
-                        time,
-                        eventObject.dsplalert,
-                        eventObject.alerttype,
-                        message
-                    ]).draw();
-                }
-            }
-            else
-            {
-                // Message received is not an alert. let's display it in the charts
-                if (eventObject.tempavg != null)
-                {
-                    // In the case of an average temperature ingo, we are adding the point to the tempavg series in the temp chart
-                    AddPointToChartSeries(tempChart, 0, eventObject.time, eventObject.tempavg);
-                }
-                else if (eventObject.bulkData != null)
-                {
-                    // if the bulkData key is set to false in the message, we will trigger the update for the chart. 
-                    if (eventObject.bulkData == true)
-                    {
-                        updateChart = false;
-                    }
-                    else
-                    {
-                        updateChart = true;
-                        tempChart.redraw();
-                        humChart.redraw();
-                        //lightChart.redraw();
-                    }
-                }
-                else
-                {
-                    // the message is data for the charts
-                    // we make sure the dspl field is in the message, meaning the data is coming from a known device or service
-                    if (eventObject.dspl != null) {
-                        if (updateChart) {
-                            //$('#messages').prepend('<div>' + eventObject.time + ': ' + eventObject.dspl + ' ' + eventObject.temp + ' ' + eventObject.hmdt + ' ' + eventObject.lght + '</div>');
-                            //$('#messages').contents().filter(':gt(100)').remove();
-                        }
-
-                        // We first check if the device is already in the chart or if we need to add a new series to the charts
-                        for (var i = 1; i < tempChart.series.length; i++) {
-                            if (tempChart.series[i].name == eventObject.dspl) {
-                                break;
-                            }
-                        }
-                        if (i >= tempChart.series.length) {
-                            tempChart.addSeries(
-                                {
-                                    name: eventObject.dspl,
-                                    data: []
-                                });
-                            humChart.addSeries(
-                                {
-                                    name: eventObject.dspl,
-                                    data: []
-                                });
-                            //lightChart.addSeries(
-                            //    {
-                            //        name: eventObject.dspl,
-                            //        data: []
-                            //    });
-                        }
-
-                        // Now we can add the point to the series
-                        AddPointToChartSeries(tempChart, i, eventObject.time, eventObject.temp);
-                        AddPointToChartSeries(humChart, i - 1, eventObject.time, eventObject.hmdt);
-                        //AddPointToChartSeries(lightChart, i - 1, eventObject.time, eventObject.lght);
-                    }
-                }
-            }
-        }
-        catch (e)
-        {
-            $('#messages').prepend('<div>Error processing message: ' + e.message + "</div>");
-        }
-    }
-
-});
-
-const timeToChart = 10 * 60000; // in milliseconds
-
-function AddPointToChartSeries(chart, seriesIndex, dateString, y)
-{
-    var lastTimeInTicks = new Date(dateString).getTime() -new Date().getTimezoneOffset() * 60 *1000;
-    var lastTimeToShowInTicks = lastTimeInTicks -timeToChart; // Only show last n minutes
-
-    var shift = false;
-    var insert = true;
-    if (chart.series[seriesIndex].points.length > 0)
-    {
-//        if (tempChart.series[seriesIndex].points[chart.series[seriesIndex].points.length - 1].x >= lastTimeInTicks) {
-        if (chart.series[seriesIndex].points[chart.series[seriesIndex].points.length - 1].x >= lastTimeInTicks) {
-            // The new datapoint is older than the last one we already have for this series: ignore!
-            insert = false;
-        }
-        else
-        {
-//            if (tempChart.series[seriesIndex].points[0].x < lastTimeToShowInTicks - 5 * 60000)
-            if (chart.series[seriesIndex].points[0].x < lastTimeToShowInTicks - 5 * 60000)
-            {
-                shift = true;
-            }
-        }
-    }
-    if (insert)
-    {
-        //tempChart.xAxis[0].setExtremes(lastTimeToShowInTicks, null, updateChart); // Only show last n minutes
-        //tempChart.series[seriesIndex].addPoint([lastTimeInTicks, y],
-        //    updateChart,
-        //    shift); // Shift out older value
-        chart.xAxis[0].setExtremes(lastTimeToShowInTicks, null, updateChart); // Only show last n minutes
-        chart.series[seriesIndex].addPoint([lastTimeInTicks, y],
-            updateChart,
-            shift); // Shift out older value
-    }
-}
-
-
-function SensorSelectionChanged(dropDown)
-{
-    var newSensor = dropDown.value;
-    if (websocket != null)
-    {
-        var x = { MessageType: "LiveDataSelection", DeviceName: newSensor };
-        websocket.send(JSON.stringify(x));
-    }
-    for (var i = 1; i < tempChart.series.length; i++)
-    {
-        if (newSensor == "All" || tempChart.series[i].name == newSensor)
-        {
-            tempChart.series[i].show();
-        }
-        else
-        {
-            tempChart.series[i].hide();
-        }
-    }
-    for (var i = 1; i < humChart.series.length; i++)
-    {
-        if (newSensor == "All" || humChart.series[i].name == newSensor) {
-            humChart.series[i].show();
-        }
-        else {
-            humChart.series[i].hide();
-        }
-    }
-
-    //for (var i = 1; i < lightChart.series.length; i++) {
-    //    if (newSensor == "All" || lightChart.series[i].name == newSensor) {
-    //        lightChart.series[i].show();
-    //    }
-    //    else {
-    //        lightChart.series[i].hide();
-    //    }
-    //}
-}
-
-function ShowHide(tHtml)
-{
-    if (tHtml)
-    {
-        if (tHtml.style.display == '')
-            tHtml.style.display = 'none';
-        else
-            tHtml.style.display = '';
-    }
-}
->>>>>>> 064f43907f5bfc9c031668db5b87b2ae9a4c084d:Azure/WebSite/ConnectTheDotsWebSite/js/connectthedots.js
