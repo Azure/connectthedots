@@ -108,7 +108,8 @@ namespace ConnectTheDotsWebSite
                         case "LiveDataSelection":
                             DeviceFilter = messageDictionary["DeviceName"] as string;
 
-                            if (DeviceFilter == "clear"){
+                            if (DeviceFilter == "clear")
+                            {
                                 DeviceFilterList.Clear();
                             }
                             else
@@ -138,11 +139,12 @@ namespace ConnectTheDotsWebSite
         {
 
             if (!message.ContainsKey("dspl") ||
-                    (this.DeviceFilter != null && (this.DeviceFilterList.Contains("all")
+                    (this.DeviceFilterList != null && (this.DeviceFilterList.Contains("all")
                 || this.DeviceFilterList.Contains(message["dspl"].ToString().ToLower())
-                
+
                 )))
             {
+
                 this.Send(JsonConvert.SerializeObject(message));
             }
 

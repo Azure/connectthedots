@@ -40,7 +40,7 @@ namespace ConnectTheDotsWebSite
     class WebSocketEventProcessor : IEventProcessor
     {
         // Keep track of devices seen, and the last message received for each device
-        public static ConcurrentDictionary<string, IDictionary<string, object>> g_devices = 
+        public static ConcurrentDictionary<string, IDictionary<string, object>> g_devices =
             new ConcurrentDictionary<string, IDictionary<string, object>>();
 
         // Keep a buffer of all messages for as long as the client UX needs them
@@ -48,7 +48,10 @@ namespace ConnectTheDotsWebSite
 
         // Message buffer (one per processor instance)
         public List<IDictionary<string, object>> bufferedMessages = new List<IDictionary<string, object>>();
+        //public SortedList<IDictionary<string, object>> bufferedMessages = new SortedList<IDictionary<string, object>>();
 
+
+        public List<IDictionary<string, object>> bufferedMessagesAvg = new List<IDictionary<string, object>>();
 
         // Remember one event until it is outside of the buffer time period
         EventData eventForNextCheckpoint = null;
@@ -66,6 +69,7 @@ namespace ConnectTheDotsWebSite
         {
             try
             {
+
                 var now = DateTime.UtcNow;
 
                 foreach (var eventData in events)
@@ -85,7 +89,7 @@ namespace ConnectTheDotsWebSite
                     catch
                     {
                         // Not a single JSON message: attempt to deserialize as array of messages
-                        
+
                         // Azure Stream Analytics Preview generates invalid JSON for some multi-values queries
                         // Workaround: turn concatenated json objects (ivalid JSON) into array of json objects (valid JSON)
                         if (eventBodyAsString.IndexOf("}{") >= 0)
@@ -101,8 +105,9 @@ namespace ConnectTheDotsWebSite
                     }
 
                     // Only send messages within the display/buffer interval to clients, to speed up recovery after downtime
-                    if ((eventData.EnqueuedTimeUtc + bufferTimeInterval).AddMinutes(5) > now)
+                    if ((eventData.EnqueuedTimeUtc + bufferTimeInterval).AddMinutes(1) > now)
                     {
+
                         foreach (var messagePayload in messagePayloads)
                         {
                             // Build up the list of devices seen so far (in lieu of a formal device repository)
@@ -116,6 +121,7 @@ namespace ConnectTheDotsWebSite
                                     WebSocketEventProcessor.g_devices.TryAdd(deviceName, messagePayload);
                                 }
                             }
+
                             
                             // Notify clients
                             MyWebSocketHandler.SendToClients(messagePayload);
@@ -128,15 +134,21 @@ namespace ConnectTheDotsWebSite
                             // because EH processor host serializes per partition, and we use one buffer per partition
                             lock (bufferedMessages)
                             {
+
                                 bufferedMessages.Add(messagePayload);
+
+                                if (messagePayload.ContainsKey("tempavg"))
+                                {
+                                    bufferedMessagesAvg.Add(messagePayload);
+                                }
                             }
                         }
                     }
                     else
                     {
-                        Debug.WriteLine("Received event older than {0} in EH {1}, partition {2}: {3} - Sequence Number {4}", 
-                            bufferTimeInterval, 
-                            context.EventHubPath, context.Lease.PartitionId, 
+                        Debug.WriteLine("Received event older than {0} in EH {1}, partition {2}: {3} - Sequence Number {4}",
+                            bufferTimeInterval,
+                            context.EventHubPath, context.Lease.PartitionId,
                             eventData.EnqueuedTimeUtc, eventData.SequenceNumber);
 
                         eventForNextCheckpoint = eventData;
@@ -157,8 +169,8 @@ namespace ConnectTheDotsWebSite
                     await context.CheckpointAsync(eventForNextCheckpoint);
 
                     Trace.TraceInformation("Checkpointed EH {0}, partition {1}: offset {2}, Sequence Number {3}, time {4}",
-                        context.EventHubPath, context.Lease.PartitionId, 
-                        eventForNextCheckpoint.Offset, eventForNextCheckpoint.SequenceNumber, 
+                        context.EventHubPath, context.Lease.PartitionId,
+                        eventForNextCheckpoint.Offset, eventForNextCheckpoint.SequenceNumber,
                         eventForNextCheckpoint.EnqueuedTimeUtc);
 
                     // Remove all older messages from the resend buffer
@@ -178,7 +190,7 @@ namespace ConnectTheDotsWebSite
             }
             catch (Exception e)
             {
-                Trace.TraceError("Error processing events in EH {0}, partition {1}: {0}", 
+                Trace.TraceError("Error processing events in EH {0}, partition {1}: {0}",
                     context.EventHubPath, context.Lease.PartitionId, e.Message);
             }
         }
@@ -240,7 +252,7 @@ namespace ConnectTheDotsWebSite
             var allMessages = new List<IDictionary<string, object>>();
             lock (g_processors)
             {
-                foreach (var processor in g_processors)
+                foreach (var processor in g_processors)                                
                 {
                     lock (processor.bufferedMessages)
                     {
@@ -248,6 +260,35 @@ namespace ConnectTheDotsWebSite
                     }
                 }
             }
+
+            allMessages.Sort(delegate(IDictionary<string, object> p1, IDictionary<string, object> p2)
+            {
+
+                if (p1.ContainsKey("time") && p2.ContainsKey("time"))
+                {
+
+                    string s1 = p1["time"].ToString();
+                    string s2 = p2["time"].ToString();
+
+                    if (!String.IsNullOrEmpty(s1) && !String.IsNullOrEmpty(s2))
+                    {
+                        DateTime t1 = Convert.ToDateTime(s1);
+                        DateTime t2 = Convert.ToDateTime(s2);
+
+                        return DateTime.Compare(t1, t2);
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                }
+                else
+                {
+                    return 0;  // just make them equal, who cares
+                }
+
+            });
+
             return allMessages;
         }
 

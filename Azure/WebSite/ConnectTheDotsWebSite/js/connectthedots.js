@@ -169,47 +169,23 @@ function InsertNewDatapoint(data, time, val)
 {
     var t = new Date(time);
     if (isNaN(t.getTime())) {
-        //console.log("invalid date");
+        console.log("invalid date");
         return;
     }
 
-    var now = new Date();
-    var cutoff = new Date(now - WINDOW_MINUTES * MS_PER_MINUTE)
+   var now = new Date();
+   var cutoff = new Date(now - WINDOW_MINUTES * MS_PER_MINUTE)
 
-    if (t < cutoff) {
-        //console.log("too old");
-        return;
-    }
+   if (t < cutoff) {
+        console.log("too old");
+       return;
+   }
 
     data.push({ data: val, time: new Date(time) });
-    //data.sort(function (a, b) { return a.time - b.time; });
 
     if (data.length >= MAX_ARRAY_SIZE) {  //should never be greater, but...
         data.shift();
         return;
-    }
-
-    if (data.length <= 2) {        
-        return;
-    }
-
-    //if (val < data[data.length - 1].data) {
-     //   return;
-    //}
-
-    // The datapoints come in out-of-order during the
-    // initial burst of data.
-
-    //data.sort(function (a, b) { return a.time - b.time; });
-
-    // prune any datapoints that are older than
-    // WINDOW_MINUTES
-
-    var newest = data[data.length - 1].time;
-    var cutoff = new Date(newest - WINDOW_MINUTES * MS_PER_MINUTE)    
-
-    while (data.length >= 2 && data[0].time < cutoff){
-        data.shift();
     }
 }
 
@@ -251,12 +227,11 @@ function AddToD3(D3_set, chart_name, series_name, val, time) {
 
 function PruneOldD3Data(D3_set, chart_name)
 {    
+    var now = new Date();
+    var cutoff = new Date(now - WINDOW_MINUTES * MS_PER_MINUTE)
 
     for (var i = 0; i < D3_set.length; i++) {
-        var data = D3_set[i].data;
-
-        var now = new Date();
-        var cutoff = new Date(now - WINDOW_MINUTES * MS_PER_MINUTE)
+        var data = D3_set[i].data;        
 
         while (data.length >= 1 && data[0].time < cutoff) {
             data.shift();
@@ -371,13 +346,10 @@ function UpdateD3Charts(D3_set, chart_name)
 
     line = d3.svg.line()
             .interpolate("linear")
-            //.x(function (d) { return x(new Date(d.time)); })
-        .x(function (d) { return x(d.time); })
+            .x(function (d) { return x(d.time); })
             .y(function (d) { return y(d.data); });    
 
     for (var i = 0; i < D3_set.length; i++) {
-
-        //console.log("length " + D3_set[i].data.length);
 
         try{
 
@@ -490,7 +462,7 @@ $(document).ready(function () {
 
             ClearD3Charts();
 
-            if (device == 'All') {
+            if (device == 'All') {                
 
                 var c = { MessageType: "LiveDataSelection", DeviceName: "clear" };
                 websocket.send(JSON.stringify(x));
@@ -542,8 +514,6 @@ $(document).ready(function () {
                 websocket.send(JSON.stringify(x));
 
                 $('#sensorList li').each(function () {
-                    //this now refers to each li
-                    //do stuff to each
 
                     var d = $(this).text();
 
@@ -631,9 +601,9 @@ $(document).ready(function () {
 
     var sss = (window.location.protocol.indexOf('s') > 0 ? "s" : "");    
     
-    //var uri = 'ws'+ sss +'://' + window.location.host + '/api/websocketconnect?clientId=none';
+    var uri = 'ws'+ sss +'://' + window.location.host + '/api/websocketconnect?clientId=none';
 
-    var uri = 'ws' + sss + '://' + 'connectthedots.msopentech.com' + '/api/websocketconnect?clientId=none';
+    //var uri = 'ws' + sss + '://' + 'connectthedots.msopentech.com' + '/api/websocketconnect?clientId=none';
 
     websocket = new WebSocket(uri);
 
@@ -661,6 +631,8 @@ $(document).ready(function () {
         // initialize the page with all sensors
 
         if (receivedFirstMessage == false) {
+
+            ClearD3Charts();
             var x = { MessageType: "LiveDataSelection", DeviceName: 'All' };
 
             websocket.send(JSON.stringify(x));
@@ -725,7 +697,7 @@ $(document).ready(function () {
 
             // If the message is an alert, we need to display it in the datatable
             if (eventObject.alerttype != null && isBulking == false) {
-                /*var table = $('#alertTable').DataTable();
+                var table = $('#alertTable').DataTable();
                 var time = new Date(eventObject.timestart);
 
                 // Log the alert in the rawalerts div
@@ -772,20 +744,23 @@ $(document).ready(function () {
                         eventObject.alerttype,
                         message
                     ]).draw();
-                }*/
+                }
             }
             else {
 
                 // Message received is not an alert. let's display it in the charts
 
                 if (eventObject.tempavg != null) {                    
-                    AddToD3(D3_tmp, "Temperature", "avg", eventObject.tempavg, eventObject.time);
 
+                    if (eventObject.time != null) {
+                        AddToD3(D3_tmp, "Temperature", "avg", eventObject.tempavg, eventObject.time);
+                    }
                     if (!isBulking) {
                         PruneOldD3Data(D3_tmp, "Temperature");
                         UpdateD3Charts(D3_tmp, "Temperature");
                     }
                     else {
+                        
                         $('#loading-sensor').text("avg");
                     }
                 }
@@ -796,7 +771,9 @@ $(document).ready(function () {
 
                     if (eventObject.bulkData == true) {
                         $('#loading').show();
-                        isBulking = true;                                               
+                        isBulking = true;
+                        //D3_tmp[0].data = [];
+                        ClearD3Charts();
                     }
                     else {
 
@@ -815,7 +792,7 @@ $(document).ready(function () {
                     // the message is data for the charts
                     // we make sure the dspl field is in the message, meaning the data is coming from a known device or service
                     if (eventObject.dspl != null) {
-
+                        
                         AddToD3(D3_tmp, "Temperature", eventObject.dspl, eventObject.temp, eventObject.time);
                         AddToD3(D3_hum, "Humidity", eventObject.dspl, eventObject.hmdt, eventObject.time);
 
@@ -826,7 +803,7 @@ $(document).ready(function () {
                             UpdateD3Charts(D3_tmp, "Temperature");
                             UpdateD3Charts(D3_hum, "Humidity");
                         } else {
-                            $('#loading-sensor').text(name);
+                            $('#loading-sensor').text(eventObject.dspl);
                         }
                     }
                 }
