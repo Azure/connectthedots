@@ -261,6 +261,8 @@ namespace ConnectTheDotsWebSite
                 }
             }
 
+            // sort
+
             allMessages.Sort(delegate(IDictionary<string, object> p1, IDictionary<string, object> p2)
             {
 
@@ -288,6 +290,26 @@ namespace ConnectTheDotsWebSite
                 }
 
             });
+
+
+            // remove if too old
+
+            var now = DateTime.UtcNow;
+            TimeSpan window = new TimeSpan(0, 10, 0);
+
+            for (int i = allMessages.Count - 1; i >= 0; i-- )
+            {
+                var m = allMessages[i];
+                if (m.ContainsKey("time"))
+                {
+                    DateTime t = Convert.ToDateTime(m["time"].ToString());
+                    if (t < now - window)
+                    {
+                        allMessages.RemoveAt(i);
+                    }
+                }
+                 
+            }
 
             return allMessages;
         }

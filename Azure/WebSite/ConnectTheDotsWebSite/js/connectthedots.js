@@ -169,7 +169,7 @@ function InsertNewDatapoint(data, time, val)
 {
     var t = new Date(time);
     if (isNaN(t.getTime())) {
-        console.log("invalid date");
+        //console.log("invalid date");
         return;
     }
 
@@ -177,7 +177,7 @@ function InsertNewDatapoint(data, time, val)
    var cutoff = new Date(now - WINDOW_MINUTES * MS_PER_MINUTE)
 
    if (t < cutoff) {
-        console.log("too old");
+        //console.log("too old");
        return;
    }
 
@@ -230,8 +230,17 @@ function PruneOldD3Data(D3_set, chart_name)
     var now = new Date();
     var cutoff = new Date(now - WINDOW_MINUTES * MS_PER_MINUTE)
 
+    console.log(now);
+    console.log(cutoff);
+
     for (var i = 0; i < D3_set.length; i++) {
         var data = D3_set[i].data;        
+
+        //for (var j = data.length - 1; j >= 0; j --){
+        //    if (data[j].time < cutoff){
+        //        data.splice(j,1);
+        //    }
+        //}
 
         while (data.length >= 1 && data[0].time < cutoff) {
             data.shift();
@@ -772,7 +781,6 @@ $(document).ready(function () {
                     if (eventObject.bulkData == true) {
                         $('#loading').show();
                         isBulking = true;
-                        //D3_tmp[0].data = [];
                         ClearD3Charts();
                     }
                     else {
@@ -793,9 +801,10 @@ $(document).ready(function () {
                     // we make sure the dspl field is in the message, meaning the data is coming from a known device or service
                     if (eventObject.dspl != null) {
                         
-                        AddToD3(D3_tmp, "Temperature", eventObject.dspl, eventObject.temp, eventObject.time);
-                        AddToD3(D3_hum, "Humidity", eventObject.dspl, eventObject.hmdt, eventObject.time);
-
+                        if (eventObject.time != null) {
+                            AddToD3(D3_tmp, "Temperature", eventObject.dspl, eventObject.temp, eventObject.time);
+                            AddToD3(D3_hum, "Humidity", eventObject.dspl, eventObject.hmdt, eventObject.time);
+                        }
                         if (!isBulking) {
                             PruneOldD3Data(D3_tmp, "Temperature");
                             PruneOldD3Data(D3_hum, "Humidity");
