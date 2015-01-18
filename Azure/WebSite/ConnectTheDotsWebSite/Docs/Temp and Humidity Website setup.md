@@ -12,10 +12,10 @@ To go through the below steps, make sure you have all the following software ins
 * Open the ConnectTheDots\Azure\WebSite\ConnectTheDotsWebSite.sln solution in Visual Studio
 * In VS, Right-click on the project name and select Publish.
 * Select Azure Web Sites, create new one. 
-    * Site name: <pick something unique>
-    * Region: <pick same region as you used for Stream Analytics>
+    * Site name: [pick something unique]
+    * Region: [pick same region as you used for Stream Analytics]
     * Database server: no database
-    * Password: <leave suggested password>
+    * Password: [leave suggested password]
 * Publish (you might need to install WebDeploy extension if you are having an error stating that the Web deployment task failed. You can find WebDeploy [here](http://www.iis.net/downloads/microsoft/web-deploy)).
 
 ##Websockets setting
