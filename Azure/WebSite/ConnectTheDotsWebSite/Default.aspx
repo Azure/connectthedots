@@ -52,21 +52,19 @@
             padding: 10px;
         }
 
-        
 
-        .big-block{
+
+        .big-block {
             margin-left: 100px;
         }
-
     </style>
 
     <!-- for device selection list -->
 
     <style>
-
         ul {
             list-style-type: none;
-            padding-left:0;
+            padding-left: 0;
             font: 12px sans-serif;
             color: #666;
         }
@@ -84,7 +82,6 @@
         li.selected:before {
             content: "\25BA \0020";
         }
-
     </style>
 
     <!-- styles for D3 charts -->
@@ -197,74 +194,74 @@
             <h3>Live Sensor Data</h3>
 
             <div style="float: left; width: 200px">
-            
+
                 <p><strong>Select Sensor/R-PI:</strong></p>
 
                 <ul id="sensorList">
                     <li class="selected">All</li>
-                </ul>             
-                
+                </ul>
+
             </div>
 
 
             <div style="margin-left: 200px">
-                <div id="Temperature">
-                    <script>
-                        (function () {
-                            chart("Temperature");  // make sure chart name matches the div id
-                        })();
-                    </script>
+                <div>
+                    <div id="Temperature">
+                        <script>
+                            (function () {
+                                chart("Temperature");  // make sure chart name matches the div id
+                            })();
+                        </script>
+                    </div>
+
+                    <div id="Humidity">
+                        <script>
+
+                            (function () {
+                                chart("Humidity");  // make sure chart name matches the div id
+                            })();
+
+                        </script>
+                    </div>
+                </div>
+            </div>
+
+            <div class="big-block" style="width: 1000px">
+                <h3>Real Time Events</h3>
+
+                <div>
+                    <input type="button" onclick="ShowHide(alerts)" value="Show/Hide Alerts" />
+
                 </div>
 
-                <div id="Humidity">
-                    <script>
 
-                        (function () {
-                            chart("Humidity");  // make sure chart name matches the div id
-                        })();
+                <div id="alerts">
+                    <table id="alertTable">
+                        <thead>
+                            <tr>
+                                <th class="timeFromDate">Time</th>
+                                <th>Device</th>
+                                <th>Alert</th>
+                                <th>Message</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
 
-                    </script>
                 </div>
             </div>
-        </div>
 
-        <div class="big-block"  style="width:1000px">
-            <h3>Real Time Events</h3>
+            <div class="big-block">
 
-            <div>
-                <input type="button" onclick="ShowHide(alerts)" value="Show/Hide Alerts" />
+                <h3>Raw Alerts</h3>
 
+                <input type="button" onclick="ShowHide(rawalerts)" value="Show/Hide Raw Alerts" />
+
+                <div id="rawalerts" style="display: none"></div>
+
+                <div id="messages"></div>
             </div>
-
-
-            <div id="alerts">
-                <table id="alertTable">
-                    <thead>
-                        <tr>
-                            <th class="timeFromDate">Time</th>
-                            <th>Device</th>
-                            <th>Alert</th>
-                            <th>Message</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-
-            </div>
-        </div>
-
-        <div class="big-block">
-
-            <h3>Raw Alerts</h3>
-
-            <input type="button" onclick="ShowHide(rawalerts)" value="Show/Hide Raw Alerts" />
-
-            <div id="rawalerts" style="display: none"></div>
-
-            <div id="messages"></div>
-        </div>
-
     </form>
 </body>
 </html>
