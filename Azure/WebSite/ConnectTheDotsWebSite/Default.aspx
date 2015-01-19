@@ -225,43 +225,44 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="big-block" style="width: 1000px">
-                <h3>Real Time Events</h3>
+        <div class="big-block" style="width: 1000px">
+            <h3>Real Time Events</h3>
 
-                <div>
-                    <input type="button" onclick="ShowHide(alerts)" value="Show/Hide Alerts" />
+            <div>
+                <input type="button" onclick="ShowHide(alerts)" value="Show/Hide Alerts" />
 
-                </div>
-
-
-                <div id="alerts">
-                    <table id="alertTable">
-                        <thead>
-                            <tr>
-                                <th class="timeFromDate">Time</th>
-                                <th>Device</th>
-                                <th>Alert</th>
-                                <th>Message</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-
-                </div>
             </div>
 
-            <div class="big-block">
 
-                <h3>Raw Alerts</h3>
+            <div id="alerts">
+                <table id="alertTable">
+                    <thead>
+                        <tr>
+                            <th class="timeFromDate">Time</th>
+                            <th>Device</th>
+                            <th>Alert</th>
+                            <th>Message</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
 
-                <input type="button" onclick="ShowHide(rawalerts)" value="Show/Hide Raw Alerts" />
-
-                <div id="rawalerts" style="display: none"></div>
-
-                <div id="messages"></div>
             </div>
+        </div>
+
+        <div class="big-block">
+
+            <h3>Raw Alerts</h3>
+
+            <input type="button" onclick="ShowHide(rawalerts)" value="Show/Hide Raw Alerts" />
+
+            <div id="rawalerts" style="display: none"></div>
+
+            <div id="messages"></div>
+        </div>
     </form>
 </body>
 </html>

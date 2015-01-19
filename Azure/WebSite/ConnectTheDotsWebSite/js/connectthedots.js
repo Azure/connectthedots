@@ -468,7 +468,7 @@ $(document).ready(function () {
         var device = $(this).text();
         if (websocket != null) {            
 
-
+            $('#loading').show();
             ClearD3Charts();
 
             if (device == 'All') {                
