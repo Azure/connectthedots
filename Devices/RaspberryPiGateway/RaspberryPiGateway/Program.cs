@@ -114,7 +114,7 @@ namespace RaspberryPiGateway
             // Initialize application by reading configuration file
             if (!InitAppSettings(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location), "RaspberryPiGateway.exe")) return -1;
             // Initializa AMQP connection
-            if (!InitAMQPConnection()) return -1;
+            if (!InitAMQPConnection(false)) return -1;
 
             // start main routine
             return main.Run();
@@ -129,8 +129,26 @@ namespace RaspberryPiGateway
         /// true when successful
         /// false when unsuccessful
         /// </returns>
-        public static bool InitAMQPConnection()
+        public static bool InitAMQPConnection(bool reset)
         {
+            if (reset)
+            {
+                // If the reset flag is set, we need to kill previous connection 
+                try
+                {
+                    logger.Info("Resetting connection to Azure Event Hub");
+                    logger.Info("Closing any existing senderLink, session and connection.");
+                    if (sender != null) sender.Close();
+                    if (session != null) session.Close();
+                    if (connection != null) connection.Close();
+                }
+                catch (Exception e)
+                {
+                    logger.Error("Error closing AMQP connection to Azure Event Hub: {0}", e.Message);
+                }
+            }
+
+            logger.Info("Initializing connection to Azure Event Hub");
             // Initialize AMQPS connection
             try
             {
@@ -146,6 +164,7 @@ namespace RaspberryPiGateway
                 if (connection != null) connection.Close();
                 return false;
             }
+            logger.Info("Connection to Azure Event Hub initialized.");
             return true;
         }
 
@@ -283,69 +302,96 @@ namespace RaspberryPiGateway
         /// </param>
         public static void SendAmqpMessage(string valuesJson)
         {
+            Message message = new Message();
+
             // If there is no value passed as parameter, do nothing
             if (valuesJson == null) return;
 
-            // Deserialize Json message
-            var sample = JsonConvert.DeserializeObject<Dictionary<string, object>>(valuesJson);
-            if (sample == null)
+            try
             {
-                logger.Info("Error parsing JSON message {0}", valuesJson);
-                return;
-            }
+                // Deserialize Json message
+                var sample = JsonConvert.DeserializeObject<Dictionary<string, object>>(valuesJson);
+                if (sample == null)
+                {
+                    logger.Info("Error parsing JSON message {0}", valuesJson);
+                    return;
+                }
 #if DEBUG
-            logger.Info("Parsed data from serial port: {0}", valuesJson);
+                logger.Info("Parsed data from serial port: {0}", valuesJson);
 #endif
 
-            // Convert JSON data in 'sample' into body of AMQP message
-            // Only data added by gateway is time of message (since sensor may not have clock) 
-            deviceId = Convert.ToString(sample["DeviceGUID"]);      // Unique identifier from sensor, to group items in event hub
+                // Convert JSON data in 'sample' into body of AMQP message
+                // Only data added by gateway is time of message (since sensor may not have clock) 
+                deviceId = Convert.ToString(sample["DeviceGUID"]);      // Unique identifier from sensor, to group items in event hub
 
-            Message message = new Message();
-            message.Properties = new Properties()
-            {
-                Subject = Convert.ToString(sample["Subject"]),              // Message type (e.g. "wthr") defined in sensor code, sent in JSON payload
-                CreationTime = DateTime.UtcNow, // Time of data sampling
-            };
+                message.Properties = new Properties()
+                {
+                    Subject = Convert.ToString(sample["Subject"]),              // Message type (e.g. "wthr") defined in sensor code, sent in JSON payload
+                    CreationTime = DateTime.UtcNow, // Time of data sampling
+                };
 
-            message.MessageAnnotations = new MessageAnnotations();
-            // Event Hub partition key: device id - ensures that all messages from this device go to the same partition and thus preserve order/co-location at processing time
-            message.MessageAnnotations[new Symbol("x-opt-partition-key")] = deviceId;
-            message.ApplicationProperties = new ApplicationProperties();
-            message.ApplicationProperties["time"] = message.Properties.CreationTime;
-            message.ApplicationProperties["from"] = deviceId; // Originating device
-            message.ApplicationProperties["dspl"] = sample["dspl"];      // Display name for originating device defined in sensor code, sent in JSON payload
+                message.MessageAnnotations = new MessageAnnotations();
+                // Event Hub partition key: device id - ensures that all messages from this device go to the same partition and thus preserve order/co-location at processing time
+                message.MessageAnnotations[new Symbol("x-opt-partition-key")] = deviceId;
+                message.ApplicationProperties = new ApplicationProperties();
+                message.ApplicationProperties["time"] = message.Properties.CreationTime;
+                message.ApplicationProperties["from"] = deviceId; // Originating device
+                message.ApplicationProperties["dspl"] = sample["dspl"];      // Display name for originating device defined in sensor code, sent in JSON payload
 
-            if (sample != null && sample.Count > 0)
-            {
+                if (sample != null && sample.Count > 0)
+                {
 #if! SENDAPPPROPERTIES
 
-                var outDictionary = new Dictionary<string, object>(sample);
-                outDictionary["Subject"] = message.Properties.Subject; // Message Type
-                outDictionary["time"] = message.Properties.CreationTime;
-                outDictionary["from"] = deviceId; // Originating device
-                outDictionary["dspl"] = sample["dspl"];      // Display name for originating device
-                message.Properties.ContentType = "text/json";
-                message.Body = new Data() { Binary = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(outDictionary)) };
+                    var outDictionary = new Dictionary<string, object>(sample);
+                    outDictionary["Subject"] = message.Properties.Subject; // Message Type
+                    outDictionary["time"] = message.Properties.CreationTime;
+                    outDictionary["from"] = deviceId; // Originating device
+                    outDictionary["dspl"] = sample["dspl"];      // Display name for originating device
+                    message.Properties.ContentType = "text/json";
+                    message.Body = new Data() { Binary = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(outDictionary)) };
 #else
-                foreach (var sampleProperty in sample)
-				{
-					message.ApplicationProperties [sample.Key] = sample.Value;
-				}
+                    foreach (var sampleProperty in sample)
+				    {
+					    message.ApplicationProperties [sample.Key] = sample.Value;
+				    }
 #endif
+                }
+                else
+                {
+                    // No data: send an empty message with message type "weather error" to help diagnose problems "from the cloud"
+                    message.Properties.Subject = "wthrerr";
+                }
             }
-            else
+            catch (Exception e)
             {
-                // No data: send an empty message with message type "weather error" to help diagnose problems "from the cloud"
-                message.Properties.Subject = "wthrerr";
+                logger.Error("Error when deserializing JSON data received over serial port: {0}", e.Message);
+                return;
             }
 
             // Send to the cloud asynchronously
             // Obtain handle on AMQP sender-link object
             if (0 == Interlocked.Exchange(ref sendingMessage, 1))
             {
-                sender.Send(message, SendOutcome, null);
+                bool AMQPConnectionIssue = false;
+                try
+                {
+                    // Message send function is asynchronous, we will receive completion info in the SendOutcome function
+                    sender.Send(message, SendOutcome, null);
+                }
+                catch (Exception e)
+                {
+                    // Something went wrong let's try and reset the AMQP connection
+                    logger.Error("Exception while sending AMQP message: {1}", e.Message);
+                    AMQPConnectionIssue = true;
+                }
                 Interlocked.Exchange(ref sendingMessage, 0);
+
+                // If there was an issue with the AMQP connection, try to reset it
+                while (AMQPConnectionIssue)
+                {
+                    AMQPConnectionIssue = !InitAMQPConnection(true);
+                    Thread.Sleep(200);
+                }
             }
 
 #if LOG_MESSAGE_RATE
@@ -372,9 +418,9 @@ namespace RaspberryPiGateway
         {
             if (outcome is Accepted)
             {
-                //#if DEBUG
+//#if DEBUG
                 logger.Info("Sent message from {0} at {1}", AppEdgeGateway, message.ApplicationProperties["time"]);
-                //#endif
+//#endif
 #if LOG_MESSAGE_RATE
                 g_messageCount++;
 #endif
@@ -395,6 +441,7 @@ namespace RaspberryPiGateway
         {
             string serialPortName = port;
             SerialPort serialPort = null;
+            bool serialPortAlive = true;
 
             // We want the thread to restart listening on the serial port if it crashed
             while (MAINSWITCH)
@@ -406,35 +453,49 @@ namespace RaspberryPiGateway
                     serialPort = new SerialPort(serialPortName, 9600);
                     serialPort.DtrEnable = true;
                     serialPort.Open();
-#if DEBUG
                     logger.Info("Opened Serial Port {0}", serialPortName);
 #endif
-#endif
-                    while (MAINSWITCH)
+                    do
                     {
                         // When simulating data, we will generate random data
                         // when not simulating, we read the serial port
+                        string valuesJson = "";
 #if! SIMULATEDATA
-                        Debug.WriteLine("Reading from Serial Port");
-                        var valuesJson = serialPort.ReadLine();
-                        Debug.WriteLine("Read Data from Serial Port: {0}", valuesJson);
-#else
-						Random r = new Random ();
-						string valuesJson = String.Format("{{ \"temp\" : {0}, \"hmdt\" : {1}, \"lght\" : {2}}}", 
-						    (r.NextDouble() * 120) - 10,
-						    (r.NextDouble() * 100),
-						    (r.NextDouble() * 100));
-#endif
                         try
                         {
-                            // Send JSON message to the Cloud
-                            SendAmqpMessage(valuesJson);
+                            valuesJson = serialPort.ReadLine();
                         }
                         catch (Exception e)
                         {
-                            logger.Error("Error parsing and sending data from serial port {2} : {0}, Data: {1}", e.Message, valuesJson, serialPortName);
+                            logger.Error("Error Reading from Serial Portand sending data from serial port {0}: {1}", serialPortName, e.Message);
+                            serialPort.Close();
+                            serialPortAlive = false;
                         }
-                    }
+#else
+						Random r = new Random ();
+                        valuesJson = String.Format("{{ \"temp\" : {0}, \"hmdt\" : {1}, \"lght\" : {2}, \"DeviceGUID\" : \"{3}\", \"Subject\" : \"{4}\", \"dspl\" : \"{5}\"}}", 
+						    (r.NextDouble() * 120) - 10,
+						    (r.NextDouble() * 100),
+						    (r.NextDouble() * 100),
+                            "81E79059-A393-4797-8A7E-526C3EF9D64B",
+                            "wthr",
+                            "Simulator");
+#endif
+
+                        if (serialPortAlive)
+                        {
+                            try
+                            {
+                                // Send JSON message to the Cloud
+                                SendAmqpMessage(valuesJson);
+                            }
+                            catch (Exception e)
+                            {
+                                logger.Error("Error sending AMQP data: {0}", e.Message);
+                            }
+                        }
+                    } while (serialPortAlive);
+
                 }
                 catch (Exception e)
                 {

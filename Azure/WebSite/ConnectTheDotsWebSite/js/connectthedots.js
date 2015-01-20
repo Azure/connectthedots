@@ -42,7 +42,9 @@ var D3_hum = [];
 
 // keep track of absolute freshest sample point
 
-var freshestTime = new Date();
+var freshestTime = [];
+freshestTime["Temperature"] = null;
+freshestTime["Humidity"] = null;
 
 // globals used with D3
 
@@ -58,7 +60,11 @@ var svg = {};
 var color = null;
 var sensorNames = [];
 
+// initialize color
+
+sensorNames.push("avg")
 color = d3.scale.category10();
+color.domain(sensorNames);
 
 // worker-related
 
@@ -161,36 +167,25 @@ function MakeNewD3Series(d3_data, series_name) {
 
 function InsertNewDatapoint(data, time, val)
 {
+    var t = new Date(time);
+    if (isNaN(t.getTime())) {
+        //console.log("invalid date");
+        return;
+    }
+
+   var now = new Date();
+   var cutoff = new Date(now - WINDOW_MINUTES * MS_PER_MINUTE)
+
+   if (t < cutoff) {
+        //console.log("too old");
+       return;
+   }
+
     data.push({ data: val, time: new Date(time) });
 
     if (data.length >= MAX_ARRAY_SIZE) {  //should never be greater, but...
         data.shift();
         return;
-    }
-
-    if (data.length <= 2) {
-        data.push({ data: val, time: new Date(time) });
-        data.sort(function (a, b) { return a.time - b.time; });
-        return;
-    }
-
-    if (val < data[data.length - 1].data) {
-        return;
-    }
-
-    // The datapoints come in out-of-order during the
-    // initial burst of data.
-
-     data.sort(function (a, b) { return a.time - b.time; });
-
-    // prune any datapoints that are older than
-    // WINDOW_MINUTES
-
-    var newest = data[data.length - 1].time;
-    var cutoff = new Date(newest - WINDOW_MINUTES * MS_PER_MINUTE)    
-
-    while (data.length >= 2 && data[0].time < cutoff){
-        data.shift();
     }
 }
 
@@ -201,7 +196,7 @@ function InsertNewDatapoint(data, time, val)
 // dataset.
 //
 
-function AddToD3(D3_set, series_name, val, time) {
+function AddToD3(D3_set, chart_name, series_name, val, time) {
 
     var data = null;
     for (var i = 0; i < D3_set.length; i++) {
@@ -218,6 +213,73 @@ function AddToD3(D3_set, series_name, val, time) {
     // insert the new datapoint into the dataset
 
     InsertNewDatapoint(data, time, val);
+}
+
+//
+// PruneOld3DData
+//
+//  Removes any datapoints that are older than 10 minutes.
+//  If any datasets are completely empty afterwards, clear
+//  that sensor entirely from the list.  This function is
+//  needed to clear sensors that have gone offline and are
+//  not producing any more data.
+//
+
+function PruneOldD3Data(D3_set, chart_name)
+{    
+    var now = new Date();
+    var cutoff = new Date(now - WINDOW_MINUTES * MS_PER_MINUTE)
+
+    console.log(now);
+    console.log(cutoff);
+
+    for (var i = 0; i < D3_set.length; i++) {
+        var data = D3_set[i].data;        
+
+        //for (var j = data.length - 1; j >= 0; j --){
+        //    if (data[j].time < cutoff){
+        //        data.splice(j,1);
+        //    }
+        //}
+
+        while (data.length >= 1 && data[0].time < cutoff) {
+            data.shift();
+        }        
+    }    
+
+    var idxToRemove = [];
+
+    for (var i = 0; i < D3_set.length ; i++) {
+
+        if (D3_set[i].data.length == 0) {
+
+            if (path[chart_name] == null) {
+                continue;
+            }
+
+            if (path[chart_name][D3_set[i].name] != null) {
+                path[chart_name][D3_set[i].name].remove();
+                path[chart_name][D3_set[i].name] = null;
+            }
+
+            if (legend[chart_name][D3_set[i].name] != null) {
+                legend[chart_name][D3_set[i].name].remove();
+                legend[chart_name][D3_set[i].name] = null;
+            }
+
+            if (legend_r[chart_name][D3_set[i].name] != null) {
+                legend_r[chart_name][D3_set[i].name].remove();
+                legend_r[chart_name][D3_set[i].name] = null;
+            }
+
+            idxToRemove.push(i);
+        }
+    }
+
+    for (var i = 0; i < idxToRemove.length; i++) {
+        console.log("splicing");
+        D3_set.splice(idxToRemove[i], 1);
+    }
 }
 
 //
@@ -292,48 +354,75 @@ function UpdateD3Charts(D3_set, chart_name)
             .call(xAxis);
 
     line = d3.svg.line()
-            .interpolate("linear")
-            .x(function (d) { return x(new Date(d.time)); })
+            .interpolate("basis")
+            .x(function (d) { return x(d.time); })
             .y(function (d) { return y(d.data); });    
 
     for (var i = 0; i < D3_set.length; i++) {
 
-        var data = D3_set[i].data;
-        var name = D3_set[i].name;
+        try{
 
-        if (path[chart_name][name] == null) {
-            path[chart_name][name] = svg[chart_name].append("g")
-                .append("path")
-                    .datum(data)
-                    .attr("class", "line")
-                    .attr("d", line)
-                    .style("stroke", function (d) { return color(name); });
+            var data = D3_set[i].data;
+            var name = D3_set[i].name;
 
+            if (path[chart_name][name] == null) {
+                path[chart_name][name] = svg[chart_name].append("g")
+                    .append("path")
+                        .datum(data)
+                        .attr("class", "line")
+                        .attr("d", line)
+                        .style("stroke", function (d) { return color(name); });
+
+            }
+
+            path[chart_name][name].datum(data)
+                .attr("d", line);
+
+            if (legend[chart_name][name] == null) {
+
+                legend_r[chart_name][name] = svg[chart_name]
+                        .append("rect")
+                            .attr("class", "legend")
+                            .attr("width", 10)
+                            .attr("height", 10)
+                            .attr("x", width + 10)
+                            .attr("y", 20 + (20 * i))
+                            .style("fill", color(name))
+                            .style("stroke", color(name));
+
+                legend[chart_name][name] = svg[chart_name].append("text")
+                            .attr("x", width + 25)
+                            .attr("y", 20 + (20 * i) + 5)
+                            .attr("class", "legend")
+                            .style("fill", color(name))
+                            .text(name == 'avg' ? 'avg (of all sensors)' : name);
+            }   
         }
-
-        path[chart_name][name].datum(data)
-            .attr("d", line);
-
-        if (legend[chart_name][name] == null) {
-
-            legend_r[chart_name][name] = svg[chart_name]
-                    .append("rect")
-                        .attr("class", "legend")
-                        .attr("width", 10)
-                        .attr("height", 10)
-                        .attr("x", width + 10)
-                        .attr("y", 20 + (20 * i))
-                        .style("fill", color(name))
-                        .style("stroke", color(name));
-
-            legend[chart_name][name] = svg[chart_name].append("text")
-                        .attr("x", width + 25)
-                        .attr("y", 20 + (20 * i) + 5)
-                        .attr("class", "legend")
-                        .style("fill", color(name))
-                        .text(name);
-        }        
+        catch(e)
+        {
+            console.log(e);
+        }
     }
+}
+
+
+function RemoveFromChart(chart_name, series_name) {
+
+    path[chart_name][series_name].remove();
+    path[chart_name][series_name] = null;
+
+    legend[chart_name][series_name].remove();
+    legend[chart_name][series_name] = null;
+
+    legend_r[chart_name][series_name].remove();
+    legend_r[chart_name][series_name] = null;
+}
+
+function ResetChart(chart_name)
+{
+    path[chart_name] = {};
+    legend[chart_name] = {};
+    legend_r[chart_name] = {};
 }
 
 //
@@ -347,39 +436,19 @@ function UpdateD3Charts(D3_set, chart_name)
 function ClearD3Charts() {
 
     for (var i = 0; i < D3_tmp.length; i++) {
-        path["Temperature"][D3_tmp[i].name].remove();
-        path["Temperature"][D3_tmp[i].name] = null;
-
-        legend["Temperature"][D3_tmp[i].name].remove();
-        legend["Temperature"][D3_tmp[i].name] = null;
-
-        legend_r["Temperature"][D3_tmp[i].name].remove();
-        legend_r["Temperature"][D3_tmp[i].name] = null;
+        RemoveFromChart("Temperature", D3_tmp[i].name);
     }
 
-    path["Temperature"] = {};
-    legend["Temperature"] = {};
-    legend_r["Temperature"] = {};
+    ResetChart("Temperature");    
 
     for (var i = 0; i < D3_hum.length; i++) {
-        path["Humidity"][D3_hum[i].name].remove();
-        path["Humidity"][D3_hum[i].name] = null;
-
-        legend["Humidity"][D3_hum[i].name].remove();
-        legend["Humidity"][D3_hum[i].name] = null;
-
-        legend_r["Humidity"][D3_hum[i].name].remove();
-        legend_r["Humidity"][D3_hum[i].name] = null;
-
+        RemoveFromChart("Humidity", D3_hum[i].name);
     }
 
-    path["Humidity"] = {};
-    legend["Humidity"] = {};
-    legend_r["Humidity"] = {};
+    ResetChart("Humidity");
 
     D3_tmp = [];
     D3_hum = [];
-
 }
 
 //
@@ -388,11 +457,119 @@ function ClearD3Charts() {
 
 $(document).ready(function () {
 
+    // 
+    //  Handle a sensor selection change
+    // 'All' means all dataset are shown.
+    //  Anything else toggles that particular
+    //  dataset
+    //
+
+    $('#sensorList').on('click', 'li', function () {
+        var device = $(this).text();
+        if (websocket != null) {            
+
+            $('#loading').show();
+            ClearD3Charts();
+
+            if (device == 'All') {                
+
+                var c = { MessageType: "LiveDataSelection", DeviceName: "clear" };
+                websocket.send(JSON.stringify(x));
+
+                var x = { MessageType: "LiveDataSelection", DeviceName: device };
+                websocket.send(JSON.stringify(x));
+
+                $('#sensorList li').each(function () {
+                    //this now refers to each li
+                    //do stuff to each
+
+                    var d = $(this).text();
+
+                    if (d == device) {
+                        $(this).addClass('selected');
+                        $(this).css('color', color(d == 'All' ? 'avg' : d));
+                        $(this).css('font-weight', 'bold');
+                    }
+                    else {
+                        $(this).removeClass('selected');
+                        $(this).css('color', '');
+                        $(this).css('font-weight', 'normal');
+                    }
+                });
+
+            }
+            else {
+
+                // not 'All' so general case
+
+                var j = $('#sensorList li').eq(0);
+                j.removeClass('selected');
+                j.css('color', '');
+                j.css('font-weight', 'normal');
+
+                var d = $(this).text();
+                if ($(this).hasClass('selected')) {
+                    $(this).removeClass('selected');
+                    $(this).css('color', '');
+                    $(this).css('font-weight', 'normal');
+                }
+                else {
+                    $(this).addClass('selected');
+                    $(this).css('color', color(d == 'All' ? 'avg' : d));
+                    $(this).css('font-weight', 'bold');
+                }
+
+                var x = { MessageType: "LiveDataSelection", DeviceName: "clear" };
+                websocket.send(JSON.stringify(x));
+
+                $('#sensorList li').each(function () {
+
+                    var d = $(this).text();
+
+                    if ($(this).hasClass('selected')) {
+                        var x = { MessageType: "LiveDataSelection", DeviceName: $(this).text() };
+                        websocket.send(JSON.stringify(x));
+                    }
+                });
+            }
+
+        }
+    });
+
+    // 
+    //  Mouseover: highlight the sensor with its color
+    //  and make the text bold.
+    //
+
+    $('#sensorList').on('mouseover', 'li', function(e) {            
+        var device = $(this).text();
+
+        if (device == 'All') {
+            device = 'avg';
+        }
+
+        if ($(this).hasClass('selected') == false)
+        {
+            $(this).css('color', color(device));
+            $(this).css('font-weight', 'bold');
+        }        
+        
+    }).on('mouseout', 'li', function (e) {
+        if ($(this).hasClass('selected') == false) {
+            $(this).css('color', '');
+            $(this).css('font-weight', 'normal');
+        }
+    });
+    
     $('#loading').hide();
 
+    //
     // Set up jQuery DataTable to show alerts
+    //
+
     var table = $('#alertTable').DataTable(
     {
+        "bAutoWidth": false,
         "columnDefs":
         [
             {
@@ -429,18 +606,13 @@ $(document).ready(function () {
     table.order([0, 'desc']);
 
 
-    var sss = (window.location.protocol.indexOf('s') > 0 ? "s" : "");
-
-
     // Set up websocket client
 
-    
+    var sss = (window.location.protocol.indexOf('s') > 0 ? "s" : "");    
     
     var uri = 'ws'+ sss +'://' + window.location.host + '/api/websocketconnect?clientId=none';
 
-    // var uri = 'ws' + sss + '://' + 'connectthedots.msopentech.com' + '/api/websocketconnect?clientId=none';
-
-    //var uri = 'ws' + sss + '://' + 'olivier-connectthedots.azurewebsites.net' + '/api/websocketconnect?clientId=none';
+    //var uri = 'ws' + sss + '://' + 'connectthedots.msopentech.com' + '/api/websocketconnect?clientId=none';
 
     websocket = new WebSocket(uri);
 
@@ -451,6 +623,7 @@ $(document).ready(function () {
     }
 
     websocket.onerror = function (event) {
+        console.log(event);
         $('#messages').prepend('<div>ERROR ' + event.error + '</div>');
     }
 
@@ -464,43 +637,75 @@ $(document).ready(function () {
             $('#messages').prepend('<div>Malformed message: ' + event.data + "</div>");
         }
 
+        // initialize the page with all sensors
 
         if (receivedFirstMessage == false) {
-            var x = { MessageType: "LiveDataSelection", DeviceName: 'All' };
-            websocket.send(JSON.stringify(x));
 
+            ClearD3Charts();
+            var x = { MessageType: "LiveDataSelection", DeviceName: 'All' };
+
+            websocket.send(JSON.stringify(x));
             receivedFirstMessage = true;
+
+            // make 'All' the active sensor
+
+            var j = $('#sensorList li').eq(0);
+            j.css('color', color('avg'));
+            j.css('font-weight', 'bold');
         }
 
         // Seems like we have valid data
         try {
 
-            /*if (eventObject.dspl != null) {
+            if (eventObject.dspl != null) {
 
-                var exists = false;
-                $('#DropDownList1 option').each(function () {
+                // Remove any sensors that have gone stale
+                /*$('#sensorList li').each(function () {
 
-                    //console.log(this.value);
-                    if (this.value == eventObject.dspl) {
-                        exists = true;
-                        return false;
+                    var t = $(this).text();
+                    var found = false;
+                    for (var i = 0; i < D3_tmp.length; i++) {
+                        if (D3_tmp[i].name == t) {
+                            found = true;
+                            break;
+                        }
                     }
-                });
+
+                    if (found == false) {
+                        for (var i = 0; i < D3_hum.length; i++) {
+                            if (D3_hum[i].name == t) {
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (found == false) {
+                        $(this).remove();
+                    }
+                    
+                });*/
+
+                // if we have a new sensor, add it to the list
+                var exists = true;
+                if ($('#sensorList').data(eventObject.dspl) == undefined) {
+                    exists = false;
+                }
 
                 if (exists == false){
 
-                    console.log(eventObject.dspl);
+                    var ul = document.getElementById("sensorList");
+                    var li = document.createElement("li");
+                    li.appendChild(document.createTextNode(eventObject.dspl));
+                    ul.appendChild(li);
 
-                    var ddl = $('#DropDownList1');
-                    ddl.append(
-                        $('<option></option>').val(eventObject.dspl).html(eventObject.dspl)
-                    );
+                    $('#sensorList').data(eventObject.dspl, eventObject.dspl);
 
                 }
-            }*/
+            }
 
             // If the message is an alert, we need to display it in the datatable
-            if (eventObject.alerttype != null) {
+            if (eventObject.alerttype != null && isBulking == false) {
                 var table = $('#alertTable').DataTable();
                 var time = new Date(eventObject.timestart);
 
@@ -555,10 +760,17 @@ $(document).ready(function () {
                 // Message received is not an alert. let's display it in the charts
 
                 if (eventObject.tempavg != null) {                    
-                    AddToD3(D3_tmp, "avg", eventObject.tempavg, eventObject.time);
 
+                    if (eventObject.time != null) {
+                        AddToD3(D3_tmp, "Temperature", "avg", eventObject.tempavg, eventObject.time);
+                    }
                     if (!isBulking) {
+                        PruneOldD3Data(D3_tmp, "Temperature");
                         UpdateD3Charts(D3_tmp, "Temperature");
+                    }
+                    else {
+                        
+                        $('#loading-sensor').text("avg");
                     }
                 }
                 else if (eventObject.bulkData != null) {
@@ -569,8 +781,12 @@ $(document).ready(function () {
                     if (eventObject.bulkData == true) {
                         $('#loading').show();
                         isBulking = true;
+                        ClearD3Charts();
                     }
                     else {
+
+                        PruneOldD3Data(D3_tmp, "Temperature");
+                        PruneOldD3Data(D3_hum, "Humidity");
 
                         UpdateD3Charts(D3_tmp, "Temperature");
                         UpdateD3Charts(D3_hum, "Humidity");
@@ -584,13 +800,19 @@ $(document).ready(function () {
                     // the message is data for the charts
                     // we make sure the dspl field is in the message, meaning the data is coming from a known device or service
                     if (eventObject.dspl != null) {
-
-                        AddToD3(D3_tmp, eventObject.dspl, eventObject.temp, eventObject.time);
-                        AddToD3(D3_hum, eventObject.dspl, eventObject.hmdt, eventObject.time);
-
+                        
+                        if (eventObject.time != null) {
+                            AddToD3(D3_tmp, "Temperature", eventObject.dspl, eventObject.temp, eventObject.time);
+                            AddToD3(D3_hum, "Humidity", eventObject.dspl, eventObject.hmdt, eventObject.time);
+                        }
                         if (!isBulking) {
+                            PruneOldD3Data(D3_tmp, "Temperature");
+                            PruneOldD3Data(D3_hum, "Humidity");
+
                             UpdateD3Charts(D3_tmp, "Temperature");
                             UpdateD3Charts(D3_hum, "Humidity");
+                        } else {
+                            $('#loading-sensor').text(eventObject.dspl);
                         }
                     }
                 }
@@ -614,31 +836,7 @@ function SensorSelectionChanged(dropDown) {
         var x = { MessageType: "LiveDataSelection", DeviceName: newSensor };
         websocket.send(JSON.stringify(x));        
     }
-    /*for (var i = 1; i < tempChart.series.length; i++) {
-        if (newSensor == "All" || tempChart.series[i].name == newSensor) {
-            tempChart.series[i].show();
-        }
-        else {
-            tempChart.series[i].hide();
-        }
-    }
-    for (var i = 1; i < humChart.series.length; i++) {
-        if (newSensor == "All" || humChart.series[i].name == newSensor) {
-            humChart.series[i].show();
-        }
-        else {
-            humChart.series[i].hide();
-        }
-    }*/
-
-    //for (var i = 1; i < lightChart.series.length; i++) {
-    //    if (newSensor == "All" || lightChart.series[i].name == newSensor) {
-    //        lightChart.series[i].show();
-    //    }
-    //    else {
-    //        lightChart.series[i].hide();
-    //    }
-    //}
+    
 }
 
 function ShowHide(tHtml) {
@@ -649,3 +847,4 @@ function ShowHide(tHtml) {
             tHtml.style.display = '';
     }
 }
+
