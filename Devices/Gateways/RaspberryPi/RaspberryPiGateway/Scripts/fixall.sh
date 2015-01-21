@@ -1,10 +1,10 @@
-#  ---------------------------------------------------------------------------------
+﻿#  ---------------------------------------------------------------------------------
 #  Copyright (c) Microsoft Open Technologies, Inc.  All rights reserved.
 # 
 #  The MIT License (MIT)
 # 
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files (the "Software"), to deal
+#  of this software and associated documentation files (the "Software"), to dea
 #  in the Software without restriction, including without limitation the rights
 #  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 #  copies of the Software, and to permit persons to whom the Software is
@@ -18,23 +18,13 @@
 #  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 #  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS INps -ef
+
 #  THE SOFTWARE.
 #  ---------------------------------------------------------------------------------
 #!/bin/bash
-echo "Starting host processes"
+echo "Fix line endings"
 
-# killing any prior mono instance or python
-sudo pkill mono
-sudo pkill python
-
-# start up the data provider 
-sudo python /home/pi/RaspberryPiGateway/usbsplsocket.py &
-sleep 3 
-
-# start the gateway
-sudo -u pi /usr/bin/mono /home/pi/RaspberryPiGateway/RaspberryPiGateway.exe &
-
-# Add the below line to /etc/rc.local
-#   /home/pi/RaspberryPiGateway/autorun.sh &
-# and don't forget to make autorun.sh executable (sudo chmod 755 autorun)
+# killing any prior mono instance
+dos2unix ./killall.sh
+dos2unix ./startall.sh

@@ -64,20 +64,31 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Docs\Raspberry Pi Gateway setup.md" />
     <None Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </None>
     <None Include="RaspberryPiGateway.exe.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
     <None Include="Scripts\autorun.sh" />
+    <None Include="Scripts\fixall.sh" />
+    <None Include="Scripts\GetFile.cmd" />
+    <None Include="Scripts\Killall.sh" />
     <None Include="Scripts\SCPRPI.cmd" />
+    <None Include="Scripts\startall.sh" />
+    <None Include="SoundLevelMeter\usbsplsocket.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\..\license.txt">
       <Link>Docs\license.txt</Link>
+    </Content>
+    <Content Include="..\..\..\notice.txt">
+      <Link>Docs\notice.txt</Link>
     </Content>
   </ItemGroup>
   <ItemGroup>
