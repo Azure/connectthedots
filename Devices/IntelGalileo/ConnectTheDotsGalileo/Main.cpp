@@ -30,10 +30,10 @@
 #include "arduino.h"
 
 // The code below can be used to send simulated data if you don't have a weather shield
-// #define SIMULATEDATA
+ #define SIMULATEDATA
 // #define USEONBOARDSENSOR
 // #define USEGROVESTARTERKIT
-#define USESPARKFUNWEATHERSHIELD
+// #define USESPARKFUNWEATHERSHIELD
 
 // Proton library is used to send AMQP messages to Azure Event Hubs
 #include "amqp\amqp.h"
@@ -172,7 +172,7 @@ void InitWeatherShieldSensors()
 // During Setup we read the configuration file to retreive connections settings and we initialize the Sensors
 void setup()
 {
-	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
 	try {
 		ReadConfiguration(CONFIG_FILE_PATH);
