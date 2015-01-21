@@ -1,5 +1,5 @@
-#ifndef PROTON_ENGINE_H
-#define PROTON_ENGINE_H 1
+#ifndef PROTON_CONTAINER_H
+#define PROTON_CONTAINER_H 1
 
 /*
  *
@@ -22,21 +22,29 @@
  *
  */
 
+#include <proton/import_export.h>
+#include <proton/type_compat.h>
+#include <stddef.h>
+#include <sys/types.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** @file
+ * Container API for the proton Engine.
  *
- * The proton Engine API. The Engine API provides a complete
- * implementation of AMQP as a Protocol Engine.
- *
- * @defgroup engine Engine
+ * @defgroup container Container
+ * @ingroup engine
+ * @{
  */
 
-#include <proton/condition.h>
-#include <proton/connection.h>
-#include <proton/session.h>
-#include <proton/terminus.h>
-#include <proton/link.h>
-#include <proton/delivery.h>
-#include <proton/event.h>
-#include <proton/transport.h>
+/**
+ * Encapsulates the endpoint state associated with an AMQP Container.
+ */
+typedef struct pn_container_t pn_container_t;
 
-#endif /* engine.h */
+/** @}
+ */
+
+#endif /* container.h */

@@ -1,5 +1,5 @@
-#ifndef PROTON_FRAMING_H
-#define PROTON_FRAMING_H 1
+#ifndef PROTON_SELECTOR_H
+#define PROTON_SELECTOR_H 1
 
 /*
  *
@@ -23,30 +23,27 @@
  */
 
 #include <proton/import_export.h>
+#include <proton/selectable.h>
 #include <proton/type_compat.h>
-#include <sys/types.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define AMQP_HEADER_SIZE (8)
-#define AMQP_MIN_MAX_FRAME_SIZE ((uint32_t)512) // minimum allowable max-frame
+#define PN_READABLE (1)
+#define PN_WRITABLE (2)
+#define PN_EXPIRED (4)
 
-typedef struct {
-  uint8_t type;
-  uint16_t channel;
-  size_t ex_size;
-  const char *extended;
-  size_t size;
-  const char *payload;
-} pn_frame_t;
-
-PN_EXTERN size_t pn_read_frame(pn_frame_t *frame, const char *bytes, size_t available);
-PN_EXTERN size_t pn_write_frame(char *bytes, size_t size, pn_frame_t frame);
+pn_selector_t *pni_selector(void);
+PN_EXTERN void pn_selector_free(pn_selector_t *selector);
+PN_EXTERN void pn_selector_add(pn_selector_t *selector, pn_selectable_t *selectable);
+PN_EXTERN void pn_selector_update(pn_selector_t *selector, pn_selectable_t *selectable);
+PN_EXTERN void pn_selector_remove(pn_selector_t *selector, pn_selectable_t *selectable);
+PN_EXTERN int pn_selector_select(pn_selector_t *select, int timeout);
+PN_EXTERN pn_selectable_t *pn_selector_next(pn_selector_t *select, int *events);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* framing.h */
+#endif /* selector.h */

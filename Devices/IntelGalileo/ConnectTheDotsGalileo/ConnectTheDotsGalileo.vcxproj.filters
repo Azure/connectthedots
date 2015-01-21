@@ -16,6 +16,36 @@
     <Filter Include="Docs">
       <UniqueIdentifier>{b0912147-3b8c-46a4-bf07-f1ec27d12591}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\amqp">
+      <UniqueIdentifier>{4e252325-736e-4120-8986-b2022fd09764}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\amqp">
+      <UniqueIdentifier>{81266893-39df-453d-9977-f3bd27076761}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sensors">
+      <UniqueIdentifier>{7d9058b3-aaf2-4b74-9438-ba514acf8410}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sensors\grove">
+      <UniqueIdentifier>{5a659956-c050-499e-8d6b-26bad6f87529}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\json">
+      <UniqueIdentifier>{531eea3b-043f-4a56-8712-d7645509a033}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sensors">
+      <UniqueIdentifier>{d8671c8c-05da-4e09-9e4f-09bf2f99af21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sensors\grove">
+      <UniqueIdentifier>{2015c597-ee4e-4773-a680-43c906fc0ffb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\data">
+      <UniqueIdentifier>{4ccd1f07-8a90-4242-a94a-b078e2781e4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\data\json">
+      <UniqueIdentifier>{fa5b3df6-bcba-4fd4-b6fc-9c0e2e30d5a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\data\xml">
+      <UniqueIdentifier>{09349ecf-5a01-426b-9f09-6e368f5fd0ec}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -24,29 +54,65 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="common.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="amqp\Address.h">
+      <Filter>Header Files\amqp</Filter>
     </ClInclude>
-    <ClInclude Include="ProtonSender.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="amqp\amqp.h">
+      <Filter>Header Files\amqp</Filter>
+    </ClInclude>
+    <ClInclude Include="amqp\AMQPData.h">
+      <Filter>Header Files\amqp</Filter>
+    </ClInclude>
+    <ClInclude Include="amqp\AMQPString.h">
+      <Filter>Header Files\amqp</Filter>
+    </ClInclude>
+    <ClInclude Include="amqp\AMQPSymbol.h">
+      <Filter>Header Files\amqp</Filter>
+    </ClInclude>
+    <ClInclude Include="amqp\AMQPuuid.h">
+      <Filter>Header Files\amqp</Filter>
+    </ClInclude>
+    <ClInclude Include="amqp\IAMQPData.h">
+      <Filter>Header Files\amqp</Filter>
+    </ClInclude>
+    <ClInclude Include="amqp\IMessage.h">
+      <Filter>Header Files\amqp</Filter>
+    </ClInclude>
+    <ClInclude Include="amqp\Sender.h">
+      <Filter>Header Files\amqp</Filter>
+    </ClInclude>
+    <ClInclude Include="amqp\TextMessage.h">
+      <Filter>Header Files\amqp</Filter>
+    </ClInclude>
+    <ClInclude Include="grove\grove.h">
+      <Filter>Header Files\sensors\grove</Filter>
+    </ClInclude>
+    <ClInclude Include="grove\GroveLight.h">
+      <Filter>Header Files\sensors\grove</Filter>
+    </ClInclude>
+    <ClInclude Include="grove\GroveTemperature.h">
+      <Filter>Header Files\sensors\grove</Filter>
     </ClInclude>
     <ClInclude Include="HTU21D.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\sensors</Filter>
     </ClInclude>
     <ClInclude Include="MPL3115A2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="JSON.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\sensors</Filter>
     </ClInclude>
     <ClInclude Include="JSONValue.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\data\json</Filter>
+    </ClInclude>
+    <ClInclude Include="JSON.h">
+      <Filter>Header Files\data\json</Filter>
+    </ClInclude>
+    <ClInclude Include="amqp\JsonMessage.h">
+      <Filter>Header Files\amqp</Filter>
     </ClInclude>
     <ClInclude Include="rapidxml.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\data\xml</Filter>
     </ClInclude>
     <ClInclude Include="rapidxml_utils.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\data\xml</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -56,16 +122,106 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HTU21D.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="amqp\Address.cpp">
+      <Filter>Source Files\amqp</Filter>
     </ClCompile>
-    <ClCompile Include="MPL3115A2.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="amqp\AMQPString.cpp">
+      <Filter>Source Files\amqp</Filter>
+    </ClCompile>
+    <ClCompile Include="amqp\AMQPSymbol.cpp">
+      <Filter>Source Files\amqp</Filter>
+    </ClCompile>
+    <ClCompile Include="amqp\AMQPuuid.cpp">
+      <Filter>Source Files\amqp</Filter>
+    </ClCompile>
+    <ClCompile Include="amqp\Sender.cpp">
+      <Filter>Source Files\amqp</Filter>
+    </ClCompile>
+    <ClCompile Include="amqp\TextMessage.cpp">
+      <Filter>Source Files\amqp</Filter>
+    </ClCompile>
+    <ClCompile Include="grove\GroveLight.cpp">
+      <Filter>Source Files\sensors\grove</Filter>
+    </ClCompile>
+    <ClCompile Include="grove\GroveTemperature.cpp">
+      <Filter>Source Files\sensors\grove</Filter>
     </ClCompile>
     <ClCompile Include="JSON.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\json</Filter>
     </ClCompile>
     <ClCompile Include="JSONValue.cpp">
+      <Filter>Source Files\json</Filter>
+    </ClCompile>
+    <ClCompile Include="HTU21D.cpp">
+      <Filter>Source Files\sensors</Filter>
+    </ClCompile>
+    <ClCompile Include="MPL3115A2.cpp">
+      <Filter>Source Files\sensors</Filter>
+    </ClCompile>
+    <ClCompile Include="amqp\JsonMessage.cpp">
+      <Filter>Source Files\amqp</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\LiquidCrystal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\Print.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\Stepper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\Stream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\WString.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\eeprom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\Servo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\HardwareSerial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\NetworkSerial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\PulseIn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\DmapSupport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\GalileoPins.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\GpioController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\I2cController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\PCA9685Support.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\PCAL9535ASupport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\CY8C9540ASupport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\Spi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\SpiController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\WInterrupt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)\Source\arduino.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

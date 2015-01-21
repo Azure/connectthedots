@@ -102,18 +102,39 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="common.h" />
+    <ClInclude Include="amqp\Address.h" />
+    <ClInclude Include="amqp\amqp.h" />
+    <ClInclude Include="amqp\AMQPData.h" />
+    <ClInclude Include="amqp\AMQPString.h" />
+    <ClInclude Include="amqp\AMQPSymbol.h" />
+    <ClInclude Include="amqp\AMQPuuid.h" />
+    <ClInclude Include="amqp\IAMQPData.h" />
+    <ClInclude Include="amqp\IMessage.h" />
+    <ClInclude Include="amqp\JsonMessage.h" />
+    <ClInclude Include="amqp\Sender.h" />
+    <ClInclude Include="amqp\TextMessage.h" />
+    <ClInclude Include="grove\grove.h" />
+    <ClInclude Include="grove\GroveLight.h" />
+    <ClInclude Include="grove\GroveTemperature.h" />
     <ClInclude Include="HTU21D.h" />
     <ClInclude Include="JSON.h" />
     <ClInclude Include="JSONValue.h" />
     <ClInclude Include="MPL3115A2.h" />
-    <ClInclude Include="ProtonSender.h" />
     <ClInclude Include="rapidxml.hpp" />
     <ClInclude Include="rapidxml_utils.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="amqp\Address.cpp" />
+    <ClCompile Include="amqp\AMQPString.cpp" />
+    <ClCompile Include="amqp\AMQPSymbol.cpp" />
+    <ClCompile Include="amqp\AMQPuuid.cpp" />
+    <ClCompile Include="amqp\JsonMessage.cpp" />
+    <ClCompile Include="amqp\Sender.cpp" />
+    <ClCompile Include="amqp\TextMessage.cpp" />
+    <ClCompile Include="grove\GroveLight.cpp" />
+    <ClCompile Include="grove\GroveTemperature.cpp" />
     <ClCompile Include="HTU21D.cpp" />
     <ClCompile Include="JSON.cpp" />
     <ClCompile Include="JSONValue.cpp" />
@@ -122,7 +143,9 @@
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ConnectTheDotsGalileo.exe.config" />
+    <None Include="ConnectTheDotsGalileo.exe.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Docs\Intel Galileo setup.md" />
     <None Include="packages.config" />
   </ItemGroup>

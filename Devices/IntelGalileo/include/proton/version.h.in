@@ -1,5 +1,5 @@
-#ifndef PROTON_ENGINE_H
-#define PROTON_ENGINE_H 1
+#ifndef _PROTON_VERSION_H
+#define _PROTON_VERSION_H 1
 
 /*
  *
@@ -22,21 +22,7 @@
  *
  */
 
-/** @file
- *
- * The proton Engine API. The Engine API provides a complete
- * implementation of AMQP as a Protocol Engine.
- *
- * @defgroup engine Engine
- */
+#define PN_VERSION_MAJOR @PN_VERSION_MAJOR@
+#define PN_VERSION_MINOR @PN_VERSION_MINOR@
 
-#include <proton/condition.h>
-#include <proton/connection.h>
-#include <proton/session.h>
-#include <proton/terminus.h>
-#include <proton/link.h>
-#include <proton/delivery.h>
-#include <proton/event.h>
-#include <proton/transport.h>
-
-#endif /* engine.h */
+#endif /* version.h */

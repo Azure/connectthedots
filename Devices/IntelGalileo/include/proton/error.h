@@ -51,6 +51,7 @@ PN_EXTERN int pn_error_vformat(pn_error_t *error, int code, const char *fmt, va_
 PN_EXTERN int pn_error_format(pn_error_t *error, int code, const char *fmt, ...);
 PN_EXTERN int pn_error_code(pn_error_t *error);
 PN_EXTERN const char *pn_error_text(pn_error_t *error);
+PN_EXTERN int pn_error_copy(pn_error_t *error, pn_error_t *src);
 
 #ifdef __cplusplus
 }

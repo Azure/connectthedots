@@ -63,7 +63,7 @@ typedef struct {
   size_t size;
 } pn_token_t;
 
-PN_EXTERN pn_scanner_t *pn_scanner();
+PN_EXTERN pn_scanner_t *pn_scanner(void);
 PN_EXTERN void pn_scanner_free(pn_scanner_t *scanner);
 PN_EXTERN pn_token_t pn_scanner_token(pn_scanner_t *scanner);
 PN_EXTERN int pn_scanner_err(pn_scanner_t *scanner, int code, const char *fmt, ...);

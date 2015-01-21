@@ -24,9 +24,11 @@
 
 #include <proton/import_export.h>
 #include <proton/error.h>
-#include <proton/engine.h>
 #include <proton/sasl.h>
+#include <proton/selectable.h>
 #include <proton/ssl.h>
+#include <proton/transport.h>
+#include <proton/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,13 +73,20 @@ PN_EXTERN pn_driver_t *pn_driver(void);
  */
 PN_EXTERN int pn_driver_errno(pn_driver_t *d);
 
-/** Return the most recent error text for d.
+/** Get additional error information associated with the driver.
+ *
+ * Whenever a driver operation fails, additional error information can
+ * be obtained using this function. The error object that is returned
+ * may also be used to clear the error condition.
+ *
+ * The pointer returned by this operation is valid until the
+ * driver object is freed.
  *
  * @param[in] d the driver
  *
- * @return the most recent error text for d
+ * @return the driver's error object
  */
-PN_EXTERN const char *pn_driver_error(pn_driver_t *d);
+PN_EXTERN pn_error_t *pn_driver_error(pn_driver_t *d);
 
 /** Set the tracing level for the given driver.
  *

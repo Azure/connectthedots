@@ -26,12 +26,7 @@
 #include <proton/object.h>
 #include <proton/types.h>
 #include <proton/error.h>
-#ifndef __cplusplus
-#include <stdbool.h>
-#include <stdint.h>
-#else
 #include <proton/type_compat.h>
-#endif
 #include <stdarg.h>
 
 #ifdef __cplusplus

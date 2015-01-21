@@ -26,13 +26,37 @@ typedef unsigned long int uint32_t;
 typedef long int int32_t;
 typedef unsigned long long int uint64_t;
 typedef long long int int64_t;
+typedef unsigned long int uintptr_t;
 
 /* Parse these interface header files to generate APIs for script languages */
 
 %include "proton/import_export.h"
+
+%ignore _PROTON_VERSION_H;
+%include "proton/version.h"
+
+/* We cannot safely just wrap pn_bytes_t but each language binding must have a typemap for it - presumably to a string type */
+%ignore pn_bytes_t;
+
+/* There is no need to wrap pn_class_t aa it is an internal implementation detail and cannot be used outside the library */
+%ignore pn_class_t;
+
+/* Ignore C APIs related to pn_atom_t - they can all be achieved with pn_data_t */
+%ignore pn_atom_t;
+%ignore pn_atom_t_u; /* Seem to need this even though its nested in pn_atom_t */
+%ignore pn_data_get_atom;
+%ignore pn_data_put_atom;
+
+%ignore pn_delivery_tag_t;
+%ignore pn_decimal128_t;
+%ignore pn_uuid_t;
+
 %include "proton/types.h"
 %ignore pn_string_vformat;
 %ignore pn_string_vaddf;
+%immutable PN_OBJECT;
+%immutable PN_VOID;
+%immutable PN_WEAKREF;
 %include "proton/object.h"
 
 %ignore pn_error_format;
@@ -60,7 +84,7 @@ typedef long long int int64_t;
 
 %aggregate_check(int, check_sasl_outcome,
                  PN_SASL_NONE, PN_SASL_OK, PN_SASL_AUTH,
-                 PN_SASL_SYS, PN_SASL_PERM, PN_SASL_TEMP);
+                 PN_SASL_SYS, PN_SASL_PERM, PN_SASL_TEMP, PN_SASL_SKIPPED);
 
 %aggregate_check(int, check_sasl_state,
                  PN_SASL_CONF, PN_SASL_IDLE, PN_SASL_STEP,
@@ -587,7 +611,15 @@ typedef long long int int64_t;
   delivery != NULL;
 }
 
-%include "proton/engine.h"
+%include "proton/condition.h"
+%include "proton/connection.h"
+%include "proton/session.h"
+%include "proton/link.h"
+%include "proton/terminus.h"
+%include "proton/delivery.h"
+%include "proton/disposition.h"
+%include "proton/transport.h"
+%include "proton/event.h"
 
 %contract pn_message_free(pn_message_t *msg)
 {
@@ -974,6 +1006,12 @@ typedef long long int int64_t;
   sasl != NULL;
 }
 
+%contract pn_sasl_allow_skip(pn_sasl_t *sasl, bool allow)
+{
+ require:
+  sasl != NULL;
+}
+
 %contract pn_sasl_plain(pn_sasl_t *sasl, const char *username, const char *password)
 {
  require:
@@ -1105,6 +1143,12 @@ typedef long long int int64_t;
   listener != NULL;
 }
 
+%contract pn_listener_set_context(pn_listener_t *listener, void *context)
+{
+ require:
+  listener != NULL;
+}
+
 %contract pn_listener_close(pn_listener_t *listener)
 {
  require:
@@ -1173,7 +1217,6 @@ typedef long long int int64_t;
 {
  require:
   ctor != NULL;
-  connection != NULL;
 }
 
 %contract pn_connector_context(pn_connector_t *connector)
@@ -1317,6 +1360,10 @@ typedef long long int int64_t;
 
 %include "proton/messenger.h"
 
+%include "proton/io.h"
+
+%include "proton/selectable.h"
+
 %include "proton/ssl.h"
 
 %ignore pn_decode_atoms;
@@ -1339,3 +1386,14 @@ typedef long long int int64_t;
 %ignore pn_data_vscan;
 
 %include "proton/codec.h"
+
+%inline %{
+  pn_connection_t *pn_cast_pn_connection(void *x) { return (pn_connection_t *) x; }
+  pn_session_t *pn_cast_pn_session(void *x) { return (pn_session_t *) x; }
+  pn_link_t *pn_cast_pn_link(void *x) { return (pn_link_t *) x; }
+  pn_delivery_t *pn_cast_pn_delivery(void *x) { return (pn_delivery_t *) x; }
+  pn_transport_t *pn_cast_pn_transport(void *x) { return (pn_transport_t *) x; }
+%}
+
+%include "proton/url.h"
+

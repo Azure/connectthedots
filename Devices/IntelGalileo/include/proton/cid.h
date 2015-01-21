@@ -1,6 +1,5 @@
-#ifndef PROTON_ENGINE_H
-#define PROTON_ENGINE_H 1
-
+#ifndef PROTON_CID_H
+#define PROTON_CID_H 1
 /*
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -22,21 +21,36 @@
  *
  */
 
-/** @file
- *
- * The proton Engine API. The Engine API provides a complete
- * implementation of AMQP as a Protocol Engine.
- *
- * @defgroup engine Engine
- */
+typedef enum {
+  CID_pn_object = 1,
+  CID_pn_void,
+  CID_pn_weakref,
 
-#include <proton/condition.h>
-#include <proton/connection.h>
-#include <proton/session.h>
-#include <proton/terminus.h>
-#include <proton/link.h>
-#include <proton/delivery.h>
-#include <proton/event.h>
-#include <proton/transport.h>
+  CID_pn_string,
+  CID_pn_list,
+  CID_pn_map,
+  CID_pn_hash,
 
-#endif /* engine.h */
+  CID_pn_collector,
+  CID_pn_event,
+
+  CID_pn_encoder,
+  CID_pn_decoder,
+  CID_pn_data,
+
+  CID_pn_connection,
+  CID_pn_session,
+  CID_pn_link,
+  CID_pn_delivery,
+  CID_pn_transport,
+
+  CID_pn_message,
+
+  CID_pn_io,
+  CID_pn_selector,
+  CID_pn_selectable,
+
+  CID_pn_url
+} pn_cid_t;
+
+#endif /* cid.h */

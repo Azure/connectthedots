@@ -22,43 +22,75 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
+#include <ctime>
+#include <sstream>
+#include <iomanip>
+#include <locale>
 #include "stdafx.h"
 #include "arduino.h"
 
-// Sparkfun Weather Shield libraries
-#include "HTU21D.h"
-#include "MPL3115A2.h"
+// The code below can be used to send simulated data if you don't have a weather shield
+// #define SIMULATEDATA
+// #define USEONBOARDSENSOR
+// #define USEGROVESTARTERKIT
+#define USESPARKFUNWEATHERSHIELD
+
 // Proton library is used to send AMQP messages to Azure Event Hubs
-#include "ProtonSender.h"
+#include "amqp\amqp.h"
+
+// Sparkfun Weather Shield libraries
+#ifdef USESPARKFUNWEATHERSHIELD
+#	include "HTU21D.h"
+#	include "MPL3115A2.h"
+#endif // USESPARKFUNWEATHERSHIELD
+
+// Seeed Grove Starer Kit Plus for Intel Galileo
+#ifdef USEGROVESTARTERKIT
+#	include "grove\grove.h"
+#endif // USEGROVESTARTERKIT
+
 // Json library
 #include "json.h"
 // XML parsing library for reading configuration file
 #include "rapidxml.hpp"
 #include "rapidxml_utils.hpp"
 
-// The code below can be used to send simulated data if you don't have a weather shield
-// #define SIMULATEDATA
-// #define USEONBOARDSENSOR
-
 // Handles to pressure and humidity sensors from the Weather shield
+#ifdef USESPARKFUNWEATHERSHIELD
 MPL3115A2 myPressure;
 HTU21D myHumidity;
+#endif // USESPARKFUNWEATHERSHIELD
 
 #ifdef USEONBOARDSENSOR
 int tempPin = -1; // The on-board thermal sensor for Galileo V1 boards
-#endif
+#endif // USEONBOARDSENSOR
+
+#ifdef USEGROVESTARTERKIT
+grove::Temperature temperatureSensor(A0);
+grove::Light lightSensor(A1);
+#endif // USEGROVESTARTERKIT
+
+#define CONFIG_FILE_PATH "ConnectTheDotsGalileo.exe.config"
+
+amqp::Address eventHubAddress;
+amqp::Sender amqpSender;
 
 // structure used to store application settings read from XML file
 typedef struct tAppSettings
 {
-	char deviceDisplayName[128];
-	char deviceID[128];
-	char sbnamespace[128];  //i.e. ConnectTheDots-ns
-	char entity[128];       //EventHub Name
-	char issuerName[128];   //Key Issuer
-	char issuerKey[128];    //i.e. "44CHARACTERKEYFOLLOWEDBYEQUALSSIGN=" //****URL DECODED*****
-	char* sbDomain = "servicebus.windows.net";
-	char* subject = "wthr";
+	std::string deviceDisplayName;
+	std::string deviceID;
+
+	std::string host; // Azure Service Bus Host, i.e. ConnectTheDots-ns.servicebus.windows.net
+	std::string path; //EventHub Name
+	std::string user; // Key Issuer, Shared Access Policy Name
+	std::string password; // Shared Access Key, i.e. "44CHARACTERKEYFOLLOWEDBYEQUALSSIGN=" 
+	std::string subject = "wthr";
+
+	// UTF versions of setting for message content
+	std::wstring deviceDisplayNameW;
+	std::wstring deviceIDW;
+	std::wstring subjectW = L"wthr";
 };
 
 tAppSettings appSettings;
@@ -66,12 +98,21 @@ tAppSettings appSettings;
 // Utility function to retreive and store specific app settings
 void StoreConfigurationAttribute(char* key, char* value)
 {
-	if (!strcmp(key, "DeviceName")) strncpy(appSettings.deviceDisplayName,value, strlen(value));
-	else if (!strcmp(key, "DeviceID")) strncpy(appSettings.deviceID, value, strlen(value));
-	else if (!strcmp(key, "NameSpace")) strncpy(appSettings.sbnamespace, value, strlen(value));
-	else if (!strcmp(key, "KeyName")) strncpy(appSettings.issuerName, value, strlen(value));
-	else if (!strcmp(key, "Key")) strncpy(appSettings.issuerKey, value, strlen(value));
-	else if (!strcmp(key, "EventHubName")) strncpy(appSettings.entity, value, strlen(value));
+	std::wstring_convert< std::codecvt<wchar_t, char, std::mbstate_t> > conv;
+	
+	if (!strcmp(key, "DeviceName")) {
+		appSettings.deviceDisplayName.assign(value);
+		appSettings.deviceDisplayNameW = conv.from_bytes(appSettings.deviceDisplayName);
+	}
+	else if (!strcmp(key, "DeviceID")) { 
+		appSettings.deviceID.assign(value); 
+		appSettings.deviceIDW = conv.from_bytes(appSettings.deviceID);
+	}
+	else if (!strcmp(key, "Host")) appSettings.host.assign(value);
+	else if (!strcmp(key, "Path")) appSettings.path.assign(value);
+	else if (!strcmp(key, "User")) appSettings.user.assign(value);
+	else if (!strcmp(key, "Password")) appSettings.password.assign(value);
+
 }
 
 // Read configuration file which is an XML file
@@ -98,6 +139,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	return RunArduinoSketch();
 }
 
+#ifdef USESPARKFUNWEATHERSHIELD
 // Function to intialize the Weather Shield sensors
 // Communication is established over I2C
 void InitWeatherShieldSensors()
@@ -125,15 +167,27 @@ void InitWeatherShieldSensors()
 	myPressure.setOversampleRate(7); // Set Oversample to the recommended 128
 	myPressure.enableEventFlags(); // Enable all three pressure and temp event flags 
 }
+#endif // USESPARKFUNWEATHERSHIELD
 
 // During Setup we read the configuration file to retreive connections settings and we initialize the Sensors
 void setup()
 {
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	ReadConfiguration("C:\\ConnectTheDots\\ConnectTheDotsGalileo.exe.config");
+	try {
+		ReadConfiguration(CONFIG_FILE_PATH);
+		eventHubAddress.setAddress(appSettings.host,
+			appSettings.user,
+			appSettings.password,
+			appSettings.path);
 
+#ifdef USESPARKFUNWEATHERSHIELD
 	InitWeatherShieldSensors();
+#endif // USESPARKFUNWEATHERSHIELD
+
+	} catch (std::exception &e) {
+		Log(e.what());
+	}
 }
 
 // Struture used to 
@@ -142,6 +196,7 @@ typedef struct SensorData
 	float tempC;
 	float tempF;
 	float hmdt;
+	float lght; // light value in Lux
 };
 
 SensorData ReadSensorData()
@@ -149,84 +204,79 @@ SensorData ReadSensorData()
 	SensorData data;
 
 #ifdef SIMULATEDATA
-	data.tempC = 75;	// Storage for the temperature value
-	data.tempF = rand() % 100 + 60;
-	data.hmdt = rand() % 100;
+	data.tempC = 75.0;	// Storage for the temperature value
+	data.tempF = static_cast<float>(rand() % 100 + 60);
+	data.hmdt = static_cast<float>(rand() % 100);
+	data.lght = static_cast<float>(rand() % 100);
 #else
-#ifdef USEONBOARDSENSOR
+
+#	ifdef USEONBOARDSENSOR
 	// reads the analog value from this pin (values range from 0-1023)
-	data.tempC = (float) analogRead(tempPin);
-	data.tempF = data.tempC * 9 / 5 + 32;
-	data.hmdt = 25;
-#endif
+	data.tempC = static_cast<float>(analogRead(tempPin));
+	data.tempF = data.tempC * 9.0 / 5.0 + 32.0;
+	data.hmdt = 25.0;
+	data.lght = 55.0;
+#	endif // USEONBOARDSENSOR
+
+#	ifdef USESPARKFUNWEATHERSHIELD
 	data.tempC = myHumidity.readTemperature();
 	data.tempF = (data.tempC *9.0) / 5.0 + 32.0;
 	data.hmdt = myHumidity.readHumidity();
-#endif
+	data.lght = 55.0;
+#	endif // USESPARKFUNWEATHERSHIELD
+
+#	ifdef USEGROVESTARTERKIT
+	// reads the analog value from this pin (values range from 0-1023)
+	data.tempC = temperatureSensor.inC();
+	data.tempF = data.tempC * 9 / 5 + 32;
+	data.hmdt = 25;
+	data.lght = lightSensor.inLux();
+#	endif // USEGROVESTARTERKIT
+
+#endif // SIMULATEDATA
+
 	return data;
 }
 
-void GetTimeNow(pn_timestamp_t* pUtcTime, char* pTimeNow)
+std::wstring GetTimeNow()
 {
 	// We need to time stamp the AMQP message.
 	// Getting UTC time
-	struct tm timeinfo;
+	std::time_t currentTime = std::time(nullptr);
 
-	time(pUtcTime);
-	gmtime_s(&timeinfo, pUtcTime);
-	strftime(pTimeNow, 80, "%Y-%m-%dT%H:%M:%SZ", &timeinfo);
-	puts(pTimeNow);
-}
-
-void SendAMQPMessage(char* message, pn_timestamp_t utcTime)
-{
-	sender(	appSettings.sbnamespace,
-			appSettings.entity,
-			appSettings.issuerName,
-			appSettings.issuerKey,
-			appSettings.sbDomain,
-			appSettings.deviceDisplayName,
-			appSettings.subject,
-			message,
-			utcTime);
-}
-
-WCHAR* char2WCHAR(char* text)
-{
-	WCHAR* output = (WCHAR*) calloc(strlen(text), sizeof(WCHAR)+1);
-	mbstowcs(output, text, strlen(text));
-	return output;
+	std::wstringstream ostr;
+	ostr << std::put_time(std::gmtime(&currentTime), L"%Y-%m-%dT%H:%M:%SZ");
+	return (ostr.str());
 }
 
 // the loop routine runs over and over again forever:
 void loop()
 {
-	// Get current time
-	pn_timestamp_t utcTime;
-	char timeNow[80];
-	GetTimeNow(&utcTime, timeNow);
+	try {
+		// Read data from sensors
+		SensorData data = ReadSensorData();
 
-	// Read data from sensors
-	SensorData data = ReadSensorData();
-	
+		// Create JSON packet
+		JSONObject jsonData;
 
-	// Create JSON packet
-	JSONObject jsonData;
+		jsonData[L"temp"] = new JSONValue(static_cast<double>(data.tempF));
+		jsonData[L"hmdt"] = new JSONValue(static_cast<double>(data.hmdt));
+		jsonData[L"lght"] = new JSONValue(static_cast<double>(data.lght));
+		jsonData[L"subject"] = new JSONValue(appSettings.subjectW);
+		jsonData[L"time"] = new JSONValue(GetTimeNow());
+		jsonData[L"from"] = new JSONValue(appSettings.deviceIDW);
+		jsonData[L"dspl"] = new JSONValue(appSettings.deviceDisplayNameW);
 
-	jsonData[L"temp"] = new JSONValue((double)data.tempF);
-	jsonData[L"hmdt"] = new JSONValue((double) data.hmdt);
-	jsonData[L"subject"] = new JSONValue(char2WCHAR(appSettings.subject));
-	jsonData[L"time"] = new JSONValue(char2WCHAR(timeNow));
-	jsonData[L"from"] = new JSONValue(char2WCHAR(appSettings.deviceID));
-	jsonData[L"dspl"] = new JSONValue(char2WCHAR(appSettings.deviceDisplayName));
+		amqp::JsonMessage telemetryMessage(appSettings.subject, jsonData, amqp::IMessage::UTF8);
+		telemetryMessage.addAnnotation(amqp::AMQPSymbol("x-opt-partition-key"), amqp::AMQPuuid(appSettings.deviceID));
+		telemetryMessage.addProperty(amqp::AMQPString("Subject"), amqp::AMQPString(appSettings.deviceDisplayName));
+		
+		// Send AMQP message
+		amqpSender.send(telemetryMessage, eventHubAddress);
 
-	JSONValue *value = new JSONValue(jsonData);
-	std::wstring serializedData = value->Stringify();
-	char* msgText = (char*) calloc(serializedData.length() + 1, sizeof(char));
-	wcstombs(msgText, serializedData.c_str(), serializedData.length() * sizeof(char));
-
-	// Send AMQP message
-	SendAMQPMessage(msgText, utcTime);
-
-	Sleep(1000);
+		Sleep(1000);
+	}
+	catch (std::exception &e) {
+		Log(e.what());
+	}
 }

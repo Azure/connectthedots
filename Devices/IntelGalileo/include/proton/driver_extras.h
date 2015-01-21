@@ -27,6 +27,7 @@ extern "C" {
 #endif
 
 #include <proton/import_export.h>
+#include <proton/io.h>
 
 /** @file
  * Additional API for the Driver Layer.
@@ -35,12 +36,6 @@ extern "C" {
  * a separately created socket to the driver library.
  *
  */
-
-#if defined(_WIN32) && ! defined(__CYGWIN__)
-typedef SOCKET pn_socket_t;
-#else
-typedef int pn_socket_t;
-#endif
 
 /** Create a listener using the existing file descriptor.
  *
@@ -52,6 +47,8 @@ typedef int pn_socket_t;
  */
 PN_EXTERN pn_listener_t *pn_listener_fd(pn_driver_t *driver, pn_socket_t fd, void *context);
 
+PN_EXTERN pn_socket_t pn_listener_get_fd(pn_listener_t *listener);
+
 /** Create a connector using the existing file descriptor.
  *
  * @param[in] driver driver that will 'own' this connector.
@@ -62,6 +59,7 @@ PN_EXTERN pn_listener_t *pn_listener_fd(pn_driver_t *driver, pn_socket_t fd, voi
  */
 PN_EXTERN pn_connector_t *pn_connector_fd(pn_driver_t *driver, pn_socket_t fd, void *context);
 
+PN_EXTERN pn_socket_t pn_connector_get_fd(pn_connector_t *connector);
 
 #ifdef __cplusplus
 }

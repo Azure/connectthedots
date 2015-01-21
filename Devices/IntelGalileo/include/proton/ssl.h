@@ -24,10 +24,8 @@
 
 #include <proton/import_export.h>
 #include <sys/types.h>
-#ifndef __cplusplus
-#include <stdbool.h>
-#endif
-#include <proton/engine.h>
+#include <proton/type_compat.h>
+#include <proton/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,9 +54,6 @@ extern "C" {
  * sessions constructed from this domain will perform the corresponding role (either
  * client or server).
  *
- * Some per-session attributes - such as peer verification mode - may be overridden on a
- * per-session basis from the default provided by the parent pn_ssl_domain_t.
- *
  * If either an SSL server or client needs to identify itself with the remote node, it
  * must have its SSL certificate configured (see ::pn_ssl_domain_set_credentials()).
  *
@@ -66,14 +61,17 @@ extern "C" {
  * must have its database of trusted CAs configured (see ::pn_ssl_domain_set_trusted_ca_db()).
  *
  * An SSL server connection may allow the remote client to connect without SSL (eg. "in
- * the clear"), see ::pn_ssl_allow_unsecured_client().
+ * the clear"), see ::pn_ssl_domain_allow_unsecured_client().
  *
  * The level of verification required of the remote may be configured (see
- * ::pn_ssl_domain_set_default_peer_authentication ::pn_ssl_set_peer_authentication,
- * ::pn_ssl_get_peer_authentication).
+ * ::pn_ssl_domain_set_peer_authentication)
  *
- * Support for SSL Client Session resume is provided (see ::pn_ssl_get_state,
- * ::pn_ssl_resume_state).
+ * Support for SSL Client Session resume is provided (see ::pn_ssl_init,
+ * ::pn_ssl_resume_status).
+ *
+ * @defgroup ssl SSL
+ * @ingroup transport
+ * @{
  */
 
 typedef struct pn_ssl_domain_t pn_ssl_domain_t;
@@ -132,9 +130,9 @@ PN_EXTERN void pn_ssl_domain_free( pn_ssl_domain_t *domain );
  * @return 0 on success
  */
 PN_EXTERN int pn_ssl_domain_set_credentials( pn_ssl_domain_t *domain,
-                               const char *certificate_file,
-                               const char *private_key_file,
-                               const char *password);
+                                             const char *certificate_file,
+                                             const char *private_key_file,
+                                             const char *password);
 
 /** Configure the set of trusted CA certificates used by this domain to verify peers.
  *
@@ -180,10 +178,10 @@ typedef enum {
  * Once certificates and trusted CAs are configured, peer verification can be enabled.
  *
  * @note In order to verify a peer, a trusted CA must be configured. See
- * ::pn_ssl_set_trusted_ca_db().
+ * ::pn_ssl_domain_set_trusted_ca_db().
  *
  * @note Servers must provide their own certificate when verifying a peer.  See
- * ::pn_ssl_set_credentials().
+ * ::pn_ssl_domain_set_credentials().
  *
  * @note This setting effects only those pn_ssl_t objects created after this call
  * returns.  pn_ssl_t objects created before invoking this method will use the domain's
@@ -228,9 +226,10 @@ PN_EXTERN pn_ssl_t *pn_ssl(pn_transport_t *transport);
  *
  * @param[in] ssl the ssl session to configured.
  * @param[in] domain the ssl domain used to configure the SSL session.
- * @param[in] session_id if supplied, attempt to resume a previous SSL session that used
- * the same session_id.  The resulting session will be identified by the given session_id
- * and stored for future session restore.
+ * @param[in] session_id if supplied, attempt to resume a previous SSL
+ * session that used the same session_id.  If no previous SSL session
+ * is available, a new session will be created using the session_id
+ * and stored for future session restore (see ::::pn_ssl_resume_status).
  * @return 0 on success, else an error code.
  */
 PN_EXTERN int pn_ssl_init( pn_ssl_t *ssl,
@@ -287,7 +286,7 @@ PN_EXTERN pn_ssl_resume_status_t pn_ssl_resume_status( pn_ssl_t *ssl );
  * (potential imposter), and the SSL connection is aborted.
  *
  * @note Verification of the hostname is only done if PN_SSL_VERIFY_PEER_NAME is enabled.
- * See ::pn_ssl_set_peer_authentication.
+ * See ::pn_ssl_domain_set_peer_authentication.
  *
  * @param[in] ssl the ssl session.
  * @param[in] hostname the expected identity of the remote. Must conform to the syntax as
@@ -310,6 +309,8 @@ PN_EXTERN int pn_ssl_set_peer_hostname( pn_ssl_t *ssl, const char *hostname);
  * @return 0 on success.
  */
 PN_EXTERN int pn_ssl_get_peer_hostname( pn_ssl_t *ssl, char *hostname, size_t *bufsize );
+
+/** @} */
 
 #ifdef __cplusplus
 }
