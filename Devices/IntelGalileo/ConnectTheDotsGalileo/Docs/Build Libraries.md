@@ -1,18 +1,18 @@
 ##Requirements for OpenSSL
 * Install Git (chose option to add Git to the system PATH during installation) - http://git-scm.com/download/win
-* Install Perl (chose option to add Git to the system PATH during installation) - https://www.perl.org/get.html
+* Install Perl (chose option to add Perl to the system PATH during installation) - https://www.perl.org/get.html
 * Install Visual Studio 2013 
 
 ##OpenSSL
-* Create solder `C:\Source`
+* Create folder `C:\Source`
 * Copy `openssl-debug.bat`, `openssl-release.bat`, `windowsiot.patch`, and `windowsiot_dbg.patch` to `C:\Source`
 * Launch `openssl-release.bat` or `openssl-debug.bat` (depend on your needs)
 * Find build of `openssl-1.0.2-beta3` in `C:\Source\openssl\builds` (or `C:\Source\openssl\builds_dbg` if Debug configuration was built)
 
 ##Requirements for Apache Qpid Proton C
 * Build OpenSSL
-* Install Cmake (chose option to add Git to the system PATH during installation) - http://www.cmake.org/download/
-* Install Python 2.7 (chose option to add Git to the system PATH during installation) - https://www.python.org/downloads/windows/
+* Install Cmake (chose option to add Cmake to the system PATH during installation) - http://www.cmake.org/download/
+* Install Python 2.7 (chose option to add Python to the system PATH during installation) - https://www.python.org/downloads/windows/
 
 ##Apache Qpid Proton C
 * Copy `proton-release.bat` and `proton-debug.bat` to `C:\Source`
