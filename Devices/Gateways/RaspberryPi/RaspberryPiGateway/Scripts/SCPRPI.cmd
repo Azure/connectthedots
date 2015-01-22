@@ -1,12 +1,9 @@
 @echo off
 set puttydir="C:\software\PuTTY\"
 set prjdir=..\
-rem set rpi_ip=raspberrypi
-rem set rpi_ip=10.121.204.204 for Spyros demo Pi
-rem set rpi_ip=10.121.204.186 for TechReady Sensor 1
-set rpi_ip=10.121.204.186
-set rpi_usr=pi
-set rpi_pw=raspberry
+set rpi_ip=<your Raspberry PI address here>
+set rpi_usr=<ytour sensor addres here>
+set rpi_pw=<password for PuTTY>
 
 rem echo Creating RaspberryPiGateway directory
 rem echo mkdir RaspberryPiGateway > %temp%\rpigatewaymkdir.tmp
