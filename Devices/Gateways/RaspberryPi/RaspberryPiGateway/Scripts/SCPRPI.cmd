@@ -21,6 +21,7 @@ rem %puttydir%pscp -pw %rpi_pw% %prjdir%Scripts\autorun.sh %rpi_usr%@%rpi_ip%:Ra
 %puttydir%pscp -pw %rpi_pw% %prjdir%Scripts\killall.sh %rpi_usr%@%rpi_ip%:RaspberryPiGateway/
 %puttydir%pscp -pw %rpi_pw% %prjdir%Scripts\fixall.sh %rpi_usr%@%rpi_ip%:RaspberryPiGateway/
 %puttydir%pscp -pw %rpi_pw% %prjdir%bin\Release\SoundLevelMeter\usbsplsocket.py %rpi_usr%@%rpi_ip%:RaspberryPiGateway/
+%puttydir%pscp -pw %rpi_pw% %prjdir%bin\Release\Amqp.Net.dll %rpi_usr%@%rpi_ip%:RaspberryPiGateway/
 
 echo Marking autorun.sh as executable
 rem echo chmod 755 RaspberryPiGateway/autorun.sh > %temp%\rpigatewayautorunx.tmp
