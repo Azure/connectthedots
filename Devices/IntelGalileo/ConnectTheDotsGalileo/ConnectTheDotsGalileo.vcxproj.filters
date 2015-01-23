@@ -231,6 +231,9 @@
     <None Include="Docs\Intel Galileo setup.md">
       <Filter>Docs</Filter>
     </None>
+    <None Include="Docs\Build Libraries.md">
+      <Filter>Docs</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\..\notice.txt">

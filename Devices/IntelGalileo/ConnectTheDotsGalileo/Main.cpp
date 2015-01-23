@@ -30,10 +30,11 @@
 #include "arduino.h"
 
 // The code below can be used to send simulated data if you don't have a weather shield
- #define SIMULATEDATA
+// #define SIMULATEDATA
 // #define USEONBOARDSENSOR
 // #define USEGROVESTARTERKIT
-// #define USESPARKFUNWEATHERSHIELD
+ #define USESPARKFUNWEATHERSHIELD
+#define TRACKMESSAGES true
 
 // Proton library is used to send AMQP messages to Azure Event Hubs
 #include "amqp\amqp.h"
@@ -73,7 +74,7 @@ grove::Light lightSensor(A1);
 #define CONFIG_FILE_PATH "ConnectTheDotsGalileo.exe.config"
 
 amqp::Address eventHubAddress;
-amqp::Sender amqpSender;
+amqp::Sender amqpSender(TRACKMESSAGES);
 
 // structure used to store application settings read from XML file
 typedef struct tAppSettings

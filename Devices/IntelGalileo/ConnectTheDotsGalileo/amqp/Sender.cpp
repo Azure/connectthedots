@@ -1,13 +1,14 @@
 #include "Sender.h"
 
-amqp::Sender::Sender()
+amqp::Sender::Sender(bool trackMessages)
+	: m_trackMessages(trackMessages)
 {
 	m_messenger = pn_messenger(NULL);
 	_startMessenger();
 }
 
-amqp::Sender::Sender(std::string const &name) :
-		m_name(name)
+amqp::Sender::Sender(std::string const &name, bool trackMessages) 
+	: m_name(name), m_trackMessages(trackMessages)
 {
 	m_messenger = pn_messenger(m_name.c_str());
 	_startMessenger();
@@ -44,16 +45,31 @@ void amqp::Sender::send(IMessage const &message, Address const &address)
 	pn_messenger_put(m_messenger, pnmessage);
 
 	if (isError()) {
-		throw std::exception(pn_error_text(pn_messenger_error(m_messenger)));
+		_throwError();
 	}
 
-	pn_messenger_send(m_messenger, 1);
+	// To avoid traffic flud and speed up the solution better to use blocking scokets in tracking mode
+	if (isTraking()) {
+		Log("Sending messages to %s\n", address.toString().c_str());
+		m_tracker = pn_messenger_outgoing_tracker(m_messenger);
+		pn_messenger_send(m_messenger, -1); // sync
+	} 
+	else {
+		pn_messenger_send(m_messenger, 1); // async
+	}
 
 	if (isError()) {
-		throw std::exception(pn_error_text(pn_messenger_error(m_messenger)));
+		_throwError();
 	}
 
+	_checkTracking();
+
 	pn_message_free(pnmessage);
+}
+
+void amqp::Sender::_throwError()
+{
+	throw std::exception(pn_error_text(pn_messenger_error(m_messenger)));
 }
 
 void amqp::Sender::_addMetaToMessage(pn_message_t *pnmessage, IMessage const &message)
@@ -127,8 +143,93 @@ void amqp::Sender::_serializeMessageMeta(pn_data_t *pndata, std::shared_ptr<amqp
 		}
 }
 
-bool amqp::Sender::isError()
+void amqp::Sender::_checkTracking()
+{
+	if (!isTraking()) 
+		return;
+
+	pn_status_t status = PN_STATUS_UNKNOWN;
+
+	status = pn_messenger_status(m_messenger, m_tracker);
+
+	switch (status)
+	{
+		case PN_STATUS_UNKNOWN:
+			Log("Message status PN_STATUS_UNKNOWN\n");
+			break;
+
+		case PN_STATUS_PENDING:
+			Log("Message status PN_STATUS_PENDING\n");
+			break;
+
+		case PN_STATUS_ACCEPTED:
+			Log("Message status PN_STATUS_ACCEPTED\n");
+			break;
+
+		case PN_STATUS_REJECTED:
+			Log("Message status PN_STATUS_REJECTED\n");
+			break;
+
+		case PN_STATUS_MODIFIED:
+			Log("Message status PN_STATUS_MODIFIED\n");
+			break;
+
+		case PN_STATUS_RELEASED:
+			Log("Message status PN_STATUS_RELEASED\n");
+			break;
+
+		case PN_STATUS_ABORTED:
+			Log("Message status PN_STATUS_ABORTED\n");
+			break;
+
+		case PN_STATUS_SETTLED:
+			Log("Message status PN_STATUS_SETTLED\n");
+			break;
+
+		default:
+			Log("Message status UNRECOGNIZED (%d)\n", (int)status);
+			break;
+	}
+
+	Log("Final send status is: ");
+	if (PN_STATUS_ACCEPTED == status)
+	{
+		Log("successful!\n");
+	}
+	else if (PN_STATUS_REJECTED == status)
+	{
+		Log("rejected by the broker\n");
+	}
+	else if (PN_STATUS_PENDING == status)
+	{
+		Log("Giving up, assuming send failed\n");
+	}
+	else if (PN_STATUS_ABORTED == status)
+	{
+
+		Log("failed, never sent on network\n");
+	}
+	else
+	{
+		Log("unclear\n");
+	}
+
+	Log("CALL pn_messenger_settle... ");
+	int err = pn_messenger_settle(m_messenger, m_tracker, PN_CUMULATIVE);
+	Log("RETURNED %d\n", err);
+	if (err != 0)
+	{
+		_throwError();
+	}
+}
+
+bool amqp::Sender::isError() const
 {
 	return (pn_messenger_errno(m_messenger) != 0);
+}
+
+bool amqp::Sender::isTraking() const
+{
+	return (m_trackMessages);
 }
 
