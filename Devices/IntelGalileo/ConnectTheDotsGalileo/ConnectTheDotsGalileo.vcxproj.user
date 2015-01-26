@@ -16,5 +16,6 @@
     <RemoteDebuggerServerName>mygalileo</RemoteDebuggerServerName>
     <DeploymentDirectory>c:\test\</DeploymentDirectory>
     <RemoteDebuggerDeployDebugCppRuntime>false</RemoteDebuggerDeployDebugCppRuntime>
+    <AdditionalFiles>$(ProjectDir)\ConnectTheDotsGalileo.exe.config;C:\Source\openssl\builds\bin\libeay32.dll;C:\Source\openssl\builds\bin\ssleay32.dll;C:\Source\proton\builds\bin\qpid-proton.dll</AdditionalFiles>
   </PropertyGroup>
 </Project>

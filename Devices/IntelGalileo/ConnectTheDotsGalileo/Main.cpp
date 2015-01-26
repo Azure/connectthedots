@@ -32,8 +32,8 @@
 // The code below can be used to send simulated data if you don't have a weather shield
 // #define SIMULATEDATA
 // #define USEONBOARDSENSOR
-// #define USEGROVESTARTERKIT
- #define USESPARKFUNWEATHERSHIELD
+ #define USEGROVESTARTERKIT
+// #define USESPARKFUNWEATHERSHIELD
 #define TRACKMESSAGES true
 
 // Proton library is used to send AMQP messages to Azure Event Hubs

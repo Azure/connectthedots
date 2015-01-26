@@ -15,9 +15,9 @@
 * Install Python 2.7 (chose option to add Python to the system PATH during installation) - https://www.python.org/downloads/windows/
 
 ##Apache Qpid Proton C
-* Copy `proton-release.bat` and `proton-debug.bat` to `C:\Source`
+* Copy `proton-release.bat`, `proton-debug.bat`, `windowsproton06.patch` to `C:\Source`
 * Launch `proton-release.bat` or `proton-debug.bat` (depends on your needs)
-* Find the build of `qpid-proton 0.8` in `C:\Source\proton\builds` (or `C:\Source\proton\builds_dbg` if it was built in the Debug configuration)
+* Find the build of `qpid-proton 0.6` in `C:\Source\proton\builds` (or `C:\Source\proton\builds_dbg` if it was built in the Debug configuration)
 
 ##References 
 To understand better, please, read following articles:
