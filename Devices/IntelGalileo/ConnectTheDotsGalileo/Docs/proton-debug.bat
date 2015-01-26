@@ -13,7 +13,9 @@ cmake -DCMAKE_CXX_STANDARD_LIBRARIES:STRING=mincore.lib ^
  -DCMAKE_C_STANDARD_LIBRARIES:STRING=mincore.lib ^
  -DGEN_JAVA:BOOL=OFF ^
  -DCMAKE_INSTALL_PREFIX:PATH="C:\Source\proton\builds_dbg" ^
- -DCMAKE_EXE_LINKER_FLAGS:STRING=" /machine:X86 /NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:ws2_32.lib /NODEFAULTLIB:gdi32.lib /NODEFAULTLIB:advapi32.lib /NODEFAULTLIB:crypt32.lib /NODEFAULTLIB:user32.lib "
+ -DCMAKE_EXE_LINKER_FLAGS:STRING=" /debug /machine:X86 /NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:ws2_32.lib /NODEFAULTLIB:gdi32.lib /NODEFAULTLIB:advapi32.lib /NODEFAULTLIB:crypt32.lib /NODEFAULTLIB:user32.lib " ^
+ -DCMAKE_MODULE_LINKER_FLAGS:STRING=" /debug /machine:X86 /NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:ws2_32.lib /NODEFAULTLIB:gdi32.lib /NODEFAULTLIB:advapi32.lib /NODEFAULTLIB:crypt32.lib /NODEFAULTLIB:user32.lib " ^
+ -DCMAKE_SHARED_LINKER_FLAGS:STRING=" /debug /machine:X86 /NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:ws2_32.lib /NODEFAULTLIB:gdi32.lib /NODEFAULTLIB:advapi32.lib /NODEFAULTLIB:crypt32.lib /NODEFAULTLIB:user32.lib "
 :: compile sources
 msbuild Proton.sln /property:Configuration=Debug
 :: install binaries to the builds\ folder

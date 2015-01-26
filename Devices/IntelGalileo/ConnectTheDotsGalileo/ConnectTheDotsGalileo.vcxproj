@@ -37,17 +37,17 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros">
-    <NuGetPackageImportStamp>4a6fcbfc</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>f9a79627</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Source\proton\builds\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>C:\Source\proton\builds\bin;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Source\proton\builds\include;$(SolutionDir)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>C:\Source\proton\builds\bin;$(SolutionDir)\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -64,7 +64,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>qpid-proton.lib;mincore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mincore.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>-d2:-nolock /NODEFAULTLIB:ole32.lib /NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:user32.lib /NODEFAULTLIB:advapi32.lib %(AdditionalOptions)</AdditionalOptions>
       <AssemblyDebug>
       </AssemblyDebug>
@@ -93,8 +93,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>qpid-proton.lib;mincore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mincore.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>-d2:-nolock /NODEFAULTLIB:ole32.lib /NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:user32.lib /NODEFAULTLIB:advapi32.lib %(AdditionalOptions)</AdditionalOptions>
+      <ShowProgress>NotSet</ShowProgress>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -159,6 +160,8 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\Microsoft.IoT.SDKFromArduino.1.0.0\build\native\Microsoft.IoT.SDKFromArduino.targets" Condition="Exists('..\packages\Microsoft.IoT.SDKFromArduino.1.0.0\build\native\Microsoft.IoT.SDKFromArduino.targets')" />
     <Import Project="..\packages\Microsoft.IoT.NativeWiring.1.0.0\build\native\Microsoft.IoT.NativeWiring.targets" Condition="Exists('..\packages\Microsoft.IoT.NativeWiring.1.0.0\build\native\Microsoft.IoT.NativeWiring.targets')" />
+    <Import Project="..\packages\qpidprotoniot.redist.0.6.0.0\build\native\qpidprotoniot.redist.targets" Condition="Exists('..\packages\qpidprotoniot.redist.0.6.0.0\build\native\qpidprotoniot.redist.targets')" />
+    <Import Project="..\packages\qpidprotoniot.0.6.0.0\build\native\qpidprotoniot.targets" Condition="Exists('..\packages\qpidprotoniot.0.6.0.0\build\native\qpidprotoniot.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -166,5 +169,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.IoT.SDKFromArduino.1.0.0\build\native\Microsoft.IoT.SDKFromArduino.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.IoT.SDKFromArduino.1.0.0\build\native\Microsoft.IoT.SDKFromArduino.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.IoT.NativeWiring.1.0.0\build\native\Microsoft.IoT.NativeWiring.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.IoT.NativeWiring.1.0.0\build\native\Microsoft.IoT.NativeWiring.targets'))" />
+    <Error Condition="!Exists('..\packages\qpidprotoniot.redist.0.6.0.0\build\native\qpidprotoniot.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\qpidprotoniot.redist.0.6.0.0\build\native\qpidprotoniot.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\qpidprotoniot.0.6.0.0\build\native\qpidprotoniot.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\qpidprotoniot.0.6.0.0\build\native\qpidprotoniot.targets'))" />
   </Target>
 </Project>

@@ -19,6 +19,13 @@
 * Launch `proton-release.bat` or `proton-debug.bat` (depends on your needs)
 * Find the build of `qpid-proton 0.6` in `C:\Source\proton\builds` (or `C:\Source\proton\builds_dbg` if it was built in the Debug configuration)
 
+##NuGet Native Package
+* Build OpenSSL and Apache Qpid
+* Copy `qpidproton.autopkg` to `C:\Source`
+* Install CoApp PowerShell tools http://coapp.org/pages/releases.html
+* Open PowerShell and change directory to `C:\Source`
+* Invoke `Write-NuGetPackage .\qpidproton.autopkg`
+
 ##References 
 To understand better, please, read following articles:
 * http://pjdecarlo.com/2015/01/porting-open-source-libraries-to-windows-for-iot-mincore.html

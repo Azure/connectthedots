@@ -7,7 +7,7 @@
     <RemoteDebuggerServerName>mygalileo</RemoteDebuggerServerName>
     <DeploymentDirectory>c:\test\</DeploymentDirectory>
     <RemoteDebuggerDeployDebugCppRuntime>false</RemoteDebuggerDeployDebugCppRuntime>
-    <AdditionalFiles>$(ProjectDir)\ConnectTheDotsGalileo.exe.config;C:\Source\openssl\builds\bin\libeay32.dll;C:\Source\openssl\builds\bin\ssleay32.dll;C:\Source\proton\builds\bin\qpid-proton.dll</AdditionalFiles>
+    <AdditionalFiles>$(ProjectDir)\ConnectTheDotsGalileo.exe.config;$(SolutionDir)\Debug\libeay32.dll;$(SolutionDir)\Debug\ssleay32.dll;$(SolutionDir)\Debug\qpid-proton.dll;</AdditionalFiles>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <DebuggerFlavor>WindowsRemoteDebugger</DebuggerFlavor>
@@ -16,6 +16,6 @@
     <RemoteDebuggerServerName>mygalileo</RemoteDebuggerServerName>
     <DeploymentDirectory>c:\test\</DeploymentDirectory>
     <RemoteDebuggerDeployDebugCppRuntime>false</RemoteDebuggerDeployDebugCppRuntime>
-    <AdditionalFiles>$(ProjectDir)\ConnectTheDotsGalileo.exe.config;C:\Source\openssl\builds\bin\libeay32.dll;C:\Source\openssl\builds\bin\ssleay32.dll;C:\Source\proton\builds\bin\qpid-proton.dll</AdditionalFiles>
+    <AdditionalFiles>$(ProjectDir)\ConnectTheDotsGalileo.exe.config;$(SolutionDir)\Release\libeay32.dll;$(SolutionDir)\Release\ssleay32.dll;$(SolutionDir)\Release\qpid-proton.dll;</AdditionalFiles>
   </PropertyGroup>
 </Project>
