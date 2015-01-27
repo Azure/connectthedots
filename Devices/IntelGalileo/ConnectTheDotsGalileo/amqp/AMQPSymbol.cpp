@@ -8,7 +8,7 @@ amqp::AMQPSymbol::AMQPSymbol(std::string const &symbol)
 
 pn_bytes_t amqp::AMQPSymbol::getSymbol() const
 {
-	return pn_bytes_dup(m_symbol.length(), m_symbol.c_str());
+	return pn_bytes(m_symbol.length(), m_symbol.c_str());
 }
 
 amqp::IAMQPData::Type amqp::AMQPSymbol::getDataType() const

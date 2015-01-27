@@ -8,7 +8,7 @@ amqp::AMQPString::AMQPString(std::string const &str)
 
 pn_bytes_t amqp::AMQPString::getString() const
 {
-	return pn_bytes_dup(m_str.length(), m_str.c_str());
+	return pn_bytes(m_str.length(), m_str.c_str());
 }
 
 amqp::IAMQPData::Type amqp::AMQPString::getDataType() const

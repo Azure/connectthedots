@@ -41,7 +41,7 @@ void amqp::Sender::send(IMessage const &message, Address const &address)
 	_addMetaToMessage(pnmessage, message);
 
 	pnmessage_body = pn_message_body(pnmessage);
-	pn_data_put_binary(pnmessage_body, pn_bytes_dup(message.getSize(), message.getBytes()));
+	pn_data_put_binary(pnmessage_body, pn_bytes(message.getSize(), message.getBytes()));
 	pn_messenger_put(m_messenger, pnmessage);
 
 	if (isError()) {

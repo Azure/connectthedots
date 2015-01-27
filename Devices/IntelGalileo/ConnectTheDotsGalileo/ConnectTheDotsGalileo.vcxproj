@@ -14,6 +14,7 @@
     <ProjectGuid>{FED02A79-C1D8-4D6F-9858-B1CAFB5F5B38}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ConnectTheDotsGalileo</RootNamespace>
+    <NuGetPackageImportStamp>4bb5efc0</NuGetPackageImportStamp>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -36,9 +37,6 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <PropertyGroup Label="UserMacros">
-    <NuGetPackageImportStamp>f9a79627</NuGetPackageImportStamp>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
@@ -156,12 +154,10 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\Microsoft.IoT.SDKFromArduino.1.0.0\build\native\Microsoft.IoT.SDKFromArduino.targets" Condition="Exists('..\packages\Microsoft.IoT.SDKFromArduino.1.0.0\build\native\Microsoft.IoT.SDKFromArduino.targets')" />
     <Import Project="..\packages\Microsoft.IoT.NativeWiring.1.0.0\build\native\Microsoft.IoT.NativeWiring.targets" Condition="Exists('..\packages\Microsoft.IoT.NativeWiring.1.0.0\build\native\Microsoft.IoT.NativeWiring.targets')" />
-    <Import Project="..\packages\qpidprotoniot.redist.0.6.0.0\build\native\qpidprotoniot.redist.targets" Condition="Exists('..\packages\qpidprotoniot.redist.0.6.0.0\build\native\qpidprotoniot.redist.targets')" />
-    <Import Project="..\packages\qpidprotoniot.0.6.0.0\build\native\qpidprotoniot.targets" Condition="Exists('..\packages\qpidprotoniot.0.6.0.0\build\native\qpidprotoniot.targets')" />
+    <Import Project="..\packages\Apache.Qpid.Proton.Unoff.IA32.redist.0.8.0.0\build\native\Apache.Qpid.Proton.Unoff.IA32.redist.targets" Condition="Exists('..\packages\Apache.Qpid.Proton.Unoff.IA32.redist.0.8.0.0\build\native\Apache.Qpid.Proton.Unoff.IA32.redist.targets')" />
+    <Import Project="..\packages\Apache.Qpid.Proton.Unoff.IA32.0.8.0.0\build\native\Apache.Qpid.Proton.Unoff.IA32.targets" Condition="Exists('..\packages\Apache.Qpid.Proton.Unoff.IA32.0.8.0.0\build\native\Apache.Qpid.Proton.Unoff.IA32.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -169,7 +165,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.IoT.SDKFromArduino.1.0.0\build\native\Microsoft.IoT.SDKFromArduino.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.IoT.SDKFromArduino.1.0.0\build\native\Microsoft.IoT.SDKFromArduino.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.IoT.NativeWiring.1.0.0\build\native\Microsoft.IoT.NativeWiring.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.IoT.NativeWiring.1.0.0\build\native\Microsoft.IoT.NativeWiring.targets'))" />
-    <Error Condition="!Exists('..\packages\qpidprotoniot.redist.0.6.0.0\build\native\qpidprotoniot.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\qpidprotoniot.redist.0.6.0.0\build\native\qpidprotoniot.redist.targets'))" />
-    <Error Condition="!Exists('..\packages\qpidprotoniot.0.6.0.0\build\native\qpidprotoniot.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\qpidprotoniot.0.6.0.0\build\native\qpidprotoniot.targets'))" />
+    <Error Condition="!Exists('..\packages\Apache.Qpid.Proton.Unoff.IA32.redist.0.8.0.0\build\native\Apache.Qpid.Proton.Unoff.IA32.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Apache.Qpid.Proton.Unoff.IA32.redist.0.8.0.0\build\native\Apache.Qpid.Proton.Unoff.IA32.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\Apache.Qpid.Proton.Unoff.IA32.0.8.0.0\build\native\Apache.Qpid.Proton.Unoff.IA32.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Apache.Qpid.Proton.Unoff.IA32.0.8.0.0\build\native\Apache.Qpid.Proton.Unoff.IA32.targets'))" />
   </Target>
 </Project>

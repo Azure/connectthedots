@@ -17,14 +17,14 @@
 ##Apache Qpid Proton C
 * Copy `proton-release.bat`, `proton-debug.bat`, `windowsproton06.patch` to `C:\Source`
 * Launch `proton-release.bat` or `proton-debug.bat` (depends on your needs)
-* Find the build of `qpid-proton 0.6` in `C:\Source\proton\builds` (or `C:\Source\proton\builds_dbg` if it was built in the Debug configuration)
+* Find the build of `qpid-proton 0.8` in `C:\Source\proton\builds` (or `C:\Source\proton\builds_dbg` if it was built with the Debug configuration)
 
 ##NuGet Native Package
-* Build OpenSSL and Apache Qpid
+* Build OpenSSL and Apache Qpid Proton with the Release configuration
 * Copy `qpidproton.autopkg` to `C:\Source`
 * Install CoApp PowerShell tools http://coapp.org/pages/releases.html
-* Open PowerShell and change directory to `C:\Source`
-* Invoke `Write-NuGetPackage .\qpidproton.autopkg`
+* Open PowerShell and change a directory to `C:\Source`
+* Invoke `Write-NuGetPackage .\qpidproton.autopkg` command
 
 ##References 
 To understand better, please, read following articles:
@@ -32,7 +32,7 @@ To understand better, please, read following articles:
 * https://code.msdn.microsoft.com/windowsazure/Using-Apache-Qpid-Proton-C-afd76504
 
 ##Product Versions
-Scripts have been tested on Windows 8.1 in environment with: 
+Scripts have been tested on Windows 8.1 in the environment with: 
 * CMake 3.1.0
 * git 1.9.5
 * Perl 5.20.1

@@ -1,6 +1,6 @@
 :: set up the Visual Studio environment
 call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\vcvars32.bat"
-:: clone library's sources
+:: clone library's sources (OpenSSL 1.0.2 beta3)
 git clone -b OpenSSL_1_0_2-beta3 https://github.com/openssl/openssl.git openssl
 cd openssl
 :: generate makefiles for nmake
