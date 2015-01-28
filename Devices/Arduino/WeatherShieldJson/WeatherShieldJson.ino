@@ -1,6 +1,39 @@
 /* 
+ Weather Shield code for http://connectthedots.msopentech.com end-to-end example of sending data to Microsoft Azure
+ By: Microsoft Open Technologies, Inc.
+ Date: January 27, 2015
+ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
- Modifications by Microsoft Open Technologies, Inc
+ Copyright (c) Microsoft Open Technologies, Inc.  All rights reserved.
+
+ The MIT License (MIT)
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ 
+ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ 
+ Based upon Nathan Seidle's Weather Shield Example, itself based upon MIke Grusin's USB Weather Board code, as stated below.
+
+ Modifications by Microsoft Open Technologies, Inc include adding self-describing fields in each output string, and changing 
+ output format to JSON string. Based upon the variables below, the JSON string would be something like the following, depending upon the values retrieved
+ from the Weather Shield:
+
+ {"dspl":"Weather Shield 01","Subject":"wthr","DeviceGUID":"81E79059-A393-4797-8A7E-526C3EF9D64B","millis":80176,"seqno":79,"winddir":-1,"windspeedmph":0.0,"windgustmph":0.0,"windgustdir":0,"windspdmph_avg2m":0.0,"winddir_avg2m":0,"windgustmph_10m":0.0,"windgustdir_10m":0,"hmdt":42.9,"temp":67.4,"tempH":21.0,"rainin":0.00,"dailyrainin":0.00,"prss":100531.75,"batt":4.23,"lght":0.37}
+
+ The dspl, Subject, deviceGUID data may be used by the Azure website and services to identify the device sending the data. The subsequent field names may be used to generate the labels on charts in the Azure website.
+
+ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+ Original header follows.
 
  Weather Shield Example
  By: Nathan Seidle
