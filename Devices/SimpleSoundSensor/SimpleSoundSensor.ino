@@ -21,11 +21,8 @@
  
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  
- Based upon code from Sunfounder Microsophone Sensor Module
- http://www.sunfounder.com/index.php?c=case_in&a=detail_&id=139&name=
- using an analog sound sensor purchased from Amazon at
- http://www.amazon.com/Analog-Microphone-Controller-Arduino-Equipment/dp/B00H39Y6AQ/ref=sr_1_4?s=electronics&ie=UTF8&qid=1415659062&sr=1-4&keywords=arduino+uno+sound
-
+ Based upon code from Sunfounder Microsophone Sensor Module  http://www.sunfounder.com/index.php?c=case_in&a=detail_&id=139&name= using a different but similar analog sound sensor purchased online.
+ 
  Modifications by Microsoft Open Technologies, Inc include adding self-describing fields in each output string, and changing 
  output format to JSON string. Based upon the variables below, the JSON string would be something like the following, depending upon the values retrieved
  from the Weather Shield:
