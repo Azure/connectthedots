@@ -53,7 +53,6 @@ namespace ConnectTheDotsWebSite
 
         public string DeviceFilter = null;
         public List<string> DeviceFilterList = new List<string>();
-        //public string[] DeviceFilter = new string[1];
 
         public MyWebSocketHandler()
         {
@@ -78,7 +77,7 @@ namespace ConnectTheDotsWebSite
 
             foreach (var message in bufferedMessages)
             {
-                this.SendFiltered(message);
+                this.SendFiltered(message.Value);
             }
 
             this.Send(JsonConvert.SerializeObject(new Dictionary<string, object> 
@@ -137,26 +136,14 @@ namespace ConnectTheDotsWebSite
 
         public void SendFiltered(IDictionary<string, object> message)
         {
-
             if (!message.ContainsKey("dspl") ||
-                    (this.DeviceFilterList != null && (this.DeviceFilterList.Contains("all")
-                || this.DeviceFilterList.Contains(message["dspl"].ToString().ToLower())
-
+                    (this.DeviceFilterList != null && (
+                        this.DeviceFilterList.Contains("all")
+                        || this.DeviceFilterList.Contains(message["dspl"].ToString().ToLower())
                 )))
             {
-
                 this.Send(JsonConvert.SerializeObject(message));
             }
-
-            /*
-            if (   !message.ContainsKey("dspl")
-                || (this.DeviceFilter != null 
-                    && (
-                        String.Equals(this.DeviceFilter, "all", StringComparison.InvariantCultureIgnoreCase))
-                        || String.Equals(this.DeviceFilter, message["dspl"])))
-            {
-                this.Send(JsonConvert.SerializeObject(message));
-            }*/
         }
 
         public static void SendToClients(IDictionary<string, object> message)
