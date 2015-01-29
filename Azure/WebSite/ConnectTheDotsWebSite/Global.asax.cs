@@ -80,7 +80,7 @@ namespace ConnectTheDotsWebSite
 
             var options = new EventProcessorOptions();
             options.ExceptionReceived += WebSocketEventProcessor.ExceptionReceived;
-            options.InitialOffsetProvider = OnlyNewDataOffsetProvider;
+            options.InitialOffsetProvider = (partitionId) => DateTime.UtcNow;
 
             Trace.TraceInformation("Registering EventProcessor for Devices");
             processorHostDevices.RegisterEventProcessorAsync<WebSocketEventProcessor>(options).Wait();
@@ -94,11 +94,6 @@ namespace ConnectTheDotsWebSite
             );
             Trace.TraceInformation("Registering EventProcessor for Alerts");
             processorHostAlerts.RegisterEventProcessorAsync<WebSocketEventProcessor>(options).Wait();
-        }
-
-        private static string OnlyNewDataOffsetProvider(object context)
-        {
-            return "0";
         }
 
         protected void Application_End(Object sender, EventArgs e)
