@@ -47,7 +47,7 @@ namespace ConnectTheDotsWebSite
         TimeSpan bufferTimeInterval = new TimeSpan(0, 10, 0);
 
         // Message buffer (one per processor instance)
-        SortedList<DateTime, IDictionary<string, object>> sortedDataBuffer = new SortedList<DateTime, IDictionary<string, object>>();
+        static SortedList<DateTime, IDictionary<string, object>> sortedDataBuffer = new SortedList<DateTime, IDictionary<string, object>>();
         Stopwatch checkpointStopWatch;
         PartitionContext partitionContext;
 
@@ -123,12 +123,10 @@ namespace ConnectTheDotsWebSite
                             // or when a client requests data for a different device
 
                             // Lock to guard against concurrent reads from client resend
-                            // Note that the Add operations are not contentious with each other 
-                            // because EH processor host serializes per partition, and we use one buffer per partition
-                            lock (this.sortedDataBuffer)
+                            lock (sortedDataBuffer)
                             {
                                 if (!sortedDataBuffer.ContainsKey(messageTimeStamp))
-                                    this.sortedDataBuffer.Add(messageTimeStamp, messagePayload);
+                                    sortedDataBuffer.Add(messageTimeStamp, messagePayload);
                             }
                         }
                     }
@@ -144,10 +142,10 @@ namespace ConnectTheDotsWebSite
                     }
 
                     // trim data buffer to keep only last 10 minutes of data
-                    lock (this.sortedDataBuffer)
+                    lock (sortedDataBuffer)
                     {
-                        SortedList<DateTime, IDictionary<string, object>> tempBuffer = new SortedList<DateTime,IDictionary<string,object>>();
-                        foreach (var item in this.sortedDataBuffer)
+                        SortedList<DateTime, IDictionary<string, object>> tempBuffer = new SortedList<DateTime, IDictionary<string, object>>();
+                        foreach (var item in sortedDataBuffer)
                         {
                             if (item.Key + bufferTimeInterval >= now)
                             {
@@ -155,7 +153,7 @@ namespace ConnectTheDotsWebSite
                             }
                         }
 
-                        this.sortedDataBuffer = tempBuffer;
+                        sortedDataBuffer = tempBuffer;
                     }
                 }
             }
@@ -229,25 +227,7 @@ namespace ConnectTheDotsWebSite
         //  to support effective scale-out to multiple web client machines/VMs for large number of devices
         public static SortedList<DateTime, IDictionary<string, object>> GetAllBufferedMessages()
         {
-            var allSortedMessages = new SortedList<DateTime, IDictionary<string, object>>();
-
-            lock (g_processors)
-            {
-                foreach (var processor in g_processors)                                
-                {
-                    lock (processor.sortedDataBuffer)
-                    {
-                        foreach (KeyValuePair<DateTime, IDictionary<string, object>> kp in processor.sortedDataBuffer)
-                        {
-                            if (!allSortedMessages.ContainsKey(kp.Key))
-                                allSortedMessages.Add(kp.Key, kp.Value);
-                        }
-                    }
-                }
-            }
-
-            return allSortedMessages;
+            return sortedDataBuffer;
         }
-
     }
 }
