@@ -1,9 +1,4 @@
 /* 
- Simple sound sensor code for http://connectthedots.msopentech.com end-to-end example of sending data to Microsoft Azure
- By: Microsoft Open Technologies, Inc.
- Date: January 27, 2015
-  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
  Copyright (c) Microsoft Open Technologies, Inc.  All rights reserved.
 
  The MIT License (MIT)
@@ -19,19 +14,14 @@
  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  
- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= 
  
  Based upon code from Sunfounder Microsophone Sensor Module  http://www.sunfounder.com/index.php?c=case_in&a=detail_&id=139&name= using a different but similar analog sound sensor purchased online.
  
- Modifications by Microsoft Open Technologies, Inc include adding self-describing fields in each output string, and changing 
- output format to JSON string. Based upon the variables below, the JSON string would be something like the following, depending upon the values retrieved
- from the Weather Shield:
-
- {"dspl":"Hex Sound Sensor 01","Subject":"sound","DeviceGUID":"898A4B4F-80B7-4BA0-B4B1-186655336472","millis":80176,"seqno":79,"soundLvl":78}
- 
- The dspl, Subject, deviceGUID data may be used by the Azure website and services to identify the device sending the data. The subsequent field names may be used to generate the labels on charts in the Azure website.
- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
+ -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= 
+ Arduino code to read data from a simple sound sensor, then augment and format as JSON to send via serial connection.
+ Example of sending sound level data to Microsoft Azure and analyzing with Azure Stream Analytics or Azure Machine Learning.
+ Real time output viewable at http://connectthedots.msopentech.com .
 */
 // Constants used for the ConnectTheDots project
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -40,15 +30,17 @@
 // DeviceGUID ensures all the data from this sensor appears on the same chart
 // You can use Visual Studio to create DeviceGUID and copy it here. In VS, On the Tools menu, click Create GUID. The Create GUID
 // tool appears with a GUID in the Result box. Click Copy, and paste below.
-//
-char SensorSubject[] = "sound";
-char DeviceDisplayName[] = "Hex Sound Sensor 01";
-char DeviceGUID[] = "898A4B4F-80B7-4BA0-B4B1-186655336472";
+
+// Constants used to add self-describing fields to the data before sending to Azure
+char SensorSubject[] = "sound";    // determines how Azure website will chart the data
+char DeviceDisplayName[] = "Hex Sound Sensor 01";   // will be the label for the curve on the chart
+char DeviceGUID[] = "898A4B4F-80B7-4BA0-B4B1-186655336472";   // ensures all the data from this sensor appears on the same chart. You can use the Tools/Create GUID in Visual Studio to create.
+char SensorDataType[]="soundLvl";   // describes what is being sent to the gateway. Interpreted by the website.
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 
-const int SOUND_PIN = A0;
-const int SAMPLE_FREQUENCY = 500;
+const int SOUND_PIN = A2;
+const int SAMPLE_FREQUENCY = 250;
 int high = 0;
 unsigned long hightime = millis();
 int sequenceNumber = 0;
@@ -78,11 +70,9 @@ void loop() {
     Serial.print("\"");
     Serial.print(DeviceGUID);
     Serial.print("\"");
-    Serial.print(",\"millis\":");
-    Serial.print(millis());
-    Serial.print(",\"seqno\":");
-    Serial.print(sequenceNumber++);
-    Serial.print(",\"soundLvl\":");
+    Serial.print(",\"");
+    Serial.print(SensorDataType);
+    Serial.print("\":");
     Serial.print(high);
     Serial.println("}");
     
