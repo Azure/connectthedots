@@ -47,7 +47,7 @@ namespace ConnectTheDotsWebSite
         TimeSpan bufferTimeInterval = new TimeSpan(0, 10, 0);
 
         // Message buffer (one per processor instance)
-        static SortedList<DateTime, IDictionary<string, object>> sortedDataBuffer = new SortedList<DateTime, IDictionary<string, object>>();
+        SortedList<DateTime, IDictionary<string, object>> sortedDataBuffer = new SortedList<DateTime, IDictionary<string, object>>();
         Stopwatch checkpointStopWatch;
         PartitionContext partitionContext;
 
@@ -88,7 +88,7 @@ namespace ConnectTheDotsWebSite
                             if (!eventBodyAsString.EndsWith("]"))
                                 eventBodyAsString = eventBodyAsString + "]";
                             if (!eventBodyAsString.StartsWith("["))
-                                eventBodyAsString = "[" + eventBodyAsString;
+                                eventBodyAsString = "[" + eventBodyAsString.Substring(eventBodyAsString.IndexOf("{"));
 
                             messagePayloads = JsonConvert.DeserializeObject<IList<IDictionary<string, object>>>(eventBodyAsString);
                         }
@@ -123,10 +123,11 @@ namespace ConnectTheDotsWebSite
                             // or when a client requests data for a different device
 
                             // Lock to guard against concurrent reads from client resend
-                            lock (sortedDataBuffer)
+                            lock (this.sortedDataBuffer)
                             {
-                                if (!sortedDataBuffer.ContainsKey(messageTimeStamp))
-                                    sortedDataBuffer.Add(messageTimeStamp, messagePayload);
+                                if (!this.sortedDataBuffer.ContainsKey(messageTimeStamp))
+                                    this.sortedDataBuffer.Add(messageTimeStamp, messagePayload);
+
                             }
                         }
                     }
@@ -142,10 +143,10 @@ namespace ConnectTheDotsWebSite
                     }
 
                     // trim data buffer to keep only last 10 minutes of data
-                    lock (sortedDataBuffer)
+                    lock (this.sortedDataBuffer)
                     {
                         SortedList<DateTime, IDictionary<string, object>> tempBuffer = new SortedList<DateTime, IDictionary<string, object>>();
-                        foreach (var item in sortedDataBuffer)
+                        foreach (var item in this.sortedDataBuffer)
                         {
                             if (item.Key + bufferTimeInterval >= now)
                             {
@@ -153,7 +154,9 @@ namespace ConnectTheDotsWebSite
                             }
                         }
 
-                        sortedDataBuffer = tempBuffer;
+                        this.sortedDataBuffer.Clear();
+                        foreach( var item in tempBuffer )
+                            this.sortedDataBuffer.Add(item.Key, item.Value);
                     }
                 }
             }
@@ -227,7 +230,20 @@ namespace ConnectTheDotsWebSite
         //  to support effective scale-out to multiple web client machines/VMs for large number of devices
         public static SortedList<DateTime, IDictionary<string, object>> GetAllBufferedMessages()
         {
-            return sortedDataBuffer;
+            SortedList<DateTime, IDictionary<string, object>> allMessages = new SortedList<DateTime, IDictionary<string, object>>();
+            lock (g_processors)
+            {
+                foreach (var processor in g_processors)
+                {
+                    foreach(var item in processor.sortedDataBuffer)
+                    {
+                        if (!allMessages.ContainsKey(item.Key))
+                            allMessages.Add(item.Key, item.Value);
+                    }
+                }
+
+            }
+            return allMessages;
         }
     }
 }

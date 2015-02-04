@@ -605,15 +605,9 @@ $(document).ready(function () {
 
     table.order([0, 'desc']);
 
-
     // Set up websocket client
-
     var sss = (window.location.protocol.indexOf('s') > 0 ? "s" : "");    
-    
     var uri = 'ws'+ sss +'://' + window.location.host + '/api/websocketconnect?clientId=none';
-
-    //var uri = 'ws' + sss + '://' + 'connectthedots.msopentech.com' + '/api/websocketconnect?clientId=none';
-
     websocket = new WebSocket(uri);
 
     $('#messages').prepend('<div> Connecting to ' + uri + '<div>');
@@ -709,10 +703,6 @@ $(document).ready(function () {
                 var table = $('#alertTable').DataTable();
                 var time = new Date(eventObject.timestart);
 
-                // Log the alert in the rawalerts div
-                $('#rawalerts').prepend('<div>' + time + ': ' + eventObject.dsplalert + ' ' + eventObject.alerttype + ' ' + eventObject.message + '</div>');
-                $('#rawalerts').contents().filter(':gt(20)').remove();
-
                 // Check if we already have this one in the table already to prevent duplicates
                 var indexes = table.rows().eq(0).filter(function (rowIdx) {
                     if (
@@ -726,7 +716,8 @@ $(document).ready(function () {
                 });
 
                 // The alert is a new one, lets display it
-                if (indexes.length == 0) {
+                if (indexes.length == 0)
+                {
                     // For performance reasons, we want to limit the number of items in the table to a max of 20. 
                     // We will remove the oldest from the list
                     if (table.data().length > 19) {
@@ -839,12 +830,4 @@ function SensorSelectionChanged(dropDown) {
     
 }
 
-function ShowHide(tHtml) {
-    if (tHtml) {
-        if (tHtml.style.display == '')
-            tHtml.style.display = 'none';
-        else
-            tHtml.style.display = '';
-    }
-}
 

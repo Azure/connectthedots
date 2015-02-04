@@ -29,13 +29,26 @@ using System.Web.Routing;
 
 using Microsoft.ServiceBus.Messaging;
 using Microsoft.WindowsAzure;
+using Microsoft.ServiceBus;
 
 namespace ConnectTheDotsWebSite
 {
+    public struct EventHubSettings
+    {
+        public string name { get; set; }
+        public string connectionString { get; set; }
+        public string consumerGroup { get; set; }
+        public EventProcessorHost processorHost { get; set; }
+        public EventProcessorOptions processorHostOptions { get; set; }
+        public EventHubClient client { get; set; }
+        public NamespaceManager namespaceManager { get; set; }
+        public string storageConnectionString { get; set; }
+    }
+
     public class Global : System.Web.HttpApplication
     {
-        EventProcessorHost processorHostDevices;
-        EventProcessorHost processorHostAlerts;
+        EventHubSettings eventHubDevicesSettings;
+        EventHubSettings eventHubAlertsSettings;
 
         protected void Application_Start(Object sender, EventArgs e)
         {
@@ -47,60 +60,93 @@ namespace ConnectTheDotsWebSite
                 defaults: new { id = RouteParameter.Optional }
             );
 
-            var serviceBusConnectionStringDevices = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionStringDevices");
-            var serviceBusConnectionStringAlerts = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionStringAlerts");
-            if (String.IsNullOrEmpty(serviceBusConnectionStringAlerts))
-            {
-                serviceBusConnectionStringAlerts = serviceBusConnectionStringDevices;
-            }
+            // Read connectiong strings and Event Hubs names from app.config file
+            GetAppSettings();
 
-            var eventHubDevices = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.EventHubDevices");
-            var eventHubDevicesConsumerGroup = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.EventHubDevicesConsumerGroup");
-
-            var eventHubAlerts = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.EventHubAlerts");
-            var eventHubAlertsConsumerGroup = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.EventHubAlertsConsumerGroup");
-
-            var storageConnectionString = CloudConfigurationManager.GetSetting("Microsoft.Storage.ConnectionString");
-
-            if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")))
-            {
-                // Assume we are running local: use different consumer groups to avoid colliding with a cloud instance
-                eventHubDevicesConsumerGroup += "local";
-                eventHubAlertsConsumerGroup += "local";
-            }
-
-
-            Trace.TraceInformation("Creating EventProcessorHost: {0}, {1}, {2}", this.Server.MachineName, eventHubDevices, eventHubDevicesConsumerGroup);
-            processorHostDevices = new EventProcessorHost(this.Server.MachineName,
-                eventHubDevices.ToLowerInvariant(),
-                eventHubDevicesConsumerGroup.ToLowerInvariant(),
-                serviceBusConnectionStringDevices,
-                storageConnectionString
-                );
-
-            var options = new EventProcessorOptions();
-            options.ExceptionReceived += WebSocketEventProcessor.ExceptionReceived;
-            options.InitialOffsetProvider = (partitionId) => DateTime.UtcNow;
-
-            Trace.TraceInformation("Registering EventProcessor for Devices");
-            processorHostDevices.RegisterEventProcessorAsync<WebSocketEventProcessor>(options).Wait();
-
-            Trace.TraceInformation("Creating EventProcessorHost: {0}, {1}, {2}", this.Server.MachineName, eventHubAlerts, eventHubAlertsConsumerGroup);
-            processorHostAlerts = new EventProcessorHost(this.Server.MachineName,
-                eventHubAlerts.ToLowerInvariant(),
-                eventHubAlertsConsumerGroup.ToLowerInvariant(),
-                serviceBusConnectionStringAlerts,
-                storageConnectionString
-            );
-            Trace.TraceInformation("Registering EventProcessor for Alerts");
-            processorHostAlerts.RegisterEventProcessorAsync<WebSocketEventProcessor>(options).Wait();
+            // Create EventProcessorHost clients
+            CreateEventProcessorHostClient(ref eventHubDevicesSettings);
+            CreateEventProcessorHostClient(ref eventHubAlertsSettings);
         }
 
         protected void Application_End(Object sender, EventArgs e)
         {
             Trace.TraceInformation("Unregistering EventProcessorHosts");
-            processorHostDevices.UnregisterEventProcessorAsync().Wait();
-            processorHostAlerts.UnregisterEventProcessorAsync().Wait();
+            eventHubDevicesSettings.processorHost.UnregisterEventProcessorAsync().Wait();
+            eventHubAlertsSettings.processorHost.UnregisterEventProcessorAsync().Wait();
+        }
+        private void CreateEventProcessorHostClient(ref EventHubSettings eventHubSettings)
+        {
+            Trace.TraceInformation("Creating EventProcessorHost: {0}, {1}, {2}", this.Server.MachineName, eventHubSettings.name, eventHubSettings.consumerGroup);
+            eventHubSettings.client = EventHubClient.CreateFromConnectionString(eventHubSettings.connectionString,
+                                                                                eventHubSettings.name);
+
+            // Delete and recreate the consumer group
+            // this allows to ensure we will start receiving only fresh messages when the site starts
+            try
+            {
+                foreach (ConsumerGroupDescription consumerGroupDesc in eventHubSettings.namespaceManager.GetConsumerGroups(eventHubSettings.client.Path))
+                {
+                    // We remove any previously created consumergroups containing the word WebSite in the name
+                    if (consumerGroupDesc.Name.Contains("WebSite") && !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME"))
+                        || consumerGroupDesc.Name.Contains("local") && String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")))
+                        eventHubSettings.namespaceManager.DeleteConsumerGroup(eventHubSettings.name, consumerGroupDesc.Name);
+                }
+            }
+            catch
+            {
+                // Error happened while trying to delete old ConsumerGroups.
+                Debug.Print("Error happened while trying to delete old ConsumerGroups");
+            }
+            finally
+            {
+                // We create a new consumer group with a new mame each time to 
+                eventHubSettings.consumerGroup += DateTime.UtcNow.Ticks.ToString();
+                eventHubSettings.namespaceManager.CreateConsumerGroupIfNotExists(eventHubSettings.name, eventHubSettings.consumerGroup);
+            }
+
+            eventHubSettings.processorHost = new EventProcessorHost(this.Server.MachineName,
+                                                          eventHubSettings.client.Path,
+                                                          eventHubSettings.consumerGroup.ToLowerInvariant(),
+                                                          eventHubSettings.connectionString,
+                                                          eventHubSettings.storageConnectionString);
+
+            eventHubSettings.processorHostOptions = new EventProcessorOptions();
+            eventHubSettings.processorHostOptions.ExceptionReceived += WebSocketEventProcessor.ExceptionReceived;
+            eventHubSettings.processorHostOptions.InitialOffsetProvider = (partitionId) => DateTime.UtcNow;
+            //eventHubSettings.processorHostOptions.InitialOffsetProvider = partitionId =>
+            //{
+            //    return eventHubSettings.namespaceManager.GetEventHubPartition(eventHubSettings.client.Path, partitionId).LastEnqueuedOffset;
+            //};
+
+            Trace.TraceInformation("Registering EventProcessor for " + eventHubSettings.name);
+            eventHubSettings.processorHost.RegisterEventProcessorAsync<WebSocketEventProcessor>(eventHubSettings.processorHostOptions).Wait();
+        }
+
+        private void GetAppSettings()
+        {
+            // Read settings for Devices Event Hub
+            eventHubDevicesSettings.connectionString = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionStringDevices");
+            eventHubDevicesSettings.name = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.EventHubDevices");
+            eventHubDevicesSettings.storageConnectionString = CloudConfigurationManager.GetSetting("Microsoft.Storage.ConnectionString");
+            eventHubDevicesSettings.namespaceManager = NamespaceManager.CreateFromConnectionString(CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString"));
+
+            // Read settings for Alerts Event Hub
+            eventHubAlertsSettings.connectionString = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionStringAlerts");
+            eventHubAlertsSettings.name = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.EventHubAlerts");
+            eventHubAlertsSettings.storageConnectionString = CloudConfigurationManager.GetSetting("Microsoft.Storage.ConnectionString");
+            eventHubAlertsSettings.namespaceManager = NamespaceManager.CreateFromConnectionString(CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString"));
+
+            if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")))
+            {
+                // Assume we are running local: use different consumer groups to avoid colliding with a cloud instance
+                eventHubDevicesSettings.consumerGroup = "local";
+                eventHubAlertsSettings.consumerGroup = "local";
+            }
+            else
+            {
+                eventHubDevicesSettings.consumerGroup = "WebSite";
+                eventHubAlertsSettings.consumerGroup = "WebSite";
+            }
         }
 
     }

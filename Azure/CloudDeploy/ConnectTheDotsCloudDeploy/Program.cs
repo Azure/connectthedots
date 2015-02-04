@@ -145,7 +145,7 @@ namespace ConnectTheDotsCloudDeploy
                 (d) => String.Equals(d.AuthorizationType, "SharedAccessAuthorization")
                 ).ConnectionString;
 
-            // Create EHs + device keys + consumer groups (WebSite) + consumer keys (WebSite*)
+            // Create EHs + device keys + consumer keys (WebSite*)
             var nsManager = NamespaceManager.CreateFromConnectionString(nsConnectionString);
 
             var ehDescriptionDevices = new EventHubDescription(EventHubNameDevices)
@@ -157,7 +157,7 @@ namespace ConnectTheDotsCloudDeploy
             ehDescriptionDevices.Authorization.Add(new SharedAccessAuthorizationRule("D3", new List<AccessRights> { AccessRights.Send }));
             ehDescriptionDevices.Authorization.Add(new SharedAccessAuthorizationRule("D4", new List<AccessRights> { AccessRights.Send }));
 
-            ehDescriptionDevices.Authorization.Add(new SharedAccessAuthorizationRule("WebSite", new List<AccessRights> { AccessRights.Listen }));
+            ehDescriptionDevices.Authorization.Add(new SharedAccessAuthorizationRule("WebSite", new List<AccessRights> { AccessRights.Manage, AccessRights.Listen, AccessRights.Send }));
 
             ehDescriptionDevices.Authorization.Add(new SharedAccessAuthorizationRule("StreamingAnalytics", new List<AccessRights> { AccessRights.Manage, AccessRights.Listen, AccessRights.Send }));
 
@@ -176,24 +176,15 @@ namespace ConnectTheDotsCloudDeploy
                 }
             } while (ehDevices == null);
 
-            Console.WriteLine("Creating Consumer Group {0} on Event Hub {1}", "WebSite", EventHubNameDevices);
-            nsManager.CreateConsumerGroupIfNotExists(EventHubNameDevices, "WebSite");
-            Console.WriteLine("Creating Consumer Group {0} on Event Hub {1}", "WebSiteLocal", EventHubNameDevices);
-            nsManager.CreateConsumerGroupIfNotExists(EventHubNameDevices, "WebSiteLocal");
-
             var ehDescriptionAlerts = new EventHubDescription(EventHubNameAlerts)
             {
                 PartitionCount = 8,
             };
-            ehDescriptionAlerts.Authorization.Add(new SharedAccessAuthorizationRule("WebSite", new List<AccessRights> { AccessRights.Listen }));
+            ehDescriptionAlerts.Authorization.Add(new SharedAccessAuthorizationRule("WebSite", new List<AccessRights> { AccessRights.Manage, AccessRights.Listen, AccessRights.Send }));
             ehDescriptionAlerts.Authorization.Add(new SharedAccessAuthorizationRule("StreamingAnalytics", new List<AccessRights> { AccessRights.Manage, AccessRights.Listen, AccessRights.Send }));
 
             Console.WriteLine("Creating Event Hub {0}", EventHubNameAlerts);
             var ehAlerts = nsManager.CreateEventHubIfNotExists(ehDescriptionAlerts);
-            Console.WriteLine("Creating Consumer Group {0} on Event Hub {1}", "WebSite", EventHubNameAlerts);
-            nsManager.CreateConsumerGroupIfNotExists(EventHubNameAlerts, "WebSite");
-            Console.WriteLine("Creating Consumer Group {0} on Event Hub {1}", "WebSiteLocal", EventHubNameAlerts);
-            nsManager.CreateConsumerGroupIfNotExists(EventHubNameAlerts, "WebSiteLocal");
 
             // Create Storage Account for Event Hub Processor
             var stgMgmt = new StorageManagementClient(creds);
@@ -253,12 +244,10 @@ namespace ConnectTheDotsCloudDeploy
 
             doc.SelectSingleNode("/configuration/appSettings/add[@key='Microsoft.ServiceBus.EventHubDevices']/@value").Value
                 = EventHubNameDevices;
-            doc.SelectSingleNode("/configuration/appSettings/add[@key='Microsoft.ServiceBus.EventHubDevicesConsumerGroup']/@value").Value
-                = "WebSite";
             doc.SelectSingleNode("/configuration/appSettings/add[@key='Microsoft.ServiceBus.EventHubAlerts']/@value").Value
                 = EventHubNameAlerts;
-            doc.SelectSingleNode("/configuration/appSettings/add[@key='Microsoft.ServiceBus.EventHubAlertsConsumerGroup']/@value").Value
-                = "WebSite";
+            doc.SelectSingleNode("/configuration/appSettings/add[@key='Microsoft.ServiceBus.ConnectionString']/@value").Value
+                = nsConnectionString;
             doc.SelectSingleNode("/configuration/appSettings/add[@key='Microsoft.ServiceBus.ConnectionStringDevices']/@value").Value
                 = ehDevicesWebSiteConnectionString;
             doc.SelectSingleNode("/configuration/appSettings/add[@key='Microsoft.ServiceBus.ConnectionStringAlerts']/@value").Value
