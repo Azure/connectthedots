@@ -47,69 +47,63 @@ namespace ConnectTheDotsWebSite
         TimeSpan bufferTimeInterval = new TimeSpan(0, 10, 0);
 
         // Message buffer (one per processor instance)
-        public List<IDictionary<string, object>> bufferedMessages = new List<IDictionary<string, object>>();
-        //public SortedList<IDictionary<string, object>> bufferedMessages = new SortedList<IDictionary<string, object>>();
-
-
-        public List<IDictionary<string, object>> bufferedMessagesAvg = new List<IDictionary<string, object>>();
-
-        // Remember one event until it is outside of the buffer time period
-        EventData eventForNextCheckpoint = null;
-        // Remember the index of the checkpoint event in the buffer (to avoid searching for it)
-        int indexOfLastCheckpoint = -1;
-
-        // Throttle checkpointing to at most 5 per second (per processor instance)
-        TimeSpan maxCheckpointFrequency = new TimeSpan(0, 0, 5);
-
-        // Remember when we last checkpointed (used for checkpoint throttling)
-        DateTime lastCheckPoint = DateTime.MinValue;
-
+        SortedList<DateTime, IDictionary<string, object>> sortedDataBuffer = new SortedList<DateTime, IDictionary<string, object>>();
+        Stopwatch checkpointStopWatch;
+        PartitionContext partitionContext;
 
         public async Task ProcessEventsAsync(PartitionContext context, IEnumerable<EventData> events)
         {
             try
             {
-
                 var now = DateTime.UtcNow;
 
                 foreach (var eventData in events)
                 {
-                    // Get message from the eventData body and convert JSON string into message object
-                    string eventBodyAsString = Encoding.UTF8.GetString(eventData.GetBytes());
-
-                    IList<IDictionary<string, object>> messagePayloads;
-                    try
+                    // We don't care about messages that are older than bufferTimeInterval
+                    if ((eventData.EnqueuedTimeUtc + bufferTimeInterval) >= now)
                     {
-                        // Attempt to deserialze event body as single JSON message
-                        messagePayloads = new List<IDictionary<string, object>> 
-                        { 
-                            JsonConvert.DeserializeObject<IDictionary<string, object>>(eventBodyAsString)
-                        };
-                    }
-                    catch
-                    {
-                        // Not a single JSON message: attempt to deserialize as array of messages
+                        // Get message from the eventData body and convert JSON string into message object
+                        string eventBodyAsString = Encoding.UTF8.GetString(eventData.GetBytes());
 
-                        // Azure Stream Analytics Preview generates invalid JSON for some multi-values queries
-                        // Workaround: turn concatenated json objects (ivalid JSON) into array of json objects (valid JSON)
-                        if (eventBodyAsString.IndexOf("}{") >= 0)
+                        // There can be several messages in one
+                        IList<IDictionary<string, object>> messagePayloads;
+                        try
                         {
-                            eventBodyAsString = eventBodyAsString.Replace("}{", "},{");
+                            // Attempt to deserialze event body as single JSON message
+                            messagePayloads = new List<IDictionary<string, object>> 
+                            { 
+                                JsonConvert.DeserializeObject<IDictionary<string, object>>(eventBodyAsString)
+                            };
                         }
-                        if (!eventBodyAsString.EndsWith("]"))
-                            eventBodyAsString = eventBodyAsString + "]";
-                        if (!eventBodyAsString.StartsWith("["))
-                            eventBodyAsString = "[" + eventBodyAsString;
+                        catch
+                        {
+                            // Not a single JSON message: attempt to deserialize as array of messages
 
-                        messagePayloads = JsonConvert.DeserializeObject<IList<IDictionary<string, object>>>(eventBodyAsString);
-                    }
+                            // Azure Stream Analytics Preview generates invalid JSON for some multi-values queries
+                            // Workaround: turn concatenated json objects (ivalid JSON) into array of json objects (valid JSON)
+                            if (eventBodyAsString.IndexOf("}{") >= 0)
+                            {
+                                eventBodyAsString = eventBodyAsString.Replace("}{", "},{");
+                            }
+                            if (!eventBodyAsString.EndsWith("]"))
+                                eventBodyAsString = eventBodyAsString + "]";
+                            if (!eventBodyAsString.StartsWith("["))
+                                eventBodyAsString = "[" + eventBodyAsString.Substring(eventBodyAsString.IndexOf("{"));
 
-                    // Only send messages within the display/buffer interval to clients, to speed up recovery after downtime
-                    if ((eventData.EnqueuedTimeUtc + bufferTimeInterval).AddMinutes(1) > now)
-                    {
+                            messagePayloads = JsonConvert.DeserializeObject<IList<IDictionary<string, object>>>(eventBodyAsString);
+                        }
 
                         foreach (var messagePayload in messagePayloads)
                         {
+                            // We want to read the time value from the message itself.
+                            // If none is found we will use the enqueued time
+                            DateTime messageTimeStamp = new DateTime();
+                            if (messagePayload.ContainsKey("time"))
+                                messageTimeStamp = DateTime.Parse(messagePayload["time"].ToString());
+                            else if (messagePayload.ContainsKey("timeStart"))
+                                messageTimeStamp = DateTime.Parse(messagePayload["timeStart"].ToString());
+                            else messageTimeStamp = eventData.EnqueuedTimeUtc;
+
                             // Build up the list of devices seen so far (in lieu of a formal device repository)
                             // Also keep the last message received per device (not currently used in the sample)
                             string deviceName = null;
@@ -122,7 +116,6 @@ namespace ConnectTheDotsWebSite
                                 }
                             }
 
-                            
                             // Notify clients
                             MyWebSocketHandler.SendToClients(messagePayload);
 
@@ -130,62 +123,41 @@ namespace ConnectTheDotsWebSite
                             // or when a client requests data for a different device
 
                             // Lock to guard against concurrent reads from client resend
-                            // Note that the Add operations are not contentious with each other 
-                            // because EH processor host serializes per partition, and we use one buffer per partition
-                            lock (bufferedMessages)
+                            lock (this.sortedDataBuffer)
                             {
+                                if (!this.sortedDataBuffer.ContainsKey(messageTimeStamp))
+                                    this.sortedDataBuffer.Add(messageTimeStamp, messagePayload);
 
-                                bufferedMessages.Add(messagePayload);
-
-                                if (messagePayload.ContainsKey("tempavg"))
-                                {
-                                    bufferedMessagesAvg.Add(messagePayload);
-                                }
                             }
                         }
                     }
-                    else
-                    {
-                        Debug.WriteLine("Received event older than {0} in EH {1}, partition {2}: {3} - Sequence Number {4}",
-                            bufferTimeInterval,
-                            context.EventHubPath, context.Lease.PartitionId,
-                            eventData.EnqueuedTimeUtc, eventData.SequenceNumber);
-
-                        eventForNextCheckpoint = eventData;
-                    }
-
-                    // Remember first event to checkpoint to later
-                    if (eventForNextCheckpoint == null)
-                    {
-                        eventForNextCheckpoint = eventData;
-                    }
                 }
 
-                // Checkpoint to an event before the buffer/display time period, so we can recover the events on VM restart
-                if (eventForNextCheckpoint != null
-                    && eventForNextCheckpoint.EnqueuedTimeUtc + bufferTimeInterval < now
-                    && lastCheckPoint + maxCheckpointFrequency < now) // Don't checkpoint too often, as every checkpoint incurs at least one blob storage roundtrip
+                //Call checkpoint every minute
+                if (this.checkpointStopWatch.Elapsed > TimeSpan.FromMinutes(1))
                 {
-                    await context.CheckpointAsync(eventForNextCheckpoint);
-
-                    Trace.TraceInformation("Checkpointed EH {0}, partition {1}: offset {2}, Sequence Number {3}, time {4}",
-                        context.EventHubPath, context.Lease.PartitionId,
-                        eventForNextCheckpoint.Offset, eventForNextCheckpoint.SequenceNumber,
-                        eventForNextCheckpoint.EnqueuedTimeUtc);
-
-                    // Remove all older messages from the resend buffer
-                    lock (bufferedMessages)
+                    await context.CheckpointAsync();
+                    lock (this)
                     {
-                        if (this.indexOfLastCheckpoint >= 0)
-                        {
-                            bufferedMessages.RemoveRange(0, this.indexOfLastCheckpoint);
-                        }
-                        indexOfLastCheckpoint = bufferedMessages.Count - 1;
+                        this.checkpointStopWatch.Reset();
                     }
 
-                    // Get ready for next checkpoint
-                    lastCheckPoint = now;
-                    eventForNextCheckpoint = events.Last<EventData>();
+                    // trim data buffer to keep only last 10 minutes of data
+                    lock (this.sortedDataBuffer)
+                    {
+                        SortedList<DateTime, IDictionary<string, object>> tempBuffer = new SortedList<DateTime, IDictionary<string, object>>();
+                        foreach (var item in this.sortedDataBuffer)
+                        {
+                            if (item.Key + bufferTimeInterval >= now)
+                            {
+                                tempBuffer.Add(item.Key, item.Value);
+                            }
+                        }
+
+                        this.sortedDataBuffer.Clear();
+                        foreach( var item in tempBuffer )
+                            this.sortedDataBuffer.Add(item.Key, item.Value);
+                    }
                 }
             }
             catch (Exception e)
@@ -212,10 +184,15 @@ namespace ConnectTheDotsWebSite
                         context.EventHubPath, context.Lease.PartitionId, e.Message);
                 }
             }
+
+            this.partitionContext = context;
+            this.checkpointStopWatch = new Stopwatch();
+            this.checkpointStopWatch.Start();
+            
             return Task.FromResult<object>(null);
         }
 
-        public Task CloseAsync(PartitionContext context, CloseReason reason)
+        public async Task CloseAsync(PartitionContext context, CloseReason reason)
         {
             Trace.TraceInformation(
                 String.Format("Closing processor for EH {0}, partition {1}. Reason: {2}",
@@ -234,7 +211,11 @@ namespace ConnectTheDotsWebSite
                             context.EventHubPath, context.Lease.PartitionId, e.Message));
                 }
             }
-            return Task.FromResult<object>(null);
+
+            if (reason == CloseReason.Shutdown)
+            {
+                await context.CheckpointAsync();
+            }
         }
 
         public static void ExceptionReceived(object sender, ExceptionReceivedEventArgs e)
@@ -247,72 +228,22 @@ namespace ConnectTheDotsWebSite
         // Retrieve buffered messages from all EH partitions (= processor instances)
         // Note: This needs to be partitioned and/or turned into a distributed call/cache 
         //  to support effective scale-out to multiple web client machines/VMs for large number of devices
-        public static IEnumerable<IDictionary<string, object>> GetAllBufferedMessages()
+        public static SortedList<DateTime, IDictionary<string, object>> GetAllBufferedMessages()
         {
-            var allMessages = new List<IDictionary<string, object>>();
+            SortedList<DateTime, IDictionary<string, object>> allMessages = new SortedList<DateTime, IDictionary<string, object>>();
             lock (g_processors)
             {
-                foreach (var processor in g_processors)                                
+                foreach (var processor in g_processors)
                 {
-                    lock (processor.bufferedMessages)
+                    foreach(var item in processor.sortedDataBuffer)
                     {
-                        allMessages.AddRange(processor.bufferedMessages);
+                        if (!allMessages.ContainsKey(item.Key))
+                            allMessages.Add(item.Key, item.Value);
                     }
                 }
+
             }
-
-            // sort
-
-            allMessages.Sort(delegate(IDictionary<string, object> p1, IDictionary<string, object> p2)
-            {
-
-                if (p1.ContainsKey("time") && p2.ContainsKey("time"))
-                {
-
-                    string s1 = p1["time"].ToString();
-                    string s2 = p2["time"].ToString();
-
-                    if (!String.IsNullOrEmpty(s1) && !String.IsNullOrEmpty(s2))
-                    {
-                        DateTime t1 = Convert.ToDateTime(s1);
-                        DateTime t2 = Convert.ToDateTime(s2);
-
-                        return DateTime.Compare(t1, t2);
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                }
-                else
-                {
-                    return 0;  // just make them equal, who cares
-                }
-
-            });
-
-
-            // remove if too old
-
-            var now = DateTime.UtcNow;
-            TimeSpan window = new TimeSpan(0, 10, 0);
-
-            for (int i = allMessages.Count - 1; i >= 0; i-- )
-            {
-                var m = allMessages[i];
-                if (m.ContainsKey("time"))
-                {
-                    DateTime t = Convert.ToDateTime(m["time"].ToString());
-                    if (t < now - window)
-                    {
-                        allMessages.RemoveAt(i);
-                    }
-                }
-                 
-            }
-
             return allMessages;
         }
-
     }
 }

@@ -47,13 +47,11 @@ namespace ConnectTheDotsWebSite
         }
     }
 
-    class MyWebSocketHandler : WebSocketHandler
+    sealed class MyWebSocketHandler : WebSocketHandler
     {
-        private static WebSocketCollection _clients = new WebSocketCollection();
+        private static readonly WebSocketCollection _clients = new WebSocketCollection();
 
-        public string DeviceFilter = null;
         public List<string> DeviceFilterList = new List<string>();
-        //public string[] DeviceFilter = new string[1];
 
         public MyWebSocketHandler()
         {
@@ -61,36 +59,19 @@ namespace ConnectTheDotsWebSite
 
         public override void OnOpen()
         {
-            _clients.Add(this);
-            ResendDataToClient();
-        }
-
-        public void ResendDataToClient()
-        {
-            var bufferedMessages = WebSocketEventProcessor.GetAllBufferedMessages();
-
-            this.Send(JsonConvert.SerializeObject(new Dictionary<string, object> 
-                { 
-                    { "bulkData", true }
-                }
-            ));
-
-
-            foreach (var message in bufferedMessages)
+            lock (_clients)
             {
-                this.SendFiltered(message);
+                _clients.Add(this);
             }
-
-            this.Send(JsonConvert.SerializeObject(new Dictionary<string, object> 
-                { 
-                    { "bulkData", false}
-                }
-            ));
+            ResendDataToClient();
         }
 
         public override void OnClose()
         {
-            _clients.Remove(this);
+            lock(_clients)
+            {
+                _clients.Remove(this);
+            }
             base.OnClose();
         }
 
@@ -106,15 +87,15 @@ namespace ConnectTheDotsWebSite
                     switch (messageDictionary["MessageType"] as string)
                     {
                         case "LiveDataSelection":
-                            DeviceFilter = messageDictionary["DeviceName"] as string;
+                            string deviceFilter = messageDictionary["DeviceName"] as string;
 
-                            if (DeviceFilter == "clear")
+                            if (deviceFilter == "clear")
                             {
                                 DeviceFilterList.Clear();
                             }
                             else
                             {
-                                DeviceFilterList.Add(DeviceFilter.ToLower());
+                                DeviceFilterList.Add(deviceFilter.ToLower());
                             }
 
                             break;
@@ -135,35 +116,75 @@ namespace ConnectTheDotsWebSite
             ResendDataToClient();
         }
 
-        public void SendFiltered(IDictionary<string, object> message)
+        private void ResendDataToClient()
         {
+            var bufferedMessages = WebSocketEventProcessor.GetAllBufferedMessages();
 
-            if (!message.ContainsKey("dspl") ||
-                    (this.DeviceFilterList != null && (this.DeviceFilterList.Contains("all")
-                || this.DeviceFilterList.Contains(message["dspl"].ToString().ToLower())
+            this.Send(JsonConvert.SerializeObject(new Dictionary<string, object> 
+                { 
+                    { "bulkData", true }
+                }
+            ));
 
-                )))
+            try
             {
+                IList<string> filteredMessages = new List<string>();
+                foreach (var message in bufferedMessages.Values)
+                {
+                    if (Filter(message))
+                    {
+                        filteredMessages.Add(JsonConvert.SerializeObject(message));
+                    }
+                }
+                foreach (var payload in filteredMessages)
+                {
+                    this.Send(payload);
+                }
+            }
+            finally
+            {
+                this.Send(JsonConvert.SerializeObject(new Dictionary<string, object> 
+                { 
+                    { "bulkData", false }
+                }
+                ));
+            }
+        }
 
-                this.Send(JsonConvert.SerializeObject(message));
+        private bool Filter(IDictionary<string, object> message)
+        {
+            if (
+                    !message.ContainsKey("dspl") ||
+                    (
+                        (
+                         this.DeviceFilterList.Contains("all") || 
+                         this.DeviceFilterList.Contains(message["dspl"].ToString().ToLower())
+                        )
+                    )
+                )
+            {
+                return true;
             }
 
-            /*
-            if (   !message.ContainsKey("dspl")
-                || (this.DeviceFilter != null 
-                    && (
-                        String.Equals(this.DeviceFilter, "all", StringComparison.InvariantCultureIgnoreCase))
-                        || String.Equals(this.DeviceFilter, message["dspl"])))
-            {
-                this.Send(JsonConvert.SerializeObject(message));
-            }*/
+            return false;
         }
 
         public static void SendToClients(IDictionary<string, object> message)
         {
-            foreach (MyWebSocketHandler client in _clients)
+            // snapshot the current clients
+            WebSocketHandler[] clients;
+            lock (_clients)
             {
-                client.SendFiltered(message);
+                clients = _clients.ToArray<WebSocketHandler>();
+            }
+
+            //send
+            foreach (MyWebSocketHandler client in clients)
+            {
+                if (client.Filter(message))
+                {
+                    client.Send(JsonConvert.SerializeObject(message));
+                }
             }
         }
     }
