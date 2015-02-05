@@ -128,18 +128,19 @@ namespace ConnectTheDotsWebSite
 
             try
             {
-                IList<string> filteredMessages = new List<string>();
+//                IList<string> filteredMessages = new List<string>();
                 foreach (var message in bufferedMessages.Values)
                 {
                     if (Filter(message))
                     {
-                        filteredMessages.Add(JsonConvert.SerializeObject(message));
+ //                       filteredMessages.Add(JsonConvert.SerializeObject(message));
+                        this.Send(JsonConvert.SerializeObject(message));
                     }
                 }
-                foreach (var payload in filteredMessages)
-                {
-                    this.Send(payload);
-                }
+                //foreach (var payload in filteredMessages)
+                //{
+                //    this.Send(payload);
+                //}
             }
             finally
             {
@@ -153,6 +154,15 @@ namespace ConnectTheDotsWebSite
 
         private bool Filter(IDictionary<string, object> message)
         {
+            DateTime messageTime = new DateTime();
+            TimeSpan bufferTime = new TimeSpan(0,10,0);
+            DateTime now = DateTime.UtcNow;
+
+            if (message.ContainsKey("time"))
+                messageTime = DateTime.Parse(message["time"].ToString());
+            else if (message.ContainsKey("timestart"))
+                messageTime = DateTime.Parse(message["timestart"].ToString());
+
             if (
                     !message.ContainsKey("dspl") ||
                     (
@@ -163,6 +173,8 @@ namespace ConnectTheDotsWebSite
                     )
                 )
             {
+                if (messageTime + bufferTime < now)
+                    return false;
                 return true;
             }
 
