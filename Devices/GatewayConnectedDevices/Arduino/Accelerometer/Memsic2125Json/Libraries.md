@@ -1,0 +1,1 @@
+This example relies on the OneWire library. This is included in the standard Arduino IDE, but updates can be downloaded from the link in the Arduino playground site [here](http://playground.arduino.cc/Learning/OneWire). Import the library into your Arduino sketch before compiling.
