@@ -33,6 +33,7 @@ using System.IO.Ports;
 using System.Text;
 using System.Threading;
 using System.IO;
+using System.Net;
 
 using Amqp;
 using Amqp.Framing;
@@ -78,6 +79,7 @@ namespace RaspberryPiGateway
         // Unique identifier for the gateway (will be generated when app starts)
         // You might want to hard code it or put this ID in the configuration file if you need the Gateway to not change ID at each reboot
         public static string deviceId;
+        public static string deviceIP;
 
         // Variables for AMQPs connection
         public static Connection connection = null;
@@ -115,6 +117,11 @@ namespace RaspberryPiGateway
             if (!InitAppSettings(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location), "RaspberryPiGateway.exe")) return -1;
             // Initializa AMQP connection
             if (!InitAMQPConnection(false)) return -1;
+
+            // Get device IP
+            IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
+            IPAddress ipAddress = ipHostInfo.AddressList[0];
+            deviceIP = ipAddress.ToString();
 
             // start main routine
             return main.Run();
@@ -336,7 +343,7 @@ namespace RaspberryPiGateway
                 message.ApplicationProperties = new ApplicationProperties();
                 message.ApplicationProperties["time"] = message.Properties.CreationTime;
                 message.ApplicationProperties["from"] = deviceId; // Originating device
-                message.ApplicationProperties["dspl"] = sample["dspl"];      // Display name for originating device defined in sensor code, sent in JSON payload
+                message.ApplicationProperties["dspl"] = sample["dspl"] + " (" + deviceIP + ")";      // Display name for originating device defined in sensor code, sent in JSON payload
 
                 if (sample != null && sample.Count > 0)
                 {
@@ -346,7 +353,7 @@ namespace RaspberryPiGateway
                     outDictionary["Subject"] = message.Properties.Subject; // Message Type
                     outDictionary["time"] = message.Properties.CreationTime;
                     outDictionary["from"] = deviceId; // Originating device
-                    outDictionary["dspl"] = sample["dspl"];      // Display name for originating device
+                    outDictionary["dspl"] = sample["dspl"] + " (" + deviceIP + ")";      // Display name for originating device
                     message.Properties.ContentType = "text/json";
                     message.Body = new Data() { Binary = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(outDictionary)) };
 #else
