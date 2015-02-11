@@ -188,7 +188,7 @@
         </div>
     </div>
     <div id="bottom">
-        <!-- <input type="button" id="generate_anomalies_btn" onclick="onGenerateAnomalies()" value="Generate Anomalies" /> !-->
+        <input type="button" id="generate_anomalies_btn" onclick="onGenerateAnomalies()" value="Generate Anomalies" />
         <div id="ctd_logo" onclick="window.open( 'http://connectthedots.io','_blank' ); return false;"></div>
         <label id="designed_label">Designed with</label>
     </div>
