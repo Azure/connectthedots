@@ -1,0 +1,445 @@
+﻿html, body {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+#loading {
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    position: fixed;
+    display: block;
+    background-color: #777;
+    background-color: rgba(155, 155, 155, 0.4);
+    z-index: 99;
+    text-align: center;
+}
+
+#loading-inner {
+    background-color: #fff;
+    border-style: solid;
+    border-width: 1px;
+    width: 400px;
+    height: 200px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -200px;
+    margin-top: -100px;
+}
+
+h3 {
+    width: 1000px;
+    background-color: #f7f7f7;
+    border-bottom: 1px #ddd solid;
+    padding: 10px;
+}
+
+ul {
+    list-style-type: none;
+    padding-left: 0;
+    font: 12px sans-serif;
+    color: #666;
+}
+
+li {
+    cursor: pointer;
+    font-weight: normal;
+}
+
+.selected {
+    font-weight: bold;
+}
+
+
+li.selected:before {
+    content: "\25BA \0020";
+}
+
+.axis {
+    shape-rendering: crispEdges;
+}
+
+    .axis text {
+        font: 10px sans-serif;
+        font-weight: normal;
+        fill: #787878;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #787878;
+        shape-rendering: crispEdges;
+    }
+
+.y.axis {
+}
+
+.x.axis {
+}
+
+path.line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+}
+
+.legend {
+    font: 10px sans-serif;
+}
+
+
+#loading-image {
+    position: relative;
+    top: 10px;
+    left: 10px;
+    z-index: 100;
+}
+
+#loading-text {
+    position: relative;
+    top: 10px;
+    left: 10px;
+    z-index: 100;
+}
+
+#top_header {
+    width: 100%;
+    height: 120px;
+    background: no-repeat url(/img/SLACLogo.png) #262626 10px 15px;
+    position: relative;
+}
+
+#otech_logo {
+    height: 50px;
+    right: 10px;
+    top: 10px;
+    width: 200px;
+    background: no-repeat url("/img/OpenTech Logo_white.png") #262626;
+    background-size: contain;
+    position: absolute;
+}
+
+#azure_logo {
+    height: 50px;
+    right: 220px;
+    top: 10px;
+    width: 200px;
+    background: no-repeat url("/img/MS-Azure_rgb_Wht.png") #262626;
+    background-size: contain;
+    position: absolute;
+}
+
+#ctd_logo {
+    height: 60px;
+    right: 10px;
+    bottom: 10px;
+    width: 120px;
+    background: no-repeat url("/img/ConnectTheDots Logo light grey.png") #262626;
+    background-size: contain;
+    position: absolute;
+}
+
+#designed_label {
+    top: 25pt;
+    right: 170px;
+    background-color: #262626;
+    position: absolute;
+    color: white;
+    font-size: 15pt;
+}
+
+#left {
+    width: 150px;
+    bottom: 0px;
+    top: 120px;
+    background-color: #262626;
+    position: absolute;
+}
+
+#center {
+    bottom: 80px;
+    top: 120px;
+    left: 150px;
+    right: 0;
+    background-color: #eaeaea;
+    position: absolute;
+}
+
+#bottom {
+    bottom: 0px;
+    height: 80px;
+    width: 100%;
+    background-color: #262626;
+    position: absolute;
+}
+
+#bottom input {
+    vertical-align: middle;
+    height: 30px;
+    width: 170px;
+    position: absolute;
+    top: 20pt;
+    left: 20px;
+}
+
+#main_menu {
+    position: absolute;
+    bottom: 0;
+    left: 170px;
+    right: 0px;
+    height: 24pt;
+}
+
+#left_menu {
+    position: absolute;
+    top: 20px;
+    right: 0px;
+    left: 15px;
+    bottom: 80px;
+}
+
+.pump_info {
+    width: 30%;
+    background-color: #eaeaea;
+    position: absolute;
+    top: 20px;
+    bottom: 20px;
+    border: 1px solid #c8c8c8;
+}
+
+.pump_graph {
+    width: 66%;
+    background-color: #eaeaea;
+    position: absolute;
+    top: 20px;
+    bottom: 20px;
+    border: 1px solid #c8c8c8;
+    overflow-x: hidden;
+}
+
+.ui-tabs .ui-tabs-nav li {
+    background: #5e6a73;
+}
+
+    .ui-tabs .ui-tabs-nav li a {
+        font-size: 10pt !important;
+        width: 100%;
+    }
+
+    .ui-tabs .ui-tabs-nav li.ui-tabs-active {
+        background: #eaeaea;
+    }
+
+        .ui-tabs .ui-tabs-nav li.ui-tabs-active a {
+            color: black;
+        }
+
+.ui-tabs-vertical {
+    width: 55em;
+}
+
+    .ui-tabs-vertical .ui-tabs-nav {
+        padding: .2em .1em .2em .2em;
+        float: left;
+        width: 12em;
+    }
+
+        .ui-tabs-vertical .ui-tabs-nav li {
+            clear: left;
+            width: 100%;
+            border-bottom-width: 1px !important;
+            border-right-width: 0 !important;
+            margin: 0 -1px .2em 0;
+        }
+
+            .ui-tabs-vertical .ui-tabs-nav li a {
+                display: block;
+            }
+
+            .ui-tabs-vertical .ui-tabs-nav li.ui-tabs-active {
+                padding-bottom: 0;
+                padding-right: .1em;
+                border-right-width: 1px;
+                border-right-width: 1px;
+            }
+
+    .ui-tabs-vertical .ui-tabs-panel {
+        padding: 1em;
+        float: right;
+        width: 40em;
+    }
+
+label.header {
+    text-align: center;
+    font-weight: bold;
+}
+
+#real_supply_temperature {
+    position: absolute;
+    left: 34%;
+    top: 10%;
+    width: 32%;
+    height: 14%;
+    text-align: left;
+}
+
+    #real_supply_temperature label {
+        display: block;
+        margin-bottom: 7%;
+    }
+
+    #real_supply_temperature .center_data label {
+        margin-bottom: 7%;
+    }
+
+    #real_supply_temperature label.header {
+        margin-bottom: 5%;
+    }
+
+#real_heater {
+    position: absolute;
+    left: 41%;
+    top: 40%;
+    width: 20%;
+    height: 14%;
+    text-align: left;
+}
+
+    #real_heater label {
+        display: block;
+        margin-bottom: 12%;
+    }
+
+    #real_heater .center_data {
+        left: 40%;
+    }
+
+        #real_heater .center_data label {
+            margin-bottom: 12%;
+        }
+
+
+#real_pump {
+    position: absolute;
+    left: 29%;
+    top: 78%;
+    width: 43%;
+    height: 17%;
+    text-align: left;
+}
+
+    #real_pump label {
+        display: block;
+        margin-bottom: 12%;
+    }
+
+#real_surge_tank {
+    position: absolute;
+    left: 73%;
+    top: 22%;
+    width: 19%;
+    height: 14%;
+    text-align: center;
+}
+
+    #real_surge_tank select {
+        display: block;
+        width: 80%;
+        margin-top: 10%;
+        margin-left: 10%;
+        height: 20%;
+    }
+
+.left_data, .right_data, .center_data {
+    position: absolute;
+    top: 25%;
+}
+
+    .left_data label, .right_data label, .center_data label {
+        display: block;
+    }
+
+.left_data {
+    width: 33%;
+    text-align: left;
+    left: 0;
+}
+
+.center_data {
+    width: 33%;
+    text-align: center;
+    left: 33%;
+    top: 25%;
+}
+
+    .center_data label {
+        color: blue;
+        font-weight: 700;
+    }
+
+.right_data {
+    width: 33%;
+    text-align: left;
+    left: 85%;
+}
+
+#alertTable td {
+    font-size: 12px;
+    text-align: center;
+}
+
+.d3-tip {
+    line-height: 1;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #000;
+    border-radius: 2px;
+}
+
+    .d3-tip .time_header {
+        color: grey;
+        font-size: 8px;
+        display: block;
+    }
+
+    .d3-tip .value_circle {
+        color: #006fc7;
+        font-size: 20px;
+    }
+
+    .d3-tip .value {
+        color: black;
+        font-size: 14px;
+        margin-left: 5px;
+    }
+
+    .d3-tip .message {
+        color: black;
+        font-size: 10px;
+        display: block;
+    }
+
+    /* Creates a small triangle extender for the tooltip */
+    .d3-tip:after {
+        box-sizing: border-box;
+        display: inline;
+        font-size: 8px;
+        width: 100%;
+        line-height: 1;
+        color: rgba(255, 255, 255, 0.9);
+        content: "\25BC";
+        position: absolute;
+        text-align: center;
+    }
+
+    /* Style northward tooltips differently */
+    .d3-tip.n:after {
+        margin: -1px 0 0 0;
+        top: 100%;
+        left: 0;
+    }
