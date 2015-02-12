@@ -632,6 +632,108 @@ function ClearD3Charts() {
 //
 
 $(document).ready(function () {
+    // 
+    //  Handle a sensor selection change
+    // 'All' means all dataset are shown.
+    //  Anything else toggles that particular
+    //  dataset
+    //
+
+    $('#sensorList').on('click', 'li', function () {
+        var device = $(this).text();
+        if (websocket != null) {
+
+            $('#loading').show();
+            ClearD3Charts();
+
+            if (device == 'All') {
+
+                var c = { MessageType: "LiveDataSelection", DeviceName: "clear" };
+                websocket.send(JSON.stringify(x));
+
+                var x = { MessageType: "LiveDataSelection", DeviceName: device };
+                websocket.send(JSON.stringify(x));
+
+                $('#sensorList li').each(function () {
+                    //this now refers to each li
+                    //do stuff to each
+
+                    var d = $(this).text();
+
+                    if (d == device) {
+                        $(this).addClass('selected');
+                        $(this).css('color', color(d == 'All' ? 'avg' : d));
+                        $(this).css('font-weight', 'bold');
+                    }
+                    else {
+                        $(this).removeClass('selected');
+                        $(this).css('color', '');
+                        $(this).css('font-weight', 'normal');
+                    }
+                });
+
+            }
+            else {
+
+                // not 'All' so general case
+
+                var j = $('#sensorList li').eq(0);
+                j.removeClass('selected');
+                j.css('color', '');
+                j.css('font-weight', 'normal');
+
+                var d = $(this).text();
+                if ($(this).hasClass('selected')) {
+                    $(this).removeClass('selected');
+                    $(this).css('color', '');
+                    $(this).css('font-weight', 'normal');
+                }
+                else {
+                    $(this).addClass('selected');
+                    $(this).css('color', color(d == 'All' ? 'avg' : d));
+                    $(this).css('font-weight', 'bold');
+                }
+
+                var x = { MessageType: "LiveDataSelection", DeviceName: "clear" };
+                websocket.send(JSON.stringify(x));
+
+                $('#sensorList li').each(function () {
+
+                    var d = $(this).text();
+
+                    if ($(this).hasClass('selected')) {
+                        var x = { MessageType: "LiveDataSelection", DeviceName: $(this).text() };
+                        websocket.send(JSON.stringify(x));
+                    }
+                });
+            }
+
+        }
+    });
+
+    // 
+    //  Mouseover: highlight the sensor with its color
+    //  and make the text bold.
+    //
+
+    $('#sensorList').on('mouseover', 'li', function (e) {
+        var device = $(this).text();
+
+        if (device == 'All') {
+            device = 'avg';
+        }
+
+        if ($(this).hasClass('selected') == false) {
+            $(this).css('color', color(device));
+            $(this).css('font-weight', 'bold');
+        }
+
+    }).on('mouseout', 'li', function (e) {
+        if ($(this).hasClass('selected') == false) {
+            $(this).css('color', '');
+            $(this).css('font-weight', 'normal');
+        }
+    });
 
     $('#loading').hide();
 
@@ -714,20 +816,34 @@ $(document).ready(function () {
 
             websocket.send(JSON.stringify(x));
             receivedFirstMessage = true;
+
+            // make 'All' the active sensor
+
+            var j = $('#sensorList li').eq(0);
+            j.css('color', color('avg'));
+            j.css('font-weight', 'bold');
         }
 
         // Seems like we have valid data
         try {
 
-            if (eventObject.dspl != null && eventObject.average == null && eventObject.dataSourceName != undefined) {
+            if (eventObject.dspl != null) {
 
                 // if we have a new sensor, add it to the list
-
-                var sensorName = eventObject.dspl + ":" + eventObject.dataSourceName;
-                var exists = (sensorNames.indexOf(sensorName) != -1);
+                var exists = true;
+                if ($('#sensorList').data(eventObject.dspl) == undefined) {
+                    exists = false;
+                }
 
                 if (exists == false) {
-                    sensorNames.push(sensorName);
+
+                    var ul = document.getElementById("sensorList");
+                    var li = document.createElement("li");
+                    li.appendChild(document.createTextNode(eventObject.dspl));
+                    ul.appendChild(li);
+
+                    $('#sensorList').data(eventObject.dspl, eventObject.dspl);
+
                 }
             }
             var chart = undefined;
