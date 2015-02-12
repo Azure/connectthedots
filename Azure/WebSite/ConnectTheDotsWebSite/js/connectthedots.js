@@ -641,9 +641,9 @@ $(document).ready(function () {
 
     var table = $('#alertTable').DataTable({
         "bAutoWidth": false,
-        "bFilter": false,
-        "bInfo": false,
-        "paging": false,
+        "bFilter": true,
+        "bInfo": true,
+        "paging": true,
         "order": [
 			[0, "desc"]
         ],
