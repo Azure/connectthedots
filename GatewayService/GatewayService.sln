@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsService", "WindowsService\WindowsService.csproj", "{38A27FC0-2864-49A8-BDA3-D7E22D276B29}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreTest", "Test\CoreTest.csproj", "{CA90B613-C4D6-4011-BC6B-CCC8DE62DAC0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{74BF7EFF-11AD-4587-9C35-9419831D1116}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gateway", "Gateway\Gateway.csproj", "{E14D1C61-1979-452E-BE8B-0303A95EF764}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BatchSenderThreadTest", "BatchSenderThreadTest\BatchSenderThreadTest.csproj", "{8279853A-07AE-4AF8-BC5F-FCD1696ABB4D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataIntakes", "DataIntakes", "{5094CC44-E8F8-4472-8042-BE7E78899225}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerialPortListener", "SerialPortListener\SerialPortListener.csproj", "{A7B77408-0DBA-4384-A31A-404187CAEC89}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketListener", "SocketListener\SocketListener.csproj", "{9D9DA1EB-90DA-4FC0-A97F-C650201DD994}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{38A27FC0-2864-49A8-BDA3-D7E22D276B29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38A27FC0-2864-49A8-BDA3-D7E22D276B29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38A27FC0-2864-49A8-BDA3-D7E22D276B29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38A27FC0-2864-49A8-BDA3-D7E22D276B29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA90B613-C4D6-4011-BC6B-CCC8DE62DAC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA90B613-C4D6-4011-BC6B-CCC8DE62DAC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA90B613-C4D6-4011-BC6B-CCC8DE62DAC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA90B613-C4D6-4011-BC6B-CCC8DE62DAC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E14D1C61-1979-452E-BE8B-0303A95EF764}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E14D1C61-1979-452E-BE8B-0303A95EF764}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E14D1C61-1979-452E-BE8B-0303A95EF764}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E14D1C61-1979-452E-BE8B-0303A95EF764}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8279853A-07AE-4AF8-BC5F-FCD1696ABB4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8279853A-07AE-4AF8-BC5F-FCD1696ABB4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8279853A-07AE-4AF8-BC5F-FCD1696ABB4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8279853A-07AE-4AF8-BC5F-FCD1696ABB4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7B77408-0DBA-4384-A31A-404187CAEC89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7B77408-0DBA-4384-A31A-404187CAEC89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7B77408-0DBA-4384-A31A-404187CAEC89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7B77408-0DBA-4384-A31A-404187CAEC89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D9DA1EB-90DA-4FC0-A97F-C650201DD994}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D9DA1EB-90DA-4FC0-A97F-C650201DD994}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D9DA1EB-90DA-4FC0-A97F-C650201DD994}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D9DA1EB-90DA-4FC0-A97F-C650201DD994}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CA90B613-C4D6-4011-BC6B-CCC8DE62DAC0} = {74BF7EFF-11AD-4587-9C35-9419831D1116}
+		{8279853A-07AE-4AF8-BC5F-FCD1696ABB4D} = {74BF7EFF-11AD-4587-9C35-9419831D1116}
+		{A7B77408-0DBA-4384-A31A-404187CAEC89} = {5094CC44-E8F8-4472-8042-BE7E78899225}
+		{9D9DA1EB-90DA-4FC0-A97F-C650201DD994} = {5094CC44-E8F8-4472-8042-BE7E78899225}
+	EndGlobalSection
+EndGlobal
