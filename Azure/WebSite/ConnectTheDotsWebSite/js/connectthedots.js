@@ -734,7 +734,7 @@ $(document).ready(function () {
             var chartName = undefined;
 
             // If the message is an alert, we need to display it in the datatable
-            if (eventObject.alerttype != null){ // && isBulking == false) {
+            if (eventObject.alerttype != null) { // && isBulking == false) {
                 var table = $('#alertTable').DataTable();
                 var time = new Date(eventObject.timestart);
 
@@ -849,21 +849,19 @@ $(document).ready(function () {
                         var sensorName = eventObject.dspl + ":" + eventObject.dataSourceName;
 
                         if (eventObject.time != null) {
-                            if (eventObject.dataSourceName.toLowerCase().indexOf("temp") != -1) {
-                                AddToD3(D3_chart1, CHART_1_NAME, sensorName, eventObject.value, eventObject.time, 0);
-                                chart = D3_chart1;
-                                chartName = CHART_1_NAME;
-                            } else if (eventObject.dataSourceName.toLowerCase().indexOf("flow") != -1) {
-                                AddToD3(D3_chart2, CHART_2_NAME, sensorName, eventObject.value, eventObject.time, 0);
-                                chart = D3_chart2;
-                                chartName = CHART_2_NAME;
-                            } else if (eventObject.dataSourceName.toLowerCase().indexOf("pressure") != -1) {
-                                AddToD3(D3_chart2, CHART_2_NAME, sensorName, eventObject.value, eventObject.time, 1);
-                                chart = D3_chart2;
-                                chartName = CHART_2_NAME;
+                            AddToD3(D3_chart1, "Temperature", eventObject.dspl, eventObject.temp, eventObject.time, 0);
+                            AddToD3(D3_chart2, "Humidity", eventObject.dspl, eventObject.hmdt, eventObject.time, 0);
+                            if (!isBulking) {
+
+                                PruneOldD3Data(D3_chart1, CHART_1_NAME);
+                                PruneOldD3Data(D3_chart2, CHART_2_NAME);
+
+                                UpdateD3Charts(D3_chart1, CHART_1_NAME);
+                                UpdateD3Charts(D3_chart2, CHART_2_NAME);
+                            } else {
+                                $('#loading-sensor').text(eventObject.dspl);
                             }
                         }
-
                     }
                 }
             }
