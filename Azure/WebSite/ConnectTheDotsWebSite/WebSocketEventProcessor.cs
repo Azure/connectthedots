@@ -125,12 +125,12 @@ namespace ConnectTheDotsWebSite
 										List<IDictionary<string, object>> dictList = sortedDataBuffer.Values[idx];
 										foreach (IDictionary<string, object> dict in dictList)
 										{
-											if (dict.ContainsKey("value") && dict.ContainsKey("dataSourceName") && alertType.IndexOf(dict["dataSourceName"] as string) >= 0)
+											if (dict.ContainsKey("value") && dict.ContainsKey("UUID") && alertType.IndexOf(dict["UUID"] as string) >= 0)
 											{
 												// fill anomaly message
-												messagePayload["value"] = dict["value"];
-												messagePayload["dataSourceName"] = dict["dataSourceName"];
-												messagePayload["dspl"] = dict["dspl"];
+												messagePayload["Value"] = dict["Value"];
+												messagePayload["UUID"] = dict["UUID"];
+												messagePayload["DisplayName"] = dict["DisplayName"];
 												found = true;
 												break;
 											}
@@ -140,15 +140,15 @@ namespace ConnectTheDotsWebSite
 									}
 								}
 							}
-							if (messagePayload.ContainsKey("dataSourceName"))
+							if (messagePayload.ContainsKey("UUID"))
 							{
-								var name = messagePayload["dataSourceName"] as string;
-								double val = Convert.ToDouble(messagePayload["value"]);
+								var uuid = messagePayload["UUID"] as string;
+								double val = Convert.ToDouble(messagePayload["Value"]);
 
-								if (!MinMaxValue.ContainsKey(name))
-									MinMaxValue.Add(name, new MinMax { min = val, max = val });
+								if (!MinMaxValue.ContainsKey(uuid))
+									MinMaxValue.Add(uuid, new MinMax { min = val, max = val });
 
-								MinMax tmp = MinMaxValue[messagePayload["dataSourceName"] as string];
+								MinMax tmp = MinMaxValue[messagePayload["UUID"] as string];
 								if (tmp.min > val)
 									tmp.min = val;
 								if (tmp.max < val)
@@ -170,9 +170,9 @@ namespace ConnectTheDotsWebSite
 
 									// correct value
 									if (rnd.Next(2) == 1)
-										messagePayload["value"] = MinMaxValue[messagePayload["dataSourceName"] as string].max * (1.01 + 0.05 * rnd.Next(100) / 100);
+										messagePayload["Value"] = MinMaxValue[messagePayload["UUID"] as string].max * (1.01 + 0.05 * rnd.Next(100) / 100);
 									else
-										messagePayload["value"] = MinMaxValue[messagePayload["dataSourceName"] as string].min * (0.99 - 0.05 * rnd.Next(100) / 100);
+										messagePayload["Value"] = MinMaxValue[messagePayload["UUID"] as string].min * (0.99 - 0.05 * rnd.Next(100) / 100);
 								}
 							}
 							else if (messagePayload.ContainsKey("timestart"))
@@ -181,15 +181,12 @@ namespace ConnectTheDotsWebSite
 
 							// Build up the list of devices seen so far (in lieu of a formal device repository)
 							// Also keep the last message received per device (not currently used in the sample)
-							if (messagePayload.ContainsKey("dspl") && !messagePayload.ContainsKey("valueAvg"))
+							if (messagePayload.ContainsKey("UUID") && !messagePayload.ContainsKey("valueAvg"))
 							{
-								string deviceName = messagePayload["dspl"] as string;
-								string dataSourceSuffix = string.Empty;
-								if (messagePayload.ContainsKey("dataSourceName"))
-									dataSourceSuffix = ":" + messagePayload["dataSourceName"];
-								if (deviceName != null)
+								string uuid = messagePayload["UUID"] as string;
+								if (uuid != null)
 								{
-									WebSocketEventProcessor.g_devices.TryAdd(deviceName + dataSourceSuffix, messagePayload);
+									WebSocketEventProcessor.g_devices.TryAdd(uuid, messagePayload);
 								}
 							}
 

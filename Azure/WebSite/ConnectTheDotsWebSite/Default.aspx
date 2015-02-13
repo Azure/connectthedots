@@ -34,8 +34,8 @@
 
     <!-- general styles -->
 
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.3/css/jquery.dataTables.css">
-    <link rel="stylesheet" type="text/css" href="css/connectthedots.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.3/css/jquery.dataTables.css"/>
+    <link rel="stylesheet" type="text/css" href="css/connectthedots.css"/>
 
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.3/js/jquery.dataTables.min.js"></script>
@@ -77,19 +77,19 @@
 
             <div style="margin-left: 200px;height: 600px;position:relative;text-align:center;">
                 <div id="Temperature" class="chart">
-                <h4>Temperature</h4>
+                <h4>DataChart One</h4>
                     <script>
                         (function () {
-                            chart("Temperature");  // make sure chart name matches the div id
+                            chart("DataChartOne");  // make sure chart name matches the div id
                         })();
                     </script>
                 </div>
                 <div id="Humidity" class="chart">
-                <h4>Humidity</h4>
+                <h4>DataChart Two</h4>
                     <script>
 
                         (function () {
-                            chart("Humidity");  // make sure chart name matches the div id
+                            chart("DataChartTwo");  // make sure chart name matches the div id
                         })();
 
                     </script>

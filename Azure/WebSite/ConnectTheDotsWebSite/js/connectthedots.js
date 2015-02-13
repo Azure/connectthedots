@@ -35,30 +35,30 @@ var MS_MIN_INTERVAL = 100;
 var MS_PER_MINUTE = 60000;
 var WINDOW_MINUTES = 10;
 
-var CHART_1_NAME = "Temperature";
-var CHART_2_NAME = "Humidity";
+/*
+registeredCharts = {
+    chartId : {
+        dataFlows : {
+            flowUUID : {
+                path : svg_object,
+                legend: svg_object,
+                legend_r: svg_object,
+            }
+        },
+        svg: svg_object,
+        height: '',
+        width: '',
+        x : d3.scale,
+        y0 : d3.scale,
+        y1 : d3.scale
+    }
+};
+*/
 
-// globals
-
-var D3_chart1 = [];
-var D3_chart2 = [];
-
-// keep track of absolute freshest sample point
-
-var freshestTime = [];
-freshestTime[CHART_1_NAME] = null;
-freshestTime[CHART_2_NAME] = null;
+var registeredCharts = {};
 
 // globals used with D3
 
-var path = {};
-var legend = {};
-var legend_r = {};
-var x = null;
-var y0 = null;
-var y1 = null;
-var height = {};
-var width = {};
 var svg = {};
 var tip = {};
 var color = null;
@@ -90,13 +90,23 @@ function deepCopy(obj) {
     return copy;
 };
 
+// register chart fo futher creation
+function registerChart(chartId, dataUUIDs) {
+    // just copy
+    registeredCharts[chartId].dataUUIDs = dataUUIDs;
+
+    for (var id in dataUUIDs) {
+        registeredCharts[chartId].dataFlows[id] = {
+        };
+    }
+}
 
 // Create the chart(s) that will be used to
 // display the live data.  We use the D3.js
 // library to establish SVG elements that will
 // do the rendering
 
-function chart(chart_name, y0_label, y0_min, y0_max, y1_label, y1_min, y1_max) {
+function chart(chartId, y0_label, y0_min, y0_max, y1_label, y1_min, y1_max) {
 
     var margin = {
         top: 30,
@@ -105,7 +115,7 @@ function chart(chart_name, y0_label, y0_min, y0_max, y1_label, y1_min, y1_max) {
         left: 50
     };
 
-    var container = $('#' + chart_name);
+    var container = $('#' + chartId);
 
     //Standard height, for which the body font size is correct
     var preferredHeight = 768;
@@ -116,99 +126,95 @@ function chart(chart_name, y0_label, y0_min, y0_max, y1_label, y1_min, y1_max) {
     var percentage = displayHeight / preferredHeight;
     var newFontSize = Math.floor(fontsize * percentage) - 1;
 
-    width = container.width() - margin.right;
-    height = container.height() - margin.top - margin.bottom;
+    registeredCharts[chartId].width = container.width() - margin.right;
+    registeredCharts[chartId].height = container.height() - margin.top - margin.bottom;
 
     // seed the axes with some dummy values
 
-    x = d3.time.scale()
+    registeredCharts[chartId].x = d3.time.scale()
 		.domain([new Date("2015-01-01T04:02:39.867841Z"), new Date("2015-01-01T04:07:39.867841Z")])
-		.range([0, width]);
+		.range([0, registeredCharts[chartId].width]);
 
-    y0 = d3.scale.linear()
+    registeredCharts[chartId].y0 = d3.scale.linear()
 		.domain([y0_min, y0_max])
-		.range([height, 0]);
+		.range([registeredCharts[chartId].height, 0]);
 
-    y1 = d3.scale.linear()
+    registeredCharts[chartId].y1 = d3.scale.linear()
 		.domain([y1_min, y1_max])
-		.range([height, 0]);
+		.range([registeredCharts[chartId].height, 0]);
 
-    svg[chart_name] = d3.select("#" + chart_name)
+    registeredCharts[chartId].svg = d3.select("#" + chartId)
 		.append("p")
 		.append("svg")
-		.attr("width", width + margin.left + margin.right)
-		.attr("height", height + margin.top + margin.bottom)
+		.attr("width", registeredCharts[chartId].width + margin.left + margin.right)
+		.attr("height", registeredCharts[chartId].height + margin.top + margin.bottom)
 		.style("margin-left", margin.left + "px")
 		.style("margin-bottom", margin.bottom + "px")
 		.style("margin-right", margin.right + "px")
 		.append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    svg[chart_name].append("g")
+    registeredCharts[chartId].svg.append("g")
 		.attr("class", "y0 axis")
-		.call(d3.svg.axis().scale(y0).ticks(7).orient("left"));
+		.call(d3.svg.axis().scale(registeredCharts[chartId].y0).ticks(7).orient("left"));
 
     if (y0_label) {
-        svg[chart_name].append("text")
+        registeredCharts[chartId].svg.append("text")
             .attr("transform", "rotate(-90)")
             .attr("class", "y0 label")
             .attr("text-anchor", "middle")
             .attr("y", -50)
-            .attr("x", -height / 2)
+            .attr("x", -registeredCharts[chartId].height / 2)
             .attr("dy", "1em")
             .attr("font-size", newFontSize + "px")
             .text(y0_label);
     }
 
     if (y1_label) {
-        svg[chart_name].append("text")
+        registeredCharts[chartId].svg.append("text")
 			.attr("y1", 0 - (margin.top / 2))
 
-        svg[chart_name].append("g")
+        registeredCharts[chartId].svg.append("g")
 			.attr("class", "y1 axis")
-			.attr("transform", "translate(" + width + ",0)")
+			.attr("transform", "translate(" + registeredCharts[chartId].width + ",0)")
 			.text(y1_label)
-			.call(d3.svg.axis().scale(y1).ticks(7).orient("right"));
+			.call(d3.svg.axis().scale(registeredCharts[chartId].y1).ticks(7).orient("right"));
 
-        svg[chart_name].append("text")
+        registeredCharts[chartId].svg.append("text")
 			.attr("transform", "rotate(-90)")
 			.attr("class", "y1 label")
 			.attr("text-anchor", "middle")
-			.attr("y", width + 30)
-			.attr("x", -height / 2)
+			.attr("y", registeredCharts[chartId].width + 30)
+			.attr("x", -registeredCharts[chartId].height / 2)
 			.attr("dy", "1em")
 			.attr("font-size", newFontSize + "px")
 			.text(y1_label);
     }
 
-    svg[chart_name].append("g")
+    registeredCharts[chartId].svg.append("g")
 		.attr("class", "x axis")
-		.attr("transform", "translate(0," + (height) + ")")
-		.call(d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.time.format("%X")));
-
-    path[chart_name] = {};
-    legend[chart_name] = {};
-    legend_r[chart_name] = {};
+		.attr("transform", "translate(0," + (registeredCharts[chartId].height) + ")")
+		.call(d3.svg.axis().scale(registeredCharts[chartId].x).orient("bottom").tickFormat(d3.time.format("%X")));
 
     // create tip
-    tip[chart_name] = d3.tip()
+    tip[chartId] = d3.tip()
         .attr('class', 'd3-tip')
         .offset([-10, 0])
         .html(function (d) {
             return "<label class='time_header'>" + d.time + "</label><label class='value_circle'>&#x25cf;</label><label class='value'>" + d.data.toFixed(2) + "</label><label class='message'>" + d.alertData.message + "</label>";
         });
-    svg[chart_name].call(tip[chart_name]);
+    registeredCharts[chartId].svg.call(tip[chartId]);
 
-    if (!window['resizeCallback@' + chart_name]) {
-        window['resizeCallback@' + chart_name] = true;
+    if (!window['resizeCallback@' + chartId]) {
+        window['resizeCallback@' + chartId] = true;
         $(window).bind('resize', function () {
-            console.log('rezise chart: ' + chart_name);
+            console.log('rezise chart: ' + chartId);
             // remove original one
-            d3.select("#" + chart_name).select('svg').remove();
+            d3.select("#" + chartId).select('svg').remove();
             // clean up alert points
 
             // create a new one w/ correct size
-            chart(chart_name, y0_label, y0_min, y0_max, y1_label, y1_min, y1_max);
+            chart(chartId, y0_label, y0_min, y0_max, y1_label, y1_min, y1_max);
         }).trigger('resize');
     }
 }
@@ -296,6 +302,11 @@ function InsertNewDatapoint(data, time, val, y_axis, alertData) {
 
 function AddToD3(D3_set, chart_name, series_name, val, time, y_axis, alertData) {
 
+    if (sensorNames.indexOf(D3_set[i].name) == -1) {
+        sensorNames.push(D3_set[i].name);
+    }
+
+
     var data = null;
     for (var i = 0; i < D3_set.length; i++) {
         if (D3_set[i].name == series_name) {
@@ -323,59 +334,31 @@ function AddToD3(D3_set, chart_name, series_name, val, time, y_axis, alertData) 
 //  not producing any more data.
 //
 
-function PruneOldD3Data(D3_set, chart_name) {
+function PruneOldD3Data(chartId, dataUUID) {
     var now = new Date();
     var cutoff = new Date(now - WINDOW_MINUTES * MS_PER_MINUTE)
 
     console.log(now);
     console.log(cutoff);
 
-    for (var i = 0; i < D3_set.length; i++) {
-        var data = D3_set[i].data;
+    // cut data
+    var charArray = registeredCharts[chartId].set[dataUUID];
 
-        //for (var j = data.length - 1; j >= 0; j --){
-        //    if (data[j].time < cutoff){
-        //        data.splice(j,1);
-        //    }
-        //}
-
-        while (data.length >= 1 && data[0].time < cutoff) {
-            data.shift();
+    while (charArray.length >= 1 && charArray[0].time < cutoff) {
+        charArray.shift();
+        // clear
+        if (registeredCharts[chartId].path[dataUUID] != null) {
+            registeredCharts[chartId].path[dataUUID].remove();
+            registeredCharts[chartId].path[dataUUID] = null;
         }
-    }
-
-    var idxToRemove = [];
-
-    for (var i = 0; i < D3_set.length; i++) {
-
-        if (D3_set[i].data.length == 0) {
-
-            if (path[chart_name] == null) {
-                continue;
-            }
-
-            if (path[chart_name][D3_set[i].name] != null) {
-                path[chart_name][D3_set[i].name].remove();
-                path[chart_name][D3_set[i].name] = null;
-            }
-
-            if (legend[chart_name][D3_set[i].name] != null) {
-                legend[chart_name][D3_set[i].name].remove();
-                legend[chart_name][D3_set[i].name] = null;
-            }
-
-            if (legend_r[chart_name][D3_set[i].name] != null) {
-                legend_r[chart_name][D3_set[i].name].remove();
-                legend_r[chart_name][D3_set[i].name] = null;
-            }
-
-            idxToRemove.push(i);
+        if (registeredCharts[chartId].legend[dataUUID] != null) {
+            registeredCharts[chartId].legend[dataUUID].remove();
+            registeredCharts[chartId].legend[dataUUID] = null;
         }
-    }
-
-    for (var i = 0; i < idxToRemove.length; i++) {
-        console.log("splicing");
-        D3_set.splice(idxToRemove[i], 1);
+        if (registeredCharts[chartId].legend_r[dataUUID] != null) {
+            registeredCharts[chartId].legend_r[dataUUID].remove();
+            registeredCharts[chartId].legend_r[dataUUID] = null;
+        }
     }
 }
 
@@ -386,7 +369,7 @@ function PruneOldD3Data(D3_set, chart_name) {
 //  arrays, recomputes ranges for x and y axes
 //
 
-function UpdateD3Charts(D3_set, chart_name) {
+function UpdateD3Charts(chartId, dataUUID) {
 
     var minDate = new Date("3015-01-01T04:02:39.867841Z");
     var maxDate = new Date("1915-01-01T04:02:39.867841Z")
@@ -397,11 +380,6 @@ function UpdateD3Charts(D3_set, chart_name) {
     var displayHeight = $(window).height();
 
     for (var i = 0; i < D3_set.length; i++) {
-
-        if (sensorNames.indexOf(D3_set[i].name) == -1) {
-            sensorNames.push(D3_set[i].name);
-        }
-
         var data = D3_set[i].data;
         var y = data[0].y_axis;
 
@@ -432,12 +410,12 @@ function UpdateD3Charts(D3_set, chart_name) {
 
     if (minVal[0] < Number.MAX_VALUE) {
         var scaleMargin = (maxVal[0] - minVal[0]) * 10 / 100;
-        y0 = d3.scale.linear()
+        registeredCharts[chartId].y0 = d3.scale.linear()
 			.domain([minVal[0] - scaleMargin, maxVal[0] + scaleMargin])
-			.range([height, 0]);
+			.range([registeredCharts[chartId].height, 0]);
 
         var yAxisLeft = d3.svg.axis()
-			.scale(y0)
+			.scale(registeredCharts[chartId].y0)
 			.orient("left")
 
         svg[chart_name].selectAll("g.y0.axis")
@@ -447,21 +425,21 @@ function UpdateD3Charts(D3_set, chart_name) {
     if (minVal[1] < Number.MAX_VALUE) {
         var scaleMargin = (maxVal[1] - minVal[1]) * 10 / 100;
 
-        y1 = d3.scale.linear()
+        registeredCharts[chartId].y1 = d3.scale.linear()
 			.domain([minVal[1] - scaleMargin, maxVal[1] + scaleMargin])
-			.range([height, 0]);
+			.range([registeredCharts[chartId].height, 0]);
 
         var yAxisRight = d3.svg.axis()
-			.scale(y1)
+			.scale(registeredCharts[chartId].y1)
 			.orient("right")
 
         svg[chart_name].selectAll("g.y1.axis")
 			.call(yAxisRight);
     }
 
-    x = d3.time.scale()
+    registeredCharts[chartId].x = d3.time.scale()
 		.domain([minDate, maxDate])
-		.range([0, width]);
+		.range([0, registeredCharts[chartId].width]);
 
     var xAxis = d3.svg.axis()
 		.scale(x)
@@ -478,7 +456,7 @@ function UpdateD3Charts(D3_set, chart_name) {
 		    return x(d.time);
 		})
 		.y(function (d) {
-		    return y0(d.data);
+		    return registeredCharts[chartId].y0(d.data);
 		}),
 
 		d3.svg.line()
@@ -487,7 +465,7 @@ function UpdateD3Charts(D3_set, chart_name) {
 		    return x(d.time);
 		})
 		.y(function (d) {
-		    return y1(d.data);
+		    return registeredCharts[chartId].y1(d.data);
 		})
     ];
 
@@ -530,21 +508,21 @@ function UpdateD3Charts(D3_set, chart_name) {
                             .attr("class", "bar")
 							.attr("x", x(data[pnt].time))
 							.attr("y", 0)
-                            .attr("height", height)
+                            .attr("height", registeredCharts[chartId].height)
 							.attr("width", "2px")
                             .style("fill", "#e6c9cd")
 
                         data[pnt].alertShowed = svg[chart_name].append("g").append("circle")
                             .attr("class", "d3-dot")
 							.attr("cx", x(data[pnt].time))
-							.attr("cy", data[pnt].y_axis == 0 ? y0(data[pnt].data) : y1(data[pnt].data))
+							.attr("cy", data[pnt].y_axis == 0 ? registeredCharts[chartId].y0(data[pnt].data) : registeredCharts[chartId].y1(data[pnt].data))
 							.style("fill", "#e93541")
 							.attr("r", displayHeight / 200)
                             .on('mouseover', function () { d3.select(this).transition().attr("r", displayHeight / 130); eval("tip[chart_name].show(" + transferData + ");") })
                             .on('mouseout', function () { d3.select(this).transition().attr("r", displayHeight / 200); tip[chart_name].hide(); });
                     } else {
                         data[pnt].alertShowed.attr("cx", x(data[pnt].time))
-							.attr("cy", data[pnt].y_axis == 0 ? y0(data[pnt].data) : y1(data[pnt].data));
+							.attr("cy", data[pnt].y_axis == 0 ? registeredCharts[chartId].y0(data[pnt].data) : registeredCharts[chartId].y1(data[pnt].data));
 
                         data[pnt].alertBarShowed
                             .attr("x", x(data[pnt].time))
@@ -557,7 +535,7 @@ function UpdateD3Charts(D3_set, chart_name) {
 					.attr("class", "legend")
 					.attr("width", 10)
 					.attr("height", 10)
-					.attr("x", width + 50)
+					.attr("x", registeredCharts[chartId].width + 50)
 					.attr("y", 20 + (20 * i))
 					.style("fill", color(name))
 					.style("stroke", color(name));
@@ -569,7 +547,7 @@ function UpdateD3Charts(D3_set, chart_name) {
                 else if (name.toLowerCase().indexOf("flow") != -1) legend_display_name = "Flow";
 
                 legend[chart_name][name] = svg[chart_name].append("text")
-					.attr("x", width + 65)
+					.attr("x", registeredCharts[chartId].width + 65)
 					.attr("y", 20 + (20 * i) + 5)
 					.attr("class", "legend")
 					.style("fill", color(name))
@@ -583,16 +561,16 @@ function UpdateD3Charts(D3_set, chart_name) {
 }
 
 
-function RemoveFromChart(chart_name, series_name) {
+function RemoveFromChart(chartId, series_name) {
 
-    path[chart_name][series_name].remove();
-    path[chart_name][series_name] = null;
+    path[chartId][series_name].remove();
+    path[chartId][series_name] = null;
 
-    legend[chart_name][series_name].remove();
-    legend[chart_name][series_name] = null;
+    legend[chartId][series_name].remove();
+    legend[chartId][series_name] = null;
 
-    legend_r[chart_name][series_name].remove();
-    legend_r[chart_name][series_name] = null;
+    legend_r[chartId][series_name].remove();
+    legend_r[chartId][series_name] = null;
 }
 
 function ResetChart(chart_name) {
@@ -610,21 +588,11 @@ function ResetChart(chart_name) {
 //
 
 function ClearD3Charts() {
-
-    for (var i = 0; i < D3_chart1.length; i++) {
-        RemoveFromChart(CHART_1_NAME, D3_chart1[i].name);
+    for (var id in registeredCharts) {
+        RemoveFromChart(id, registeredCharts[id].name);
+        ResetChart(id);
+        registeredCharts[id] = { dataUUIDs: registeredCharts[id].dataUUIDs }
     }
-
-    ResetChart(CHART_1_NAME);
-
-    for (var i = 0; i < D3_chart2.length; i++) {
-        RemoveFromChart(CHART_2_NAME, D3_chart2[i].name);
-    }
-
-    ResetChart(CHART_2_NAME);
-
-    D3_chart1 = [];
-    D3_chart2 = [];
 }
 
 //
@@ -827,11 +795,11 @@ $(document).ready(function () {
         // Seems like we have valid data
         try {
 
-            if (eventObject.dspl != null) {
+            if (eventObject.DisplayName != null) {
 
                 // if we have a new sensor, add it to the list
                 var exists = true;
-                if ($('#sensorList').data(eventObject.dspl) == undefined) {
+                if ($('#sensorList').data(eventObject.DisplayName) == undefined) {
                     exists = false;
                 }
 
@@ -839,15 +807,14 @@ $(document).ready(function () {
 
                     var ul = document.getElementById("sensorList");
                     var li = document.createElement("li");
-                    li.appendChild(document.createTextNode(eventObject.dspl));
+                    li.appendChild(document.createTextNode(eventObject.DisplayName));
                     ul.appendChild(li);
 
-                    $('#sensorList').data(eventObject.dspl, eventObject.dspl);
+                    $('#sensorList').data(eventObject.DisplayName, eventObject.DisplayName);
 
                 }
             }
-            var chart = undefined;
-            var chartName = undefined;
+            var chartId = undefined;
 
             // If the message is an alert, we need to display it in the datatable
             if (eventObject.alerttype != null) { // && isBulking == false) {
@@ -900,44 +867,19 @@ $(document).ready(function () {
                     var alertData = { message: message };
 
                     // add to charts
-                    if (eventObject.average != null) {
-                        AddToD3(D3_chart1, CHART_1_NAME, "avg", eventObject.valueavg, eventObject.timestart, 0, alertData);
-                        chart = D3_chart1;
-                        chartName = CHART_1_NAME;
-                    } else {
-                        var sensorName = eventObject.dspl + ":" + eventObject.dataSourceName;
-
-                        if (eventObject.dataSourceName.toLowerCase().indexOf("temp") != -1) {
-                            AddToD3(D3_chart1, CHART_1_NAME, sensorName, eventObject.value, eventObject.timestart, 0, alertData);
-                            chart = D3_chart1;
-                            chartName = CHART_1_NAME;
-                        } else if (eventObject.dataSourceName.toLowerCase().indexOf("flow") != -1) {
-                            AddToD3(D3_chart2, CHART_2_NAME, sensorName, eventObject.value, eventObject.timestart, 0, alertData);
-                            chart = D3_chart2;
-                            chartName = CHART_2_NAME;
-                        } else if (eventObject.dataSourceName.toLowerCase().indexOf("pressure") != -1) {
-                            AddToD3(D3_chart2, CHART_2_NAME, sensorName, eventObject.value, eventObject.timestart, 1, alertData);
-                            chart = D3_chart2;
-                            chartName = CHART_2_NAME;
+                    for (var id in registeredCharts) {
+                        if (registeredCharts[id].hasOwnProperty(eventObject.UUID)) {
+                            chartId = id;
+                            AddToD3(chartId, eventObject.UUID, eventObject.Value, eventObject.timestart, 0, alertData);
+                            break;
                         }
                     }
-
                 }
             } else {
 
                 // Message received is not an alert. let's display it in the charts
 
-                if (eventObject.average != null) {
-
-                    if (eventObject.time != null) {
-                        AddToD3(D3_chart1, CHART_1_NAME, "avg", eventObject.valueavg, eventObject.time, 0);
-                        chart = D3_chart1;
-                        chartName = CHART_1_NAME;
-                    }
-                    if (isBulking) {
-                        $('#loading-sensor').text("avg");
-                    }
-                } else if (eventObject.bulkData != null) {
+                if (eventObject.bulkData != null) {
 
                     // Don't update while receiving bulk data.  It will
                     // cause the browser to (usually) freeze
@@ -947,43 +889,31 @@ $(document).ready(function () {
                         isBulking = true;
                         ClearD3Charts();
                     } else {
-
-                        PruneOldD3Data(D3_chart1, CHART_1_NAME);
-                        PruneOldD3Data(D3_chart2, CHART_2_NAME);
-
-                        UpdateD3Charts(D3_chart1, CHART_1_NAME);
-                        UpdateD3Charts(D3_chart2, CHART_2_NAME);
+                        // update all
+                        for (var id in registeredCharts) {
+                            for (var uuid in registeredCharts[id]) {
+                                PruneOldD3Data(id, uuid);
+                                UpdateD3Charts(id, uuid);
+                            }
+                        }
 
                         $('#loading').hide();
-
                         isBulking = false;
                     }
                 } else {
-                    // the message is data for the charts
-                    // we make sure the dspl field is in the message, meaning the data is coming from a known device or service
-                    if (eventObject.dspl != null) {
-                        var sensorName = eventObject.dspl + ":" + eventObject.dataSourceName;
-
-                        if (eventObject.time != null) {
-                            AddToD3(D3_chart1, "Temperature", eventObject.dspl, eventObject.temp, eventObject.time, 0);
-                            AddToD3(D3_chart2, "Humidity", eventObject.dspl, eventObject.hmdt, eventObject.time, 0);
-                            if (!isBulking) {
-
-                                PruneOldD3Data(D3_chart1, CHART_1_NAME);
-                                PruneOldD3Data(D3_chart2, CHART_2_NAME);
-
-                                UpdateD3Charts(D3_chart1, CHART_1_NAME);
-                                UpdateD3Charts(D3_chart2, CHART_2_NAME);
-                            } else {
-                                $('#loading-sensor').text(eventObject.dspl);
-                            }
+                    // the message is data for the charts. find chart for message
+                    for (var id in registeredCharts) {
+                        if (registeredCharts[id].hasOwnProperty(eventObject.UUID)) {
+                            chartId = id;
+                            AddToD3(chartId, eventObject.UUID, eventObject.Value, eventObject.timestart, 0);
+                            break;
                         }
                     }
                 }
             }
-            if (!isBulking && chart && chartName) {
-                PruneOldD3Data(chart, chartName);
-                UpdateD3Charts(chart, chartName);
+            if (!isBulking && chartId) {
+                PruneOldD3Data(chartId, eventObject.UUID);
+                UpdateD3Charts(chartId, eventObject.UUID);
             } else {
                 $('#loading-sensor').text(sensorName);
             }

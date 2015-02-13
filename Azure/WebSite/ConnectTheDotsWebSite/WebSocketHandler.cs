@@ -183,11 +183,11 @@ namespace ConnectTheDotsWebSite
 				messageTime = DateTime.Parse(message["timestart"].ToString());
 
 			if (
-					  !message.ContainsKey("dspl") ||
+					  !message.ContainsKey("DisplayName") ||
 					  (
 							(
 							 this.DeviceFilterList.Contains("all") ||
-							 this.DeviceFilterList.Contains(message["dspl"].ToString().ToLower())
+							 this.DeviceFilterList.Contains(message["DisplayName"].ToString().ToLower())
 							)
 					  )
 				 )
