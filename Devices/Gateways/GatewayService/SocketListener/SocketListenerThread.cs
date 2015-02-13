@@ -19,6 +19,8 @@ namespace SocketListener
         private static Func<string, int> _Enqueue;
         private static Func<bool> _DoWorkSwitch;
 
+        private Thread listeningThread = null;
+
         public bool Start(Func<string, int> enqueue, ILogger logger, Func<bool> doWorkSwitch)
         {
             _Enqueue = enqueue;
@@ -29,13 +31,12 @@ namespace SocketListener
             return true;
         }
 
-        Thread listeningThread = null;
         public int RunForSocket()
         {
             int step = CONNECTION_RETRIES;
 
             Socket client = null;
-            while (--step > 0)
+            while (--step > 0 && _DoWorkSwitch())
             {
                 try
                 {
@@ -94,17 +95,18 @@ namespace SocketListener
 
         public static void SensorDataClient(Socket client)
         {
-            StringBuilder jsonBuilder = new StringBuilder();
-            byte[] buffer = new Byte[1024];
-            // Use Regular Expressions (Regex) to parse incoming data, which may contain multiple JSON strings 
-            // USBSPLSOCKET.PY uses "<" and ">" to terminate JSON string at each end, so built Regex to find strings surrounded by angle brackets
-            // You can test Regex extractor against a known string using a variety of online tools, such as http://regexhero.net/tester/ for C#.
-            //Regex dataExtractor = new Regex(@"<(\d+.?\d*)>");
-            Regex dataExtractor = new Regex("<([\\w\\s\\d:\",-{}.]+)>");
-
-            while (_DoWorkSwitch())
+            try
             {
-                try
+                _Logger.LogError("SensorDataClient");    
+                StringBuilder jsonBuilder = new StringBuilder();
+                byte[] buffer = new Byte[1024];
+                // Use Regular Expressions (Regex) to parse incoming data, which may contain multiple JSON strings 
+                // USBSPLSOCKET.PY uses "<" and ">" to terminate JSON string at each end, so built Regex to find strings surrounded by angle brackets
+                // You can test Regex extractor against a known string using a variety of online tools, such as http://regexhero.net/tester/ for C#.
+                //Regex dataExtractor = new Regex(@"<(\d+.?\d*)>");
+                Regex dataExtractor = new Regex("<([\\w\\s\\d:\",-{}.]+)>");
+
+                while (_DoWorkSwitch())
                 {
                     int bytesRec = client.Receive(buffer);
                     int matchCount = 1;
@@ -132,43 +134,45 @@ namespace SocketListener
                         }
                     }
                 }
-                catch (StackOverflowException ex)
+            }
+            catch (StackOverflowException ex)
+            {
+                if (_Logger != null)
                 {
-                    if (_Logger != null)
-                    {
-                        _Logger.LogError("Stack Overflow while processing data from socket: " + ex.StackTrace);
-                        _Logger.LogError("Closing program...");
-                    }   
-
-                    throw;
+                    _Logger.LogError("Stack Overflow while processing data from socket: " + ex.StackTrace);
+                    _Logger.LogError("Closing program...");
                 }
-                catch (OutOfMemoryException ex)
-                {
-                    if (_Logger != null)
-                    {
-                        _Logger.LogError("Stack Overflow while processing data from socket: " + ex.StackTrace);
-                        _Logger.LogError("Closing program...");    
-                    }
 
-                    throw;
-                }
-                catch (SocketException ex)
+                throw;
+            }
+            catch (OutOfMemoryException ex)
+            {
+                if (_Logger != null)
                 {
-                    if (_Logger != null)
-                    {
-                        _Logger.LogError("Socket exception processing data from socket: " + ex.StackTrace);
-                        _Logger.LogError("Closing Program...");
-                    }
+                    _Logger.LogError("Stack Overflow while processing data from socket: " + ex.StackTrace);
+                    _Logger.LogError("Closing program...");
+                }
 
-                    throw;
-                }
-                catch (Exception ex)
+                throw;
+            }
+            catch (SocketException ex)
+            {
+                if (_Logger != null)
                 {
-                    if (_Logger != null)
-                    {
-                        _Logger.LogError("Exception processing data from socket: " + ex.StackTrace);
-                        _Logger.LogError("Continuing...");
-                    }
+                    _Logger.LogError("Socket exception processing data from socket: " + ex.StackTrace + ex.Message);
+                    _Logger.LogError("Continuing...");
+                }
+
+                // Dinar: this will raise every time when sensor stopped connection
+                // wont throw to not stop service
+                //throw;
+            }
+            catch (Exception ex)
+            {
+                if (_Logger != null)
+                {
+                    _Logger.LogError("Exception processing data from socket: " + ex.StackTrace);
+                    _Logger.LogError("Continuing...");
                 }
             }
         }
