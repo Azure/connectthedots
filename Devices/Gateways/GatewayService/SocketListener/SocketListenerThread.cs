@@ -108,29 +108,40 @@ namespace SocketListener
 
                 while (_DoWorkSwitch())
                 {
-                    int bytesRec = client.Receive(buffer);
-                    int matchCount = 1;
-                    // Read string from buffer
-                    string data = Encoding.ASCII.GetString(buffer, 0, bytesRec);
-                    //logger.Info("Read string: " + data);
-                    if (data.Length > 0)
+                    try
                     {
-                        // Parse string into angle bracket surrounded JSON strings
-                        var matches = dataExtractor.Matches(data);
-                        if (matches.Count >= 1)
+                        int bytesRec = client.Receive(buffer);
+                        int matchCount = 1;
+                        // Read string from buffer
+                        string data = Encoding.ASCII.GetString(buffer, 0, bytesRec);
+                        //logger.Info("Read string: " + data);
+                        if (data.Length > 0)
                         {
-                            foreach (Match m in matches)
+                            // Parse string into angle bracket surrounded JSON strings
+                            var matches = dataExtractor.Matches(data);
+                            if (matches.Count >= 1)
                             {
-                                jsonBuilder.Clear();
-                                // Remove angle brackets
-                                //jsonBuilder.Append("{\"dspl\":\"Wensn Digital Sound Level Meter\",\"Subject\":\"sound\",\"DeviceGUID\":\"81E79059-A393-4797-8A7E-526C3EF9D64B\",\"decibels\":");
-                                jsonBuilder.Append(m.Captures[0].Value.Trim().Substring(1, m.Captures[0].Value.Trim().Length - 2));
-                                //jsonBuilder.Append("}");
-                                string jsonString = jsonBuilder.ToString();
-                                //logger.Info("About to call SendAMQPMessage with JSON string: " + jsonString);
-                                _Enqueue(jsonString);
-                                matchCount++;
+                                foreach (Match m in matches)
+                                {
+                                    jsonBuilder.Clear();
+                                    // Remove angle brackets
+                                    //jsonBuilder.Append("{\"dspl\":\"Wensn Digital Sound Level Meter\",\"Subject\":\"sound\",\"DeviceGUID\":\"81E79059-A393-4797-8A7E-526C3EF9D64B\",\"decibels\":");
+                                    jsonBuilder.Append(m.Captures[0].Value.Trim().Substring(1, m.Captures[0].Value.Trim().Length - 2));
+                                    //jsonBuilder.Append("}");
+                                    string jsonString = jsonBuilder.ToString();
+                                    //logger.Info("About to call SendAMQPMessage with JSON string: " + jsonString);
+                                    _Enqueue(jsonString);
+                                    matchCount++;
+                                }
                             }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        if (_Logger != null)
+                        {
+                            _Logger.LogError("Exception processing data from socket: " + ex.StackTrace);
+                            _Logger.LogError("Continuing...");
                         }
                     }
                 }
@@ -166,14 +177,6 @@ namespace SocketListener
                 // Dinar: this will raise every time when sensor stopped connection
                 // wont throw to not stop service
                 //throw;
-            }
-            catch (Exception ex)
-            {
-                if (_Logger != null)
-                {
-                    _Logger.LogError("Exception processing data from socket: " + ex.StackTrace);
-                    _Logger.LogError("Continuing...");
-                }
             }
         }
     }
