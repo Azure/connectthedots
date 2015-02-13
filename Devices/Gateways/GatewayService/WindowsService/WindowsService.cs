@@ -1,4 +1,5 @@
-﻿using System.ServiceModel.Web;
+﻿using System;
+using System.ServiceModel.Web;
 using System.ServiceProcess;
 using WindowsService.Utils;
 using WindowsService.Utils.Logger;
@@ -16,8 +17,8 @@ namespace WindowsService
         private static WebServiceHost _WebHost;
         private static readonly ILogger _Logger = EventLogger.Instance;
 
-        private static readonly GatewayQueue<SensorDataContract> _GatewayQueue
-            = new GatewayQueue<SensorDataContract>();
+        private static readonly GatewayQueue<QueuedItem> _GatewayQueue
+            = new GatewayQueue<QueuedItem>();
 
         private static readonly AMQPSender<SensorDataContract> _AMPQSender
             = new AMQPSender<SensorDataContract>(Constants.AMQPSAddress,
@@ -25,7 +26,8 @@ namespace WindowsService
                 Constants.EventHubDeviceId, Constants.EventHubDeviceDisplayName);
 
         private static readonly EventProcessor _BatchSenderThread
-            = new BatchSenderThread<SensorDataContract>(_GatewayQueue, _AMPQSender);
+            = new BatchSenderThread<QueuedItem, SensorDataContract>(_GatewayQueue, _AMPQSender, null,
+                new Func<QueuedItem, string>( m => m.JsonData));
 
         private static readonly DataIntakeLoader _DataIntakeLoader
             = new DataIntakeLoader(_Logger);
@@ -68,15 +70,18 @@ namespace WindowsService
 	    _Logger.LogInfo("...started");
         }
 
+        private static bool _DoWork = true;
         public static bool DoWork()
         {
-            //TODO: add stop indicator
-            return true;
+            //TODO: test stop indicator
+            return _DoWork;
         }
 
         protected override void OnStop()
         {
             _Logger.LogInfo( "Service stopping... " );
+
+            _DoWork = false;
 
             // close web host first (message intake)
             if (_WebHost != null)
@@ -85,7 +90,7 @@ namespace WindowsService
                 _WebHost = null;
             }
 
-            /// shutdown processor (message processing)
+            // shutdown processor (message processing)
             _BatchSenderThread.Stop(STOP_TIMEOUT_MS);
 
             // shut down connection to event hub last
@@ -97,7 +102,7 @@ namespace WindowsService
             _Logger.LogInfo("...stopped");
         }
 
-        protected virtual void OnData(SensorDataContract data)
+        protected virtual void OnData(QueuedItem data)
         {
             // LORENZO: test behaviours such as accumulating data an processing in batch
             _BatchSenderThread.Process();

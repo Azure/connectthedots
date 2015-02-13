@@ -33,6 +33,11 @@ namespace Test
             return null;
         }
 
+        public Task SendSerialized(string jsonData)
+        {
+            throw new Exception("Not implemented");
+        }
+
         public void Close()
         {
         }

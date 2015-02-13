@@ -8,10 +8,12 @@ using System.Diagnostics;
 
 namespace Gateway.Utils.Queue
 {
-    public class BatchSenderThread<T> : EventProcessor
+    public class BatchSenderThread<TQueueItem, TMessage> : EventProcessor
     {
-        private readonly IAsyncQueue<T> _DataSource;
-        private readonly IMessageSender<T> _DataTarget;
+        private readonly IAsyncQueue<TQueueItem> _DataSource;
+        private readonly IMessageSender<TMessage> _DataTarget;
+        private readonly Func<TQueueItem, TMessage> _DataTransform;
+        private readonly Func<TQueueItem, string> _SerializedData;
         private int _outstandingTasks;
 
         private Thread _WorkerThread;
@@ -19,12 +21,11 @@ namespace Gateway.Utils.Queue
         private AutoResetEvent _doWork;
         private bool _running; 
 
-
         private object _SyncRoot = new object();
 
         private static readonly string _LogMessagePrefix = "BatchSenderThread error. ";
 
-        public BatchSenderThread(IAsyncQueue<T> dataSource, IMessageSender<T> dataTarget)
+        public BatchSenderThread(IAsyncQueue<TQueueItem> dataSource, IMessageSender<TMessage> dataTarget, Func<TQueueItem, TMessage> dataTransform, Func<TQueueItem, string> serializedData)
         {
             if (dataSource == null || dataTarget == null)
             {
@@ -36,6 +37,8 @@ namespace Gateway.Utils.Queue
             _running = false;
             _DataSource = dataSource;
             _DataTarget = dataTarget;
+            _DataTransform = dataTransform;
+            _SerializedData = serializedData;
             _outstandingTasks = 0;
         }
 
@@ -156,7 +159,14 @@ namespace Gateway.Utils.Queue
 
                                         if (popped.Result.IsSuccess)
                                         {
-                                            return _DataTarget.SendMessage(popped.Result.Result);
+                                            if (_DataTransform != null)
+                                                return _DataTarget.SendMessage(_DataTransform(popped.Result.Result));
+                                            if (_SerializedData != null)
+                                                return _DataTarget.SendSerialized(_SerializedData(popped.Result.Result));
+                                        }
+                                        else
+                                        {
+                                            throw new Exception();
                                         }
                                         return popped;
                                     })

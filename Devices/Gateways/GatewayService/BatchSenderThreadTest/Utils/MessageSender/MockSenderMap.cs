@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Gateway.Utils.MessageSender;
@@ -20,6 +21,11 @@ namespace BatchSenderThreadTest.Utils.MessageSender
                     else _SentMessages.Add(data, 1);
                 }
             });
+        }
+
+        public Task SendSerialized(string jsonData)
+        {
+            throw new Exception("Not implemented");
         }
 
         public bool Contains(T data)

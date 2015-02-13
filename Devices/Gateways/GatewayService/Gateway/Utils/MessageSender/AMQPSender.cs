@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -8,7 +7,6 @@ using Amqp;
 using Amqp.Framing;
 using Gateway.Utils.Logger;
 using Newtonsoft.Json;
-using System.Diagnostics;
 
 namespace Gateway.Utils.MessageSender
 {
@@ -192,8 +190,26 @@ namespace Gateway.Utils.MessageSender
 
         public async Task SendMessage(T data)
         {
-            var m = PrepareMessage( data );
+            string serializedData = null;
+            if (data != null)
+                serializedData = JsonConvert.SerializeObject(data);
+            Message m = PrepareMessage(serializedData);
+            await TrySendPrepared(m);
+        }
 
+        public async Task SendSerialized(string jsonData)
+        {
+            Message m = PrepareMessage(jsonData);
+            await TrySendPrepared(m);
+        }
+
+        public void Close()
+        {
+            _senders.Close( );
+        }
+
+        private async Task TrySendPrepared(Message m)
+        {
             try
             {
                 // send to the cloud asynchronously, but wait for completetion
@@ -204,11 +220,6 @@ namespace Gateway.Utils.MessageSender
             {
                 Logger.LogError(_LogMesagePrefix + ex.Message);
             }
-        }
-
-        public void Close()
-        {
-            _senders.Close( );
         }
 
         private void SendAmqpMessage( Message m )
@@ -242,7 +253,7 @@ namespace Gateway.Utils.MessageSender
             }
         }
 
-        protected Message PrepareMessage( T messageData, string subject = default(string), string deviceId = default(string), string deviceDisplayName = default(string) )
+        protected Message PrepareMessage(string serializedData, string subject = default(string), string deviceId = default(string), string deviceDisplayName = default(string))
         {
             if( subject == default( string ) )
                 subject = _DefaultSubject;
@@ -263,9 +274,9 @@ namespace Gateway.Utils.MessageSender
             //message.MessageAnnotations[new Symbol("x-opt-partition-key")] = deviceId;
 
             Dictionary<string, object> outDictionary = null;
-            if( messageData != null )
+            if (serializedData != null)
             {
-                string serializedData = JsonConvert.SerializeObject( messageData );
+                //string serializedData = JsonConvert.SerializeObject( messageData );
                 outDictionary =
                     JsonConvert.DeserializeObject<Dictionary<string, object>>( serializedData );
 

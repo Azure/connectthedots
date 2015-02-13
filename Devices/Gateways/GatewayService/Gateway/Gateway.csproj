@@ -63,6 +63,7 @@
     <Compile Include="GatewayService.cs" />
     <Compile Include="EventProcessor.cs" />
     <Compile Include="IGatewayService.cs" />
+    <Compile Include="Models\QueueItem.cs" />
     <Compile Include="Models\SensorDataContract.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceInstantiation\IService.cs" />

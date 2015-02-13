@@ -11,7 +11,7 @@ namespace BatchSenderThreadTest
             t.Run();
 
             // wait for logging tasks to complete
-            Console.WriteLine("Test completed, press any key to exit");
+            Console.WriteLine("Test completed, press enter to exit");
             Console.ReadLine();
         }
     }

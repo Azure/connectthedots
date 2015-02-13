@@ -4,7 +4,9 @@ using System.IO.Ports;
 using System.Threading;
 using System.Threading.Tasks;
 using Gateway.DataIntake;
+using Gateway.Models;
 using Gateway.Utils.Logger;
+using Newtonsoft.Json;
 
 namespace SerialPortListener
 {
@@ -21,6 +23,8 @@ namespace SerialPortListener
             public Thread listeningThread { get; set; }
         }
 
+        const int SLEEP_TIME_BETWEEN_SCAN = 5000; // 5 sec
+
         private static readonly List<SerialPortListeningThread> _ListeningThreads
             = new List<SerialPortListeningThread>();
 
@@ -34,15 +38,30 @@ namespace SerialPortListener
             _Logger = logger;
             _DoWorkSwitch = doWorkSwitch;
 
+            Task.Run(() => RunForSerial());
             Task.Run(() => TestRun());
             return true;
         }
 
         public int TestRun()
         {
+            int nall = 0;
             do
             {
-                _Enqueue("EEE");
+                Random r = new Random();
+                int rint = r.Next() % 2;
+                SensorDataContract sensorData = new SensorDataContract
+                    {
+                        Measure = rint == 0 ? "length" : "time",
+                        UnitOfMeasure = rint == 0 ? "m" : "s",
+                        DisplayName = "Sensor" + r.Next() % 2 + (rint == 0 ? "m" : "s"),
+                        Guid = nall++,
+                        Value = r.Next() % 1000 - 500,
+                        Location = "here",
+                        Organization = "contoso",
+                    };
+
+                _Enqueue(JsonConvert.SerializeObject(sensorData));
                 Thread.Sleep(1000);
             } while (_DoWorkSwitch());
             return 0;
@@ -81,14 +100,14 @@ namespace SerialPortListener
                 // For each of the valid serial ports, start a new listening thread if not already created
                 foreach (string serialPortName in ports)
                 {
-                    if (!_ListeningThreads.Exists(x => x.portName.Equals(serialPortName))
-                        )
+                    if (!_ListeningThreads.Exists(x => x.portName.Equals(serialPortName)))
                     {
                         if (_Logger != null)
                             _Logger.LogInfo("Found serial port with Normal attribute: " + serialPortName);
 
                         // Start a listening thread for each serial port
-                        var listeningThread = new Thread(() => ListeningForSensors(serialPortName));
+                        string name = serialPortName;
+                        var listeningThread = new Thread(() => ListeningForSensors(name));
                         listeningThread.Start();
                         _ListeningThreads.Add(new SerialPortListeningThread(serialPortName, listeningThread));
                     }
@@ -101,16 +120,16 @@ namespace SerialPortListener
                         _Logger.LogError("No connected serial ports");
                 }
 #else
-                if (listeningThreads.Count == 0)
+                if (_ListeningThreads.Count == 0)
                 {
                     // Start a unique thread simulating data
                     var listeningThread = new Thread(() => ListeningForSensors("Simulated"));
                     listeningThread.Start();
-                    listeningThreads.Add(new SerialPortListeningThread("Simulated", listeningThread));
+                    _ListeningThreads.Add(new SerialPortListeningThread("Simulated", listeningThread));
                 }
 #endif
                 // Every 5 seconds we scan Serial COM ports
-                Thread.Sleep(5000);
+                Thread.Sleep(SLEEP_TIME_BETWEEN_SCAN);
             } while (_DoWorkSwitch());
             return 0;
         }

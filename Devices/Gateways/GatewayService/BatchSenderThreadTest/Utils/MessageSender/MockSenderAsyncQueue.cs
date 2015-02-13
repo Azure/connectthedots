@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Gateway.Utils.MessageSender;
@@ -13,6 +14,10 @@ namespace BatchSenderThreadTest.Utils.MessageSender
         public async Task SendMessage(T data)
         {
             _SentMessagesQueue.Push(data);
+        }
+        public Task SendSerialized(string jsonData)
+        {
+            throw new Exception("Not implemented");
         }
 
         public MockSenderMap<T> ToMockSenderMap()

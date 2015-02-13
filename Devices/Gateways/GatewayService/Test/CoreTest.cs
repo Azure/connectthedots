@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.AccessControl;
 using System.Threading;
 using System.Threading.Tasks;
 using Gateway;
@@ -18,9 +19,9 @@ namespace Test
 
         private readonly ILogger _testLogger = new TestLogger();
         private readonly AutoResetEvent _completed = new AutoResetEvent(false);
-        private readonly GatewayQueue<SensorDataContract> _GatewayQueue;
-        private readonly IMessageSender<SensorDataContract> _Sender;
-        private readonly BatchSenderThread<SensorDataContract> _BatchSenderThread;
+        private readonly GatewayQueue<QueuedItem> _GatewayQueue;
+        private readonly IMessageSender<QueuedItem> _Sender;
+        private readonly BatchSenderThread<QueuedItem, QueuedItem> _BatchSenderThread;
         private readonly Random _rand;
         private int _totalMessages;
 
@@ -30,11 +31,11 @@ namespace Test
         {
             _rand = new Random();
             _totalMessages = 0;
-            _GatewayQueue = new GatewayQueue<SensorDataContract>();
-            _Sender = new MockSender<SensorDataContract>(this);
+            _GatewayQueue = new GatewayQueue<QueuedItem>();
+            _Sender = new MockSender<QueuedItem>(this);
             //_Sender = new AMQPSender<SensorDataContract>(Constants.AMQPSAddress, Constants.EventHubName, Constants.EventHubMessageSubject, Constants.EventHubDeviceId, Constants.EventHubDeviceDisplayName);
-            ((AMQPSender<SensorDataContract>)_Sender).Logger = new TestLogger();
-            _BatchSenderThread = new BatchSenderThread<SensorDataContract>( _GatewayQueue, _Sender );
+            //((AMQPSender<QueuedItem>)_Sender).Logger = new TestLogger();
+            _BatchSenderThread = new BatchSenderThread<QueuedItem, QueuedItem>(_GatewayQueue, _Sender, m => m, null);
         }
 
         public void Run()
@@ -64,7 +65,10 @@ namespace Test
                         service.Enqueue("42");
                     }
                 }
-
+                // Dinar: if messages stop to enqueue, BatchSenderThread may not send all messages because some messages
+                // could come after counting number of tasks and before waiting
+                Thread.Sleep(3000);
+                _BatchSenderThread.Process();
                 // LORENZO: check all tasks
                 _completed.WaitOne();
 
@@ -94,7 +98,7 @@ namespace Test
             _completed.Set();
         }
 
-        protected virtual void OnData(SensorDataContract data)
+        protected virtual void OnData(QueuedItem data)
         {
             // LORENZO: test behaviours such as accumulating data an processing in batch
             // as it stands, we are processing every event as it comes in

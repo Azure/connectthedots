@@ -17,7 +17,7 @@ namespace Test
             Console.WriteLine(String.Format("Test completed, {0} messages sent", t2.TotalMessagesSent));
 
             // wait for logging tasks to complete
-            Console.WriteLine("Press any key to exit");
+            Console.WriteLine("Press enter to exit");
             Console.ReadLine();
         }
     }
