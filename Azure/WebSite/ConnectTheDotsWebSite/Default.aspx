@@ -76,20 +76,20 @@
 
 
             <div style="margin-left: 200px;height: 600px;position:relative;text-align:center;">
-                <div id="Temperature" class="chart">
+                <div id="chartOne" class="chart">
                 <h4>DataChart One</h4>
                     <script>
                         (function () {
-                            chart("DataChartOne");  // make sure chart name matches the div id
+                            registerChart("chartOne", ["1000", "1001"]);
                         })();
                     </script>
                 </div>
-                <div id="Humidity" class="chart">
+                <div id="chartTwo" class="chart">
                 <h4>DataChart Two</h4>
                     <script>
 
                         (function () {
-                            chart("DataChartTwo");  // make sure chart name matches the div id
+                            registerChart("chartTwo", ["1002", "1003"]);
                         })();
 
                     </script>

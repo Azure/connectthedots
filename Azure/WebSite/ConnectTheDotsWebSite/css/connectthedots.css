@@ -145,11 +145,11 @@ path.line {
     position: absolute;
 }
 
-#Humidity {
+#chartTwo {
     top: 40%;
 }
 
-#Temperature {
+#chartOne {
     top: 0;
 }
 
