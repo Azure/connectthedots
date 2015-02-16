@@ -40,12 +40,15 @@ registeredCharts = {
     chartId : {
         dataFlows : {
             flowUUID : {
+		data : [],
+        	    svg: svg_object,
                 path : svg_object,
                 legend: svg_object,
                 legend_r: svg_object,
+                color : svg_object,
             }
         },
-        svg: svg_object,
+        tip: tooltip_object,
         height: '',
         width: '',
         x : d3.scale,
@@ -57,47 +60,30 @@ registeredCharts = {
 
 var registeredCharts = {};
 
-// globals used with D3
-
-var svg = {};
-var tip = {};
-var color = null;
-var sensorNames = [];
-
-// initialize color
-
-//sensorNames.push("avg")
-color = d3.scale.category10();
-color.domain(sensorNames);
-
 // worker-related
-
 var sss = null;
-
-// deep copy of any object
-function deepCopy(obj) {
-    if (typeof obj != 'object') {
-        return obj;
-    }
-    var copy = obj.constructor();
-    for (var key in obj) {
-        if (typeof obj[key] == 'object' && obj[key] != null) {
-            copy[key] = this.deepCopy(obj[key]);
-        } else {
-            copy[key] = obj[key];
-        }
-    }
-    return copy;
-};
 
 // register chart fo futher creation
 function registerChart(chartId, dataUUIDs) {
     // just copy
     registeredCharts[chartId].dataUUIDs = dataUUIDs;
 
+    // initialize object
     for (var id in dataUUIDs) {
         registeredCharts[chartId].dataFlows[id] = {
+            data: [],
+            svg: null,
+            path: null,
+            legend: null,
+            legend_r: null,
+            color: null
+
         };
+
+        var flow = registeredCharts[chartId].dataFlows[id];
+        // initialize color
+        flow.color = d3.scale.category10();
+        flow.color.domain(id);
     }
 }
 
@@ -235,13 +221,13 @@ function chart(chartId, y0_label, y0_min, y0_max, y1_label, y1_min, y1_max) {
 //  }
 //
 
-function MakeNewD3Series(d3_data, series_name) {
+function MakeNewD3Series(chartId, chartUUID) {
 
     var obj = {
-        name: series_name,
+        name: chartUUID,
         data: []
     };
-    d3_data.push(obj);
+    registeredCharts[chartId].dataFlows[chartUUID].push(obj);
 
     return obj;
 }
@@ -298,25 +284,17 @@ function InsertNewDatapoint(data, time, val, y_axis, alertData) {
 //
 // Add a new datapoint to the appropriate
 // dataset.
-//
 
-function AddToD3(D3_set, chart_name, series_name, val, time, y_axis, alertData) {
+function AddToD3(chartId, chartUUID, val, time, y_axis, alertData) {
 
-    if (sensorNames.indexOf(D3_set[i].name) == -1) {
-        sensorNames.push(D3_set[i].name);
-    }
+    //    if (sensorNames.indexOf(D3_set[i].name) == -1) {
+    //        sensorNames.push(D3_set[i].name);
+    //    }
 
 
-    var data = null;
-    for (var i = 0; i < D3_set.length; i++) {
-        if (D3_set[i].name == series_name) {
-            data = D3_set[i].data;
-            break;
-        }
-    }
-
-    if (data == null) {
-        data = MakeNewD3Series(D3_set, series_name).data;
+    var data = registeredCharts[chartId].dataFlows.data;
+    if (data == null || data == undefined) {
+        data = MakeNewD3Series(chartId, chartUUID).data;
     }
 
     // insert the new datapoint into the dataset
@@ -379,30 +357,35 @@ function UpdateD3Charts(chartId, dataUUID) {
 
     var displayHeight = $(window).height();
 
-    for (var i = 0; i < D3_set.length; i++) {
-        var data = D3_set[i].data;
-        var y = data[0].y_axis;
+    var data = registeredCharts[chartId].dataFlows[dataUUID].data;
+    // sort data
+    data.sort(function (a, b) {
+        if (a.time < b.time) return -1;
+        if (a.time > b.time) return 1;
+        return 0;
+    });
 
-        for (var j = 0; j < data.length; j++) {
+    var y = data[0].y_axis;
 
-            var c = data[j].data;
-            var t = data[j].time;
+    for (var j = 0; j < data.length; j++) {
 
-            if (c < minVal[y]) {
-                minVal[y] = c;
-            }
+        var c = data[j].data;
+        var t = data[j].time;
 
-            if (c > maxVal[y]) {
-                maxVal[y] = c;
-            }
+        if (c < minVal[y]) {
+            minVal[y] = c;
+        }
 
-            if (t > maxDate) {
-                maxDate = t;
-            }
+        if (c > maxVal[y]) {
+            maxVal[y] = c;
+        }
 
-            if (t < minDate) {
-                minDate = t;
-            }
+        if (t > maxDate) {
+            maxDate = t;
+        }
+
+        if (t < minDate) {
+            minDate = t;
         }
     }
 
@@ -469,94 +452,82 @@ function UpdateD3Charts(chartId, dataUUID) {
 		})
     ];
 
-    for (var i = 0; i < D3_set.length; i++) {
+    var dataFlow = registeredCharts[chartId].dataFlows[dataUUID];
 
-        try {
+    try {
 
-            var data = D3_set[i].data;
-            var name = D3_set[i].name;
+        if (dataFlow.path == null) {
+            dataFlow.path = dataFlow.svg.append("g")
+				.append("path")
+				.datum(data)
+				.attr("class", "line")
+				.attr("d", line[data[0].y_axis])
+				.style("stroke", function (d) {
+				    return color(dataUUID);
+				});
+        }
 
-            // sort data
-            data.sort(function (a, b) {
-                if (a.time < b.time) return -1;
-                if (a.time > b.time) return 1;
-                return 0;
-            });
+        dataFlow.path.datum(data)
+            .attr("d", line[data[0].y_axis]);
 
-            if (path[chart_name][name] == null) {
-                path[chart_name][name] = svg[chart_name].append("g")
-					.append("path")
-					.datum(data)
-					.attr("class", "line")
-					.attr("d", line[data[0].y_axis])
-					.style("stroke", function (d) {
-					    return color(name);
-					});
-            }
+        // draw alert points
+        for (var pnt in data) {
+            if (typeof data[pnt].alertData == 'object') {
+                if (data[pnt].alertShowed == undefined) {
+                    var transferData = JSON.stringify({ alertData: data[pnt].alertData, time: data[pnt].time, data: data[pnt].data });
 
-            path[chart_name][name]
-                .datum(data)
-                .attr("d", line[data[0].y_axis]);
+                    data[pnt].alertBarShowed = dataFlow.svg.append("g").append("rect")
+                        .attr("class", "bar")
+						.attr("x", x(data[pnt].time))
+						.attr("y", 0)
+                        .attr("height", registeredCharts[chartId].height)
+						.attr("width", "2px")
+                        .style("fill", "#e6c9cd")
 
-            // draw alert points
-            for (var pnt in data) {
-                if (typeof data[pnt].alertData == 'object') {
-                    if (data[pnt].alertShowed == undefined) {
-                        var transferData = JSON.stringify({ alertData: data[pnt].alertData, time: data[pnt].time, data: data[pnt].data });
+                    data[pnt].alertShowed = dataFlow.svg.append("g").append("circle")
+                        .attr("class", "d3-dot")
+						.attr("cx", x(data[pnt].time))
+						.attr("cy", data[pnt].y_axis == 0 ? registeredCharts[chartId].y0(data[pnt].data) : registeredCharts[chartId].y1(data[pnt].data))
+						.style("fill", "#e93541")
+						.attr("r", displayHeight / 200)
+                        .on('mouseover', function () { d3.select(this).transition().attr("r", displayHeight / 130); eval("tip[chart_name].show(" + transferData + ");") })
+                        .on('mouseout', function () { d3.select(this).transition().attr("r", displayHeight / 200); tip[chart_name].hide(); });
+                } else {
+                    data[pnt].alertShowed.attr("cx", x(data[pnt].time))
+						.attr("cy", data[pnt].y_axis == 0 ? registeredCharts[chartId].y0(data[pnt].data) : registeredCharts[chartId].y1(data[pnt].data));
 
-                        data[pnt].alertBarShowed = svg[chart_name].append("g").append("rect")
-                            .attr("class", "bar")
-							.attr("x", x(data[pnt].time))
-							.attr("y", 0)
-                            .attr("height", registeredCharts[chartId].height)
-							.attr("width", "2px")
-                            .style("fill", "#e6c9cd")
-
-                        data[pnt].alertShowed = svg[chart_name].append("g").append("circle")
-                            .attr("class", "d3-dot")
-							.attr("cx", x(data[pnt].time))
-							.attr("cy", data[pnt].y_axis == 0 ? registeredCharts[chartId].y0(data[pnt].data) : registeredCharts[chartId].y1(data[pnt].data))
-							.style("fill", "#e93541")
-							.attr("r", displayHeight / 200)
-                            .on('mouseover', function () { d3.select(this).transition().attr("r", displayHeight / 130); eval("tip[chart_name].show(" + transferData + ");") })
-                            .on('mouseout', function () { d3.select(this).transition().attr("r", displayHeight / 200); tip[chart_name].hide(); });
-                    } else {
-                        data[pnt].alertShowed.attr("cx", x(data[pnt].time))
-							.attr("cy", data[pnt].y_axis == 0 ? registeredCharts[chartId].y0(data[pnt].data) : registeredCharts[chartId].y1(data[pnt].data));
-
-                        data[pnt].alertBarShowed
-                            .attr("x", x(data[pnt].time))
-                    }
+                    data[pnt].alertBarShowed
+                        .attr("x", x(data[pnt].time))
                 }
             }
-
-            if (legend[chart_name][name] == null) {
-                legend_r[chart_name][name] = svg[chart_name].append("rect")
-					.attr("class", "legend")
-					.attr("width", 10)
-					.attr("height", 10)
-					.attr("x", registeredCharts[chartId].width + 50)
-					.attr("y", 20 + (20 * i))
-					.style("fill", color(name))
-					.style("stroke", color(name));
-
-                var legend_display_name = name;
-                if (name.toLowerCase().indexOf("return_temp") != -1) legend_display_name = "Return Temp";
-                else if (name.toLowerCase().indexOf("supply_temp") != -1) legend_display_name = "Supply Temp";
-                else if (name.toLowerCase().indexOf("pressure") != -1) legend_display_name = "Pressure";
-                else if (name.toLowerCase().indexOf("flow") != -1) legend_display_name = "Flow";
-
-                legend[chart_name][name] = svg[chart_name].append("text")
-					.attr("x", registeredCharts[chartId].width + 65)
-					.attr("y", 20 + (20 * i) + 5)
-					.attr("class", "legend")
-					.style("fill", color(name))
-					.text(legend_display_name == 'avg' ? 'avg (of all sensors)' : legend_display_name);
-
-            }
-        } catch (e) {
-            console.log(e);
         }
+
+        if (dataFlow.legend == null) {
+            dataFlow.legend_r = dataFlow.svg.append("rect")
+				.attr("class", "legend")
+				.attr("width", 10)
+				.attr("height", 10)
+				.attr("x", registeredCharts[chartId].width + 50)
+				.attr("y", 20 + (20 * i))
+				.style("fill", color(name))
+				.style("stroke", color(name));
+
+            var legend_display_name = name;
+            if (name.toLowerCase().indexOf("return_temp") != -1) legend_display_name = "Return Temp";
+            else if (name.toLowerCase().indexOf("supply_temp") != -1) legend_display_name = "Supply Temp";
+            else if (name.toLowerCase().indexOf("pressure") != -1) legend_display_name = "Pressure";
+            else if (name.toLowerCase().indexOf("flow") != -1) legend_display_name = "Flow";
+
+            dataFlow.legend = dataFlow.svg.append("text")
+				.attr("x", registeredCharts[chartId].width + 65)
+				.attr("y", 20 + (20 * i) + 5)
+				.attr("class", "legend")
+				.style("fill", color(name))
+				.text(legend_display_name == 'avg' ? 'avg (of all sensors)' : legend_display_name);
+
+        }
+    } catch (e) {
+        console.log(e);
     }
 }
 
