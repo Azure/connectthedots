@@ -3,7 +3,7 @@ using System.Threading;
 using BatchSenderThreadTest.Utils.MessageSender;
 using Gateway;
 using Gateway.Utils.Queue;
-using Test.Utils.Logger;
+using CoreTest.Utils.Logger;
 
 namespace BatchSenderThreadTest
 {

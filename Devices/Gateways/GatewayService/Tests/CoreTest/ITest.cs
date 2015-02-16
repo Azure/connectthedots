@@ -1,4 +1,4 @@
-﻿namespace Test
+﻿namespace CoreTest
 {
     interface ITest
     {

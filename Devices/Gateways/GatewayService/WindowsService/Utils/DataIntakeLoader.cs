@@ -10,6 +10,8 @@ namespace WindowsService.Utils
     public class DataIntakeLoader
     {
         private static readonly List<IDataIntake> _DataIntakes = new List<IDataIntake>();
+        private static readonly SensorEndpointConfigSection _SensorEndpoints;
+
         private static ILogger _Logger;
         public DataIntakeLoader(ILogger logger)
         {
@@ -22,12 +24,23 @@ namespace WindowsService.Utils
 
                 foreach (DataIntakeConfigInstanceElement e in config.Instances)
                 {
-                    logger.LogInfo(e.TypeName + e.AssemblyPath);
-                    Assembly ass = Assembly.LoadFrom(e.AssemblyPath);
-                    Type handlerType = ass.GetType(e.TypeName);
-                    IDataIntake dataIntake = (IDataIntake)Activator.CreateInstance(handlerType);
-                    _DataIntakes.Add(dataIntake);
+                    try
+                    {
+                        logger.LogInfo("Loading Data Intake: " + e.TypeName + e.AssemblyPath);
+
+                        Assembly ass = Assembly.LoadFrom(e.AssemblyPath);
+                        Type handlerType = ass.GetType(e.TypeName);
+                        IDataIntake dataIntake = (IDataIntake) Activator.CreateInstance(handlerType);
+                        _DataIntakes.Add(dataIntake);
+                    }
+                    catch (Exception ex)
+                    {
+                        _Logger.LogError(ex.Message);
+                    }
                 }
+
+                SensorEndpointConfigSection _SensorEndpoints = ConfigurationManager.GetSection("sensorEndpoints")
+                 as SensorEndpointConfigSection;
             }
             catch (Exception ex)
             {
@@ -37,7 +50,8 @@ namespace WindowsService.Utils
 
         public void Start(Func<string, int> enqueue, ILogger loggerForDataIntake, Func<bool> doWorkSwitch)
         {
-            try {
+            try
+            {
                 foreach (IDataIntake dataIntake in _DataIntakes)
                 {
                     dataIntake.Start(enqueue, loggerForDataIntake, doWorkSwitch);
@@ -122,6 +136,58 @@ namespace WindowsService.Utils
             get
             {
                 return (string)base["assemblyPath"];
+            }
+        }
+    }
+
+    public class SensorEndpointConfigSection : ConfigurationSection
+    {
+        [ConfigurationProperty("", IsRequired = true, IsDefaultCollection = true)]
+        public SensorEndpointConfigInstanceCollection Instances
+        {
+            get { return (SensorEndpointConfigInstanceCollection)this[""]; }
+            set { this[""] = value; }
+        }
+    }
+    public class SensorEndpointConfigInstanceCollection : ConfigurationElementCollection
+    {
+        protected override ConfigurationElement CreateNewElement()
+        {
+            return new SensorEndpointConfigInstanceElement();
+        }
+
+        protected override object GetElementKey(ConfigurationElement element)
+        {
+            return ((SensorEndpointConfigInstanceElement)element).Name;
+        }
+    }
+
+    public class SensorEndpointConfigInstanceElement : ConfigurationElement
+    {
+        [ConfigurationProperty("name", IsKey = true, IsRequired = true)]
+        public string Name
+        {
+            get
+            {
+                return (string)base["name"];
+            }
+        }
+
+        [ConfigurationProperty("port", IsRequired = true)]
+        public string TypeName
+        {
+            get
+            {
+                return (string)base["port"];
+            }
+        }
+
+        [ConfigurationProperty("ip", IsRequired = true)]
+        public string AssemblyPath
+        {
+            get
+            {
+                return (string)base["ip"];
             }
         }
     }

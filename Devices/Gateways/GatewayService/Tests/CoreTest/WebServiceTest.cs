@@ -7,13 +7,13 @@ using Gateway.Models;
 using Gateway.Utils.Logger;
 using Gateway.Utils.MessageSender;
 using Gateway.Utils.Queue;
-using Test.Utils.Logger;
+using CoreTest.Utils.Logger;
 using System.Net;
 using System.IO;
 using System.Diagnostics;
 
 
-namespace Test
+namespace CoreTest
 {
     public class WebServiceTest : ITest
     {

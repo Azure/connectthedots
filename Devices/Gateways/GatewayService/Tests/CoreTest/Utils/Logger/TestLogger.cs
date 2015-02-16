@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using Gateway.Utils.Logger;
 
-namespace Test.Utils.Logger
+namespace CoreTest.Utils.Logger
 {
     public class TestLogger : ILogger
     {

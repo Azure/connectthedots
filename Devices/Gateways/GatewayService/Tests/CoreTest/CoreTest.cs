@@ -8,9 +8,9 @@ using Gateway.Models;
 using Gateway.Utils.Logger;
 using Gateway.Utils.MessageSender;
 using Gateway.Utils.Queue;
-using Test.Utils.Logger;
+using CoreTest.Utils.Logger;
 
-namespace Test
+namespace CoreTest
 {
     public class CoreTest : ITest
     {

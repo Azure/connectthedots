@@ -30,15 +30,18 @@ namespace Gateway
 
         public int Enqueue(string jsonData)
         {
-            QueuedItem sensorData = new QueuedItem
+            if (jsonData != null)//not filling a queue by empty items
             {
-                JsonData = jsonData
-            };
+                QueuedItem sensorData = new QueuedItem
+                {
+                    JsonData = jsonData
+                };
 
-            //TODO:we can check status of BatchSender and indicate error on request if needed
-            _Queue.Push(sensorData);
+                //TODO:we can check status of BatchSender and indicate error on request if needed
+                _Queue.Push(sensorData);
 
-            DataInQueue(sensorData);
+                DataInQueue(sensorData);   
+            }
 
             return _Queue.Count;
         }

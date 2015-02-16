@@ -44,7 +44,7 @@ namespace SocketListener
                         _Logger.LogInfo("Try connecting to device - step: " + (CONNECTION_RETRIES - step));
 
                     IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-                    IPAddress ipAddress = ipHostInfo.AddressList[0];
+                    IPAddress ipAddress = new IPAddress(new byte[]{192,168,50,62});//ipHostInfo.AddressList[0]);
                     IPEndPoint remoteEP = new IPEndPoint(ipAddress, 5000);
 
                     client = new Socket(

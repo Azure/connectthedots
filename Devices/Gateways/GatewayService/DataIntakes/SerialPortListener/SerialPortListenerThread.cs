@@ -1,12 +1,12 @@
-﻿using System;
+﻿//#define SIMULATEDATA
+
+using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Threading;
 using System.Threading.Tasks;
 using Gateway.DataIntake;
-using Gateway.Models;
 using Gateway.Utils.Logger;
-using Newtonsoft.Json;
 
 namespace SerialPortListener
 {
@@ -39,32 +39,7 @@ namespace SerialPortListener
             _DoWorkSwitch = doWorkSwitch;
 
             Task.Run(() => RunForSerial());
-            Task.Run(() => TestRun());
             return true;
-        }
-
-        public int TestRun()
-        {
-            int nall = 0;
-            do
-            {
-                Random r = new Random();
-                int rint = r.Next() % 2;
-                SensorDataContract sensorData = new SensorDataContract
-                    {
-                        Measure = rint == 0 ? "length" : "time",
-                        UnitOfMeasure = rint == 0 ? "m" : "s",
-                        DisplayName = "Sensor" + r.Next() % 2 + (rint == 0 ? "m" : "s"),
-                        Guid = nall++,
-                        Value = r.Next() % 1000 - 500,
-                        Location = "here",
-                        Organization = "contoso",
-                    };
-
-                _Enqueue(JsonConvert.SerializeObject(sensorData));
-                Thread.Sleep(1000);
-            } while (_DoWorkSwitch());
-            return 0;
         }
 
         public int RunForSerial()
@@ -177,11 +152,11 @@ namespace SerialPortListener
                             serialPortAlive = false;
                         }
 #else
-                                        Random r = new Random ();
-                                        valuesJson = String.Format("{{ \"temp\" : {0}, \"hmdt\" : {1}, \"lght\" : {2}}}", 
-                                            (r.NextDouble() * 120) - 10,
-                                            (r.NextDouble() * 100),
-                                            (r.NextDouble() * 100));
+                        Random r = new Random ();
+                        valuesJson = String.Format("{{ \"temp\" : {0}, \"hmdt\" : {1}, \"lght\" : {2}}}", 
+                            (r.NextDouble() * 120) - 10,
+                            (r.NextDouble() * 100),
+                            (r.NextDouble() * 100));
 #endif
 
                         if (serialPortAlive)
@@ -213,8 +188,13 @@ namespace SerialPortListener
                 // we will try to close the port properly, but if the device has been disconnected, this will trigger an exception
                 try
                 {
-                    if (serialPort.IsOpen) serialPort.Close();
-                    if (serialPort != null) serialPort = null;
+                    if (serialPort != null)
+                    {
+                        if(serialPort.IsOpen)
+                            serialPort.Close();
+
+                        serialPort = null;
+                    }
                 }
                 catch (Exception e)
                 {
