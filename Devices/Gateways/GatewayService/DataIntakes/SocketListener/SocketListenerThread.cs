@@ -20,6 +20,16 @@ namespace SocketListener
         private static Func<bool> _DoWorkSwitch;
 
         private Thread listeningThread = null;
+        private static SensorEndpoint _Endpoint;
+
+        public bool SetEndpoint(SensorEndpoint endpoint = null)
+        {
+            if (endpoint == null)
+                return false;
+
+            _Endpoint = endpoint;
+            return true;
+        }
 
         public bool Start(Func<string, int> enqueue, ILogger logger, Func<bool> doWorkSwitch)
         {
@@ -43,15 +53,11 @@ namespace SocketListener
                     if (_Logger != null)
                         _Logger.LogInfo("Try connecting to device - step: " + (CONNECTION_RETRIES - step));
 
-                    IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-                    IPAddress ipAddress = new IPAddress(new byte[]{192,168,50,62});//ipHostInfo.AddressList[0]);
-                    IPEndPoint remoteEP = new IPEndPoint(ipAddress, 5000);
-
                     client = new Socket(
                         AddressFamily.InterNetwork,
                         SocketType.Stream,
-                        ProtocolType.Tcp);
-                    client.Connect(remoteEP);
+                        ProtocolType.Unspecified);
+                    client.Connect(_Endpoint.Host, _Endpoint.Port);
 
                     if (client.Connected)
                     {
@@ -97,7 +103,6 @@ namespace SocketListener
         {
             try
             {
-                _Logger.LogError("SensorDataClient");    
                 StringBuilder jsonBuilder = new StringBuilder();
                 byte[] buffer = new Byte[1024];
                 // Use Regular Expressions (Regex) to parse incoming data, which may contain multiple JSON strings 

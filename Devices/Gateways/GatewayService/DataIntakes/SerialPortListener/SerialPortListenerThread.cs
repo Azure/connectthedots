@@ -32,6 +32,15 @@ namespace SerialPortListener
         private static Func<string, int> _Enqueue;
         private static Func<bool> _DoWorkSwitch;
 
+        public bool SetEndpoint(SensorEndpoint endpoint = null)
+        {
+            //we don't need any endpoints for this Data Intake
+            if (endpoint == null)
+                return true;
+
+            return false;
+        }
+
         public bool Start(Func<string, int> enqueue, ILogger logger, Func<bool> doWorkSwitch)
         {
             _Enqueue = enqueue;

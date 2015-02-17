@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Reflection;
+using Gateway.DataIntake;
 using Gateway.Utils.Logger;
 using IDataIntake = Gateway.DataIntake.IDataIntake;
 
@@ -10,7 +11,7 @@ namespace WindowsService.Utils
     public class DataIntakeLoader
     {
         private static readonly List<IDataIntake> _DataIntakes = new List<IDataIntake>();
-        private static readonly SensorEndpointConfigSection _SensorEndpoints;
+        private static readonly List<SensorEndpoint> _SensorEndpoints = new List<SensorEndpoint>();
 
         private static ILogger _Logger;
         public DataIntakeLoader(ILogger logger)
@@ -19,6 +20,21 @@ namespace WindowsService.Utils
 
             try
             {
+                SensorEndpointConfigSection sensorEndpointItems = ConfigurationManager.GetSection("sensorEndpoints")
+                 as SensorEndpointConfigSection;
+
+                if (sensorEndpointItems != null)
+                {
+                    foreach (SensorEndpointConfigInstanceElement sensorEndpointItem in sensorEndpointItems.Instances)
+                    {
+                        _SensorEndpoints.Add(new SensorEndpoint
+                        {
+                            Host = sensorEndpointItem.Host,
+                            Port = sensorEndpointItem.Port,
+                        });
+                    }
+                }
+
                 DataIntakeConfigSection config = ConfigurationManager.GetSection("dataIntakes")
                  as DataIntakeConfigSection;
 
@@ -30,17 +46,23 @@ namespace WindowsService.Utils
 
                         Assembly ass = Assembly.LoadFrom(e.AssemblyPath);
                         Type handlerType = ass.GetType(e.TypeName);
+
                         IDataIntake dataIntake = (IDataIntake) Activator.CreateInstance(handlerType);
-                        _DataIntakes.Add(dataIntake);
+                        if(dataIntake.SetEndpoint())
+                            _DataIntakes.Add(dataIntake);
+
+                        foreach (SensorEndpoint sensorEndpoint in _SensorEndpoints)
+                        {
+                            IDataIntake dataIntakeWithEndpoint = (IDataIntake)Activator.CreateInstance(handlerType);
+                            if (dataIntakeWithEndpoint.SetEndpoint(sensorEndpoint))
+                                _DataIntakes.Add(dataIntakeWithEndpoint);
+                        }
                     }
                     catch (Exception ex)
                     {
                         _Logger.LogError(ex.Message);
                     }
                 }
-
-                SensorEndpointConfigSection _SensorEndpoints = ConfigurationManager.GetSection("sensorEndpoints")
-                 as SensorEndpointConfigSection;
             }
             catch (Exception ex)
             {
@@ -174,20 +196,20 @@ namespace WindowsService.Utils
         }
 
         [ConfigurationProperty("port", IsRequired = true)]
-        public string TypeName
+        public int Port
         {
             get
             {
-                return (string)base["port"];
+                return (int)base["port"];
             }
         }
 
-        [ConfigurationProperty("ip", IsRequired = true)]
-        public string AssemblyPath
+        [ConfigurationProperty("host", IsRequired = true)]
+        public string Host
         {
             get
             {
-                return (string)base["ip"];
+                return (string)base["host"];
             }
         }
     }

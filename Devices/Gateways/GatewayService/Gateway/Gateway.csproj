@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="Constants.cs" />
     <Compile Include="DataIntake\IDataIntake.cs" />
+    <Compile Include="DataIntake\SensorEndpoint.cs" />
     <Compile Include="GatewayService.cs" />
     <Compile Include="EventProcessor.cs" />
     <Compile Include="IGatewayService.cs" />

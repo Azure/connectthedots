@@ -28,6 +28,15 @@ namespace DataIntakeTestMock
             return true;
         }
 
+        public bool SetEndpoint(SensorEndpoint endpoint = null)
+        {
+            //we don't need any endpoints for this Data Intake
+            if (endpoint == null)
+                return true;
+
+            return false;
+        }
+
         public void TestRun()
         {
             int messagesSent = 0;
