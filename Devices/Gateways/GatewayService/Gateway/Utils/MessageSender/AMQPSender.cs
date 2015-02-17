@@ -22,11 +22,14 @@ namespace Gateway.Utils.MessageSender
             private SenderLink _sender;
             private bool _alive;
 
+            private ILogger _Logger;
+
             private object _sync = new object( );
 
-            internal ReliableSender( string amqpsAddress, string eventHubName )
+            internal ReliableSender( string amqpsAddress, string eventHubName, ILogger logger )
             {
                 _EventHubName = eventHubName;
+                _Logger = logger;
 
                 try
                 {
@@ -78,22 +81,32 @@ namespace Gateway.Utils.MessageSender
 
             protected void EstablishSender()
             {
-                if( _alive == false )
+                try
                 {
-                    lock( _sync )
+                    if (_alive == false)
                     {
-                        if( _alive == false )
+                        lock (_sync)
                         {
-                            Connection connection = new Connection( _address );
-                            Session session = new Session( connection );
+                            if (_alive == false)
+                            {
+                                Connection connection = new Connection(_address);
+                                Session session = new Session(connection);
 
-                            _sender = new SenderLink( session, "send-link:" + _EventHubName, _EventHubName );
+                                _sender = new SenderLink(session, "send-link:" + _EventHubName, _EventHubName);
 
-                            _sender.Closed += OnSenderClosedCallback;
+                                _sender.Closed += OnSenderClosedCallback;
 
-                            _alive = true;
+                                _alive = true;
+                            }
                         }
                     }
+                }
+                catch (Exception ex)
+                {
+                    //we don't want service to stop working when exception was thrown at connection creation 
+                    //TODO: add reraise for some cases
+                    if (_Logger != null)
+                        _Logger.LogError("Error on establishing sender: " + ex.Message);
                 }
             }
 
@@ -115,8 +128,12 @@ namespace Gateway.Utils.MessageSender
             private int _current;
             private readonly object _sync = new object();
 
-            public SendersPool( string amqpAddress, string eventHubName, int size )
+            private ILogger _Logger;
+
+            public SendersPool( string amqpAddress, string eventHubName, int size, ILogger logger)
             {
+                _Logger = logger;
+
                 if(size > MAX_POOL_SIZE)
                 {
                     size = MAX_POOL_SIZE;
@@ -126,7 +143,7 @@ namespace Gateway.Utils.MessageSender
 
                 for(int i = 0; i < size; ++i)
                 {
-                    _pool[i] = new ReliableSender(amqpAddress, eventHubName); 
+                    _pool[i] = new ReliableSender(amqpAddress, eventHubName, logger); 
                 }
 
                 _current = 0;
@@ -185,7 +202,7 @@ namespace Gateway.Utils.MessageSender
             _DefaultDeviceId = defaultDeviceId;
             _DefaultDeviceDisplayName = defaultDeviceDisplayName;
 
-            _senders = new SendersPool(amqpsAddress, eventHubName, Constants.ConcurrentConnections);
+            _senders = new SendersPool(amqpsAddress, eventHubName, Constants.ConcurrentConnections, Logger);
         }
 
         public async Task SendMessage(T data)
@@ -324,7 +341,6 @@ namespace Gateway.Utils.MessageSender
             message.ApplicationProperties["time"] = creationTime;
             message.ApplicationProperties["from"] = deviceId; // Originating device
             message.ApplicationProperties["dspl"] = deviceDisplayName; // Display name for originating device
-
 
             return message;
         }
