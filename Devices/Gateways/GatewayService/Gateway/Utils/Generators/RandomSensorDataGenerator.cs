@@ -12,7 +12,7 @@ namespace Gateway.Utils.Generators
             int rint = r.Next() % 2, cint = r.Next() % 2;
             SensorDataContract sensorData = new SensorDataContract
             {
-                Measure = rint == 0 ? "length" : "time",
+                MeasureName = rint == 0 ? "length" : "time",
                 UnitOfMeasure = rint == 0 ? "m" : "s",
                 DisplayName = "Sensor" + cint + (rint == 0 ? "m" : "s"),
                 Guid = 1000 + cint + 2 * rint,
