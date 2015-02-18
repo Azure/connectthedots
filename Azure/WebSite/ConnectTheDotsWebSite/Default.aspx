@@ -34,18 +34,22 @@
 
     <!-- general styles -->
 
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.3/css/jquery.dataTables.css"/>
-    <link rel="stylesheet" type="text/css" href="css/connectthedots.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.3/css/jquery.dataTables.css" />
+    <link rel="stylesheet" type="text/css" href="css/connectthedots.css" />
 
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.3/js/jquery.dataTables.min.js"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
-    <script type="text/javascript" src="js/connectthedots.js"></script>
+    <script type="text/javascript" src="js/d3utils.js"></script>
+    <script type="text/javascript" src="js/d3DataFlow.js"></script>
+    <script type="text/javascript" src="js/d3Chart.js"></script>
+    <script type="text/javascript" src="js/d3DataSourceSocket.js"></script>
+    <script type="text/javascript" src="js/d3CTDDataSourceSocket.js"></script>
 </head>
 <body>
 
-    <div id="loading">
+    <div id="loading" style="display: none;">
         <div id="loading-inner">
             <p id="loading-text">Loading last 10 minutes of data...</p>
             <p id="loading-sensor"></p>
@@ -75,24 +79,12 @@
             </div>
 
 
-            <div style="margin-left: 200px;height: 600px;position:relative;text-align:center;">
+            <div style="margin-left: 200px; height: 600px; position: relative; text-align: center;">
                 <div id="chartOne" class="chart">
-                <h4>DataChart One</h4>
-                    <script>
-                        (function () {
-                            registerChart("chartOne", ["1000", "1001"]);
-                        })();
-                    </script>
+                    <h4>DataChart One</h4>
                 </div>
                 <div id="chartTwo" class="chart">
-                <h4>DataChart Two</h4>
-                    <script>
-
-                        (function () {
-                            registerChart("chartTwo", ["1002", "1003"]);
-                        })();
-
-                    </script>
+                    <h4>DataChart Two</h4>
                 </div>
             </div>
         </div>
@@ -121,5 +113,23 @@
             <div id="messages"></div>
         </div>
     </form>
+    <script>
+
+        (function () {
+            // create dataflow
+            var dataFlow01 = new d3DataFlow('1001');
+            var dataFlow02 = new d3DataFlow('1002');
+
+            var dataChart = new d3Chart('chartOne', [dataFlow01, dataFlow02]);
+
+            var sss = (window.location.protocol.indexOf('s') > 0 ? "s" : "");
+            var uri = 'ws' + sss + '://' + window.location.host + '/api/websocketconnect?clientId=none';
+
+            // create datasource
+            var dataSource = new d3CTDDataSourceSocket(uri);
+            // attach flows to source socket
+            dataChart.attachToDataSource(dataSource);
+        })();
+    </script>
 </body>
 </html>

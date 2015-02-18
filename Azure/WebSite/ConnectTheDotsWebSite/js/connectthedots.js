@@ -39,7 +39,7 @@ var WINDOW_MINUTES = 10;
 registeredCharts = {
     chartId : {
         dataFlows : {
-            flowUUID : {
+            flowGUID : {
 		data : [],
                 path : svg_object,
                 legend: svg_object,

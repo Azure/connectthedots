@@ -22,25 +22,9 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-// useful function
-function deepCopy(obj) {
-    if (typeof obj != 'object') {
-        return obj;
-    }
-    var copy = obj.constructor();
-    for (var key in obj) {
-        if (typeof obj[key] == 'object' && obj[key] != null) {
-            copy[key] = this.deepCopy(obj[key]);
-        } else {
-            copy[key] = obj[key];
-        }
-    }
-    return copy;
-};
-
 // create dataFlow with
 /*
-flowUUID : string,
+flowGUID : string,
 params = {
 	yMin : number,
 	yMax : number,
@@ -48,20 +32,37 @@ params = {
 	label : string
 };*/
 
-function d3DataFlow(flowUUID, params) {
+function d3DataFlow(flowGUID, params) {
     var self = this;
+    // call base class contructor
+    baseClass.call(self);
     // initialize object
-    self._UUID = flowUUID;
+    self._GUID = flowGUID;
     self._yMin = params ? params.yMin : undefined;
     self._yMax = params ? params.yMax : undefined;
     self._displayName = params ? params.displayName : undefined;
     self._label = params ? params.label : undefined;
+    self._CONSTANTS = {
+        MAX_ARRAY_SIZE: 1000
+    };
+
+    self.clearData();
 }
 
 d3DataFlow.prototype = {
     constructor: d3DataFlow,
-    getUUID: function () {
-        return this._UUID;
+    attachToDataSource: function (dataSource) {
+        var self = this;
+        // remebmer data source
+        self._dataSource = dataSource;
+
+        // register events handler
+        dataSource.addEventListener('onNewData', function (event) {
+            self._onNewDataHandler.call(self, event);
+        });
+    },
+    getGUID: function () {
+        return this._GUID;
     },
     yMin: function (yMinNew) {
         if (yMinNew != undefined) {
@@ -87,4 +88,54 @@ d3DataFlow.prototype = {
         }
         return this._label;
     },
+    clearData: function () {
+        this._data = [];
+    },
+    cutData: function (cutoff) {
+        var len = this._data.length;
+        while (this._data.length >= 1 && this._data[0].time < cutoff) {
+            this._data.shift();
+        }
+        return len != this._data.length;
+    },
+    getData: function () {
+        return this._data;
+    },
+    addNewPoint: function (obj) {
+        var self = this;
+        var t = new Date(obj.time);
+        if (isNaN(t.getTime())) {
+            return;
+        }
+
+        // remember displayName
+        if (obj.hasOwnProperty("DisplayName")) {
+            self._displayName = obj.DisplayName;
+        }
+
+        var pushObj = {
+            data: obj.Value,
+            time: new Date(obj.time)
+        };
+
+
+        self._data.push(pushObj);
+
+        if (self._data.length >= self._CONSTANTS.MAX_ARRAY_SIZE) {
+            self._data.shift();
+            return;
+        }
+    },
+    // private members
+    _onNewDataHandler: function (evt) {
+        var self = this;
+        var object = evt.owner;
+        // check GUID
+        if (object.GUID != self._GUID) return;
+
+        // add to array
+        self.addNewPoint(object);
+    }
 };
+
+extendClass(d3DataFlow, baseClass);

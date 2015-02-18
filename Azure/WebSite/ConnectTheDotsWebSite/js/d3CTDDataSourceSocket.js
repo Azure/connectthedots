@@ -22,42 +22,53 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-// create new source
-function d3DataSourceSocket(uri, handlers) {
+// events: onEventObject
+function d3CTDDataSourceSocket(uri, handlers) {
     var self = this;
     // call base class contructor
-    baseClass.call(self);
+    d3DataSourceSocket.call(self, uri, {
+        onmessage: function (event) {
+            self._onMessage.call(self, event);
+        }
+    });
 
-    // initialize object
-    self._websocket = new WebSocket(uri);
-    self._eventHandlers = {};
-
+    // register handlers
     if (handlers) {
         for (id in handlers) {
             self.addEventListener(id, handlers[id]);
         }
     }
-
-    // register handlers
-    self._websocket.onopen = function () {
-        self.raiseEvent.call(self, 'onopen');
-    }
-
-    self._websocket.onerror = function (event) {
-        self.raiseEvent.call(self, 'onerror', event);
-    }
-
-    self._websocket.onmessage = function (event) {
-        self.raiseEvent.call(self, 'onmessage', event);
-    }
-
+    self._firstMessage = true;
+    self._deviceName = 'All';
 }
 
-d3DataSourceSocket.prototype = {
-    constructor: d3DataSourceSocket,
-    sendMessage: function (message) {
-        this._websocket.send(JSON.stringify(message));
+d3CTDDataSourceSocket.prototype = {
+    constructor: d3CTDDataSourceSocket,
+    _onMessage: function (event) {
+        var self = this;
+        if (self._firstMessage) {
+            var req = {
+                MessageType: "LiveDataSelection",
+                DeviceName: self._deviceName
+            };
+            self._firstMessage = false;
+            // send request
+            self.sendMessage(req);
+
+            // prevent next call
+            event.handled = true;
+        } else {
+            // Parse the JSON package
+            try {
+                var eventObject = JSON.parse(event.owner.data);
+            } catch (e) {
+                $('#messages').prepend('<div>Malformed message: ' + event.data + "</div>");
+                return;
+            }
+            // forward message
+            self.raiseEvent('onEventObject', eventObject);
+        }
     }
 };
 
-extendClass(d3DataSourceSocket, baseClass);
+extendClass(d3CTDDataSourceSocket, d3DataSourceSocket);
