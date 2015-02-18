@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Reflection;
-using Gateway.DataIntake;
-using Gateway.Utils.Logger;
 
 namespace WindowsService.Utils
 {

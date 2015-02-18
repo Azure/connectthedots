@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Security.AccessControl;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreTest.Utils.MessageSender;
 using Gateway;
 using Gateway.Models;
+using Gateway.Utils.Loader;
 using Gateway.Utils.Logger;
 using Gateway.Utils.MessageSender;
 using Gateway.Utils.Queue;
 using CoreTest.Utils.Logger;
 using CoreTest.Utils.Loader;
-using Gateway.Utils;
-using Gateway.DataIntake;
-
 
 namespace CoreTest
 {

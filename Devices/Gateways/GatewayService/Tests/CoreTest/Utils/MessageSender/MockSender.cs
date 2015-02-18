@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Gateway.Utils.MessageSender;
 using System;
 
-namespace CoreTest
+namespace CoreTest.Utils.MessageSender
 {
     internal class MockSender<T> : IMessageSender<T>
     {

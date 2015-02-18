@@ -6,10 +6,10 @@ using WindowsService.Utils.Logger;
 using Gateway;
 using Gateway.Models;
 using Gateway.ServiceInstantiation;
+using Gateway.Utils.Loader;
 using Gateway.Utils.Logger;
 using Gateway.Utils.MessageSender;
 using Gateway.Utils.Queue;
-using Gateway.Utils;
 
 namespace WindowsService
 {

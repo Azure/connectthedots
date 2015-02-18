@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Reflection;
 using Gateway.DataIntake;
 using Gateway.Utils.Logger;
-using Gateway.DataIntake;
 
-namespace Gateway.Utils
+namespace Gateway.Utils.Loader
 {
     public class DataIntakeLoader
     {
