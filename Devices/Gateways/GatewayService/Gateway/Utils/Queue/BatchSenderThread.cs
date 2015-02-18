@@ -142,29 +142,41 @@ namespace Gateway.Utils.Queue
                         // fish from the queue and accumulate, keep track of outstanding tasks to 
                         // avoid accumulating too many competing tasks
                         int count = _DataSource.Count - _outstandingTasks;
+
+                        // process all messages that have not been processed yet
                         while (--count >= 0)
                         {
                             var t = _DataSource.TryPop();
 
-                            Debug.Assert(_outstandingTasks >= 0);
+                            Debug.Assert( _outstandingTasks >= 0 ); 
 
                             bool added = false;
                             try
                             {
+                                // increment outstanding task count but be ready to decrement if we fail to add to the queue
+                                Interlocked.Increment( ref _outstandingTasks );
+
+                                Debug.Assert( tasks != null );
+
                                 tasks.Add(
                                     t.ContinueWith<Task>( popped =>
                                     {
                                         Interlocked.Decrement( ref _outstandingTasks );
 
-                                        //Dinar: we can reach this earlier than finally block, faced during testing
-                                        //Debug.Assert( _outstandingTasks >= 0 );
+                                        // because the outstanding task counter is incremented before 
+                                        // adding, we should never incur a negative count 
+                                        Debug.Assert( _outstandingTasks >= 0 );
 
                                         if( popped.Result.IsSuccess )
                                         {
                                             if( _DataTransform != null )
+                                            {
                                                 return _DataTarget.SendMessage( _DataTransform( popped.Result.Result ) );
+                                            }
                                             if( _SerializedData != null )
+                                            {
                                                 return _DataTarget.SendSerialized( _SerializedData( popped.Result.Result ) );
+                                            }
                                         }
                                         else
                                         {
@@ -174,14 +186,23 @@ namespace Gateway.Utils.Queue
                                     } )
                                 );
 
+                                // the only case when we do not get here is if List.Add fails (tasks.Add) or
+                                // if the task engine fails Task.ContinueWith (t.ContinueWith)
                                 added = true;
                             }
-                            finally
+                            catch
                             {
-                                if( added )
+                                if( !added )
                                 {
-                                    Interlocked.Increment( ref _outstandingTasks );
+                                    Interlocked.Decrement( ref _outstandingTasks );   
                                 }
+
+                                //
+                                // TODO: Issue #49 
+                                //
+                                // We should try and recover for Task 't' that we popped and did not process 
+                                
+                                throw;
                             }
                         }
 

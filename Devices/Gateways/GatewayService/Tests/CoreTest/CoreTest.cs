@@ -44,7 +44,7 @@ namespace CoreTest
 
         public void Run()
         {
-            TestRepeatSend();
+            TestRepeatSend( );
             TestDataIntake();
         }
 
@@ -75,15 +75,17 @@ namespace CoreTest
                     while (--count >= 0)
                     {
                         string message = "42";
+
                         DataArrived(message);
+
                         service.Enqueue(message);
                     }
                 }
 
                 // Dinar: if messages stop to enqueue, BatchSenderThread may not send all messages because some messages
                 // could come after counting number of tasks and before waiting (#48)
-                Thread.Sleep(3000);
-                _BatchSenderThread.Process();
+                //Thread.Sleep(3000);
+                //_BatchSenderThread.Process();
 
                 _completed.WaitOne();
 
@@ -109,6 +111,7 @@ namespace CoreTest
                 DataIntakeLoader dataIntakeLoader = new DataIntakeLoader(Loader.GetSources(), _testLogger);
 
                 _totalMessagesToSend += 5;
+
                 dataIntakeLoader.StartAll(service.Enqueue, DataArrived);
 
                 _completed.WaitOne();
@@ -144,7 +147,9 @@ namespace CoreTest
 
         public void Completed()
         {
-            _completed.Set();
+            _completed.Set( );
+
+            Console.WriteLine( String.Format( "Test completed, {0} messages sent", _totalMessagesToSend ) );
         }
 
         private GatewayService PrepareGatewayService()

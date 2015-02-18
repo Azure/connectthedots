@@ -24,10 +24,10 @@ namespace Gateway.Utils.Loader
                 try
                 {
                     Assembly ass = Assembly.LoadFrom(s);
-                    _Logger.LogError("Loaded assembly: " + s);
+
                     foreach (Type t in ass.GetExportedTypes())
                     {
-                        //Get all classes implement IUserInterface
+                        //Get all classes that implement the required interface
                         if (t.GetInterface("IDataIntake", false) != null)
                         {
                             nameTypeDict.Add(t.Name, t); //Add to Dictonary
@@ -52,7 +52,7 @@ namespace Gateway.Utils.Loader
                 }
                 catch (Exception ex)
                 {
-                    //dont want to stop creating another instances if one fails
+                    // dont want to stop creating another instances if one fails
                     _Logger.LogError(String.Format("Exception on Creating Instance {0}: {1}", t.Key, ex.Message));
                 }
             }
@@ -73,15 +73,20 @@ namespace Gateway.Utils.Loader
             {
                 try
                 {
-                    if (onDataArrival != null)
+                    if( onDataArrival != null )
                     {
-                        OnDataToEnqueue = 
-                            data => {
-                                onDataArrival(data);
-                                return enqueue(data);
+                        OnDataToEnqueue =
+                            data =>
+                            {
+                                onDataArrival( data );
+
+                                return enqueue( data );
                             };
                     }
-                    else OnDataToEnqueue = enqueue;
+                    else
+                    {
+                        OnDataToEnqueue = enqueue;
+                    }
 
                     dataIntake.Start(OnDataToEnqueue);
                 }

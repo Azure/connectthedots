@@ -9,12 +9,16 @@ namespace CoreTest
     {
         static void Main(string[] args)
         {
-
+            /////////////////////////////////////////////////////////////////////////////////////////////
+            // Test core service 
+            //
             CoreTest t2 = new CoreTest();
             t2.Run();
-            Console.WriteLine(String.Format("Test completed, {0} messages sent", t2.TotalMessagesSent));
+            Console.WriteLine(String.Format("Core Test completed"));
 
-
+            //////////////////////////////////////////////////////////////////////////////////////////////
+            // Test Web service and core service 
+            //
             SensorDataContract sensorData = RandomSensorDataGenerator.Generate( );
             string serializedData = JsonConvert.SerializeObject( sensorData );
 
