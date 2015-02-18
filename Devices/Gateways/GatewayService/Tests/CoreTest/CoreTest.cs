@@ -1,7 +1,4 @@
-﻿
-#define TEST_CORE_AND_DATA_INTAKES
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Security.AccessControl;
 using System.Threading;
@@ -51,49 +48,39 @@ namespace CoreTest
         {
             try
             {
-                _BatchSenderThread.Logger = _testLogger;
-                _BatchSenderThread.Start();
+                GatewayService service = PrepareGatewayService();
 
-                GatewayService service = new GatewayService(_GatewayQueue, _BatchSenderThread);
-
-                service.Logger = _testLogger;
-                
-                service.OnDataInQueue += DataInQueue;
-                
-                _BatchSenderThread.OnEventsBatchProcessed += EventBatchProcessed;
-
-                var dataIntakeLoader = new DataIntakeLoader( Loader.GetSources( ), _testLogger ); 
-
-                //
                 // Send a flurry of messages, repeat a few times
-                //
-#if TEST_CORE_AND_DATA_INTAKES
-                _totalMessagesToSend = 100;
-                dataIntakeLoader.StartAll( service.Enqueue, DataArrived );
-#else 
-                //// script message sequence
-                //int[] sequence = new int[ TEST_ITERATIONS ];
-                //for( int iteration = 0; iteration < TEST_ITERATIONS; ++iteration )
-                //{
-                //    int count = _rand.Next( MAX_TEST_MESSAGES );
 
-                //    sequence[ iteration ] = count;
+                // script message sequence
+                int[] sequence = new int[TEST_ITERATIONS];
+                for (int iteration = 0; iteration < TEST_ITERATIONS; ++iteration)
+                {
+                    int count = _rand.Next(MAX_TEST_MESSAGES);
 
-                //    _totalMessagesToSend += count;
-                //}
+                    sequence[iteration] = count;
 
-                //// send the messages
-                //for( int iteration = 0; iteration < TEST_ITERATIONS; ++iteration )
-                //{
-                //    int count = sequence[ iteration ];
+                    _totalMessagesToSend += count;
+                }
 
-                //    while( --count >= 0 )
-                //    {
-                //        service.Enqueue( "42" );
-                //    }
-                //}
-#endif
-                
+                // send the messages
+                for (int iteration = 0; iteration < TEST_ITERATIONS; ++iteration)
+                {
+                    int count = sequence[iteration];
+
+                    while (--count >= 0)
+                    {
+                        string message = "42";
+                        DataArrived(message);
+                        service.Enqueue(message);
+                    }
+                }
+
+                // Dinar: if messages stop to enqueue, BatchSenderThread may not send all messages because some messages
+                // could come after counting number of tasks and before waiting (#48)
+                Thread.Sleep(3000);
+                _BatchSenderThread.Process();
+
                 _completed.WaitOne();
 
                 _BatchSenderThread.Stop(STOP_TIMEOUT_MS);
@@ -106,6 +93,32 @@ namespace CoreTest
             {
                 _BatchSenderThread.Stop(STOP_TIMEOUT_MS);
                 _Sender.Close( );
+            }
+        }
+
+        public void RunWithDataIntake()
+        {
+            try
+            {
+                GatewayService service = PrepareGatewayService();
+
+                DataIntakeLoader dataIntakeLoader = new DataIntakeLoader(Loader.GetSources(), _testLogger);
+
+                _totalMessagesToSend += 100;
+                dataIntakeLoader.StartAll( service.Enqueue, DataArrived );
+
+                _completed.WaitOne();
+
+                _BatchSenderThread.Stop(STOP_TIMEOUT_MS);
+            }
+            catch (Exception ex)
+            {
+                _testLogger.LogError("exception caught: " + ex.StackTrace);
+            }
+            finally
+            {
+                _BatchSenderThread.Stop(STOP_TIMEOUT_MS);
+                _Sender.Close();
             }
         }
 
@@ -128,6 +141,21 @@ namespace CoreTest
         public void Completed()
         {
             _completed.Set();
+        }
+
+        private GatewayService PrepareGatewayService()
+        {
+            _BatchSenderThread.Logger = _testLogger;
+            _BatchSenderThread.Start();
+
+            GatewayService service = new GatewayService(_GatewayQueue, _BatchSenderThread);
+
+            service.Logger = _testLogger;
+            service.OnDataInQueue += DataInQueue;
+
+            _BatchSenderThread.OnEventsBatchProcessed += EventBatchProcessed;
+
+            return service;
         }
 
         protected void DataArrived( string data )

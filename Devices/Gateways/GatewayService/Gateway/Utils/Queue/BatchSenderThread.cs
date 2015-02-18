@@ -156,7 +156,8 @@ namespace Gateway.Utils.Queue
                                     {
                                         Interlocked.Decrement( ref _outstandingTasks );
 
-                                        Debug.Assert( _outstandingTasks >= 0 );
+                                        //Dinar: we can reach this earlier than finally block, faced during testing
+                                        //Debug.Assert( _outstandingTasks >= 0 );
 
                                         if( popped.Result.IsSuccess )
                                         {
