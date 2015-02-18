@@ -24,8 +24,10 @@ namespace CoreTest
             // Naive atetmpt to simulate network latency
             Thread.Sleep(_rand.Next(MAX_LAG));
 
+            int totalMessages = _test.TotalMessagesSent;
+
             // LORENZO: print all data and validate that they match the data sent
-            if (Interlocked.Increment(ref _received) == _test.TotalMessagesSent)
+            if( Interlocked.Increment( ref _received ) == totalMessages && totalMessages >= _test.TotalMessagesToSend)
             {
                 _test.Completed();
             }

@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="DataIntake\DataIntake.cs" />
     <Compile Include="DataIntake\IDataIntake.cs" />
     <Compile Include="DataIntake\SensorEndpoint.cs" />
     <Compile Include="GatewayService.cs" />
@@ -70,8 +71,9 @@
     <Compile Include="ServiceInstantiation\IService.cs" />
     <Compile Include="ServiceInstantiation\ServiceBehavior.cs" />
     <Compile Include="ServiceInstantiation\ServiceInstanceProvider.cs" />
-    <Compile Include="Utils\Generators\RandomSensorDataGenerator.cs" />
+    <Compile Include="Utils\Loader\DataIntakeLoader.cs" />
     <Compile Include="Utils\Logger\ILogger.cs" />
+    <Compile Include="Utils\Logger\SafeLogger.cs" />
     <Compile Include="Utils\MessageSender\AMQPSender.cs" />
     <Compile Include="Utils\MessageSender\IMessageSender.cs" />
     <Compile Include="Utils\OperationStatus\ErrorCode.cs" />

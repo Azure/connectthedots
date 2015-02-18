@@ -148,29 +148,40 @@ namespace Gateway.Utils.Queue
 
                             Debug.Assert(_outstandingTasks >= 0);
 
-                            Interlocked.Increment( ref _outstandingTasks);
-
-                            tasks.Add( 
-                                t.ContinueWith<Task>(popped =>
+                            bool added = false;
+                            try
+                            {
+                                tasks.Add(
+                                    t.ContinueWith<Task>( popped =>
                                     {
-                                        Interlocked.Decrement(ref _outstandingTasks);
+                                        Interlocked.Decrement( ref _outstandingTasks );
 
-                                        Debug.Assert(_outstandingTasks >= 0);
+                                        Debug.Assert( _outstandingTasks >= 0 );
 
-                                        if (popped.Result.IsSuccess)
+                                        if( popped.Result.IsSuccess )
                                         {
-                                            if (_DataTransform != null)
-                                                return _DataTarget.SendMessage(_DataTransform(popped.Result.Result));
-                                            if (_SerializedData != null)
-                                                return _DataTarget.SendSerialized(_SerializedData(popped.Result.Result));
+                                            if( _DataTransform != null )
+                                                return _DataTarget.SendMessage( _DataTransform( popped.Result.Result ) );
+                                            if( _SerializedData != null )
+                                                return _DataTarget.SendSerialized( _SerializedData( popped.Result.Result ) );
                                         }
                                         else
                                         {
-                                            throw new Exception();
+                                            throw new Exception( );
                                         }
                                         return popped;
-                                    })
-                            );
+                                    } )
+                                );
+
+                                added = true;
+                            }
+                            finally
+                            {
+                                if( added )
+                                {
+                                    Interlocked.Increment( ref _outstandingTasks );
+                                }
+                            }
                         }
 
                         // alert any client about outstanding message tasks

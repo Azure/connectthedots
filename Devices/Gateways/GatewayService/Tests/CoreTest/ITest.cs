@@ -3,7 +3,8 @@
     interface ITest
     {
         void Run();
-        void Completed();
+        void Completed( );
         int TotalMessagesSent { get; }
+        int TotalMessagesToSend { get; }
     }
 }

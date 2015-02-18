@@ -10,53 +10,72 @@ using Gateway.Utils.Logger;
 
 namespace SocketListener
 {
-    public class SocketListenerThread : IDataIntake
+    public class SocketListenerThread : DataIntakeAbstract
     {
         const int CONNECTION_RETRIES = 20;
         const int SLEEP_TIME_BETWEEN_RETRIES = 1000; // 1 sec
 
-        private static ILogger _Logger;
-        private static Func<string, int> _Enqueue;
-        private static Func<bool> _DoWorkSwitch;
+        private Func<string, int> _Enqueue;
+        private bool _DoWorkSwitch;
 
         private Thread listeningThread = null;
-        private static SensorEndpoint _Endpoint;
+        private SensorEndpoint _Endpoint;
 
-        public bool SetEndpoint(SensorEndpoint endpoint = null)
+        public SocketListenerThread( ILogger logger )
+            : base( logger ) 
         {
-            if (endpoint == null)
-                return false;
-
-            _Endpoint = endpoint;
-            return true;
+            //
+            // TODO: Issue #45
+            //
+            _Endpoint = new SensorEndpoint
+                            {
+                                Host = "127.0.0.1",
+                                Port = 5000,
+                            };
         }
 
-        public bool Start(Func<string, int> enqueue, ILogger logger, Func<bool> doWorkSwitch)
+        public override bool  Start( Func<string, int> enqueue )
         {
             _Enqueue = enqueue;
-            _Logger = logger;
-            _DoWorkSwitch = doWorkSwitch;
 
-            Task.Run(() => RunForSocket());
+            _DoWorkSwitch = true;
+
+            Task.Run( ( ) => RunForSocket( ) );
+
             return true;
         }
 
-        public int RunForSocket()
+        public override bool Stop( )
+        {
+            _DoWorkSwitch = false;
+
+            return true;
+        }
+        public override bool SetEndpoint(SensorEndpoint endpoint)
+        {
+            if( endpoint == null )
+            {
+                return false;
+            }
+
+            _Endpoint = endpoint;
+
+            return true;
+        }
+
+        private int RunForSocket()
         {
             int step = CONNECTION_RETRIES;
 
             Socket client = null;
-            while (--step > 0 && _DoWorkSwitch())
+            while (--step > 0 && _DoWorkSwitch)
             {
                 try
                 {
-                    if (_Logger != null)
-                        _Logger.LogInfo("Try connecting to device - step: " + (CONNECTION_RETRIES - step));
+                    _Logger.LogInfo("Try connecting to device - step: " + (CONNECTION_RETRIES - step));
 
-                    client = new Socket(
-                        AddressFamily.InterNetwork,
-                        SocketType.Stream,
-                        ProtocolType.Unspecified);
+                    client = new Socket( AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Unspecified );
+
                     client.Connect(_Endpoint.Host, _Endpoint.Port);
 
                     if (client.Connected)
@@ -66,11 +85,8 @@ namespace SocketListener
                 }
                 catch (Exception ex)
                 {
-                    if (_Logger != null)
-                    {
-                        _Logger.LogError("Exception when opening socket:" + ex.StackTrace);
-                        _Logger.LogError("Will retry in 1 second");
-                    }
+                    _Logger.LogError("Exception when opening socket:" + ex.StackTrace);
+                    _Logger.LogError("Will retry in 1 second");
                 }
 
                 // wait and try again
@@ -79,27 +95,25 @@ namespace SocketListener
 
             if (client != null && client.Connected)
             {
-                if (_Logger != null)
-                    _Logger.LogInfo(string.Format("Socket connected to {0}", client.RemoteEndPoint.ToString()));
+                _Logger.LogInfo(string.Format("Socket connected to {0}", client.RemoteEndPoint.ToString()));
 
                 listeningThread = new Thread(() => SensorDataClient(client));
                 listeningThread.Start();
 
-                if (_Logger != null)
-                    _Logger.LogInfo(string.Format("Reader thread started"));
+                _Logger.LogInfo(string.Format("Reader thread started"));
+                
                 listeningThread.Join();
-                if (_Logger != null)
-                    _Logger.LogInfo("Listening thread terminated. Quitting.");
+                
+                _Logger.LogInfo("Listening thread terminated. Quitting.");
             }
             else
             {
-                if (_Logger != null)
-                    _Logger.LogError("No sensor connection detected. Quitting.");
+                _Logger.LogError("No sensor connection detected. Quitting.");
             }
             return 0;
         }
 
-        public static void SensorDataClient(Socket client)
+        public void SensorDataClient(Socket client)
         {
             try
             {
@@ -111,7 +125,7 @@ namespace SocketListener
                 //Regex dataExtractor = new Regex(@"<(\d+.?\d*)>");
                 Regex dataExtractor = new Regex("<([\\w\\s\\d:\",-{}.]+)>");
 
-                while (_DoWorkSwitch())
+                while (_DoWorkSwitch)
                 {
                     try
                     {
@@ -136,6 +150,7 @@ namespace SocketListener
                                     string jsonString = jsonBuilder.ToString();
                                     //logger.Info("About to call SendAMQPMessage with JSON string: " + jsonString);
                                     _Enqueue(jsonString);
+
                                     matchCount++;
                                 }
                             }
@@ -143,41 +158,29 @@ namespace SocketListener
                     }
                     catch (Exception ex)
                     {
-                        if (_Logger != null)
-                        {
-                            _Logger.LogError("Exception processing data from socket: " + ex.StackTrace);
-                            _Logger.LogError("Continuing...");
-                        }
+                        _Logger.LogError("Exception processing data from socket: " + ex.StackTrace);
+                        _Logger.LogError("Continuing...");
                     }
                 }
             }
             catch (StackOverflowException ex)
             {
-                if (_Logger != null)
-                {
-                    _Logger.LogError("Stack Overflow while processing data from socket: " + ex.StackTrace);
-                    _Logger.LogError("Closing program...");
-                }
+                _Logger.LogError("Stack Overflow while processing data from socket: " + ex.StackTrace);
+                _Logger.LogError("Closing program...");
 
                 throw;
             }
             catch (OutOfMemoryException ex)
             {
-                if (_Logger != null)
-                {
-                    _Logger.LogError("Stack Overflow while processing data from socket: " + ex.StackTrace);
-                    _Logger.LogError("Closing program...");
-                }
+                _Logger.LogError("Stack Overflow while processing data from socket: " + ex.StackTrace);
+                _Logger.LogError("Closing program...");
 
                 throw;
             }
             catch (SocketException ex)
             {
-                if (_Logger != null)
-                {
-                    _Logger.LogError("Socket exception processing data from socket: " + ex.StackTrace + ex.Message);
-                    _Logger.LogError("Continuing...");
-                }
+                _Logger.LogError("Socket exception processing data from socket: " + ex.StackTrace + ex.Message);
+                _Logger.LogError("Continuing...");
 
                 // Dinar: this will raise every time when sensor stopped connection
                 // wont throw to not stop service

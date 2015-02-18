@@ -1,7 +1,7 @@
 ﻿using System;
 using Gateway.Models;
 
-namespace Gateway.Utils.Generators
+namespace CoreTest.Utils.Generators
 {
     public static class RandomSensorDataGenerator
     {

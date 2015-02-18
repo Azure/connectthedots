@@ -9,35 +9,53 @@ using Gateway.ServiceInstantiation;
 using Gateway.Utils.Logger;
 using Gateway.Utils.MessageSender;
 using Gateway.Utils.Queue;
+using Gateway.Utils;
 
 namespace WindowsService
 {
     public class WindowsService : ServiceBase
     {
-        private static WebServiceHost _WebHost;
-        private static readonly ILogger _Logger = EventLogger.Instance;
-
-        private static readonly GatewayQueue<QueuedItem> _GatewayQueue
-            = new GatewayQueue<QueuedItem>();
-
-        private static readonly AMQPSender<SensorDataContract> _AMPQSender
-            = new AMQPSender<SensorDataContract>(Constants.AMQPSAddress,
-                Constants.EventHubName, Constants.EventHubMessageSubject,
-                Constants.EventHubDeviceId, Constants.EventHubDeviceDisplayName);
-
-        private static readonly EventProcessor _BatchSenderThread
-            = new BatchSenderThread<QueuedItem, SensorDataContract>(_GatewayQueue, _AMPQSender, null,
-                new Func<QueuedItem, string>( m => m.JsonData));
-
-        private static readonly DataIntakeLoader _DataIntakeLoader
-            = new DataIntakeLoader(_Logger);
-
         private const int STOP_TIMEOUT_MS = 5000; // ms
+
+        private static WebServiceHost _WebHost;
+
+        private readonly ILogger _Logger;
+
+        private readonly GatewayQueue<QueuedItem> _GatewayQueue;
+
+        private readonly AMQPSender<SensorDataContract> _AMPQSender;
+
+        private readonly EventProcessor _BatchSenderThread;
+
+        private readonly DataIntakeLoader _DataIntakeLoader;
+
+        private bool _DoWork = true;
 
         public WindowsService()
         {
             // Name the Windows Service
             ServiceName = Constants.WindowsServiceName;
+
+            _Logger = EventLogger.Instance;
+
+            _GatewayQueue = new GatewayQueue<QueuedItem>();
+
+            _AMPQSender = new AMQPSender<SensorDataContract>(
+                                                Constants.AMQPSAddress,
+                                                Constants.EventHubName,
+                                                Constants.EventHubMessageSubject,
+                                                Constants.EventHubDeviceId,
+                                                Constants.EventHubDeviceDisplayName
+                                                ); 
+            
+            _BatchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>(
+                                                _GatewayQueue,
+                                                _AMPQSender,
+                                                null,
+                                                new Func<QueuedItem, string>( m => m.JsonData )
+                                                ); 
+
+            _DataIntakeLoader = new DataIntakeLoader( Loader.GetSources(), _Logger ); 
         }
 
         protected override void OnStart(string[] args)
@@ -62,16 +80,14 @@ namespace WindowsService
             service.Logger = _Logger;
             service.OnDataInQueue += OnData;
 
-
             _WebHost.Open();
 
-            _DataIntakeLoader.Start(service.Enqueue, _Logger, DoWork);
+            _DataIntakeLoader.StartAll( service.Enqueue ); 
 	    
-	    _Logger.LogInfo("...started");
+            _Logger.LogInfo("...started");
         }
 
-        private static bool _DoWork = true;
-        public static bool DoWork()
+        public bool DoWork()
         {
             //TODO: test stop indicator
             return _DoWork;

@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using Gateway.Models;
-using Gateway.Utils.Generators;
+using CoreTest.Utils.Generators;
 using Newtonsoft.Json;
 
 namespace SocketServiceDeviceMock

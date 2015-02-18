@@ -5,8 +5,10 @@ namespace Gateway.DataIntake
 {
     public interface IDataIntake
     {
-        bool Start(Func<string, int> enqueue, ILogger logger, Func<bool> doWorkSwitch);
+        bool Start( Func<string, int> enqueue );
 
-        bool SetEndpoint(SensorEndpoint endpoint = null);
+        bool Stop( );
+
+        bool SetEndpoint( SensorEndpoint endpoint );
     }
 }

@@ -1,4 +1,7 @@
-﻿using System;
+﻿
+#define TEST_CORE_AND_DATA_INTAKES
+
+using System;
 using System.Collections.Generic;
 using System.Security.AccessControl;
 using System.Threading;
@@ -9,6 +12,10 @@ using Gateway.Utils.Logger;
 using Gateway.Utils.MessageSender;
 using Gateway.Utils.Queue;
 using CoreTest.Utils.Logger;
+using CoreTest.Utils.Loader;
+using Gateway.Utils;
+using Gateway.DataIntake;
+
 
 namespace CoreTest
 {
@@ -23,14 +30,16 @@ namespace CoreTest
         private readonly IMessageSender<QueuedItem> _Sender;
         private readonly BatchSenderThread<QueuedItem, QueuedItem> _BatchSenderThread;
         private readonly Random _rand;
-        private int _totalMessages;
+        private int _totalMessagesSent;
+        private int _totalMessagesToSend;
 
         private const int STOP_TIMEOUT_MS = 5000; // ms
 
         public CoreTest()
         {
-            _rand = new Random();
-            _totalMessages = 0;
+            _rand = new Random( );
+            _totalMessagesSent = 0;
+            _totalMessagesToSend = 0;
             _GatewayQueue = new GatewayQueue<QueuedItem>();
             _Sender = new MockSender<QueuedItem>(this);
             //_Sender = new AMQPSender<SensorDataContract>(Constants.AMQPSAddress, Constants.EventHubName, Constants.EventHubMessageSubject, Constants.EventHubDeviceId, Constants.EventHubDeviceDisplayName);
@@ -49,27 +58,42 @@ namespace CoreTest
 
                 service.Logger = _testLogger;
                 
-                service.OnDataInQueue += OnData;
+                service.OnDataInQueue += DataInQueue;
                 
-                _BatchSenderThread.OnEventsBatchProcessed += OnEventBatchProcessed;
+                _BatchSenderThread.OnEventsBatchProcessed += EventBatchProcessed;
 
+                var dataIntakeLoader = new DataIntakeLoader( Loader.GetSources( ), _testLogger ); 
+
+                //
                 // Send a flurry of messages, repeat a few times
-                for (int iteration = 0; iteration < TEST_ITERATIONS; ++iteration)
-                {
-                    int count = _rand.Next(MAX_TEST_MESSAGES);
+                //
+#if TEST_CORE_AND_DATA_INTAKES
+                _totalMessagesToSend = 100;
+                dataIntakeLoader.StartAll( service.Enqueue, DataArrived );
+#else 
+                //// script message sequence
+                //int[] sequence = new int[ TEST_ITERATIONS ];
+                //for( int iteration = 0; iteration < TEST_ITERATIONS; ++iteration )
+                //{
+                //    int count = _rand.Next( MAX_TEST_MESSAGES );
 
-                    _totalMessages += count;
+                //    sequence[ iteration ] = count;
 
-                    while (--count >= 0)
-                    {
-                        service.Enqueue("42");
-                    }
-                }
-                // Dinar: if messages stop to enqueue, BatchSenderThread may not send all messages because some messages
-                // could come after counting number of tasks and before waiting
-                Thread.Sleep(3000);
-                _BatchSenderThread.Process();
-                // LORENZO: check all tasks
+                //    _totalMessagesToSend += count;
+                //}
+
+                //// send the messages
+                //for( int iteration = 0; iteration < TEST_ITERATIONS; ++iteration )
+                //{
+                //    int count = sequence[ iteration ];
+
+                //    while( --count >= 0 )
+                //    {
+                //        service.Enqueue( "42" );
+                //    }
+                //}
+#endif
+                
                 _completed.WaitOne();
 
                 _BatchSenderThread.Stop(STOP_TIMEOUT_MS);
@@ -89,7 +113,15 @@ namespace CoreTest
         {
             get
             {
-                return _totalMessages;
+                return _totalMessagesSent;
+            }
+        }
+
+        public int TotalMessagesToSend
+        {
+            get
+            {
+                return _totalMessagesToSend;
             }
         }
 
@@ -98,14 +130,20 @@ namespace CoreTest
             _completed.Set();
         }
 
-        protected virtual void OnData(QueuedItem data)
+        protected void DataArrived( string data )
+        {
+            _totalMessagesSent++;
+        }
+
+        protected virtual void DataInQueue( QueuedItem data )
         {
             // LORENZO: test behaviours such as accumulating data an processing in batch
             // as it stands, we are processing every event as it comes in
-            _BatchSenderThread.Process();
+
+            _BatchSenderThread.Process( );
         }
 
-        protected virtual void OnEventBatchProcessed( List<Task> messages )
+        protected virtual void EventBatchProcessed( List<Task> messages )
         {
             // LORENZO: test behaviours such as waiting for messages to be delivered or re-transmission
             

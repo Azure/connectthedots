@@ -37,6 +37,7 @@
       <HintPath>..\..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -47,6 +48,8 @@
   <ItemGroup>
     <Compile Include="CoreTest.cs" />
     <Compile Include="ITest.cs" />
+    <Compile Include="Utils\Generators\RandomSensorDataGenerator.cs" />
+    <Compile Include="Utils\Loader\Loader.cs" />
     <Compile Include="Utils\MessageSender\MockSender.cs" />
     <Compile Include="TestRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

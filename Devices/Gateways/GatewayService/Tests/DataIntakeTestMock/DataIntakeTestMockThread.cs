@@ -3,32 +3,44 @@ using System.Threading;
 using System.Threading.Tasks;
 using Gateway.DataIntake;
 using Gateway.Models;
-using Gateway.Utils.Generators;
 using Gateway.Utils.Logger;
+using CoreTest.Utils.Generators;
 using Newtonsoft.Json;
 
 namespace DataIntakeTestMock
 {
-    public class DataIntakeTestMockThread : IDataIntake
+    public class DataIntakeTestMockThread : DataIntakeAbstract
     {
         private const int SLEEP_TIME_MS = 1000;
         private const int LOG_MESSAGE_RATE = 100;//should be positive
 
-        private static ILogger _Logger;
-        private static Func<string, int> _Enqueue;
-        private static Func<bool> _DoWorkSwitch;
+        private Func<string, int> _Enqueue;
+        private bool _DoWorkSwitch;
 
-        public bool Start(Func<string, int> enqueue, ILogger logger, Func<bool> doWorkSwitch)
+        public DataIntakeTestMockThread( ILogger logger )
+            : base( logger ) 
+        {
+        }
+
+        public override bool Start( Func<string, int> enqueue )
         {
             _Enqueue = enqueue;
-            _Logger = logger;
-            _DoWorkSwitch = doWorkSwitch;
 
-            Task.Run(() => TestRun());
+            _DoWorkSwitch = true;
+
+            Task.Run( ( ) => TestRun( ) );
+
             return true;
         }
 
-        public bool SetEndpoint(SensorEndpoint endpoint = null)
+        public override bool Stop( )
+        {
+            _DoWorkSwitch = false;
+
+            return true;
+        }
+
+        public override bool SetEndpoint( SensorEndpoint endpoint )
         {
             //we don't need any endpoints for this Data Intake
             if (endpoint == null)
@@ -43,21 +55,21 @@ namespace DataIntakeTestMock
             do
             {
                 SensorDataContract sensorData = RandomSensorDataGenerator.Generate();
+                
                 string serializedData = JsonConvert.SerializeObject(sensorData);
+
+                SignalDataArrival( serializedData );
 
                 _Enqueue(serializedData);
 
                 if (++messagesSent % LOG_MESSAGE_RATE == 0)
                 {
-                    if (LOG_MESSAGE_RATE == 1)
-                        _Logger.LogInfo("Message sent via DataIntakeTestMock: " + serializedData);
-                    else
-                        _Logger.LogInfo(LOG_MESSAGE_RATE + " messages sent via DataIntakeTestMock.");
+                    _Logger.LogInfo(LOG_MESSAGE_RATE + " messages sent via DataIntakeTestMock.");
                 }
 
                 Thread.Sleep(SLEEP_TIME_MS);
-            } while (_DoWorkSwitch());
+
+            } while (_DoWorkSwitch);
         }
     }
-
 }

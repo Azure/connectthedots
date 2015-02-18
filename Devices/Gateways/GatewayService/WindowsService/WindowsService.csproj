@@ -46,7 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Utils\DataIntakeLoader.cs" />
+    <Compile Include="Utils\Loader.cs" />
     <Compile Include="Utils\Logger\EventLogger.cs" />
     <Compile Include="WindowsService.cs">
       <SubType>Component</SubType>

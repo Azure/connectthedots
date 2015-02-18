@@ -23,7 +23,8 @@ namespace CoreTest
         string _url;
         private readonly ILogger _testLogger = new TestLogger();
         private readonly Random _rand;
-        private int _totalMessages;
+        private int _totalMessagesSent;
+        private int _totalMessagesToSend;
         
         private const int MINUTES_TO_MILLISECONDS = 60 * 1000;
         private const int STOP_TIMEOUT_MS = 5000; // ms
@@ -32,8 +33,9 @@ namespace CoreTest
         public WebServiceTest(string url)
         {
             _url = url;
-            _rand = new Random();
-            _totalMessages = 0;
+            _rand = new Random( );
+            _totalMessagesSent = 0;
+            _totalMessagesToSend = 0;
         }
 
         public void Run()
@@ -58,7 +60,7 @@ namespace CoreTest
                             }
                             else
                             {
-                                _totalMessages++;
+                                _totalMessagesSent++;
                             }
                         }
                     }
@@ -66,7 +68,7 @@ namespace CoreTest
                     // sleep 5 to 10 minutes
                     int sleepMS = MIN_WAIT_BEETWEEN_BURSTS + _rand.Next(MIN_WAIT_BEETWEEN_BURSTS);
 
-                    Console.WriteLine(String.Format("Sent {0} messages, sleeping now for {1} minutes", _totalMessages, sleepMS / MINUTES_TO_MILLISECONDS));
+                    Console.WriteLine(String.Format("Sent {0} messages, sleeping now for {1} minutes", _totalMessagesSent, sleepMS / MINUTES_TO_MILLISECONDS));
 
                     Thread.Sleep(sleepMS);
                 }
@@ -86,7 +88,15 @@ namespace CoreTest
         {
             get
             {
-                return _totalMessages;
+                return _totalMessagesSent;
+            }
+        }
+
+        public int TotalMessagesToSend
+        {
+            get
+            {
+                return _totalMessagesToSend;
             }
         }
 

@@ -51,6 +51,10 @@
       <Project>{E14D1C61-1979-452E-BE8B-0303A95EF764}</Project>
       <Name>Gateway</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CoreTest\CoreTest.csproj">
+      <Project>{ca90b613-c4d6-4011-bc6b-ccc8de62dac0}</Project>
+      <Name>CoreTest</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

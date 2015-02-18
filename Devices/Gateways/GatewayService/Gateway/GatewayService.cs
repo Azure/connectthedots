@@ -27,7 +27,6 @@ namespace Gateway
 
         public ILogger Logger { get; set; }
 
-
         public int Enqueue(string jsonData)
         {
             if (jsonData != null)//not filling a queue by empty items

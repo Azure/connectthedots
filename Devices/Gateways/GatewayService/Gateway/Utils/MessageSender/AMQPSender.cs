@@ -29,7 +29,7 @@ namespace Gateway.Utils.MessageSender
             internal ReliableSender( string amqpsAddress, string eventHubName, ILogger logger )
             {
                 _EventHubName = eventHubName;
-                _Logger = logger;
+                _Logger = new SafeLogger( logger );
 
                 try
                 {
@@ -105,8 +105,7 @@ namespace Gateway.Utils.MessageSender
                 {
                     //we don't want service to stop working when exception was thrown at connection creation 
                     //TODO: add reraise for some cases
-                    if (_Logger != null)
-                        _Logger.LogError("Error on establishing sender: " + ex.Message);
+                    _Logger.LogError("Error on establishing sender: " + ex.Message);
                 }
             }
 
