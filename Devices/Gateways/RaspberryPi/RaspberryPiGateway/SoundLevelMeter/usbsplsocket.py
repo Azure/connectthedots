@@ -27,10 +27,10 @@ print hex(dev.idVendor) + ', ' + hex(dev.idProduct)
  
 conn, addr = s.accept()
 while 1:
-	ret = dev.ctrl_transfer(0xC0, 4, 0, 0, 200)
-	dB = (ret[0] + ((ret[1] & 3) * 256)) * 0.1 + 30
-	JSONdB="{\"dspl\":\"IMML Sound Level Meter 01\",\"Subject\":\"sound\",\"DeviceGUID\":\"81E79059-A393-4797-8A7E-526C3EF9D64B\",\"decibels\":" +str(dB) + "}"
-	conn.send("<" + JSONdB + ">");
-	print JSONdB
-	time.sleep(1)
+    ret = dev.ctrl_transfer(0xC0, 4, 0, 0, 200)
+    dB = (ret[0] + ((ret[1] & 3) * 256)) * 0.1 + 30
+    JSONdB="{\"Value\":"+str(dB)+",\"GUID\":\"81E79059-A393-4797-8A7E-526C3EF9D64B\",\"Organization\":\"contoso\",\"DisplayName\":\"IMML Sound Level Meter 01\",\"UnitOfMeasure\":\"decibels\",\"MeasureName\":\"sound\",\"Location\":\"here\"}"
+    conn.send("<" + JSONdB + ">");
+    print JSONdB
+    time.sleep(1)
 s.close()

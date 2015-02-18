@@ -24,17 +24,5 @@ namespace Gateway.DataIntake
         public abstract bool Stop( );
 
         public abstract bool SetEndpoint( SensorEndpoint endpoint );
-
-        public void SignalDataArrival( string data )
-        {
-            DataArrivalEventHandler onData = OnDataArrival;
-
-            if(onData != null)
-            {
-                onData( data );
-            }
-        }
-
-        public event DataArrivalEventHandler OnDataArrival;
     }
 }
