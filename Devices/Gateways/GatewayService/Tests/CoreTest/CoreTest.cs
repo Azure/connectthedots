@@ -46,6 +46,12 @@ namespace CoreTest
 
         public void Run()
         {
+            TestRepeatSend();
+            TestDataIntake();
+        }
+
+        public void TestRepeatSend()
+        {
             try
             {
                 GatewayService service = PrepareGatewayService();
@@ -96,7 +102,7 @@ namespace CoreTest
             }
         }
 
-        public void RunWithDataIntake()
+        public void TestDataIntake()
         {
             try
             {
@@ -105,7 +111,13 @@ namespace CoreTest
                 DataIntakeLoader dataIntakeLoader = new DataIntakeLoader(Loader.GetSources(), _testLogger);
 
                 _totalMessagesToSend += 100;
-                dataIntakeLoader.StartAll( service.Enqueue, DataArrived );
+                dataIntakeLoader.StartAll(
+                    data =>
+                    {
+                        DataArrived(data);
+                        return service.Enqueue(data);
+                    }
+                );
 
                 _completed.WaitOne();
 
