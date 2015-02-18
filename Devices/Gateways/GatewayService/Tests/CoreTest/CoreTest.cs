@@ -108,14 +108,8 @@ namespace CoreTest
 
                 DataIntakeLoader dataIntakeLoader = new DataIntakeLoader(Loader.GetSources(), _testLogger);
 
-                _totalMessagesToSend += 100;
-                dataIntakeLoader.StartAll(
-                    data =>
-                    {
-                        DataArrived(data);
-                        return service.Enqueue(data);
-                    }
-                );
+                _totalMessagesToSend += 5;
+                dataIntakeLoader.StartAll(service.Enqueue, DataArrived);
 
                 _completed.WaitOne();
 

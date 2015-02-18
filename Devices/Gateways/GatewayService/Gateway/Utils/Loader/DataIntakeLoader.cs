@@ -10,7 +10,7 @@ namespace Gateway.Utils.Loader
     {
         private readonly IList<IDataIntake> _DataIntakes = new List<IDataIntake>( );
 
-        private ILogger _Logger;
+        private readonly ILogger _Logger;
 
         public DataIntakeLoader( IList<String> sources, ILogger logger )
         {
@@ -21,23 +21,40 @@ namespace Gateway.Utils.Loader
             var nameTypeDict = new Dictionary<string, Type>(); 
             foreach(string s in sources) 
             {
-                Assembly ass = Assembly.LoadFrom( s );
-
-                foreach( Type t in ass.GetExportedTypes( ) )
+                try
                 {
-                    //Get all classes implement IUserInterface
-                    if( t.GetInterface( "IDataIntake", false ) != null )
+                    Assembly ass = Assembly.LoadFrom(s);
+                    _Logger.LogError("Loaded assembly: " + s);
+                    foreach (Type t in ass.GetExportedTypes())
                     {
-                        nameTypeDict.Add( t.Name, t );//Add to Dictonary
+                        //Get all classes implement IUserInterface
+                        if (t.GetInterface("IDataIntake", false) != null)
+                        {
+                            nameTypeDict.Add(t.Name, t); //Add to Dictonary
+                        }
                     }
+                }
+                catch (Exception ex)
+                {
+                    //dont want to stop loading another modules if one fails
+                    _Logger.LogError(String.Format("Exception on loading DataIntake {0}: {1}", s, ex.Message));
                 }
             }
 
-            foreach( Type t in nameTypeDict.Values )
+            foreach( KeyValuePair<string, Type> t in nameTypeDict )
             {
-                DataIntakeAbstract di = ( DataIntakeAbstract )Activator.CreateInstance( t, new object[] { _Logger } );
+                try
+                {
+                    DataIntakeAbstract di = (DataIntakeAbstract)Activator.CreateInstance(t.Value, new object[] { _Logger });
 
-                _DataIntakes.Add( di );
+                    if( di != null )
+                        _DataIntakes.Add(di);
+                }
+                catch (Exception ex)
+                {
+                    //dont want to stop creating another instances if one fails
+                    _Logger.LogError(String.Format("Exception on Creating Instance {0}: {1}", t.Key, ex.Message));
+                }
             }
         }
 
@@ -49,18 +66,24 @@ namespace Gateway.Utils.Loader
             }
         }
 
-        public void StartAll( Func<string, int> enqueue, DataArrivalEventHandler onDataArrival = null )
+        protected Func<string, int> OnDataToEnqueue;
+        public void StartAll(Func<string, int> enqueue, DataArrivalEventHandler onDataArrival = null)
         {
             foreach( DataIntakeAbstract dataIntake in _DataIntakes )
             {
                 try
                 {
-                    if( onDataArrival != null )
+                    if (onDataArrival != null)
                     {
-                        dataIntake.OnDataArrival += onDataArrival;
+                        OnDataToEnqueue = 
+                            data => {
+                                onDataArrival(data);
+                                return enqueue(data);
+                            };
                     }
+                    else OnDataToEnqueue = enqueue;
 
-                    dataIntake.Start( enqueue );
+                    dataIntake.Start(OnDataToEnqueue);
                 }
                 catch( Exception ex )
                 {

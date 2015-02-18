@@ -58,8 +58,6 @@ namespace DataIntakeTestMock
                 
                 string serializedData = JsonConvert.SerializeObject(sensorData);
 
-                SignalDataArrival( serializedData );
-
                 _Enqueue(serializedData);
 
                 if (++messagesSent % LOG_MESSAGE_RATE == 0)
