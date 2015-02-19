@@ -47,7 +47,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CoreTest.cs" />
+    <Compile Include="Devices\SocketServiceTestDevice.cs" />
     <Compile Include="ITest.cs" />
+    <Compile Include="SocketTest.cs" />
     <Compile Include="Utils\Generators\RandomSensorDataGenerator.cs" />
     <Compile Include="Utils\Loader\Loader.cs" />
     <Compile Include="Utils\MessageSender\MockSender.cs" />

@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="SocketServiceDeviceMock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\Logger\ConsoleLogger.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -56,6 +57,10 @@
     <ProjectReference Include="..\..\Gateway\Gateway.csproj">
       <Project>{E14D1C61-1979-452E-BE8B-0303A95EF764}</Project>
       <Name>Gateway</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SharedInterfaces\SharedInterfaces.csproj">
+      <Project>{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}</Project>
+      <Name>SharedInterfaces</Name>
     </ProjectReference>
     <ProjectReference Include="..\CoreTest\CoreTest.csproj">
       <Project>{ca90b613-c4d6-4011-bc6b-ccc8de62dac0}</Project>

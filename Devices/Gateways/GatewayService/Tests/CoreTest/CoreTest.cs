@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CoreTest.Utils.MessageSender;
 using Gateway;
+using Gateway.DataIntake;
 using Gateway.Models;
 using Gateway.Utils.Loader;
 using Gateway.Utils.MessageSender;

@@ -24,8 +24,14 @@ namespace CoreTest
 
             WebServiceTest t1 = new WebServiceTest( "http://localhost:8000/GatewayService/API/Enqueue?jsonData=" + serializedData );
             t1.Run( );
-            Console.WriteLine( String.Format( "Test completed, {0} messages sent", t1.TotalMessagesSent ) );
+            Console.WriteLine(String.Format("WebService Test completed, {0} messages sent", t1.TotalMessagesSent));
 
+            /////////////////////////////////////////////////////////////////////////////////////////////
+            // Test Socket
+            //
+            SocketTest t3 = new SocketTest();
+            t3.Run();
+            Console.WriteLine(String.Format("Socket Test completed"));
 
             // wait for logging tasks to complete
             Console.WriteLine( "Press enter to exit" );
