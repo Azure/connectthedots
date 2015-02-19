@@ -222,10 +222,22 @@ namespace Gateway.Utils.Queue
                                     Interlocked.Decrement( ref _outstandingTasks );
                                 }
 
-                                //
-                                // TODO: Issue #49 
-                                //
                                 // We should try and recover for Task 't' that we popped and did not process 
+                                if (t.Status == TaskStatus.RanToCompletion || t.Status == TaskStatus.Running)
+                                {
+                                    //We need to wait for a result if task was started
+                                    try
+                                    {
+                                        OperationStatus<TQueueItem> popResult = t.Result;
+                                        if (popResult.IsSuccess)
+                                        {
+                                            //we don't want possibly race with other sending tasks
+                                            //more safety would be just give message back to the queue
+                                            _DataSource.Push(popResult.Result);
+                                        }
+                                    }
+                                    catch (AggregateException) { }
+                                }
 
                                 throw;
                             }
