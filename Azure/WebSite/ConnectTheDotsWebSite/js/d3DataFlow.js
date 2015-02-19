@@ -47,6 +47,7 @@ function d3DataFlow(flowGUID, params) {
     };
 
     self.clearData();
+    return self;
 }
 
 d3DataFlow.prototype = {
@@ -57,9 +58,11 @@ d3DataFlow.prototype = {
         self._dataSource = dataSource;
 
         // register events handler
-        dataSource.addEventListener('onNewData', function (event) {
+        dataSource.addEventListener('newData', function (event) {
             self._onNewDataHandler.call(self, event);
         });
+
+        return self;
     },
     getGUID: function () {
         return this._GUID;
@@ -88,6 +91,12 @@ d3DataFlow.prototype = {
         }
         return this._label;
     },
+    yAxis: function (yAxisNew) {
+        if (yAxisNew != undefined) {
+            this._yAxis = yAxisNew;
+        }
+        return this._yAxis;
+    },
     clearData: function () {
         this._data = [];
     },
@@ -108,15 +117,13 @@ d3DataFlow.prototype = {
             return;
         }
 
-        // remember displayName
-        if (obj.hasOwnProperty("DisplayName")) {
-            self._displayName = obj.DisplayName;
-        }
-
         var pushObj = {
             data: obj.Value,
             time: new Date(obj.time)
         };
+
+        if (obj.alerttype)
+            pushObj.alertData = { message: obj.message };
 
 
         self._data.push(pushObj);
@@ -130,11 +137,27 @@ d3DataFlow.prototype = {
     _onNewDataHandler: function (evt) {
         var self = this;
         var object = evt.owner;
-        // check GUID
+        // filter GUID
         if (object.GUID != self._GUID) return;
 
         // add to array
         self.addNewPoint(object);
+
+        // update properties
+        self._updateProperties(object);
+    },
+    _updateProperties: function (eventObject) {
+        var self = this;
+
+        if (eventObject.hasOwnProperty("DisplayName")) {
+            self.displayName(eventObject.DisplayName);
+        }
+
+        if (eventObject.hasOwnProperty("MeasureName")) {
+            self.label(eventObject.MeasureName + " (" + eventObject.UnitOfMeasure + ")");
+        }
+
+        self.raiseEvent('change', self);
     }
 };
 

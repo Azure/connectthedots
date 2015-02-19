@@ -87,7 +87,7 @@ namespace ConnectTheDotsWebSite
 					switch (messageDictionary["MessageType"] as string)
 					{
 						case "LiveDataSelection":
-							string deviceFilter = messageDictionary["DeviceName"] as string;
+							string deviceFilter = messageDictionary["DeviceGUID"] as string;
 
 							if (deviceFilter == "clear")
 							{
@@ -183,11 +183,11 @@ namespace ConnectTheDotsWebSite
 				messageTime = DateTime.Parse(message["timestart"].ToString());
 
 			if (
-					  !message.ContainsKey("DisplayName") ||
+					  !message.ContainsKey("GUID") ||
 					  (
 							(
 							 this.DeviceFilterList.Contains("all") ||
-							 this.DeviceFilterList.Contains(message["DisplayName"].ToString().ToLower())
+							 this.DeviceFilterList.Contains(message["GUID"].ToString().ToLower())
 							)
 					  )
 				 )

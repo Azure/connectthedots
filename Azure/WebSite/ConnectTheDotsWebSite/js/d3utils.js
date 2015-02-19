@@ -58,21 +58,36 @@ function baseClass() {
 
 baseClass.prototype = {
     constructor: baseClass,
-    addEventListener: function (eventName, callback) {
-        if (!this._eventsListeners.hasOwnProperty(eventName)) {
-            this._eventsListeners[eventName] = [];
+    addEventListeners: function (callbacks) {
+        var self = this;
+        for (var id in callbacks) {
+            self.addEventListener(id, callbacks[id]);
         }
-        this._eventsListeners[eventName].push(callback);
+        return self;
+    },
+    addEventListener: function (eventName, callback) {
+        var self = this;
+
+        if (!self._eventsListeners.hasOwnProperty(eventName)) {
+            self._eventsListeners[eventName] = [];
+        }
+        self._eventsListeners[eventName].push(callback);
+
+        return self;
     },
 
     removeEventListener: function (eventName, callback) {
-        if (!this._eventsListeners.hasOwnProperty(eventName) || !this._eventsListeners[eventName].length)
+        var self = this;
+
+        if (!self._eventsListeners.hasOwnProperty(eventName) || !self._eventsListeners[eventName].length)
             return;
         for (var i = this._eventsListeners[eventName].length; i > 0; --i)
-            if (this._eventsListeners[eventName][i - 1] === callback) {
-                this._eventsListeners[eventName].splice(i - 1, 1);
+            if (self._eventsListeners[eventName][i - 1] === callback) {
+                self._eventsListeners[eventName].splice(i - 1, 1);
                 break;
             }
+
+        return self;
     },
 
     raiseEvent: function (eventName, owner) {

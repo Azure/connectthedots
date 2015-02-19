@@ -41,19 +41,41 @@ function d3Chart(containerId, dataFlows) {
         MS_PER_MINUTE: 60000,
         WINDOW_MINUTES: 10,
     }
+    self._colors = d3.scale.category10();
 
     if (dataFlows) {
+        var axis = 0;
         for (var id in dataFlows) {
-            self.addFlow(dataFlows[id]);
+            self.addFlow(dataFlows[id], axis);
+            if (axis == 0) {
+                axis = 1;
+            }
         }
     }
+
+    // register update handler
+    self.addEventListener('update', function (evt) {
+        self.pruneOldData();
+        self.updateChart();
+    });
+
+    return self;
 }
 
 d3Chart.prototype = {
     constructor: d3Chart,
-    addFlow: function (newFlow) {
-        this._flows[newFlow.getGUID()] = newFlow;
-        newFlow.attachToDataSource(this);
+    addFlow: function (newFlow, yAxis) {
+        var self = this;
+        self._flows[newFlow.getGUID()] = newFlow;
+        self._flowsVisuals[newFlow.getGUID()] = {
+            alerts: {}
+        };
+
+        newFlow.yAxis(yAxis);
+        newFlow.attachToDataSource(self);
+        self._colors.domain(newFlow.getGUID());
+
+        return self;
     },
     attachToDataSource: function (dataSource) {
         var self = this;
@@ -61,9 +83,11 @@ d3Chart.prototype = {
         self._dataSource = dataSource;
 
         // register events handler
-        dataSource.addEventListener('onEventObject', function (event) {
+        dataSource.addEventListener('eventObject', function (event) {
             self._onMessageHandler.call(self, event);
         });
+
+        return self;
     },
     recalcFontSize: function () {
         //Standard height, for which the body font size is correct
@@ -75,52 +99,104 @@ d3Chart.prototype = {
 
         // remember font size
         this._fontSize = Math.floor(fontsize * percentage) - 1;
+
+        return self;
     },
     clearDataFlows: function () {
+        var self = this;
         // remove visual elements
         for (var id in this._flowsVisuals) {
-            removeFlowVisual(id);
+            self.removeFlowVisual(id);
         }
-        this._flowsVisuals = {};
         // clear data
-        for (var id in this._flows) {
+        for (var id in self._flows) {
             // clear data set
-            this._flows[id].clearData();
+            self._flows[id].clearData();
         }
+
+        return self;
+    },
+    removeChartVisual: function () {
+        var self = this;
+        if (self._x != null) {
+            self._x = null;
+        }
+        if (self._y0 != null) {
+            self._y0 = null;
+        }
+        if (self._y1 != null) {
+            self._y1 = null;
+        }
+        if (self._svg != null) {
+            self._svg.remove();
+            self._svg = null;
+        }
+
+        return self;
     },
     removeFlowVisual: function (id) {
         if (!this._flowsVisuals.hasOwnProperty(id)) return;
 
-        var dataFlow = this._flowsVisuals[id];
+        var dataFlowVisuals = this._flowsVisuals[id];
 
-        if (dataFlow.path) {
-            dataFlow.path.remove();
-            dataFlow.path = null;
+        for (var idAl in dataFlowVisuals.alerts) {
+            var alert = dataFlowVisuals.alerts[idAl];
+            if (alert.alertShowed) {
+                alert.alertShowed.remove();
+                alert.alertShowed = null;
+            }
+            if (alert.alertBarShowed) {
+                alert.alertBarShowed.remove();
+                alert.alertBarShowed = null;
+            }
         }
-        if (dataFlow.legend) {
-            dataFlow.legend.remove();
-            dataFlow.legend = null;
+
+        dataFlowVisuals.alerts = {};
+
+        if (dataFlowVisuals.path) {
+            dataFlowVisuals.path.remove();
+            dataFlowVisuals.path = null;
         }
-        if (dataFlow.legend_r) {
-            dataFlow.legend_r.remove();
-            dataFlow.legend_r = null;
+        if (dataFlowVisuals.legend) {
+            dataFlowVisuals.legend.remove();
+            dataFlowVisuals.legend = null;
         }
+        if (dataFlowVisuals.legend_r) {
+            dataFlowVisuals.legend_r.remove();
+            dataFlowVisuals.legend_r = null;
+        }
+
+        return self;
     },
     registerResizeHandler: function (containerId) {
+        var self = this;
         if (!window['resizeCallback@' + containerId]) {
             window['resizeCallback@' + containerId] = true;
             $(window).bind('resize', function () {
                 console.log('rezise chart: ' + containerId);
+                // remove visual elements
+                for (var id in self._flowsVisuals) {
+                    self.removeFlowVisual(id);
+                }
                 // remove original one
-                self.clearDataFlows();
+                self.removeChartVisual();
                 d3.select("#" + containerId).select('svg').remove();
                 // create a new one w/ correct size
-                self.createChart(containerId);
+                self.updateChart();
             });
         }
+
+        return self;
     },
     createChart: function () {
         var self = this;
+
+        var margin = {
+            top: 5,
+            right: 250,
+            bottom: 20,
+            left: 50
+        };
 
         // remember container
         self._container = $('#' + self._containerId);
@@ -130,8 +206,8 @@ d3Chart.prototype = {
 
         var dataFlowsArray = [];
 
-        self._width = self._container.width();
-        self._height = self._container.height();
+        self._width = self._container.width() - margin.right;
+        self._height = self._container.height() - margin.top - margin.bottom;
 
         // create dataFlows array
         for (var id in self._flows) {
@@ -163,9 +239,13 @@ d3Chart.prototype = {
         self._svg = d3.select("#" + self._containerId)
             .append("p")
             .append("svg")
-            .attr("width", self._width)
-            .attr("height", self._height)
-            .append("g")
+       		.attr("width", self._width + margin.left + margin.right)
+		    .attr("height", self._height + margin.top + margin.bottom)
+		    .style("margin-left", margin.left + "px")
+		    .style("margin-bottom", margin.bottom + "px")
+		    .style("margin-right", margin.right + "px")
+		    .append("g")
+		    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         self._svg.append("g")
             .attr("class", "y0 axis")
@@ -180,13 +260,13 @@ d3Chart.prototype = {
                 .attr("x", -self._height / 2)
                 .attr("dy", "1em")
                 .attr("font-size", self._fontSize + "px")
-                .style("fill", colors(dataFlowsArray[0].id))
+                .style("fill", self._colors(dataFlowsArray[0].id))
                 .text(dataFlowsArray[0].label);
         }
 
         if (dataFlowsArray.length > 1 && dataFlowsArray[1].label) {
             self._svg.append("text")
-                .attr("y1", 0)
+                .attr("y1", 0 - (margin.top / 2))
 
             self._svg.append("g")
                 .attr("class", "y1 axis")
@@ -202,7 +282,7 @@ d3Chart.prototype = {
                 .attr("x", -self._height / 2)
                 .attr("dy", "1em")
                 .attr("font-size", self._fontSize + "px")
-                .style("fill", colors(dataFlowsArray[1].id))
+                .style("fill", self._colors(dataFlowsArray[1].id))
                 .text(dataFlowsArray[1].label);
         }
 
@@ -223,6 +303,29 @@ d3Chart.prototype = {
         // register resize handler
         self.registerResizeHandler(self._containerId);
     },
+    pruneAlerts: function (flowId, cutoff) {
+        var self = this;
+        var alertsToRemove = [];
+        // cut alerts
+        for (var t in self._flowsVisuals[flowId].alerts) {
+            if (new Date(t) < cutoff) alertsToRemove.push(t);
+        }
+
+        for (var t in alertsToRemove) {
+            var alert = self._flowsVisuals[flowId].alerts[alertsToRemove[t]];
+
+            if (alert.alertShowed) {
+                alert.alertShowed.remove();
+                alert.alertShowed = null;
+            }
+            if (alert.alertBarShowed) {
+                alert.alertBarShowed.remove();
+                alert.alertBarShowed = null;
+            }
+
+            delete alert;
+        }
+    },
     pruneOldData: function () {
         var self = this;
         var now = new Date();
@@ -231,7 +334,8 @@ d3Chart.prototype = {
         // cut data
         for (var id in self._flows) {
             if (self._flows[id].cutData(cutoff)) {
-                self.removeFlowVisual(id);
+                self.pruneAlerts(id, cutoff);
+                //self.removeFlowVisual(id);
             }
         }
     },
@@ -239,6 +343,7 @@ d3Chart.prototype = {
     updateChart: function () {
 
         var self = this;
+        var someData = false;
 
         var minDate = new Date("3015-01-01T04:02:39.867841Z");
         var maxDate = new Date("1915-01-01T04:02:39.867841Z")
@@ -252,7 +357,9 @@ d3Chart.prototype = {
         for (var id in self._flows) {
             var dataFlow = self._flows[id];
             var data = dataFlow.getData();
-            if (data.length == 0 || !dataFlow.displayName()) return;
+            if (data.length == 0 || !dataFlow.displayName()) continue;
+
+            someData = true;
 
             // sort data
             data.sort(function (a, b) {
@@ -261,7 +368,7 @@ d3Chart.prototype = {
                 return 0;
             });
 
-            var y = data[0].y_axis;
+            var y = dataFlow.yAxis();
 
             for (var j = 0; j < data.length; j++) {
 
@@ -285,6 +392,8 @@ d3Chart.prototype = {
                 }
             }
         }
+
+        if (!someData) return;
 
         // create chart on demand
         if (self._svg == null) {
@@ -357,29 +466,31 @@ d3Chart.prototype = {
             for (var id in self._flows) {
                 var dataGUID = id;
                 var dataFlow = self._flows[id];
-                var data = dataFlow.data;
+                var dataFlowVisuals = self._flowsVisuals[id];
+                var data = dataFlow.getData();
+                var yAxis = dataFlow.yAxis();
 
-                if (dataFlow.path == null) {
-                    dataFlow.path = self._svg.append("g")
+                if (dataFlowVisuals.path == null) {
+                    dataFlowVisuals.path = self._svg.append("g")
                         .append("path")
                         .datum(data)
                         .attr("class", "line")
-                        .attr("d", line[data[0].y_axis])
+                        .attr("d", line[yAxis])
                         .style("stroke", function (d) {
-                            return colors(dataGUID);
+                            return self._colors(dataGUID);
                         });
                 }
 
-                dataFlow.path.datum(data)
-                    .attr("d", line[data[0].y_axis]);
+                dataFlowVisuals.path.datum(data)
+                    .attr("d", line[yAxis]);
 
                 // draw alert points
                 for (var pnt in data) {
                     if (typeof data[pnt].alertData == 'object') {
-                        if (data[pnt].alertShowed == undefined) {
+                        if (!dataFlowVisuals.alerts.hasOwnProperty(data[pnt].time)) {
                             var transferData = JSON.stringify({ alertData: data[pnt].alertData, time: data[pnt].time, data: data[pnt].data });
-
-                            data[pnt].alertBarShowed = self._svg.append("g").append("rect")
+                            var alertVisual = dataFlowVisuals.alerts[data[pnt].time] = {};
+                            alertVisual.alertBarShowed = self._svg.append("g").append("rect")
                                 .attr("class", "bar")
                                 .attr("x", self._x(data[pnt].time))
                                 .attr("y", 0)
@@ -387,42 +498,43 @@ d3Chart.prototype = {
                                 .attr("width", "2px")
                                 .style("fill", "#e6c9cd")
 
-                            data[pnt].alertShowed = self._svg.append("g").append("circle")
+                            alertVisual.alertShowed = self._svg.append("g").append("circle")
                                 .attr("class", "d3-dot")
                                 .attr("cx", self._x(data[pnt].time))
-                                .attr("cy", data[pnt].y_axis == 0 ? self._y0(data[pnt].data) : self._y1(data[pnt].data))
+                                .attr("cy", yAxis == 0 ? self._y0(data[pnt].data) : self._y1(data[pnt].data))
                                 .style("fill", "#e93541")
                                 .attr("r", displayHeight / 200)
                                 .on('mouseover', function () { d3.select(this).transition().attr("r", displayHeight / 130); eval("self._tip.show(" + transferData + ");") })
                                 .on('mouseout', function () { d3.select(this).transition().attr("r", displayHeight / 200); self._tip.hide(); });
                         } else {
-                            data[pnt].alertShowed.attr("cx", self._x(data[pnt].time))
-                                .attr("cy", data[pnt].y_axis == 0 ? self._y0(data[pnt].data) : self._y1(data[pnt].data));
+                            var alertVisual = dataFlowVisuals.alerts[data[pnt].time];
+                            alertVisual.alertShowed.attr("cx", self._x(data[pnt].time))
+                                .attr("cy", yAxis == 0 ? self._y0(data[pnt].data) : self._y1(data[pnt].data));
 
-                            data[pnt].alertBarShowed
+                            alertVisual.alertBarShowed
                                 .attr("x", self._x(data[pnt].time))
                         }
                     }
                 }
-                if (dataFlow.legend == null) {
-                    dataFlow.legend_r = self._svg.append("rect")
+                if (dataFlowVisuals.legend == null) {
+                    dataFlowVisuals.legend_r = self._svg.append("rect")
                         .attr("class", "legend")
                         .attr("width", 10)
                         .attr("height", 10)
                         .attr("x", self._width + 50)
                         .attr("y", 20 + (20 * pos))
-                        .style("fill", colors(dataGUID))
-                        .style("stroke", colors(dataGUID));
+                        .style("fill", self._colors(dataGUID))
+                        .style("stroke", self._colors(dataGUID));
 
-                    dataFlow.legend = self._svg.append("text")
+                    dataFlowVisuals.legend = self._svg.append("text")
                         .attr("x", self._width + 65)
                         .attr("y", 20 + (20 * pos) + 5)
                         .attr("class", "legend")
-                        .style("fill", colors(dataGUID))
-                        .text(dataFlow.displayName);
+                        .style("fill", self._colors(dataGUID))
+                        .text(dataFlow.displayName());
                 }
                 else {
-                    dataFlow.legend.text(dataFlow.displayName);
+                    dataFlowVisuals.legend.text(dataFlow.displayName());
                 }
                 pos++;
             }
@@ -443,9 +555,8 @@ d3Chart.prototype = {
                 self._isBulking = true;
             } else {
                 // received bulk data. update graphs
-                self.pruneOldData();
-                self.updateChart();
-
+                self.raiseEvent('update');
+                self.raiseEvent('loaded');
                 self._isBulking = false;
             }
         } else {
@@ -460,7 +571,14 @@ d3Chart.prototype = {
                 }
 
                 // add event
-                self.raiseEvent('onNewData', evt);
+                self.raiseEvent('newData', evt);
+
+                // check if nessasary to update
+                if (!self._isBulking) {
+                    self.raiseEvent('update');
+                } else {
+                    self.raiseEvent('loading', evt.DisplayName);
+                }
             }
         }
     }

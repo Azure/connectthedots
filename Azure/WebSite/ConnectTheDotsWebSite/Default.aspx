@@ -46,6 +46,7 @@
     <script type="text/javascript" src="js/d3Chart.js"></script>
     <script type="text/javascript" src="js/d3DataSourceSocket.js"></script>
     <script type="text/javascript" src="js/d3CTDDataSourceSocket.js"></script>
+    <script type="text/javascript" src="js/d3CTD.js"></script>
 </head>
 <body>
 
@@ -113,23 +114,5 @@
             <div id="messages"></div>
         </div>
     </form>
-    <script>
-
-        (function () {
-            // create dataflow
-            var dataFlow01 = new d3DataFlow('1001');
-            var dataFlow02 = new d3DataFlow('1002');
-
-            var dataChart = new d3Chart('chartOne', [dataFlow01, dataFlow02]);
-
-            var sss = (window.location.protocol.indexOf('s') > 0 ? "s" : "");
-            var uri = 'ws' + sss + '://' + window.location.host + '/api/websocketconnect?clientId=none';
-
-            // create datasource
-            var dataSource = new d3CTDDataSourceSocket(uri);
-            // attach flows to source socket
-            dataChart.attachToDataSource(dataSource);
-        })();
-    </script>
 </body>
 </html>

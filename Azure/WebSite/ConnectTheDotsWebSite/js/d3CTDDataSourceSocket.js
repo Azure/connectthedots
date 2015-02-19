@@ -27,7 +27,7 @@ function d3CTDDataSourceSocket(uri, handlers) {
     var self = this;
     // call base class contructor
     d3DataSourceSocket.call(self, uri, {
-        onmessage: function (event) {
+        message: function (event) {
             self._onMessage.call(self, event);
         }
     });
@@ -39,21 +39,42 @@ function d3CTDDataSourceSocket(uri, handlers) {
         }
     }
     self._firstMessage = true;
-    self._deviceName = 'All';
+    self._deviceGUID = 'All';
+
+    return self;
 }
 
 d3CTDDataSourceSocket.prototype = {
     constructor: d3CTDDataSourceSocket,
+    changeDeviceGUID: function (newDeviceGUID) {
+        var self = this;
+
+        if (newDeviceGUID != undefined) {
+            self._deviceGUID = newDeviceGUID;
+        }
+
+        var reqClear = {
+            MessageType: "LiveDataSelection",
+            DeviceGUID: 'clear'
+        };
+
+        var req = {
+            MessageType: "LiveDataSelection",
+            DeviceGUID: self._deviceGUID.toString()
+        };
+
+        // send request
+        self.sendMessage(reqClear);
+        self.sendMessage(req);
+
+        return self;
+    },
     _onMessage: function (event) {
         var self = this;
         if (self._firstMessage) {
-            var req = {
-                MessageType: "LiveDataSelection",
-                DeviceName: self._deviceName
-            };
             self._firstMessage = false;
-            // send request
-            self.sendMessage(req);
+
+            self.changeDeviceGUID();
 
             // prevent next call
             event.handled = true;
@@ -62,11 +83,11 @@ d3CTDDataSourceSocket.prototype = {
             try {
                 var eventObject = JSON.parse(event.owner.data);
             } catch (e) {
-                $('#messages').prepend('<div>Malformed message: ' + event.data + "</div>");
+                self.raiseEvent('error', '<div>Malformed message: ' + event.data + '</div>');
                 return;
             }
             // forward message
-            self.raiseEvent('onEventObject', eventObject);
+            self.raiseEvent('eventObject', eventObject);
         }
     }
 };

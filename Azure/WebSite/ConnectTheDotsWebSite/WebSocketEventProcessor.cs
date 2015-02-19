@@ -125,7 +125,8 @@ namespace ConnectTheDotsWebSite
 										List<IDictionary<string, object>> dictList = sortedDataBuffer.Values[idx];
 										foreach (IDictionary<string, object> dict in dictList)
 										{
-											if (dict.ContainsKey("value") && dict.ContainsKey("GUID") && alertType.IndexOf(dict["GUID"] as string) >= 0)
+											if ((dict.ContainsKey("GUID") && messagePayload.ContainsKey("GUID") && messagePayload["GUID"].ToString() == dict["GUID"].ToString()) ||
+												(dict.ContainsKey("Value") && dict.ContainsKey("DisplayName") && alertType.IndexOf(dict["DisplayName"] as string) >= 0))
 											{
 												// fill anomaly message
 												messagePayload["Value"] = dict["Value"];

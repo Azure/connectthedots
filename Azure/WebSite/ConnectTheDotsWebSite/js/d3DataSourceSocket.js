@@ -40,17 +40,18 @@ function d3DataSourceSocket(uri, handlers) {
 
     // register handlers
     self._websocket.onopen = function () {
-        self.raiseEvent.call(self, 'onopen');
+        self.raiseEvent.call(self, 'open');
     }
 
     self._websocket.onerror = function (event) {
-        self.raiseEvent.call(self, 'onerror', event);
+        self.raiseEvent.call(self, 'error', event);
     }
 
     self._websocket.onmessage = function (event) {
-        self.raiseEvent.call(self, 'onmessage', event);
+        self.raiseEvent.call(self, 'message', event);
     }
 
+    return self;
 }
 
 d3DataSourceSocket.prototype = {
