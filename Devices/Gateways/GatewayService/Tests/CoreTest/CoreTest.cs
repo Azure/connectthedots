@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace CoreTest
 {
     public class CoreTest : ITest
     {
-        public const int TEST_ITERATIONS = 100;
+        public const int TEST_ITERATIONS = 5;
         public const int MAX_TEST_MESSAGES = 1000;
 
         private readonly ILogger _testLogger = new TestLogger();
@@ -76,20 +77,17 @@ namespace CoreTest
                     {
                         string message = "42";
 
-                        DataArrived(message);
-
                         service.Enqueue(message);
+
+                        DataArrived(message);
                     }
                 }
 
-                // Dinar: if messages stop to enqueue, BatchSenderThread may not send all messages because some messages
-                // could come after counting number of tasks and before waiting (#48)
-                //Thread.Sleep(3000);
-                //_BatchSenderThread.Process();
+                Debug.Assert( _totalMessagesSent == _totalMessagesToSend );
 
                 _completed.WaitOne();
 
-                _BatchSenderThread.Stop(STOP_TIMEOUT_MS);
+                _BatchSenderThread.Stop( STOP_TIMEOUT_MS ); 
             }
             catch (Exception ex)
             {

@@ -7,11 +7,11 @@ namespace CoreTest.Utils.MessageSender
 {
     internal class MockSender<T> : IMessageSender<T>
     {
-        private static readonly int MAX_LAG = 50; // ms
+        private static readonly int MAX_LAG = 1; // ms
 
         protected readonly ITest _test;
         protected readonly Random _rand;
-        protected int _received = 0;
+        protected int _forSending = 0;
 
         internal MockSender(ITest test)
         {
@@ -24,10 +24,10 @@ namespace CoreTest.Utils.MessageSender
             // Naive atetmpt to simulate network latency
             Thread.Sleep(_rand.Next(MAX_LAG));
 
-            int totalMessages = _test.TotalMessagesSent;
+            int totalMessagesSent = _test.TotalMessagesSent;
 
             // LORENZO: print all data and validate that they match the data sent
-            if( Interlocked.Increment( ref _received ) == totalMessages && totalMessages >= _test.TotalMessagesToSend)
+            if( Interlocked.Increment( ref _forSending ) == totalMessagesSent && totalMessagesSent >= _test.TotalMessagesToSend)
             {
                 _test.Completed();
             }

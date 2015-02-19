@@ -25,25 +25,25 @@ namespace Gateway
             _EventProcessor = processor;
         }
 
-        public ILogger Logger { get; set; }
+        public ILogger Logger { get; set; } 
 
-        public int Enqueue(string jsonData)
+        public int Enqueue( string jsonData )
         {
-            if (jsonData != null)//not filling a queue by empty items
+            if( jsonData != null )//not filling a queue by empty items
             {
                 QueuedItem sensorData = new QueuedItem
                 {
                     JsonData = jsonData
                 };
 
-                //TODO:we can check status of BatchSender and indicate error on request if needed
-                _Queue.Push(sensorData);
+                //TODO: we can check status of BatchSender and indicate error on request if needed
+                _Queue.Push( sensorData );
 
-                DataInQueue(sensorData);   
+                DataInQueue( sensorData );
             }
 
             return _Queue.Count;
-        }
+        } 
 
         public event DataInQueueEventHandler OnDataInQueue;
 

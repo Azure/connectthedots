@@ -12,9 +12,9 @@ namespace CoreTest
             /////////////////////////////////////////////////////////////////////////////////////////////
             // Test core service 
             //
-            CoreTest t2 = new CoreTest();
-            t2.Run();
-            Console.WriteLine(String.Format("Core Test completed"));
+            CoreTest t2 = new CoreTest( );
+            t2.Run( );
+            Console.WriteLine( String.Format( "Core Test completed" ) );
 
             //////////////////////////////////////////////////////////////////////////////////////////////
             // Test Web service and core service 
@@ -28,8 +28,8 @@ namespace CoreTest
 
 
             // wait for logging tasks to complete
-            Console.WriteLine("Press enter to exit");
-            Console.ReadLine();
+            Console.WriteLine( "Press enter to exit" );
+            Console.ReadLine( );
         }
     }
 }

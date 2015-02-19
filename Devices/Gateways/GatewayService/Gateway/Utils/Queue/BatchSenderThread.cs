@@ -114,13 +114,17 @@ namespace Gateway.Utils.Queue
 
             try
             {
+                const int WAIT_TIMEOUT = 50;
+
                 // run until Stop() is called
                 while (_running == true)
                 {
                     try
                     {
-                        // wait for some events to process
-                        _doWork.WaitOne();
+                        // If there are no tasks to be served, wait for some events to process
+                        // Use a timeout to prevent race conditions on teh outstanding tasks count
+                        // and the actual queue count
+                        _doWork.WaitOne( WAIT_TIMEOUT );
 
                         // check if we have been woken up to actually stop processing 
                         EventBatchProcessedEventHandler eventBatchProcessed = null;
@@ -136,24 +140,29 @@ namespace Gateway.Utils.Queue
                             eventBatchProcessed = OnEventsBatchProcessed;
                         }
 
-                        // allocate enough space for the events currently in the queue
+                        // allocate a container to keep track of tasks for events in the queue
                         var tasks = new List<Task>();
 
-                        // fish from the queue and accumulate, keep track of outstanding tasks to 
-                        // avoid accumulating too many competing tasks
+                        // Fish from the queue and accumulate, keep track of outstanding tasks to 
+                        // avoid accumulating too many competing tasks. Note that we are going to schedule
+                        // one more tasks than strictly needed, so that we prevent tasks to sit in the queue
+                        // because of the race condition on the outstanding task count (_outstandingTasks) 
+                        // and the tasks actually sitting in the queue.  (*)
+                        // To prevent this race condition, we will wait with a timeout
                         int count = _DataSource.Count - _outstandingTasks;
 
-                        // process all messages that have not been processed yet
-                        while (--count >= 0)
+                        // process all messages that have not been processed yet 
+                        while( --count >= 0 )
                         {
-                            var t = _DataSource.TryPop();
+                            var t = _DataSource.TryPop( );
 
-                            Debug.Assert( _outstandingTasks >= 0 ); 
+                            Debug.Assert( _outstandingTasks >= 0 );
 
-                            bool added = false;
+                            bool scheduled = false;
                             try
                             {
-                                // increment outstanding task count but be ready to decrement if we fail to add to the queue
+                                // increment outstanding task count but be ready to decrement if we fail 
+                                // in the catch handler
                                 Interlocked.Increment( ref _outstandingTasks );
 
                                 Debug.Assert( tasks != null );
@@ -161,6 +170,12 @@ namespace Gateway.Utils.Queue
                                 tasks.Add(
                                     t.ContinueWith<Task>( popped =>
                                     {
+                                        // Decrement the numbers of outstanding tasks. 
+                                        // (*) Note that there is a race  condition because at this point in time the tasks 
+                                        // is already out of the queue but we did not decrement the outstanding task count 
+                                        // yet. This race condition may cause tasks to be left sitting in the queue. 
+                                        // To prevent this race condition, we will always schedule one more tasks than 
+                                        // the count, so that we keep draining the queue
                                         Interlocked.Decrement( ref _outstandingTasks );
 
                                         // because the outstanding task counter is incremented before 
@@ -177,35 +192,40 @@ namespace Gateway.Utils.Queue
                                             {
                                                 return _DataTarget.SendSerialized( _SerializedData( popped.Result.Result ) );
                                             }
+
+                                            Debug.Assert( false );
                                         }
-                                        else
-                                        {
-                                            throw new Exception( );
-                                        }
+
                                         return popped;
                                     } )
                                 );
 
                                 // the only case when we do not get here is if List.Add fails (tasks.Add) or
-                                // if the task engine fails Task.ContinueWith (t.ContinueWith)
-                                added = true;
+                                // if the task engine fails to execute Task.ContinueWith (t.ContinueWith)
+                                // only the second case is interesting, because the number of outstanding tasks
+                                // will not be decremented in that case
+                                scheduled = true;
                             }
                             catch
                             {
-                                if( !added )
+                                // if there was a failure to schedule the tasks, make sure we decrement teh outstanding tasks 
+                                // count. Note that this may be unnecessary, if the failure to schedule was actually a 
+                                // failure to add to the List of outstanding tasks, but it is better to be conservative than 
+                                // leave items in the queue
+                                if( !scheduled )
                                 {
-                                    Interlocked.Decrement( ref _outstandingTasks );   
+                                    Interlocked.Decrement( ref _outstandingTasks );
                                 }
 
                                 //
                                 // TODO: Issue #49 
                                 //
                                 // We should try and recover for Task 't' that we popped and did not process 
-                                
+
                                 throw;
                             }
                         }
-
+                        
                         // alert any client about outstanding message tasks
                         if (eventBatchProcessed != null)
                         {
