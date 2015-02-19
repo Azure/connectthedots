@@ -7,11 +7,11 @@ using CoreTest.Utils.MessageSender;
 using Gateway;
 using Gateway.Models;
 using Gateway.Utils.Loader;
-using Gateway.Utils.Logger;
 using Gateway.Utils.MessageSender;
 using Gateway.Utils.Queue;
 using CoreTest.Utils.Logger;
 using CoreTest.Utils.Loader;
+using SharedInterfaces;
 
 namespace CoreTest
 {

@@ -72,7 +72,6 @@
     <Compile Include="ServiceInstantiation\ServiceBehavior.cs" />
     <Compile Include="ServiceInstantiation\ServiceInstanceProvider.cs" />
     <Compile Include="Utils\Loader\DataIntakeLoader.cs" />
-    <Compile Include="Utils\Logger\ILogger.cs" />
     <Compile Include="Utils\Logger\SafeLogger.cs" />
     <Compile Include="Utils\MessageSender\AMQPSender.cs" />
     <Compile Include="Utils\MessageSender\IMessageSender.cs" />
@@ -85,6 +84,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SharedInterfaces\SharedInterfaces.csproj">
+      <Project>{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}</Project>
+      <Name>SharedInterfaces</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

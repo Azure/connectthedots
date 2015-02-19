@@ -9,8 +9,8 @@ using Gateway.Utils.MessageSender;
 using Gateway.Utils.Queue;
 using CoreTest.Utils.Logger;
 using System.Net;
-using System.IO;
 using System.Diagnostics;
+using SharedInterfaces;
 
 
 namespace CoreTest

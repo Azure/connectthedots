@@ -3,9 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Gateway.DataIntake;
 using Gateway.Models;
-using Gateway.Utils.Logger;
 using CoreTest.Utils.Generators;
 using Newtonsoft.Json;
+using SharedInterfaces;
 
 namespace DataIntakeTestMock
 {

@@ -6,7 +6,7 @@ using System.IO.Ports;
 using System.Threading;
 using System.Threading.Tasks;
 using Gateway.DataIntake;
-using Gateway.Utils.Logger;
+using SharedInterfaces;
 
 namespace SerialPortListener
 {

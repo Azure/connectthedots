@@ -51,6 +51,10 @@
       <Project>{E14D1C61-1979-452E-BE8B-0303A95EF764}</Project>
       <Name>Gateway</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\SharedInterfaces\SharedInterfaces.csproj">
+      <Project>{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}</Project>
+      <Name>SharedInterfaces</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

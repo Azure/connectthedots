@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using Gateway.Utils.Logger;
+using SharedInterfaces;
 
 namespace CoreTest.Utils.Logger
 {

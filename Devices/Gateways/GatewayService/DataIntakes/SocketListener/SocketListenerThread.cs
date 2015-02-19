@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Gateway.DataIntake;
-using Gateway.Utils.Logger;
+using SharedInterfaces;
 
 namespace SocketListener
 {

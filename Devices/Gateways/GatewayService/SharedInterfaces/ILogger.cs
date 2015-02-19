@@ -1,4 +1,4 @@
-﻿namespace Gateway.Utils.Logger
+﻿namespace SharedInterfaces
 {
     public interface ILogger
     {

@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Gateway.Utils.Logger;
 using System.Collections.Generic;
+using SharedInterfaces;
 
 namespace Gateway
 {

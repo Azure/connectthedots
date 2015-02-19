@@ -7,6 +7,7 @@ using Amqp;
 using Amqp.Framing;
 using Gateway.Utils.Logger;
 using Newtonsoft.Json;
+using SharedInterfaces;
 
 namespace Gateway.Utils.MessageSender
 {

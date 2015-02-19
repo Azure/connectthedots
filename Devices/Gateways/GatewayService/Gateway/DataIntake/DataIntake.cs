@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Gateway.Utils.Logger;
-using Gateway.Models;
-using System.Collections.Generic;
+using SharedInterfaces;
 
 namespace Gateway.DataIntake
 {

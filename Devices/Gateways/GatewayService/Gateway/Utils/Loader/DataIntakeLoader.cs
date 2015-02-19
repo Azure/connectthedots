@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Gateway.DataIntake;
 using Gateway.Utils.Logger;
+using SharedInterfaces;
 
 namespace Gateway.Utils.Loader
 {

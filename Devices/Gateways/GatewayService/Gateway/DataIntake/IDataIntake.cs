@@ -1,5 +1,4 @@
 ﻿using System;
-using Gateway.Utils.Logger;
 
 namespace Gateway.DataIntake
 {

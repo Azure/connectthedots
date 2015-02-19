@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
 using Gateway;
-using Gateway.Utils.Logger;
+using SharedInterfaces;
 
 namespace WindowsService.Utils.Logger
 {

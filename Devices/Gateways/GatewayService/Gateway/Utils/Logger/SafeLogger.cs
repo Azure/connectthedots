@@ -1,4 +1,6 @@
-﻿namespace Gateway.Utils.Logger
+﻿using SharedInterfaces;
+
+namespace Gateway.Utils.Logger
 {
     public class SafeLogger : ILogger
     {

@@ -2,8 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Gateway.Models;
-using Gateway.Utils.Logger;
 using Gateway.Utils.Queue;
+using SharedInterfaces;
 
 namespace Gateway
 {
