@@ -20,7 +20,7 @@ namespace Gateway.Models
         [DataMember(Name = "UnitOfMeasure")]
         public string UnitOfMeasure { get; set; }
 
-        [DataMember(Name = "MeasureName’")]
+        [DataMember(Name = "MeasureName")]
         public string MeasureName { get; set; }
 
         [DataMember(Name = "Location")]
