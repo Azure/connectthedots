@@ -17,6 +17,10 @@ namespace Gateway.Utils.Loader
         {
             _Logger = new SafeLogger( logger );
 
+            if (sources == null)
+            {
+                throw new ArgumentException("List of DataIntake sources could be empty but not null");
+            }
 
             // enumerate all types with a IDataIntake interface
             var nameTypeDict = new Dictionary<string, Type>(); 
