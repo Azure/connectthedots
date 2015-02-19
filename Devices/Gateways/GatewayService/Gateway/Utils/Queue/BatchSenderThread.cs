@@ -126,6 +126,19 @@ namespace Gateway.Utils.Queue
                         // and the actual queue count
                         _doWork.WaitOne( WAIT_TIMEOUT );
 
+                        // Fish from the queue and accumulate, keep track of outstanding tasks to 
+                        // avoid accumulating too many competing tasks. Note that we are going to schedule
+                        // one more tasks than strictly needed, so that we prevent tasks to sit in the queue
+                        // because of the race condition on the outstanding task count (_outstandingTasks) 
+                        // and the tasks actually sitting in the queue.  (*)
+                        // To prevent this race condition, we will wait with a timeout
+                        int count = _DataSource.Count - _outstandingTasks;
+
+                        if(count == 0)
+                        {
+                            continue;
+                        }
+
                         // check if we have been woken up to actually stop processing 
                         EventBatchProcessedEventHandler eventBatchProcessed = null;
 
@@ -142,14 +155,6 @@ namespace Gateway.Utils.Queue
 
                         // allocate a container to keep track of tasks for events in the queue
                         var tasks = new List<Task>();
-
-                        // Fish from the queue and accumulate, keep track of outstanding tasks to 
-                        // avoid accumulating too many competing tasks. Note that we are going to schedule
-                        // one more tasks than strictly needed, so that we prevent tasks to sit in the queue
-                        // because of the race condition on the outstanding task count (_outstandingTasks) 
-                        // and the tasks actually sitting in the queue.  (*)
-                        // To prevent this race condition, we will wait with a timeout
-                        int count = _DataSource.Count - _outstandingTasks;
 
                         // process all messages that have not been processed yet 
                         while( --count >= 0 )
