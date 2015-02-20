@@ -72,7 +72,7 @@ namespace Gateway.Utils.Loader
         }
 
         protected Func<string, int> OnDataToEnqueue;
-        public void StartAll(Func<string, int> enqueue, DataArrivalEventHandler onDataArrival = null)
+        public void StartAll( Func<string, int> enqueue, DataArrivalEventHandler onDataArrival = null )
         {
             foreach( DataIntakeAbstract dataIntake in _DataIntakes )
             {
@@ -93,13 +93,29 @@ namespace Gateway.Utils.Loader
                         OnDataToEnqueue = enqueue;
                     }
 
-                    dataIntake.Start(OnDataToEnqueue);
+                    dataIntake.Start( OnDataToEnqueue );
                 }
                 catch( Exception ex )
                 {
                     _Logger.LogError( ex.StackTrace );
 
                     // catch all other exceptions
+                }
+            }
+        }
+        public void StopAll( )
+        {
+            foreach( DataIntakeAbstract dataIntake in _DataIntakes )
+            {
+                try
+                {
+                    dataIntake.Stop();
+                }
+                catch( Exception ex )
+                {
+                    _Logger.LogError( ex.StackTrace );
+
+                    // catch all exceptions
                 }
             }
         }

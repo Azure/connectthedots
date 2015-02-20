@@ -107,13 +107,15 @@ namespace CoreTest
             {
                 GatewayService service = PrepareGatewayService();
 
-                DataIntakeLoader dataIntakeLoader = new DataIntakeLoader(Loader.GetSources(), _testLogger);
+                DataIntakeLoader dataIntakeLoader = new DataIntakeLoader( Loader.GetSources( ), _testLogger ); 
 
                 _totalMessagesToSend += 5;
 
-                dataIntakeLoader.StartAll(service.Enqueue, DataArrived);
+                dataIntakeLoader.StartAll( service.Enqueue, DataArrived ); 
 
                 _completed.WaitOne();
+
+                dataIntakeLoader.StopAll( );
 
                 _BatchSenderThread.Stop(STOP_TIMEOUT_MS);
             }

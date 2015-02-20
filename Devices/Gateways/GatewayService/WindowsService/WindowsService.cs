@@ -29,8 +29,6 @@ namespace WindowsService
 
         private readonly DataIntakeLoader _DataIntakeLoader;
 
-        private bool _DoWork = true;
-
         public WindowsService()
         {
             // Name the Windows Service
@@ -87,17 +85,11 @@ namespace WindowsService
             _Logger.LogInfo("...started");
         }
 
-        public bool DoWork()
-        {
-            //TODO: test stop indicator
-            return _DoWork;
-        }
-
         protected override void OnStop()
         {
             _Logger.LogInfo( "Service stopping... " );
 
-            _DoWork = false;
+            _DataIntakeLoader.StopAll( ); 
 
             // close web host first (message intake)
             if (_WebHost != null)

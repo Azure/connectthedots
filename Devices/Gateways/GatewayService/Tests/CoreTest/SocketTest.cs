@@ -69,7 +69,9 @@ namespace CoreTest
 
                 dataIntakeLoader.StartAll(service.Enqueue, DataArrived);
 
-                _completed.WaitOne();
+                _completed.WaitOne( );
+
+                dataIntakeLoader.StopAll( );
 
                 _BatchSenderThread.Stop(STOP_TIMEOUT_MS);
             }
