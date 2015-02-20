@@ -106,6 +106,15 @@ namespace ConnectTheDotsWebSite
 							{
 								Debug.Print("Alert message received!");
 							}
+							// Hotfix
+							if (messagePayload.ContainsKey("time_created"))
+							{
+								messagePayload["time"] = messagePayload["time_created"];
+							}
+							if (messagePayload.ContainsKey("time_arrived"))
+							{
+								messagePayload["time"] = messagePayload["time_arrived"];
+							}
 							// process an anomaly
 							if (messagePayload.ContainsKey("alerttype") && messagePayload.ContainsKey("timestart"))
 							{
