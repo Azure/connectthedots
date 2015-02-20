@@ -25,5 +25,8 @@ namespace Gateway.Models
 
         [DataMember(Name = "Location")]
         public string Location { get; set; }
+
+        [DataMember(Name = "time_created")]
+        public DateTime TimeCreated { get; set; }
     }
 }
