@@ -298,7 +298,8 @@ namespace Gateway.Utils.MessageSender
                     JsonConvert.DeserializeObject<Dictionary<string, object>>( serializedData );
 
                 outDictionary["Subject"] = subject; // Message Type
-                outDictionary[ "time" ] = creationTime;
+                if (!serializedData.Contains("time_created"))
+                    outDictionary["time_created"] = creationTime;
                 outDictionary[ "from" ] = deviceId; // Originating device
                 outDictionary[ "dspl" ] = deviceDisplayName; // Display name for originating device
 
