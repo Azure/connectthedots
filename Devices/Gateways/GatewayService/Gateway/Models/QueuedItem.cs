@@ -15,8 +15,15 @@ namespace Gateway.Models
     {
         public static SensorDataContract SensorDataContractFromQueuedItem(QueuedItem data)
         {
-            SensorDataContract result =
+            SensorDataContract result = null;
+            try
+            {
+                result =
                     JsonConvert.DeserializeObject<SensorDataContract>(data.JsonData);
+            }
+            catch (Exception ex)
+            {
+            }
 
             return result;
         }
