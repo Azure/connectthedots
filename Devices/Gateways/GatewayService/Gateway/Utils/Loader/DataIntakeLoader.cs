@@ -80,8 +80,8 @@ namespace Gateway.Utils.Loader
                             var assmName =  Path.GetFileName( s ); 
 
                             // try again
-                            string assmPath = Path.Combine( d, assmName ); 
-                            if ( File.Exists( s ) )
+                            string assmPath = Path.Combine( d, assmName );
+                            if ( File.Exists( assmPath ) )
                             {
                                 assm = Assembly.LoadFrom( s );
                             }
