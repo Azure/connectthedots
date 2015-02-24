@@ -49,8 +49,8 @@ namespace WindowsService
             _BatchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>(
                                                 _GatewayQueue,
                                                 _AMPQSender,
-                                                null,
-                                                new Func<QueuedItem, string>( m => m.JsonData )
+                                                m => DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromQueuedItem(m)),
+                                                null //new Func<QueuedItem, string>( m => m.JsonData )
                                                 ); 
 
             _DataIntakeLoader = new DataIntakeLoader( Loader.GetSources(), _Logger ); 

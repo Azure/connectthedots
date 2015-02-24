@@ -1,4 +1,6 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
 namespace Gateway.Models
 {
@@ -7,5 +9,28 @@ namespace Gateway.Models
     {
         [DataMember(Name = "serializedData")]
         public string JsonData { get; set; }
+    }
+
+    public static class DataTransforms
+    {
+        public static SensorDataContract SensorDataContractFromQueuedItem(QueuedItem data)
+        {
+            SensorDataContract result =
+                    JsonConvert.DeserializeObject<SensorDataContract>(data.JsonData);
+
+            return result;
+        }
+
+        public static SensorDataContract AddTimeCreated(SensorDataContract data)
+        {
+            SensorDataContract result = data;
+            if (result.TimeCreated == default(DateTime))
+            {
+                var creationTime = DateTime.UtcNow;
+                result.TimeCreated = creationTime;
+            }
+
+            return result;
+        }
     }
 }
