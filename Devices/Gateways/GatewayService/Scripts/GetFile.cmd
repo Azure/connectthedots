@@ -2,7 +2,6 @@
 @echo off
 set puttydir="C:\software\PuTTY\"
 set prjdir=..\
-rem set rpi_ip=raspberrypi
 set rpi_ip=10.121.204.204
 set rpi_usr=pi
 set rpi_pw=raspberry

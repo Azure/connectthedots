@@ -26,12 +26,6 @@ echo "Starting host processes"
 
 # killing any prior mono instance
 sudo pkill mono
-sudo pkill python
-
-# start up the data provider 
-sudo python /home/pi/RaspberryPiGateway/usbsplsocket.py &
-
-sleep 3 
 
 # start the gateway
-sudo -u pi /usr/bin/mono /home/pi/RaspberryPiGateway/RaspberryPiGateway.exe &
+/usr/bin/mono-service /home/pi/GatewayService/GatewayService.exe
