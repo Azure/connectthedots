@@ -100,6 +100,7 @@
     <Content Include="..\..\..\license.txt">
       <Link>Docs\license.txt</Link>
     </Content>
+    <Content Include="css\connectthedots.css" />
     <Content Include="img\ajax-loader.gif" />
     <Content Include="js\d3Chart.js" />
     <Content Include="js\d3CTD.js" />
@@ -122,7 +123,6 @@
     <Content Include="Default.aspx" />
     <Content Include="Global.asax" />
     <Content Include="img\ConnectTheDotsLogo.png" />
-    <Content Include="js\connectthedots.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

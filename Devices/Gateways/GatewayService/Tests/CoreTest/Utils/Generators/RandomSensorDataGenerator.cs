@@ -19,6 +19,7 @@ namespace CoreTest.Utils.Generators
                 Value = r.Next() % 1000 - 500,
                 Location = "here",
                 Organization = "contoso",
+                TimeCreated = DateTime.UtcNow
             };
             return sensorData;
         }

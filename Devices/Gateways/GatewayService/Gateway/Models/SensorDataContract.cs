@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 
 namespace Gateway.Models
 {
@@ -25,5 +26,8 @@ namespace Gateway.Models
 
         [DataMember(Name = "Location")]
         public string Location { get; set; }
+
+        [DataMember(Name = "time_created")]
+        public DateTime TimeCreated { get; set; }
     }
 }
