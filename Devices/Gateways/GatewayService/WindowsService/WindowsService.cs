@@ -38,12 +38,13 @@ namespace WindowsService
 
             _GatewayQueue = new GatewayQueue<QueuedItem>();
 
+            AMQPConfig aqmpConfig = Loader.GetAMQPConfig();
             _AMPQSender = new AMQPSender<SensorDataContract>(
-                                                Constants.AMQPSAddress,
-                                                Constants.EventHubName,
-                                                Constants.EventHubMessageSubject,
-                                                Constants.EventHubDeviceId,
-                                                Constants.EventHubDeviceDisplayName
+                                                aqmpConfig.AMQPSAddress,
+                                                aqmpConfig.EventHubName,
+                                                aqmpConfig.EventHubMessageSubject,
+                                                aqmpConfig.EventHubDeviceId,
+                                                aqmpConfig.EventHubDeviceDisplayName
                                                 ); 
             
             _BatchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>(
@@ -87,7 +88,7 @@ namespace WindowsService
 
         protected override void OnStop()
         {
-            _Logger.LogInfo( "Service stopping... " );
+            _Logger.LogInfo("Service stopping... ");
 
             _DataIntakeLoader.StopAll( ); 
 
