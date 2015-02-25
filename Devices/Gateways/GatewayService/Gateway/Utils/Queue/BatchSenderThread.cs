@@ -198,12 +198,12 @@ namespace Gateway.Utils.Queue
                             {
                                 tasks.Add( t );
                             }
-                            catch( StackOverflowException ex )
+                            catch( StackOverflowException /*ex*/ )
                             {
                                 // do not hide stack overflow exceptions
                                 throw;
                             }
-                            catch( OutOfMemoryException ex )
+                            catch( OutOfMemoryException /*ex*/ )
                             {
                                 // do not hide memory exceptions
                                 throw;

@@ -21,7 +21,7 @@ namespace Gateway.Models
                 result =
                     JsonConvert.DeserializeObject<SensorDataContract>(data.JsonData);
             }
-            catch (Exception ex)
+            catch (Exception /*ex*/)
             {
             }
 
