@@ -18,15 +18,11 @@ namespace Gateway.Utils.Loader
         public DataIntakeLoader( IList<String> sources, ILogger logger )
         {
             _Logger = new SafeLogger( logger );
+            _Logger.LogInfo("Starting loading Data Intakes");
 
             if (sources == null)
             {
                 throw new ArgumentException("List of DataIntake sources could be empty but not null");
-            }
-
-            if ( sources.Count == 0 )
-            {
-                return;
             }
 
             //
@@ -53,8 +49,17 @@ namespace Gateway.Utils.Loader
                 directories.Add( di3 );
             }
 
+            foreach (string directory in directories)
+            {
+                foreach (string filename in Directory.GetFiles(directory))
+                {
+                    sources.Add(filename);
+                }
+            }
+            
             // try and load assemblies from path 
             var nameTypeDict = new Dictionary<string, Type>( );
+            
             foreach ( string s in sources )
             {
                 try
@@ -107,6 +112,7 @@ namespace Gateway.Utils.Loader
                         //Get all classes that implement the required interface
                         if ( t.GetInterface( "IDataIntake", false ) != null )
                         {
+                            _Logger.LogInfo("IDataIntake loaded: " + t.Name);
                             nameTypeDict.Add( t.Name, t ); //Add to Dictonary
                         }
                     }
@@ -114,7 +120,7 @@ namespace Gateway.Utils.Loader
                 catch ( Exception ex )
                 {
                     //dont want to stop loading another modules if one fails
-                    _Logger.LogError( String.Format( "Exception on loading DataIntake {0}: {1}", s, ex.Message ) );
+                    _Logger.LogError( String.Format( "Did not used assembly {0} as IDataIntake: {1}", s, ex.Message ) );
                 }
             }
 
