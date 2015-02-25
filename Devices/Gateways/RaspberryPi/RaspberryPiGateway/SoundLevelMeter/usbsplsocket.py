@@ -31,7 +31,7 @@ while 1:
     ret = dev.ctrl_transfer(0xC0, 4, 0, 0, 200)
     dB = (ret[0] + ((ret[1] & 3) * 256)) * 0.1 + 30
     timeStr = datetime.datetime.utcnow().isoformat()
-    JSONdB="{\"Value\":"+str(dB)+",\"GUID\":\"81E79059-A393-4797-8A7E-526C3EF9D64B\",\"Organization\":\"contoso\",\"DisplayName\":\"IMML Sound Level Meter 01\",\"UnitOfMeasure\":\"decibels\",\"MeasureName\":\"sound\",\"Location\":\"here\",\"time_created\":"+timeStr+"}"
+    JSONdB="{\"value\":"+str(dB)+",\"guid\":\"81E79059-A393-4797-8A7E-526C3EF9D64B\",\"organization\":\"contoso\",\"displayname\":\"IMML Sound Level Meter 01\",\"unitofmeasure\":\"decibels\",\"measurename\":\"sound\",\"location\":\"here\",\"timecreated\":"+timeStr+"}"
     conn.send("<" + JSONdB + ">");
     print JSONdB
     time.sleep(1)
