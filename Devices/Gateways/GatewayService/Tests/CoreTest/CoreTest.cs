@@ -24,8 +24,9 @@ namespace CoreTest
         private readonly ILogger _testLogger = new TestLogger();
         private readonly AutoResetEvent _completed = new AutoResetEvent(false);
         private readonly GatewayQueue<QueuedItem> _GatewayQueue;
-        private readonly IMessageSender<QueuedItem> _Sender;
-        private readonly BatchSenderThread<QueuedItem, QueuedItem> _BatchSenderThread;
+        //private readonly IMessageSender<QueuedItem> _Sender;
+        private readonly AMQPSender<SensorDataContract> _Sender;
+        private readonly BatchSenderThread<QueuedItem, SensorDataContract> _BatchSenderThread;
         private readonly Random _rand;
         private int _totalMessagesSent;
         private int _totalMessagesToSend;
@@ -37,11 +38,25 @@ namespace CoreTest
             _rand = new Random( );
             _totalMessagesSent = 0;
             _totalMessagesToSend = 0;
-            _GatewayQueue = new GatewayQueue<QueuedItem>();
-            _Sender = new MockSender<QueuedItem>(this);
-            //_Sender = new AMQPSender<SensorDataContract>(Constants.AMQPSAddress, Constants.EventHubName, Constants.EventHubMessageSubject, Constants.EventHubDeviceId, Constants.EventHubDeviceDisplayName);
-            //((AMQPSender<QueuedItem>)_Sender).Logger = new TestLogger();
-            _BatchSenderThread = new BatchSenderThread<QueuedItem, QueuedItem>(_GatewayQueue, _Sender, m => m, null);
+            _GatewayQueue = new GatewayQueue<QueuedItem>( );
+            //_Sender = new MockSender<QueuedItem>(this);
+
+            AMQPConfig amqpConfig = Loader.GetAMQPConfig( );
+                
+            _Sender = new AMQPSender<SensorDataContract>(
+                                                amqpConfig.AMQPSAddress,
+                                                amqpConfig.EventHubName,
+                                                amqpConfig.EventHubMessageSubject,
+                                                amqpConfig.EventHubDeviceId,
+                                                amqpConfig.EventHubDeviceDisplayName,
+                                                new TestLogger()
+                                                );
+
+            _BatchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>( 
+                _GatewayQueue, 
+                _Sender,
+                m => DataTransforms.AddTimeCreated( DataTransforms.SensorDataContractFromQueuedItem( m ) ), 
+                null );
         }
 
         public void Run()
