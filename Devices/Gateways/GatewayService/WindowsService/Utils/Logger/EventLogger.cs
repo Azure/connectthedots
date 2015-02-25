@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using Gateway;
 using SharedInterfaces;
+using NLog;
 
 namespace WindowsService.Utils.Logger
 {
@@ -31,8 +32,12 @@ namespace WindowsService.Utils.Logger
             }
 		}
 
-        private EventLogger() 
+        private static EventLog _EventLog;
+        private static NLog.Logger _NLog;
+
+        private EventLogger()
         {
+            _NLog = LogManager.GetCurrentClassLogger();
             _EventLog = new EventLog
             {
                 Source = Constants.WindowsServiceName,
@@ -49,15 +54,15 @@ namespace WindowsService.Utils.Logger
 
 		#endregion
 
-        private static EventLog _EventLog;
-
         public void LogError(string logMessage)
         {
+            _NLog.Error(logMessage);
             _EventLog.WriteEntry(logMessage, EventLogEntryType.Error);
         }
 
         public void LogInfo(string logMessage)
         {
+            _NLog.Info(logMessage);
             _EventLog.WriteEntry(logMessage, EventLogEntryType.Information);
         }
     }
