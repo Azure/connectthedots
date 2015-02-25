@@ -107,13 +107,13 @@ namespace ConnectTheDotsWebSite
 								Debug.Print("Alert message received!");
 							}
 							// Hotfix
-							if (messagePayload.ContainsKey("time_created"))
+							if (messagePayload.ContainsKey("timecreated"))
 							{
-								messagePayload["time"] = messagePayload["time_created"];
+								messagePayload["time"] = messagePayload["timecreated"];
 							}
-							if (messagePayload.ContainsKey("time_arrived"))
+							if (messagePayload.ContainsKey("timearrived"))
 							{
-								messagePayload["time"] = messagePayload["time_arrived"];
+								messagePayload["time"] = messagePayload["timearrived"];
 							}
 							// process an anomaly
 							if (messagePayload.ContainsKey("alerttype") && messagePayload.ContainsKey("timestart"))
@@ -134,13 +134,13 @@ namespace ConnectTheDotsWebSite
 										List<IDictionary<string, object>> dictList = sortedDataBuffer.Values[idx];
 										foreach (IDictionary<string, object> dict in dictList)
 										{
-											if ((dict.ContainsKey("GUID") && messagePayload.ContainsKey("GUID") && messagePayload["GUID"].ToString() == dict["GUID"].ToString()) ||
-												(dict.ContainsKey("Value") && dict.ContainsKey("DisplayName") && alertType.IndexOf(dict["DisplayName"] as string) >= 0))
+											if ((dict.ContainsKey("guid") && messagePayload.ContainsKey("guid") && messagePayload["guid"].ToString() == dict["guid"].ToString()) ||
+												(dict.ContainsKey("value") && dict.ContainsKey("displayname") && alertType.IndexOf(dict["displayname"] as string) >= 0))
 											{
 												// fill anomaly message
-												messagePayload["Value"] = dict["Value"];
-												messagePayload["GUID"] = dict["GUID"];
-												messagePayload["DisplayName"] = dict["DisplayName"];
+												messagePayload["value"] = dict["value"];
+												messagePayload["guid"] = dict["guid"];
+												messagePayload["displayname"] = dict["displayname"];
 												found = true;
 												break;
 											}
@@ -150,15 +150,15 @@ namespace ConnectTheDotsWebSite
 									}
 								}
 							}
-							if (messagePayload.ContainsKey("GUID"))
+							if (messagePayload.ContainsKey("guid"))
 							{
-								var GUID = messagePayload["GUID"].ToString();
-								double val = Convert.ToDouble(messagePayload["Value"]);
+								var guid = messagePayload["guid"].ToString();
+								double val = Convert.ToDouble(messagePayload["value"]);
 
-								if (!MinMaxValue.ContainsKey(GUID))
-									MinMaxValue.Add(GUID, new MinMax { min = val, max = val });
+								if (!MinMaxValue.ContainsKey(guid))
+									MinMaxValue.Add(guid, new MinMax { min = val, max = val });
 
-								MinMax tmp = MinMaxValue[messagePayload["GUID"].ToString()];
+								MinMax tmp = MinMaxValue[messagePayload["guid"].ToString()];
 								if (tmp.min > val)
 									tmp.min = val;
 								if (tmp.max < val)
@@ -180,9 +180,9 @@ namespace ConnectTheDotsWebSite
 
 									// correct value
 									if (rnd.Next(2) == 1)
-										messagePayload["Value"] = MinMaxValue[messagePayload["GUID"].ToString()].max * (1.01 + 0.05 * rnd.Next(100) / 100);
+										messagePayload["value"] = MinMaxValue[messagePayload["guid"].ToString()].max * (1.01 + 0.05 * rnd.Next(100) / 100);
 									else
-										messagePayload["Value"] = MinMaxValue[messagePayload["GUID"].ToString()].min * (0.99 - 0.05 * rnd.Next(100) / 100);
+										messagePayload["value"] = MinMaxValue[messagePayload["guid"].ToString()].min * (0.99 - 0.05 * rnd.Next(100) / 100);
 								}
 							}
 							else if (messagePayload.ContainsKey("timestart"))
@@ -191,12 +191,12 @@ namespace ConnectTheDotsWebSite
 
 							// Build up the list of devices seen so far (in lieu of a formal device repository)
 							// Also keep the last message received per device (not currently used in the sample)
-							if (messagePayload.ContainsKey("GUID") && !messagePayload.ContainsKey("valueAvg"))
+							if (messagePayload.ContainsKey("guid") && !messagePayload.ContainsKey("valueAvg"))
 							{
-								string GUID = messagePayload["GUID"].ToString();
-								if (GUID != null)
+								string guid = messagePayload["guid"].ToString();
+								if (guid != null)
 								{
-									WebSocketEventProcessor.g_devices.TryAdd(GUID, messagePayload);
+									WebSocketEventProcessor.g_devices.TryAdd(guid, messagePayload);
 								}
 							}
 

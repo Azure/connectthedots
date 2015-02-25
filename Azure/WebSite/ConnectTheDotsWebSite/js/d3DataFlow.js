@@ -37,7 +37,7 @@ function d3DataFlow(flowGUID, params) {
     // call base class contructor
     baseClass.call(self);
     // initialize object
-    self._GUID = flowGUID;
+    self._guid = flowGUID;
     self._yMin = params ? params.yMin : undefined;
     self._yMax = params ? params.yMax : undefined;
     self._displayName = params ? params.displayName : undefined;
@@ -65,7 +65,7 @@ d3DataFlow.prototype = {
         return self;
     },
     getGUID: function () {
-        return this._GUID;
+        return this._guid;
     },
     yMin: function (yMinNew) {
         if (yMinNew != undefined) {
@@ -118,7 +118,7 @@ d3DataFlow.prototype = {
         }
 
         var pushObj = {
-            data: obj.Value,
+            data: obj.value,
             time: new Date(obj.time)
         };
 
@@ -138,7 +138,7 @@ d3DataFlow.prototype = {
         var self = this;
         var object = evt.owner;
         // filter GUID
-        if (object.GUID != self._GUID) return;
+        if (object.guid != self._guid) return;
 
         // add to array
         self.addNewPoint(object);
@@ -149,12 +149,12 @@ d3DataFlow.prototype = {
     _updateProperties: function (eventObject) {
         var self = this;
 
-        if (eventObject.hasOwnProperty("DisplayName")) {
-            self.displayName(eventObject.DisplayName);
+        if (eventObject.hasOwnProperty("displayname")) {
+            self.displayName(eventObject.displayname);
         }
 
-        if (eventObject.hasOwnProperty("MeasureName")) {
-            self.label(eventObject.MeasureName + " (" + eventObject.UnitOfMeasure + ")");
+        if (eventObject.hasOwnProperty("measurename")) {
+            self.label(eventObject.measurename + " (" + eventObject.unitofmeasure + ")");
         }
 
         self.raiseEvent('change', self);

@@ -109,8 +109,8 @@ $(document).ready(function () {
     // create flows
     var dataFlows = [new d3DataFlow('1000'), new d3DataFlow('1001'), new d3DataFlow('1002'), new d3DataFlow('1003')];
     for (var i = 0, j = dataFlows.length; i < j; ++i) {
-        var uuid = dataFlows[i].getGUID();
-        $('#sensorList').append("<li id='flow" + uuid + "' value='" + uuid + "'>loading...</li>");
+        var guid = dataFlows[i].getGUID();
+        $('#sensorList').append("<li id='flow" + guid + "' value='" + guid + "'>loading...</li>");
 
         dataFlows[i].addEventListener('change', function (evt) {
             document.getElementById('flow' + evt.owner.getGUID()).innerHTML = evt.owner.displayName();

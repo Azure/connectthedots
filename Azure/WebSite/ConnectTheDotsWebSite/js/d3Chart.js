@@ -561,7 +561,7 @@ d3Chart.prototype = {
             }
         } else {
             // the message is data for the charts. find chart for message
-            if (evt.hasOwnProperty('GUID') && self._flows.hasOwnProperty(evt.GUID)) {
+            if (evt.hasOwnProperty('guid') && self._flows.hasOwnProperty(evt.guid)) {
                 // check event time
                 var now = new Date();
                 var cutoff = new Date(now - self._CONSTANTS.WINDOW_MINUTES * self._CONSTANTS.MS_PER_MINUTE)
@@ -577,7 +577,7 @@ d3Chart.prototype = {
                 if (!self._isBulking) {
                     self.raiseEvent('update');
                 } else {
-                    self.raiseEvent('loading', evt.DisplayName);
+                    self.raiseEvent('loading', evt.displayname);
                 }
             }
         }

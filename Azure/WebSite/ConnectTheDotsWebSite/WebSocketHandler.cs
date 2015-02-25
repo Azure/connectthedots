@@ -183,11 +183,11 @@ namespace ConnectTheDotsWebSite
 				messageTime = DateTime.Parse(message["timestart"].ToString());
 
 			if (
-					  !message.ContainsKey("GUID") ||
+					  !message.ContainsKey("guid") ||
 					  (
 							(
 							 this.DeviceFilterList.Contains("all") ||
-							 this.DeviceFilterList.Contains(message["GUID"].ToString().ToLower())
+							 this.DeviceFilterList.Contains(message["guid"].ToString().ToLower())
 							)
 					  )
 				 )
