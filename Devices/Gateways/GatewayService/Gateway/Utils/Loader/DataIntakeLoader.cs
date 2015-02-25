@@ -35,7 +35,7 @@ namespace Gateway.Utils.Loader
             var di2 = Path.GetDirectoryName( Assembly.GetCallingAssembly( ).Location );
             var di3 = Path.GetDirectoryName( Assembly.GetExecutingAssembly( ).Location );
 
-            // do not dupiclate search paths 
+            // do not duplicate search paths 
             if ( !directories.Contains( di1 ) )
             {
                 directories.Add( di1 );

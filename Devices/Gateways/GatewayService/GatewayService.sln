@@ -25,6 +25,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataIntakeTestMock", "Tests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedInterfaces", "SharedInterfaces\SharedInterfaces.csproj", "{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{A5D7B51F-689A-4BB1-AE4C-7C12F4B443FA}"
+	ProjectSection(SolutionItems) = preProject
+		Scripts\autorun.sh = Scripts\autorun.sh
+		Scripts\fixall.sh = Scripts\fixall.sh
+		Scripts\GetFile.cmd = Scripts\GetFile.cmd
+		Scripts\Killall.sh = Scripts\Killall.sh
+		Scripts\SCPRPI.cmd = Scripts\SCPRPI.cmd
+		Scripts\startall.sh = Scripts\startall.sh
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
