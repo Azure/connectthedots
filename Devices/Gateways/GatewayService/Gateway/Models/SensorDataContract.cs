@@ -6,28 +6,28 @@ namespace Gateway.Models
     [DataContract]
     public class SensorDataContract
     {
-        [DataMember(Name = "Value")]
+        [DataMember(Name = "value")]
         public double Value { get; set; }
 
-        [DataMember(Name = "GUID")]
+        [DataMember(Name = "guid")]
         public int Guid { get; set; }
 
-        [DataMember(Name = "Organization")]
+        [DataMember(Name = "organization")]
         public string Organization { get; set; }
 
-        [DataMember(Name = "DisplayName")]
+        [DataMember(Name = "displayname")]
         public string DisplayName { get; set; }
 
-        [DataMember(Name = "UnitOfMeasure")]
+        [DataMember(Name = "unitofmeasure")]
         public string UnitOfMeasure { get; set; }
 
-        [DataMember(Name = "MeasureName")]
+        [DataMember(Name = "measurename")]
         public string MeasureName { get; set; }
 
-        [DataMember(Name = "Location")]
+        [DataMember(Name = "location")]
         public string Location { get; set; }
 
-        [DataMember(Name = "time_created")]
+        [DataMember(Name = "timecreated")]
         public DateTime TimeCreated { get; set; }
     }
 }
