@@ -4,7 +4,7 @@ using System.Configuration;
 
 namespace WindowsService.Utils
 {
-    internal struct AMQPConfig
+    internal class AMQPConfig
     {
         public string AMQPSAddress;
         public string EventHubName;
@@ -35,13 +35,19 @@ namespace WindowsService.Utils
         internal static AMQPConfig GetAMQPConfig()
         {
             AMQPServiceConfigSection section = ConfigurationManager.GetSection("AMQPServiceConfig") as AMQPServiceConfigSection;
+            AMQPConfig configData = null;
 
-            AMQPConfig configData;
-            configData.AMQPSAddress = section.AMQPSAddress;
-            configData.EventHubName = section.EventHubName;
-            configData.EventHubMessageSubject = section.EventHubMessageSubject;
-            configData.EventHubDeviceId = section.EventHubDeviceId;
-            configData.EventHubDeviceDisplayName = section.EventHubDeviceDisplayName;
+            if (section != null)
+            {
+                configData = new AMQPConfig
+                {
+                    AMQPSAddress = section.AMQPSAddress,
+                    EventHubName = section.EventHubName,
+                    EventHubMessageSubject = section.EventHubMessageSubject,
+                    EventHubDeviceId = section.EventHubDeviceId,
+                    EventHubDeviceDisplayName = section.EventHubDeviceDisplayName
+                };
+            }
             
             return configData;
         }

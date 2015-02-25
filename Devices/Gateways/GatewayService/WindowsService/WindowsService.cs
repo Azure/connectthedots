@@ -35,18 +35,22 @@ namespace WindowsService
             ServiceName = Constants.WindowsServiceName;
 
             _Logger = EventLogger.Instance;
-
             _GatewayQueue = new GatewayQueue<QueuedItem>();
+            AMQPConfig amqpConfig = Loader.GetAMQPConfig();
 
-            AMQPConfig aqmpConfig = Loader.GetAMQPConfig();
+            if (amqpConfig == null)
+            {
+                _Logger.LogError("AMQP configuration is missing");
+                return;
+            }
             _AMPQSender = new AMQPSender<SensorDataContract>(
-                                                aqmpConfig.AMQPSAddress,
-                                                aqmpConfig.EventHubName,
-                                                aqmpConfig.EventHubMessageSubject,
-                                                aqmpConfig.EventHubDeviceId,
-                                                aqmpConfig.EventHubDeviceDisplayName
-                                                ); 
-            
+                                                amqpConfig.AMQPSAddress,
+                                                amqpConfig.EventHubName,
+                                                amqpConfig.EventHubMessageSubject,
+                                                amqpConfig.EventHubDeviceId,
+                                                amqpConfig.EventHubDeviceDisplayName,
+                                                _Logger
+                                                );
             _BatchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>(
                                                 _GatewayQueue,
                                                 _AMPQSender,
@@ -66,7 +70,6 @@ namespace WindowsService
                 _WebHost.Close();
             }
 
-            _AMPQSender.Logger = _Logger;
             _AMPQSender.LogMessagePrefix = Constants.LogMessageTexts.AMQPSenderErrorPrefix;
 
             _BatchSenderThread.Logger = _Logger;

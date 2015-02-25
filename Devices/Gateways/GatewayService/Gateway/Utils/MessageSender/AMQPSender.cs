@@ -106,7 +106,7 @@ namespace Gateway.Utils.MessageSender
                 {
                     //we don't want service to stop working when exception was thrown at connection creation 
                     //TODO: add reraise for some cases
-                    _Logger.LogError("Error on establishing sender: " + ex.Message);
+                    _Logger.LogError("Error on establishing sender: " + JsonConvert.SerializeObject(ex));
                 }
             }
 
@@ -191,8 +191,9 @@ namespace Gateway.Utils.MessageSender
             set { _LogMesagePrefix = value; }
         }
 
-        public AMQPSender(string amqpsAddress, string eventHubName, string defaultSubject, string defaultDeviceId, string defaultDeviceDisplayName)
+        public AMQPSender(string amqpsAddress, string eventHubName, string defaultSubject, string defaultDeviceId, string defaultDeviceDisplayName, ILogger logger)
         {
+            Logger = logger;
             if (defaultSubject == null || defaultDeviceId == null || defaultDeviceDisplayName == null || eventHubName == null)
             {
                 throw new ArgumentException("defaultSubject, defaultDeviceId, defaultDeviceDisplayName, eventHubName cannot be null");
@@ -298,8 +299,6 @@ namespace Gateway.Utils.MessageSender
                     JsonConvert.DeserializeObject<Dictionary<string, object>>( serializedData );
 
                 outDictionary["Subject"] = subject; // Message Type
-                if (!serializedData.Contains("time_created"))
-                    outDictionary["time_created"] = creationTime;
                 outDictionary[ "from" ] = deviceId; // Originating device
                 outDictionary[ "dspl" ] = deviceDisplayName; // Display name for originating device
 
@@ -338,10 +337,6 @@ namespace Gateway.Utils.MessageSender
                 // No data: send an empty message with message type "weather error" to help diagnose problems "from the cloud"
                 message.Properties.Subject = subject + "err";
             }
-
-            message.ApplicationProperties["time"] = creationTime;
-            message.ApplicationProperties["from"] = deviceId; // Originating device
-            message.ApplicationProperties["dspl"] = deviceDisplayName; // Display name for originating device
 
             return message;
         }
