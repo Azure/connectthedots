@@ -23,14 +23,6 @@ namespace SocketListener
         public SocketListenerThread( ILogger logger )
             : base( logger ) 
         {
-            //
-            // TODO: Issue #45
-            //
-            _Endpoint = new SensorEndpoint
-                            {
-                                Host = "127.0.0.1",
-                                Port = 5000,
-                            };
         }
 
         public override bool  Start( Func<string, int> enqueue )
@@ -50,10 +42,12 @@ namespace SocketListener
 
             return true;
         }
-        public override bool SetEndpoint(SensorEndpoint endpoint)
+
+        public override bool SetEndpoint(SensorEndpoint endpoint = null)
         {
             if( endpoint == null )
             {
+                //we need to know endpoint
                 return false;
             }
 
@@ -67,7 +61,7 @@ namespace SocketListener
             int step = CONNECTION_RETRIES;
 
             Socket client = null;
-            while (--step > 0 && _DoWorkSwitch)
+            while (_DoWorkSwitch)//--step > 0 &&
             {
                 try
                 {

@@ -20,6 +20,6 @@ namespace Gateway.DataIntake
 
         public abstract bool Stop( );
 
-        public abstract bool SetEndpoint( SensorEndpoint endpoint );
+        public abstract bool SetEndpoint( SensorEndpoint endpoint = null );
     }
 }

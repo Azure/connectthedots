@@ -11,19 +11,44 @@ namespace Gateway.Utils.Loader
 {
     public class DataIntakeLoader
     {
-        private readonly IList<IDataIntake> _DataIntakes = new List<IDataIntake>( );
+        private readonly IList<DataIntakeAbstract> _DataIntakes = new List<DataIntakeAbstract>();
+        
+        //dont want duplicated endpoints
+        private static HashSet<SensorEndpoint> _SensorEndpoints = new HashSet<SensorEndpoint>();
 
         private readonly ILogger _Logger;
 
-        public DataIntakeLoader( IList<String> sources, ILogger logger )
+        public DataIntakeLoader(IList<String> sources, IList<SensorEndpoint> endpoints, ILogger logger)
         {
             _Logger = new SafeLogger( logger );
             _Logger.LogInfo("Starting loading Data Intakes");
 
-            if (sources == null)
+            //for each filename will store a flag - whether it was specified at config or not
+            Dictionary<String, bool> sourcesToLoad = new Dictionary<string, bool>();
+            if (sources != null)
             {
-                throw new ArgumentException("List of DataIntake sources could be empty but not null");
+                foreach (var filename in sources)
+                {
+                    sourcesToLoad.Add(filename, true);
+                }
             }
+            else
+            {
+                _Logger.LogInfo("No list of DataIntakes in configuration file, continuing...");
+            }
+
+            if (endpoints != null)
+            {
+                foreach (SensorEndpoint endpoint in endpoints)
+                {
+                    _SensorEndpoints.Add(endpoint);
+                }
+            }
+            else
+            {
+                _Logger.LogInfo("No list of SensorEndpoints in configuration file, continuing...");
+            }
+            
 
             //
             // enumerate all types with a IDataIntake interface look in the current directory, in the 
@@ -51,27 +76,35 @@ namespace Gateway.Utils.Loader
 
             foreach (string directory in directories)
             {
-                foreach (string filename in Directory.GetFiles(directory))
+                //Dinar: dont want to try all windows/system32 directory for now
+                if (!directory.ToLowerInvariant().Contains("system32"))
                 {
-                    sources.Add(filename);
+                    foreach (string filename in Directory.GetFiles(directory))
+                    {
+                        //false flag - file was not specified at config
+                        sourcesToLoad.Add(filename, false);
+                    }
                 }
             }
             
             // try and load assemblies from path 
             var nameTypeDict = new Dictionary<string, Type>( );
-            
-            foreach ( string s in sources )
+            string notLoadedSpecifiedSources = "";
+            string notLoadedNotSpecifiedSources = "";
+
+            foreach (KeyValuePair<string, bool> source in sourcesToLoad)
             {
+                string fileName = source.Key;
                 try
                 {
                     Assembly assm = null;
                     // try path from config first
-                    if ( File.Exists( s ) )
+                    if (File.Exists(fileName))
                     {
-                        assm = Assembly.LoadFrom( s );
+                        assm = Assembly.LoadFrom(fileName);
 
                         // remember this directory as a potential source
-                        var lastDir = Path.GetDirectoryName( s );
+                        var lastDir = Path.GetDirectoryName(fileName);
                         if ( !directories.Contains( lastDir ) )
                         {
                             directories.Add( lastDir ); 
@@ -82,26 +115,29 @@ namespace Gateway.Utils.Loader
                         // try the other directories
                         foreach(var d in directories)
                         {
-                            var assmName =  Path.GetFileName( s ); 
+                            var assmName = Path.GetFileName(fileName); 
 
                             // try again
                             string assmPath = Path.Combine( d, assmName );
                             if ( File.Exists( assmPath ) )
                             {
-                                assm = Assembly.LoadFrom( s );
+                                assm = Assembly.LoadFrom(fileName);
                             }
                         }
 
                         if(assm == null)
                         {
                             // Log that we did not load our data sources correctly
-                            string allSources = "";
-                            foreach(var src in sources)
+                            if (source.Value)
                             {
-                                allSources += s + ";";
+                                notLoadedSpecifiedSources += fileName;
                             }
-
-                            _Logger.LogError( String.Format( "Following data intakes were specificied, but could not be loaded: {0}", allSources ) );  
+                            else
+                            {
+                                notLoadedNotSpecifiedSources += fileName;
+                            }
+                            notLoadedSpecifiedSources += ";";
+                            continue;
                         }
                     }
 
@@ -112,16 +148,32 @@ namespace Gateway.Utils.Loader
                         //Get all classes that implement the required interface
                         if ( t.GetInterface( "IDataIntake", false ) != null )
                         {
-                            _Logger.LogInfo("IDataIntake loaded: " + t.Name);
+                            _Logger.LogInfo("IDataIntake assembly loaded: " + t.Name);
                             nameTypeDict.Add( t.Name, t ); //Add to Dictonary
                         }
                     }
                 }
-                catch ( Exception ex )
+                catch ( Exception )
                 {
                     //dont want to stop loading another modules if one fails
-                    _Logger.LogError( String.Format( "Did not used assembly {0} as IDataIntake: {1}", s, ex.Message ) );
+                    if (source.Value)
+                    {
+                        notLoadedSpecifiedSources += fileName;
+                    }
+                    else
+                    {
+                        notLoadedNotSpecifiedSources += fileName;
+                    }
                 }
+            }
+
+            if (notLoadedSpecifiedSources.Length > 0)
+            {
+                _Logger.LogError(String.Format("Following Data Intakes were specificied, but could not be loaded: {0}", notLoadedSpecifiedSources));
+            }
+            if (notLoadedNotSpecifiedSources.Length > 0)
+            {
+                _Logger.LogError(String.Format("Following files are not specificied, and could not be loaded as Data Intakes: {0}", notLoadedNotSpecifiedSources));  
             }
 
             foreach( KeyValuePair<string, Type> t in nameTypeDict )
@@ -132,13 +184,24 @@ namespace Gateway.Utils.Loader
 
                     if( di != null )
                     {
-                        _DataIntakes.Add(di);
+                        _Logger.LogInfo("IDataIntake instance created: " + t.Key);
+
+                        //adding instance without endpoint if acceptable
+                        if (di.SetEndpoint())
+                            _DataIntakes.Add(di);
+
+                        foreach (SensorEndpoint sensorEndpoint in _SensorEndpoints)
+                        {
+                            DataIntakeAbstract diWithEndpoint = (DataIntakeAbstract)Activator.CreateInstance(t.Value, new object[] { _Logger });
+                            if (diWithEndpoint.SetEndpoint(sensorEndpoint))
+                                _DataIntakes.Add(diWithEndpoint);
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
                     // dont want to stop creating another instances if one fails
-                    _Logger.LogError(String.Format("Exception on Creating Instance {0}: {1}", t.Key, ex.Message));
+                    _Logger.LogError(String.Format("Exception on Creating DataIntake Instance \"{0}\": {1}", t.Key, ex.Message));
                 }
             }
         }
@@ -147,7 +210,7 @@ namespace Gateway.Utils.Loader
         {
             get
             {
-                return _DataIntakes;
+                return (IList<IDataIntake>)_DataIntakes;
             }
         }
 
@@ -177,7 +240,7 @@ namespace Gateway.Utils.Loader
                 }
                 catch( Exception ex )
                 {
-                    _Logger.LogError( ex.StackTrace );
+                    _Logger.LogError( "Exception on Starting DataIntake: " + ex.StackTrace );
 
                     // catch all other exceptions
                 }
