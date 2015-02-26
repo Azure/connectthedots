@@ -43,6 +43,37 @@ function onOpen(evt) {
 
 function onNewEvent(evt) {
     var eventObject = evt.owner;
+    var flowCnt = dataFlows.length;
+
+    // auto add flows
+    if (flowCnt >= 0 && flowCnt < 4 && eventObject.hasOwnProperty('guid')) {
+        var found = false;
+        for (var i = 0; i < flowCnt ; ++i) {
+            if (dataFlows[i].getGUID() == eventObject.guid) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            var newFlow = new d3DataFlow(eventObject.guid);
+            dataFlows.push(newFlow);
+            if (flowCnt < 2) {
+                dataChartOne.addFlow(newFlow, flowCnt);
+            } else {
+                dataChartTwo.addFlow(newFlow, flowCnt - 2);
+            }
+
+            $('#sensorList').append("<li id='flow" + eventObject.guid + "' value='" + (flowCnt + 1) + "'>loading...</li>");
+
+            newFlow.addEventListener('change', function (evt) {
+                document.getElementById('flow' + evt.owner.getGUID()).innerHTML = evt.owner.displayName();
+
+            });
+
+        }
+    }
+
+
     if (eventObject.alerttype != null) {
         var table = $('#alertTable').DataTable();
         var time = new Date(eventObject.timestart);
@@ -97,6 +128,10 @@ function onNewEvent(evt) {
 // JQuery ready function
 //
 
+var dataFlows = [];
+var dataChartOne = null;
+var dataChartTwo = null;
+
 $(document).ready(function () {
 
     // create datasource
@@ -104,26 +139,17 @@ $(document).ready(function () {
     var uri = 'ws' + sss + '://' + window.location.host + '/api/websocketconnect?clientId=none';
 
     $('#messages').prepend('<div> Connecting to ' + uri + '<div>');
-    var dataSource = new d3CTDDataSourceSocket(uri).addEventListeners({ 'eventObject': onNewEvent, 'error' : onError, 'open' : onOpen });
+    var dataSource = new d3CTDDataSourceSocket(uri).addEventListeners({ 'eventObject': onNewEvent, 'error': onError, 'open': onOpen });
 
     // create flows
-    var dataFlows = [new d3DataFlow('1000'), new d3DataFlow('1001'), new d3DataFlow('1002'), new d3DataFlow('1003')];
-    for (var i = 0, j = dataFlows.length; i < j; ++i) {
-        var guid = dataFlows[i].getGUID();
-        $('#sensorList').append("<li id='flow" + guid + "' value='" + guid + "'>loading...</li>");
-
-        dataFlows[i].addEventListener('change', function (evt) {
-            document.getElementById('flow' + evt.owner.getGUID()).innerHTML = evt.owner.displayName();
-
-        });
-    }
+    //var dataFlows = [new d3DataFlow('4dee9a68-0000-0000-0000-000000000000'), new d3DataFlow('339490f3-0000-0000-0000-000000000000'), new d3DataFlow('43a8c699-0000-0000-0000-000000000000'), new d3DataFlow('0bcb6a5d-0000-0000-0000-000000000000')];
 
     // create charts
-    var dataChartOne = (new d3Chart('chartOne', [dataFlows[0], dataFlows[1]]))
+    dataChartOne = (new d3Chart('chartOne'))
         .addEventListeners({ 'loading': onLoading, 'loaded': onLoaded })
         .attachToDataSource(dataSource);
 
-    var dataChartTwo = (new d3Chart('chartTwo', [dataFlows[2], dataFlows[3]]))
+    dataChartTwo = (new d3Chart('chartTwo'))
         .addEventListeners({ 'loading': onLoading, 'loaded': onLoaded })
         .attachToDataSource(dataSource);
 
@@ -133,7 +159,7 @@ $(document).ready(function () {
     //  dataset
 
     $('#sensorList').on('click', 'li', function () {
-        var device = this.value ? this.value : 'All';
+        var device = this.value > 0 ? dataFlows[this.value - 1].getGUID() : 'All';
         dataSource.changeDeviceGUID(device);
         $('#sensorList li').each(function () {
             $(this).removeClass('selected');
