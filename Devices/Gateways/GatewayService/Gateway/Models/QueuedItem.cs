@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using SharedInterfaces;
 
 namespace Gateway.Models
 {
@@ -13,7 +14,7 @@ namespace Gateway.Models
 
     public static class DataTransforms
     {
-        public static SensorDataContract SensorDataContractFromQueuedItem(QueuedItem data)
+        public static SensorDataContract SensorDataContractFromQueuedItem(QueuedItem data, ILogger logger = null)
         {
             SensorDataContract result = null;
             try
@@ -21,8 +22,13 @@ namespace Gateway.Models
                 result =
                     JsonConvert.DeserializeObject<SensorDataContract>(data.JsonData);
             }
-            catch (Exception /*ex*/)
+            catch (Exception ex)
             {
+                //TODO: maybe better to add some metrics instead
+                if (logger != null)
+                {
+                    logger.LogError("Error on deserialize queued item: " + ex.Message);
+                }
             }
 
             return result;

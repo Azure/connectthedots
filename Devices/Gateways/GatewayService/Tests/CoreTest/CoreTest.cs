@@ -60,7 +60,7 @@ namespace CoreTest
             _BatchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>( 
                 _GatewayQueue, 
                 _Sender,
-                m => DataTransforms.AddTimeCreated( DataTransforms.SensorDataContractFromQueuedItem( m ) ), 
+                m => DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromQueuedItem(m, _testLogger)), 
                 null );
         }
 
