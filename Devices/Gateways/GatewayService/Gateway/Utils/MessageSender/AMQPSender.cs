@@ -193,7 +193,8 @@ namespace Gateway.Utils.MessageSender
 
         public AMQPSender(string amqpsAddress, string eventHubName, string defaultSubject, string defaultDeviceId, string defaultDeviceDisplayName, ILogger logger)
         {
-            Logger = logger;
+            Logger = new SafeLogger(logger);
+
             if (Logger!=null)
                 Logger.LogInfo("AMQPSender ctor");
 
@@ -254,7 +255,7 @@ namespace Gateway.Utils.MessageSender
                 try
                 {
                     rl.Sender.Send( m, SendOutcome, rl );
-
+                    Logger.LogInfo("Message to be sent: " + m);
                     break;
                 }
                 catch(Exception )
@@ -350,14 +351,17 @@ namespace Gateway.Utils.MessageSender
         {
             int sent = Interlocked.Increment(ref _sentMessages);
 
-            if( outcome is Accepted ) 
+            if (outcome is Accepted)
             {
-                if(sent == 1)
+                Logger.LogInfo("Message is accepted: " + message);
+
+                if (sent == 1)
                 {
                     _start = DateTime.Now;
                 }
-                
-                if (Interlocked.CompareExchange( ref _sentMessages, 0, Constants.MessagesLoggingThreshold) == Constants.MessagesLoggingThreshold)
+
+                if (Interlocked.CompareExchange(ref _sentMessages, 0, Constants.MessagesLoggingThreshold) ==
+                    Constants.MessagesLoggingThreshold)
                 {
                     DateTime now = DateTime.Now;
 
@@ -365,13 +369,18 @@ namespace Gateway.Utils.MessageSender
 
                     _start = now;
 
-                    Task.Run( () => 
-                        {
-                            Logger.LogInfo( 
-                                String.Format( "GatewayService sent {0} events to Event Hub succesfully in {1} ms ", Constants.MessagesLoggingThreshold, elapsed.TotalMilliseconds.ToString( ) ) 
-                                );
-                        });
+                    Task.Run(() =>
+                    {
+                        Logger.LogInfo(
+                            String.Format("GatewayService sent {0} events to Event Hub succesfully in {1} ms ",
+                                Constants.MessagesLoggingThreshold, elapsed.TotalMilliseconds.ToString())
+                            );
+                    });
                 }
+            }
+            else
+            {
+                Logger.LogInfo("Message is rejected: " + message);
             }
         }
     }

@@ -29,6 +29,7 @@ namespace Gateway
 
         public int Enqueue( string jsonData )
         {
+            Logger.LogInfo("Recievedfrom sensor: " + jsonData);
             if( jsonData != null )//not filling a queue by empty items
             {
                 QueuedItem sensorData = new QueuedItem
