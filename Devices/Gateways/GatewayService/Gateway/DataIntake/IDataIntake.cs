@@ -8,6 +8,7 @@ namespace Gateway.DataIntake
 
         bool Stop( );
 
-        bool SetEndpoint( SensorEndpoint endpoint );
+        //leave endpoint null for Data Intakes that don't expect any endpoints
+        bool SetEndpoint( SensorEndpoint endpoint = null );
     }
 }

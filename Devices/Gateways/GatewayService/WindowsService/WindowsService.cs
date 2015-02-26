@@ -58,7 +58,7 @@ namespace WindowsService
                                                 null //new Func<QueuedItem, string>( m => m.JsonData )
                                                 );
 
-            _DataIntakeLoader = new DataIntakeLoader( Loader.GetSources(), _Logger ); 
+            _DataIntakeLoader = new DataIntakeLoader( Loader.GetSources(), Loader.GetEndpoints(), _Logger ); 
         }
 
         protected override void OnStart(string[] args)

@@ -140,7 +140,7 @@ namespace CoreTest
             {
                 GatewayService service = PrepareGatewayService();
 
-                DataIntakeLoader dataIntakeLoader = new DataIntakeLoader( Loader.GetSources( ), _testLogger ); 
+                DataIntakeLoader dataIntakeLoader = new DataIntakeLoader( Loader.GetSources( ), Loader.GetEndpoints(), _testLogger ); 
 
                 _totalMessagesToSend += 5;
 

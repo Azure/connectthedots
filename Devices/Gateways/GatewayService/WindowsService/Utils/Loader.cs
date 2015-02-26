@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using Gateway.DataIntake;
 
 namespace WindowsService.Utils
 {
@@ -30,6 +31,29 @@ namespace WindowsService.Utils
             }
 
             return dataIntakes;
+        }
+
+        internal static IList<SensorEndpoint> GetEndpoints()
+        {
+            var sensorEndpoints = new List<SensorEndpoint>();
+
+            CoreTest.Utils.Loader.SensorEndpointConfigSection sensorEndpointItems = ConfigurationManager.GetSection("sensorEndpoints")
+                as CoreTest.Utils.Loader.SensorEndpointConfigSection;
+
+            if (sensorEndpointItems != null)
+            {
+                foreach (CoreTest.Utils.Loader.SensorEndpointConfigInstanceElement sensorEndpointItem in sensorEndpointItems.Instances)
+                {
+                    sensorEndpoints.Add(new SensorEndpoint
+                    {
+                        Name = sensorEndpointItem.Name,
+                        Host = sensorEndpointItem.Host,
+                        Port = sensorEndpointItem.Port,
+                    });
+                }
+            }
+
+            return sensorEndpoints;
         }
 
         internal static AMQPConfig GetAMQPConfig()

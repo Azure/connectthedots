@@ -52,18 +52,27 @@ namespace CoreTest
         {
             try
             {
-                SocketServiceTestDevice device = new SocketServiceTestDevice(_testLogger);
-                SensorEndpoint endpoint = new SensorEndpoint
+                IList<string> sources = Loader.GetSources()
+                    .Where(m => m.Contains("Socket")).ToList();
+                IList<SensorEndpoint> endpoints = Loader.GetEndpoints()
+                    .Where(m => m.Name.Contains("Socket")).ToList();
+
+                if (endpoints.Count == 0)
                 {
-                    Host = "127.0.0.1",
-                    Port = 5000
-                };
-                device.Start(endpoint);
+                    throw new Exception("Need to specify local ip host for Socket interations " +
+                                        "and name of endpoint should contain \"Socket\"");
+                }
 
                 GatewayService service = PrepareGatewayService();
 
-                IList<string> sources = Loader.GetSources();
-                DataIntakeLoader dataIntakeLoader = new DataIntakeLoader(sources.Where(m => m.Contains("Socket")).ToList(), _testLogger);
+                SensorEndpoint endpoint = endpoints.First();
+                SocketServiceTestDevice device = new SocketServiceTestDevice(_testLogger);
+                device.Start(endpoint);
+
+                DataIntakeLoader dataIntakeLoader = new DataIntakeLoader(
+                    sources,
+                    endpoints,
+                    _testLogger);
 
                 _totalMessagesToSend += 5;
 
