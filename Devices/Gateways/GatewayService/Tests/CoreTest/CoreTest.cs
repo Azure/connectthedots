@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define MOCK_SENDER
+
+using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Threading;
@@ -24,8 +26,7 @@ namespace CoreTest
         private readonly ILogger _testLogger = new TestLogger();
         private readonly AutoResetEvent _completed = new AutoResetEvent(false);
         private readonly GatewayQueue<QueuedItem> _GatewayQueue;
-        //private readonly IMessageSender<QueuedItem> _Sender;
-        private readonly AMQPSender<SensorDataContract> _Sender;
+        private readonly IMessageSender<SensorDataContract> _Sender;
         private readonly BatchSenderThread<QueuedItem, SensorDataContract> _BatchSenderThread;
         private readonly Random _rand;
         private int _totalMessagesSent;
@@ -39,7 +40,9 @@ namespace CoreTest
             _totalMessagesSent = 0;
             _totalMessagesToSend = 0;
             _GatewayQueue = new GatewayQueue<QueuedItem>( );
-            //_Sender = new MockSender<QueuedItem>(this);
+#if MOCK_SENDER
+            _Sender = new MockSender<SensorDataContract>(this);
+#else
 
             AMQPConfig amqpConfig = Loader.GetAMQPConfig( );
                 
@@ -51,6 +54,7 @@ namespace CoreTest
                                                 amqpConfig.EventHubDeviceDisplayName,
                                                 new TestLogger()
                                                 );
+#endif
 
             _BatchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>( 
                 _GatewayQueue, 
