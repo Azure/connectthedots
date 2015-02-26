@@ -53,7 +53,7 @@ namespace CoreTest
                                                 amqpConfig.EventHubMessageSubject,
                                                 amqpConfig.EventHubDeviceId,
                                                 amqpConfig.EventHubDeviceDisplayName,
-                                                new TestLogger()
+                                                _testLogger
                                                 );
 #endif
 
