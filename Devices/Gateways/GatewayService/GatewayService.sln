@@ -31,12 +31,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{A5D7B51F-689A-4BB1-AE4C-7C12F4B443FA}"
 	ProjectSection(SolutionItems) = preProject
 		Scripts\autorun.sh = Scripts\autorun.sh
-		Scripts\fixall.sh = Scripts\fixall.sh
 		Scripts\GetFile.cmd = Scripts\GetFile.cmd
-		Scripts\Killall.sh = Scripts\Killall.sh
 		Scripts\runonce.sh = Scripts\runonce.sh
 		Scripts\SCPRPI.cmd = Scripts\SCPRPI.cmd
-		Scripts\startall.sh = Scripts\startall.sh
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{91C9B120-0E62-4942-ACE1-FF1E38F960F3}"

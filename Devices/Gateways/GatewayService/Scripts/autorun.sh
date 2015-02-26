@@ -24,14 +24,18 @@
 #!/bin/bash
 echo "Starting host processes"
 
-# killing any prior mono instance 
+echo "Killing mono"
 sudo pkill mono
 
-# event log entries will be written to /var/lib/mono/EventLog/Application
-export MONO_EVENTLOG_TYPE=local
+echo "Trying to delete lock file if there is any"
+sudo rm /tmp/GatewayService.exe.lock
 
-# start the gateway
-/usr/bin/mono-service /home/pi/GatewayService/GatewayService.exe
+# event log entries will be written to /var/lib/mono/EventLog/Application
+echo "Setting MONO_EVENTLOG_TYPE to local"
+sudo export MONO_EVENTLOG_TYPE=local
+
+echo "Starting Gateway"
+sudo MONO_LOG_LEVEL=debug /usr/bin/mono-service /home/pi/GatewayService/GatewayService.exe --debug > monoOutput.txt &
 
 # Add the below line to /etc/rc.local
 #   /home/pi/GatewayService/autorun.sh &
