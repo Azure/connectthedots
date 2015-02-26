@@ -50,6 +50,8 @@ namespace WindowsService.Utils.Logger
                 EventLog.CreateEventSource(_EventLog.Source, _EventLog.Log);
             }
             ((ISupportInitialize)(_EventLog)).EndInit(); 
+
+            LogInfo("Logger appeared.");
         }
 
 		#endregion

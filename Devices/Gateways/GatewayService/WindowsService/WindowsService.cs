@@ -31,34 +31,42 @@ namespace WindowsService
 
         public WindowsService()
         {
-            // Name the Windows Service
-            ServiceName = Constants.WindowsServiceName;
-
-            _Logger = EventLogger.Instance;
-            _GatewayQueue = new GatewayQueue<QueuedItem>();
-            AMQPConfig amqpConfig = Loader.GetAMQPConfig();
-
-            if (amqpConfig == null)
+            _Logger.LogInfo("WindowsService ctor");
+            try
             {
-                _Logger.LogError("AMQP configuration is missing");
-                return;
-            }
-            _AMPQSender = new AMQPSender<SensorDataContract>(
-                                                amqpConfig.AMQPSAddress,
-                                                amqpConfig.EventHubName,
-                                                amqpConfig.EventHubMessageSubject,
-                                                amqpConfig.EventHubDeviceId,
-                                                amqpConfig.EventHubDeviceDisplayName,
-                                                _Logger
-                                                );
-            _BatchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>(
-                                                _GatewayQueue,
-                                                _AMPQSender,
-                                                m => DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromQueuedItem(m, _Logger)),
-                                                null //new Func<QueuedItem, string>( m => m.JsonData )
-                                                );
+                // Name the Windows Service
+                ServiceName = Constants.WindowsServiceName;
 
-            _DataIntakeLoader = new DataIntakeLoader( Loader.GetSources(), Loader.GetEndpoints(), _Logger ); 
+                _Logger = EventLogger.Instance;
+                _GatewayQueue = new GatewayQueue<QueuedItem>();
+                AMQPConfig amqpConfig = Loader.GetAMQPConfig();
+
+                if (amqpConfig == null)
+                {
+                    _Logger.LogError("AMQP configuration is missing");
+                    return;
+                }
+                _AMPQSender = new AMQPSender<SensorDataContract>(
+                                                    amqpConfig.AMQPSAddress,
+                                                    amqpConfig.EventHubName,
+                                                    amqpConfig.EventHubMessageSubject,
+                                                    amqpConfig.EventHubDeviceId,
+                                                    amqpConfig.EventHubDeviceDisplayName,
+                                                    _Logger
+                                                    );
+                _BatchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>(
+                                                    _GatewayQueue,
+                                                    _AMPQSender,
+                                                    m => DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromQueuedItem(m, _Logger)),
+                                                    null, //new Func<QueuedItem, string>( m => m.JsonData )
+                                                    _Logger);
+
+                _DataIntakeLoader = new DataIntakeLoader(Loader.GetSources(), Loader.GetEndpoints(), _Logger); 
+            }
+            catch (Exception ex)
+            {
+                _Logger.LogInfo("Exception at WindowsService ctor: " + ex.Message);
+            }
         }
 
         protected override void OnStart(string[] args)
@@ -72,7 +80,6 @@ namespace WindowsService
 
             _AMPQSender.LogMessagePrefix = Constants.LogMessageTexts.AMQPSenderErrorPrefix;
 
-            _BatchSenderThread.Logger = _Logger;
             _BatchSenderThread.Start();
 
             _WebHost = new WebServiceHost(typeof(Gateway.GatewayService));
@@ -103,6 +110,7 @@ namespace WindowsService
             }
 
             // shutdown processor (message processing)
+            _BatchSenderThread.Logger = _Logger;
             _BatchSenderThread.Stop(STOP_TIMEOUT_MS);
 
             // shut down connection to event hub last

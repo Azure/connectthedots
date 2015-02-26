@@ -194,6 +194,9 @@ namespace Gateway.Utils.MessageSender
         public AMQPSender(string amqpsAddress, string eventHubName, string defaultSubject, string defaultDeviceId, string defaultDeviceDisplayName, ILogger logger)
         {
             Logger = logger;
+            if (Logger!=null)
+                Logger.LogInfo("AMQPSender ctor");
+
             if (defaultSubject == null || defaultDeviceId == null || defaultDeviceDisplayName == null || eventHubName == null)
             {
                 throw new ArgumentException("defaultSubject, defaultDeviceId, defaultDeviceDisplayName, eventHubName cannot be null");

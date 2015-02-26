@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Gateway.Utils.MessageSender;
 using Gateway.Utils.OperationStatus;
 using System.Diagnostics;
+using SharedInterfaces;
 
 namespace Gateway.Utils.Queue
 {
@@ -25,8 +26,12 @@ namespace Gateway.Utils.Queue
 
         private static readonly string _LogMessagePrefix = "BatchSenderThread error. ";
 
-        public BatchSenderThread(IAsyncQueue<TQueueItem> dataSource, IMessageSender<TMessage> dataTarget, Func<TQueueItem, TMessage> dataTransform, Func<TQueueItem, string> serializedData)
+        public BatchSenderThread(IAsyncQueue<TQueueItem> dataSource, IMessageSender<TMessage> dataTarget, Func<TQueueItem, TMessage> dataTransform, Func<TQueueItem, string> serializedData, ILogger logger = null)
         {
+            Logger = logger;
+            if(Logger != null)
+                Logger.LogInfo("BatchSenderThread ctor");
+
             if (dataSource == null || dataTarget == null)
             {
                 throw new ArgumentException("data source and data target cannot be null");
