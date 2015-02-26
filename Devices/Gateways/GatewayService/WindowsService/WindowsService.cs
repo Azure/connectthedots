@@ -122,7 +122,17 @@ namespace WindowsService
 
         static void Main(string[] args)
         {
-            Run(new WindowsService());
+            try
+            {
+                Run(new WindowsService());
+            }
+            catch(Exception ex)
+            {
+                if (EventLogger.Instance != null)
+                {
+                    EventLogger.Instance.LogError(ex.ToString());
+                }
+            }
         }
     }
 }

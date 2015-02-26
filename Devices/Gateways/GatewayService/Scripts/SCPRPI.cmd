@@ -21,6 +21,7 @@ rem %puttydir%pscp -pw %rpi_pw% %prjdir%Scripts\autorun.sh %rpi_usr%@%rpi_ip%:Ga
 %puttydir%pscp -pw %rpi_pw% %prjdir%Scripts\startall.sh %rpi_usr%@%rpi_ip%:GatewayService/
 %puttydir%pscp -pw %rpi_pw% %prjdir%Scripts\killall.sh %rpi_usr%@%rpi_ip%:GatewayService/
 %puttydir%pscp -pw %rpi_pw% %prjdir%Scripts\fixall.sh %rpi_usr%@%rpi_ip%:GatewayService/
+%puttydir%pscp -pw %rpi_pw% %prjdir%Scripts\runonce.sh %rpi_usr%@%rpi_ip%:GatewayService/
 
 echo Marking autorun.sh as executable
 rem echo chmod 755 GatewayService/autorun.sh > %temp%\rpigatewayautorunx.tmp
