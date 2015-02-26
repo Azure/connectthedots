@@ -31,13 +31,13 @@ namespace WindowsService
 
         public WindowsService()
         {
+            _Logger = EventLogger.Instance;
             _Logger.LogInfo("WindowsService ctor");
             try
             {
                 // Name the Windows Service
                 ServiceName = Constants.WindowsServiceName;
 
-                _Logger = EventLogger.Instance;
                 _GatewayQueue = new GatewayQueue<QueuedItem>();
                 AMQPConfig amqpConfig = Loader.GetAMQPConfig();
 
