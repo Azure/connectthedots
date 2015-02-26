@@ -1,4 +1,4 @@
-﻿#define MOCK_SENDER
+﻿//#define MOCK_SENDER
 
 using System;
 using System.Diagnostics;
@@ -66,7 +66,6 @@ namespace CoreTest
 
         public void Run()
         {
-            while(true)
             TestRepeatSend( );
             TestDataIntake();
         }
@@ -97,6 +96,11 @@ namespace CoreTest
 
                     while (--count >= 0)
                     {
+                        //
+                        // Build a message. 
+                        // It will look something like this: 
+                        // "{\"unitofmeasure\":\"%\",\"location\":\"Olivier's office\",\"measurename\":\"Humidity\",\"timecreated\":\"2/26/2015 12:50:29 AM\",\"organization\":\"MSOpenTech\",\"guid\":\"00000000-0000-0000-0000-000000000000\",\"value\":39.600000000000001,\"displayname\":\"NETMF\"}"
+                        // 
                         StringBuilder sb = new StringBuilder( );
                         sb.Append( "{\"unitofmeasure\":\"%\",\"location\":\"Olivier's office\",\"measurename\":\"Humidity\"," );
                         sb.Append( "\"timecreated\":\"" );
