@@ -15,6 +15,7 @@ using Gateway.Utils.Queue;
 using CoreTest.Utils.Logger;
 using CoreTest.Utils.Loader;
 using SharedInterfaces;
+using System.Text;
 
 namespace CoreTest
 {
@@ -65,6 +66,7 @@ namespace CoreTest
 
         public void Run()
         {
+            while(true)
             TestRepeatSend( );
             TestDataIntake();
         }
@@ -95,12 +97,19 @@ namespace CoreTest
 
                     while (--count >= 0)
                     {
-                        string message = 
-                            "{\"unitofmeasure\":\"%\",\"location\":\"Olivier's office\",\"measurename\":\"Humidity\",\"timecreated\":\"2015-02-25T23:07:47.159Z\",\"organization\":\"MSOpenTech\",\"guid\":\"d011897e0976423ba65d07bc21bef6b9\",\"value\":39.600000000000001,\"displayname\":\"NETMF\"}";
+                        StringBuilder sb = new StringBuilder( );
+                        sb.Append( "{\"unitofmeasure\":\"%\",\"location\":\"Olivier's office\",\"measurename\":\"Humidity\"," );
+                        sb.Append( "\"timecreated\":\"" );
+                        sb.Append( DateTime.UtcNow.ToString( ) ); // this should look like "2015-02-25T23:07:47.159Z"
+                        sb.Append( "\",\"organization\":\"MSOpenTech\",\"guid\":\"" );
+                        sb.Append( new Guid().ToString() );
+                        sb.Append( "\",\"value\":39.600000000000001,\"displayname\":\"NETMF\"}" );
 
-                        service.Enqueue(message);
+                        string message = sb.ToString();
 
-                        DataArrived(message);
+                        service.Enqueue( message ); 
+
+                        DataArrived( message ); 
                     }
                 }
 
