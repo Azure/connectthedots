@@ -39,6 +39,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{A5D7
 		Scripts\startall.sh = Scripts\startall.sh
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{91C9B120-0E62-4942-ACE1-FF1E38F960F3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{34475128-5EFB-4A85-9FD5-30F9D7670DE0}"
+	ProjectSection(SolutionItems) = preProject
+		Config\Web\Web.config = Config\Web\Web.config
+		Config\Web\Web.Debug.config = Config\Web\Web.Debug.config
+		Config\Web\Web.Release.config = Config\Web\Web.Release.config
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CoreTest", "CoreTest", "{079B0668-D666-4CAB-BED3-C2093CBD20C8}"
+	ProjectSection(SolutionItems) = preProject
+		Config\CoreTest\App.config = Config\CoreTest\App.config
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WindowsService", "WindowsService", "{71E19A15-D3EA-4397-B641-1F2A6FD50C7D}"
+	ProjectSection(SolutionItems) = preProject
+		Config\WindowsService\App.config = Config\WindowsService\App.config
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -92,5 +111,8 @@ Global
 		{9D9DA1EB-90DA-4FC0-A97F-C650201DD994} = {5094CC44-E8F8-4472-8042-BE7E78899225}
 		{91C31E86-7DDB-4C29-8A65-56596478013C} = {74BF7EFF-11AD-4587-9C35-9419831D1116}
 		{756AB4B0-BC00-4297-A4F0-3DB40B7E2181} = {74BF7EFF-11AD-4587-9C35-9419831D1116}
+		{34475128-5EFB-4A85-9FD5-30F9D7670DE0} = {91C9B120-0E62-4942-ACE1-FF1E38F960F3}
+		{079B0668-D666-4CAB-BED3-C2093CBD20C8} = {91C9B120-0E62-4942-ACE1-FF1E38F960F3}
+		{71E19A15-D3EA-4397-B641-1F2A6FD50C7D} = {91C9B120-0E62-4942-ACE1-FF1E38F960F3}
 	EndGlobalSection
 EndGlobal
