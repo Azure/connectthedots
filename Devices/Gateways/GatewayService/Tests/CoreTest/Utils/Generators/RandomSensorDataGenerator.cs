@@ -15,7 +15,7 @@ namespace CoreTest.Utils.Generators
                 MeasureName = rint == 0 ? "length" : "time",
                 UnitOfMeasure = rint == 0 ? "m" : "s",
                 DisplayName = "Sensor" + cint + (rint == 0 ? "m" : "s"),
-                Guid = 1000 + cint + 2 * rint,
+                Guid = new Guid().ToString(),
                 Value = r.Next() % 1000 - 500,
                 Location = "here",
                 Organization = "contoso",

@@ -10,7 +10,7 @@ namespace Gateway.Models
         public double Value { get; set; }
 
         [DataMember(Name = "guid")]
-        public int Guid { get; set; }
+        public string Guid { get; set; }
 
         [DataMember(Name = "organization")]
         public string Organization { get; set; }

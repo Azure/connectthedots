@@ -91,7 +91,8 @@ namespace CoreTest
 
                     while (--count >= 0)
                     {
-                        string message = "42";
+                        string message = 
+                            "{\"unitofmeasure\":\"%\",\"location\":\"Olivier's office\",\"measurename\":\"Humidity\",\"timecreated\":\"2015-02-25T23:07:47.159Z\",\"organization\":\"MSOpenTech\",\"guid\":\"d011897e0976423ba65d07bc21bef6b9\",\"value\":39.600000000000001,\"displayname\":\"NETMF\"}";
 
                         service.Enqueue(message);
 
