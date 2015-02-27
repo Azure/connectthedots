@@ -29,7 +29,8 @@ params = {
 	yMin : number,
 	yMax : number,
 	displayName : string,
-	label : string
+	label : string,
+    filter : {}
 };*/
 
 function d3DataFlow(flowGUID, params) {
@@ -42,6 +43,7 @@ function d3DataFlow(flowGUID, params) {
     self._yMax = params ? params.yMax : undefined;
     self._displayName = params ? params.displayName : undefined;
     self._label = params ? params.label : undefined;
+    self._filter = params ? params.filter : undefined;
     self._CONSTANTS = {
         MAX_ARRAY_SIZE: 1000
     };
@@ -137,7 +139,14 @@ d3DataFlow.prototype = {
     _onNewDataHandler: function (evt) {
         var self = this;
         var object = evt.owner;
-        // filter GUID
+        // check filter
+        if (self._filter) {
+            for (var id in self._filter) {
+                if (!object.hasOwnProperty(id) || object[id] != self._filter[id])
+                    return;
+            }
+        }
+        // check GUID
         if (object.guid != self._guid) return;
 
         // add to array

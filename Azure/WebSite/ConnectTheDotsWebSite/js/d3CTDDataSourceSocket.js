@@ -39,28 +39,28 @@ function d3CTDDataSourceSocket(uri, handlers) {
         }
     }
     self._firstMessage = true;
-    self._deviceGUID = 'All';
+    self._deviceGUIDs = 'All';
 
     return self;
 }
 
 d3CTDDataSourceSocket.prototype = {
     constructor: d3CTDDataSourceSocket,
-    changeDeviceGUID: function (newDeviceGUID) {
+    changeDeviceGUIDs: function (newDeviceGUIDs) {
         var self = this;
 
-        if (newDeviceGUID != undefined) {
-            self._deviceGUID = newDeviceGUID;
+        if (newDeviceGUIDs != undefined) {
+            self._deviceGUIDs = newDeviceGUIDs;
         }
 
         var reqClear = {
             MessageType: "LiveDataSelection",
-            DeviceGUID: 'clear'
+            DeviceGUIDs: 'clear'
         };
 
         var req = {
             MessageType: "LiveDataSelection",
-            DeviceGUID: self._deviceGUID.toString()
+            DeviceGUIDs: self._deviceGUIDs.toString()
         };
 
         // send request
@@ -74,7 +74,7 @@ d3CTDDataSourceSocket.prototype = {
         if (self._firstMessage) {
             self._firstMessage = false;
 
-            self.changeDeviceGUID();
+            self.changeDeviceGUIDs();
 
             // prevent next call
             event.handled = true;

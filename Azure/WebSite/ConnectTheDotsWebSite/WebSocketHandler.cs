@@ -87,7 +87,7 @@ namespace ConnectTheDotsWebSite
 					switch (messageDictionary["MessageType"] as string)
 					{
 						case "LiveDataSelection":
-							string deviceFilter = messageDictionary["DeviceGUID"] as string;
+							string deviceFilter = messageDictionary["DeviceGUIDs"] as string;
 
 							if (deviceFilter == "clear")
 							{
@@ -132,6 +132,8 @@ namespace ConnectTheDotsWebSite
 		private void ResendDataToClient()
 		{
 			var bufferedMessages = WebSocketEventProcessor.GetAllBufferedMessages();
+			
+			// collect all guids for bulk data
 
 			this.Send(JsonConvert.SerializeObject(new Dictionary<string, object> 
                 { 

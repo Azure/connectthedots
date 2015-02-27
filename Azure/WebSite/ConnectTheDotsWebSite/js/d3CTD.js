@@ -22,6 +22,19 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
+var dataFlows = {};
+var bulkMode = false;
+
+function onChangeSensors() {
+    var newGUIDs = [];
+    $('#sensorList li').each(function () {
+        if ($(this).hasClass('selected') && this.id) {
+            newGUIDs.push(this.id.slice(4));
+        }
+    });
+    dataFlows.dataSource.changeDeviceGUIDs(newGUIDs);
+}
+
 function onLoading(evt) {
     $('#loading').show();
     if (evt.owner) {
@@ -41,38 +54,91 @@ function onOpen(evt) {
     $('#messages').prepend('<div>Connected.</div>');
 }
 
+function addNewDataFlow(eventObject) {
+    var measurename = eventObject['measurename'];
+    // create chart if necessary
+    if (!dataFlows.hasOwnProperty(measurename)) {
+        dataFlows[measurename] = {
+            containerId: 'chart_' + measurename,
+            flows: {}
+        };
+        // add new div object
+        $('#chartsContainer').height((Object.keys(dataFlows).length - 1) * 300 + 'px');
+        dataFlows[measurename].container = $('#chartsContainer').append('<div id="' + dataFlows[measurename].containerId + '" style="top: ' + (Object.keys(dataFlows).length - 2) * 300 + 'px;" class="chart"></div>');
+        // create chart
+        dataFlows[measurename].chart = (new d3Chart(dataFlows[measurename].containerId))
+                    .addEventListeners({ 'loading': onLoading, 'loaded': onLoaded })
+                    .attachToDataSource(dataFlows.dataSource)
+                    .setBulkMode(bulkMode);
+    };
+
+    // add new flow
+    var newFlow = new d3DataFlow(eventObject.guid, { filter: { measurename: measurename } });
+
+    addNewSensorOption(newFlow, eventObject);
+
+    dataFlows[measurename].flows[eventObject.guid] = newFlow;
+
+    dataFlows[measurename].chart.addFlow(newFlow, 0);
+
+    $(window).resize();
+}
+
+function addNewSensorOption(newFlow, eventObject) {
+    var found = false;
+
+    for (var id in dataFlows) {
+        if (dataFlows[id].hasOwnProperty('flows')) {
+            for (var id2 in dataFlows[id].flows) {
+                if (id2 == eventObject.guid)
+                    found = true;
+            }
+        }
+    }
+    if (!found) {
+        $('#sensorList').append("<li id='flow" + eventObject.guid + "' class='selected'>loading...</li>");
+
+        document.getElementById('flow' + eventObject.guid)
+            .onclick = function () {
+                if ($(this).hasClass('selected')) {
+                    $(this).removeClass('selected');
+                } else {
+                    $(this).addClass('selected');
+                }
+
+                onChangeSensors();
+            };
+
+        newFlow.addEventListener('change', function (evt) {
+            document.getElementById('flow' + eventObject.guid).innerHTML = evt.owner.displayName();
+        });
+    }
+}
+
+function checkBulkMode(evt) {
+    if (evt.bulkData != undefined) {
+        bulkMode = evt.bulkData;
+
+        // alert all charts
+        for (var id in dataFlows) {
+            if (dataFlows[id].chart)
+                dataFlows[id].chart.setBulkMode(bulkMode);
+        }
+    }
+}
 function onNewEvent(evt) {
     var eventObject = evt.owner;
     var flowCnt = dataFlows.length;
 
+    // check bulk mode
+    checkBulkMode(eventObject);
+
+    // check object necessary properties
+    if (!eventObject.hasOwnProperty('guid') || !eventObject.hasOwnProperty('measurename')) return;
+
     // auto add flows
-    if (flowCnt >= 0 && flowCnt < 4 && eventObject.hasOwnProperty('guid')) {
-        var found = false;
-        for (var i = 0; i < flowCnt ; ++i) {
-            if (dataFlows[i].getGUID() == eventObject.guid) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            var newFlow = new d3DataFlow(eventObject.guid);
-            dataFlows.push(newFlow);
-            if (flowCnt < 2) {
-                dataChartOne.addFlow(newFlow, flowCnt);
-            } else {
-                dataChartTwo.addFlow(newFlow, flowCnt - 2);
-            }
-
-            $('#sensorList').append("<li id='flow" + eventObject.guid + "' value='" + (flowCnt + 1) + "'>loading...</li>");
-
-            newFlow.addEventListener('change', function (evt) {
-                document.getElementById('flow' + evt.owner.getGUID()).innerHTML = evt.owner.displayName();
-
-            });
-
-        }
-    }
-
+    if (!dataFlows.hasOwnProperty(eventObject['measurename']) || !dataFlows[eventObject['measurename']].flows.hasOwnProperty(eventObject['guid']))
+        addNewDataFlow(eventObject);
 
     if (eventObject.alerttype != null) {
         var table = $('#alertTable').DataTable();
@@ -128,10 +194,6 @@ function onNewEvent(evt) {
 // JQuery ready function
 //
 
-var dataFlows = [];
-var dataChartOne = null;
-var dataChartTwo = null;
-
 $(document).ready(function () {
 
     // create datasource
@@ -139,10 +201,11 @@ $(document).ready(function () {
     var uri = 'ws' + sss + '://' + window.location.host + '/api/websocketconnect?clientId=none';
 
     $('#messages').prepend('<div> Connecting to ' + uri + '<div>');
-    var dataSource = new d3CTDDataSourceSocket(uri).addEventListeners({ 'eventObject': onNewEvent, 'error': onError, 'open': onOpen });
+    dataFlows.dataSource = new d3CTDDataSourceSocket(uri).addEventListeners({ 'eventObject': onNewEvent, 'error': onError, 'open': onOpen });
 
+    /*
     // create flows
-    //var dataFlows = [new d3DataFlow('4dee9a68-0000-0000-0000-000000000000'), new d3DataFlow('339490f3-0000-0000-0000-000000000000'), new d3DataFlow('43a8c699-0000-0000-0000-000000000000'), new d3DataFlow('0bcb6a5d-0000-0000-0000-000000000000')];
+    var dataFlows = [new d3DataFlow('4dee9a68-0000-0000-0000-000000000000'), new d3DataFlow('339490f3-0000-0000-0000-000000000000'), new d3DataFlow('43a8c699-0000-0000-0000-000000000000'), new d3DataFlow('0bcb6a5d-0000-0000-0000-000000000000')];
 
     // create charts
     dataChartOne = (new d3Chart('chartOne'))
@@ -152,20 +215,12 @@ $(document).ready(function () {
     dataChartTwo = (new d3Chart('chartTwo'))
         .addEventListeners({ 'loading': onLoading, 'loaded': onLoaded })
         .attachToDataSource(dataSource);
+    */
 
     //  Handle a sensor selection change
     // 'All' means all dataset are shown.
     //  Anything else toggles that particular
     //  dataset
-
-    $('#sensorList').on('click', 'li', function () {
-        var device = this.value > 0 ? dataFlows[this.value - 1].getGUID() : 'All';
-        dataSource.changeDeviceGUID(device);
-        $('#sensorList li').each(function () {
-            $(this).removeClass('selected');
-        });
-        $(this).addClass('selected');
-    });
 
     // create alerts table
     var table = $('#alertTable').DataTable({

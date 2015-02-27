@@ -78,15 +78,7 @@
                 </ul>
 
             </div>
-
-
-            <div style="margin-left: 200px; height: 600px; position: relative; text-align: center;">
-                <div id="chartOne" class="chart">
-                    <h4>DataChart One</h4>
-                </div>
-                <div id="chartTwo" class="chart">
-                    <h4>DataChart Two</h4>
-                </div>
+            <div id="chartsContainer">
             </div>
         </div>
 

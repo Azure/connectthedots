@@ -1,7 +1,7 @@
 body {
     font: 16px sans-serif;
     color: #333;
-    width: 80%;
+    width: 95%;
 }
 
 #header {
@@ -24,29 +24,29 @@ h4 {
 }
 
 .big-block {
-    margin-left: 100px;
+    margin-left: 10px;
 }
 
-        ul {
-            list-style-type: none;
-            padding-left: 0;
-            font: 12px sans-serif;
-            color: #666;
-        }
+ul {
+    list-style-type: none;
+    padding-left: 0;
+    font: 12px sans-serif;
+    color: #666;
+}
 
-        li {
-            cursor: pointer;
-            font-weight: normal;
-        }
+li {
+    cursor: pointer;
+    font-weight: normal;
+}
 
-        .selected {
-            font-weight: bold;
-        }
+.selected {
+    font-weight: bold;
+}
 
 
-        li.selected:before {
-            content: "\25BA \0020";
-        }
+li.selected:before {
+    content: "\25BA \0020";
+}
 
 /*styles for D3 charts*/
 .axis {
@@ -137,6 +137,12 @@ path.line {
     height: 80%;
     width: 100%;
     position: absolute;
+}
+
+#chartsContainer {
+    margin-left: 200px;
+    position: relative;
+    text-align: center;
 }
 
 .chart {

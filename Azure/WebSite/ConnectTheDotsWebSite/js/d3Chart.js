@@ -21,14 +21,12 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
-
 // create dataFlow with
 /*
 containerId : string,
 dataFlows = [
     dataFlowObject
 ]*/
-
 function d3Chart(containerId, dataFlows) {
     var self = this;
     // call base class contructor
@@ -64,6 +62,13 @@ function d3Chart(containerId, dataFlows) {
 
 d3Chart.prototype = {
     constructor: d3Chart,
+    setBulkMode: function (newVal) {
+        var self = this;
+        self._isBulking = newVal;
+
+        if (!newVal) { self.raiseEvent('loaded'); }
+        return self;
+    },
     addFlow: function (newFlow, yAxis) {
         var self = this;
         self._flows[newFlow.getGUID()] = newFlow;
@@ -221,83 +226,55 @@ d3Chart.prototype = {
 
         // seed the axes with some dummy values
         self._x = d3.time.scale()
-            .domain([new Date("2015-01-01T04:02:39.867841Z"), new Date("2015-01-01T04:07:39.867841Z")])
-            .range([0, self._width]);
+			.domain([new Date("2015-01-01T04:02:39.867841Z"), new Date("2015-01-01T04:07:39.867841Z")])
+			.range([0, self._width]);
 
         self._y0 = d3.scale.linear()
-            .range([self._height, 0]);
+			.range([self._height, 0]);
 
         if (dataFlowsArray.length > 0 && dataFlowsArray[0].yMax != null && dataFlowsArray[0].yMin != null)
             self._y0.domain([dataFlowsArray[0].yMin, dataFlowsArray[0].yMax]);
 
-        self._y1 = d3.scale.linear()
-            .range([self._height, 0]);
-
-        if (dataFlowsArray.length > 1 && dataFlowsArray[1].yMax != null && dataFlowsArray[1].yMin != null)
-            self._y1.domain([dataFlowsArray[1].yMin, dataFlowsArray[1].yMax]);
-
         self._svg = d3.select("#" + self._containerId)
-            .append("p")
-            .append("svg")
-       		.attr("width", self._width + margin.left + margin.right)
-		    .attr("height", self._height + margin.top + margin.bottom)
-		    .style("margin-left", margin.left + "px")
-		    .style("margin-bottom", margin.bottom + "px")
-		    .style("margin-right", margin.right + "px")
-		    .append("g")
-		    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+			.append("p")
+			.append("svg")
+			.attr("width", self._width + margin.left + margin.right)
+			.attr("height", self._height + margin.top + margin.bottom)
+			.style("margin-left", margin.left + "px")
+			.style("margin-bottom", margin.bottom + "px")
+			.style("margin-right", margin.right + "px")
+			.append("g")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         self._svg.append("g")
-            .attr("class", "y0 axis")
-            .call(d3.svg.axis().scale(self._y0).ticks(7).orient("left"));
+			.attr("class", "y0 axis")
+			.call(d3.svg.axis().scale(self._y0).ticks(7).orient("left"));
 
         if (dataFlowsArray.length > 0 && dataFlowsArray[0].label) {
             self._svg.append("text")
-                .attr("transform", "rotate(-90)")
-                .attr("class", "y0 label")
-                .attr("text-anchor", "middle")
-                .attr("y", -50)
-                .attr("x", -self._height / 2)
-                .attr("dy", "1em")
-                .attr("font-size", self._fontSize + "px")
-                .style("fill", self._colors(dataFlowsArray[0].id))
-                .text(dataFlowsArray[0].label);
-        }
-
-        if (dataFlowsArray.length > 1 && dataFlowsArray[1].label) {
-            self._svg.append("text")
-                .attr("y1", 0 - (margin.top / 2))
-
-            self._svg.append("g")
-                .attr("class", "y1 axis")
-                .attr("transform", "translate(" + self._width + ",0)")
-                .text(dataFlowsArray[1].label)
-                .call(d3.svg.axis().scale(self._y1).ticks(7).orient("right"));
-
-            self._svg.append("text")
-                .attr("transform", "rotate(-90)")
-                .attr("class", "y1 label")
-                .attr("text-anchor", "middle")
-                .attr("y", self._width + 30)
-                .attr("x", -self._height / 2)
-                .attr("dy", "1em")
-                .attr("font-size", self._fontSize + "px")
-                .style("fill", self._colors(dataFlowsArray[1].id))
-                .text(dataFlowsArray[1].label);
+				.attr("transform", "rotate(-90)")
+				.attr("class", "y0 label")
+				.attr("text-anchor", "middle")
+				.attr("y", -50)
+				.attr("x", -self._height / 2)
+				.attr("dy", "1em")
+				.attr("font-size", self._fontSize + "px")
+				//.style("fill", self._colors(dataFlowsArray[0].id))
+				.text(dataFlowsArray[0].label);
         }
 
         self._svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + (self._height) + ")")
-            .call(d3.svg.axis().scale(self._x).orient("bottom").tickFormat(d3.time.format("%X")));
+			.attr("class", "x axis")
+			.attr("transform", "translate(0," + (self._height) + ")")
+			.call(d3.svg.axis().scale(self._x).orient("bottom").tickFormat(d3.time.format("%X")));
 
         // create tip
         self._tip = d3.tip()
-            .attr('class', 'd3-tip')
-            .offset([-10, 0])
-            .html(function (d) {
-                return "<label class='time_header'>" + d.time + "</label><label class='value_circle'>&#x25cf;</label><label class='value'>" + d.data.toFixed(2) + "</label><label class='message'>" + d.alertData.message + "</label>";
-            });
+			.attr('class', 'd3-tip')
+			.offset([-10, 0])
+			.html(function (d) {
+			    return "<label class='time_header'>" + d.time + "</label><label class='value_circle'>&#x25cf;</label><label class='value'>" + d.data.toFixed(2) + "</label><label class='message'>" + d.alertData.message + "</label>";
+			});
         self._svg.call(self._tip);
 
         // register resize handler
@@ -403,62 +380,62 @@ d3Chart.prototype = {
         if (minVal[0] < Number.MAX_VALUE) {
             var scaleMargin = (maxVal[0] - minVal[0]) * 10 / 100;
             self._y0 = d3.scale.linear()
-                .domain([minVal[0] - scaleMargin, maxVal[0] + scaleMargin])
-                .range([self._height, 0]);
+				.domain([minVal[0] - scaleMargin, maxVal[0] + scaleMargin])
+				.range([self._height, 0]);
 
             var yAxisLeft = d3.svg.axis()
-                .scale(self._y0)
-                .orient("left")
+				.scale(self._y0)
+				.orient("left")
 
             self._svg.selectAll("g.y0.axis")
-                .call(yAxisLeft);
+				.call(yAxisLeft);
         }
 
         if (minVal[1] < Number.MAX_VALUE) {
             var scaleMargin = (maxVal[1] - minVal[1]) * 10 / 100;
 
             self._y1 = d3.scale.linear()
-                .domain([minVal[1] - scaleMargin, maxVal[1] + scaleMargin])
-                .range([self._height, 0]);
+				.domain([minVal[1] - scaleMargin, maxVal[1] + scaleMargin])
+				.range([self._height, 0]);
 
             var yAxisRight = d3.svg.axis()
-                .scale(self._y1)
-                .orient("right")
+				.scale(self._y1)
+				.orient("right")
 
             self._svg.selectAll("g.y1.axis")
-                .call(yAxisRight);
+				.call(yAxisRight);
         }
 
         self._x = d3.time.scale()
-            .domain([minDate, maxDate])
-            .range([0, self._width]);
+			.domain([minDate, maxDate])
+			.range([0, self._width]);
 
         var xAxis = d3.svg.axis()
-            .scale(self._x)
-            .tickFormat(d3.time.format("%X"))
-            .orient("bottom");
+			.scale(self._x)
+			.tickFormat(d3.time.format("%X"))
+			.orient("bottom");
 
         self._svg.selectAll("g.x.axis")
-            .call(xAxis);
+			.call(xAxis);
 
         var line = [
-            d3.svg.line()
-            .interpolate("monotone")
-            .x(function (d) {
-                return self._x(d.time);
-            })
-            .y(function (d) {
-                return self._y0(d.data);
-            }),
+			d3.svg.line()
+			.interpolate("monotone")
+			.x(function (d) {
+			    return self._x(d.time);
+			})
+			.y(function (d) {
+			    return self._y0(d.data);
+			}),
 
-            d3.svg.line()
-            .interpolate("monotone")
-            .x(function (d) {
-                return self._x(d.time);
-            })
-            .y(function (d) {
-                return self._y1(d.data);
-            })
+			d3.svg.line()
+			.interpolate("monotone")
+			.x(function (d) {
+			    return self._x(d.time);
+			})
+			.y(function (d) {
+			    return self._y1(d.data);
+			})
         ];
 
         try {
@@ -472,68 +449,77 @@ d3Chart.prototype = {
 
                 if (dataFlowVisuals.path == null) {
                     dataFlowVisuals.path = self._svg.append("g")
-                        .append("path")
-                        .datum(data)
-                        .attr("class", "line")
-                        .attr("d", line[yAxis])
-                        .style("stroke", function (d) {
-                            return self._colors(dataGUID);
-                        });
+						.append("path")
+						.datum(data)
+						.attr("class", "line")
+						.attr("d", line[yAxis])
+						.style("stroke", function (d) {
+						    return self._colors(dataGUID);
+						});
                 }
 
                 dataFlowVisuals.path.datum(data)
-                    .attr("d", line[yAxis]);
+					.attr("d", line[yAxis]);
 
                 // draw alert points
                 for (var pnt in data) {
                     if (typeof data[pnt].alertData == 'object') {
                         if (!dataFlowVisuals.alerts.hasOwnProperty(data[pnt].time)) {
-                            var transferData = JSON.stringify({ alertData: data[pnt].alertData, time: data[pnt].time, data: data[pnt].data });
+                            var transferData = JSON.stringify({
+                                alertData: data[pnt].alertData,
+                                time: data[pnt].time,
+                                data: data[pnt].data
+                            });
                             var alertVisual = dataFlowVisuals.alerts[data[pnt].time] = {};
                             alertVisual.alertBarShowed = self._svg.append("g").append("rect")
-                                .attr("class", "bar")
-                                .attr("x", self._x(data[pnt].time))
-                                .attr("y", 0)
-                                .attr("height", self._height)
-                                .attr("width", "2px")
-                                .style("fill", "#e6c9cd")
+								.attr("class", "bar")
+								.attr("x", self._x(data[pnt].time))
+								.attr("y", 0)
+								.attr("height", self._height)
+								.attr("width", "2px")
+								.style("fill", "#e6c9cd")
 
                             alertVisual.alertShowed = self._svg.append("g").append("circle")
-                                .attr("class", "d3-dot")
-                                .attr("cx", self._x(data[pnt].time))
-                                .attr("cy", yAxis == 0 ? self._y0(data[pnt].data) : self._y1(data[pnt].data))
-                                .style("fill", "#e93541")
-                                .attr("r", displayHeight / 200)
-                                .on('mouseover', function () { d3.select(this).transition().attr("r", displayHeight / 130); eval("self._tip.show(" + transferData + ");") })
-                                .on('mouseout', function () { d3.select(this).transition().attr("r", displayHeight / 200); self._tip.hide(); });
+								.attr("class", "d3-dot")
+								.attr("cx", self._x(data[pnt].time))
+								.attr("cy", yAxis == 0 ? self._y0(data[pnt].data) : self._y1(data[pnt].data))
+								.style("fill", "#e93541")
+								.attr("r", displayHeight / 200)
+								.on('mouseover', function () {
+								    d3.select(this).transition().attr("r", displayHeight / 130);
+								    eval("self._tip.show(" + transferData + ");")
+								})
+								.on('mouseout', function () {
+								    d3.select(this).transition().attr("r", displayHeight / 200);
+								    self._tip.hide();
+								});
                         } else {
                             var alertVisual = dataFlowVisuals.alerts[data[pnt].time];
                             alertVisual.alertShowed.attr("cx", self._x(data[pnt].time))
-                                .attr("cy", yAxis == 0 ? self._y0(data[pnt].data) : self._y1(data[pnt].data));
+								.attr("cy", yAxis == 0 ? self._y0(data[pnt].data) : self._y1(data[pnt].data));
 
                             alertVisual.alertBarShowed
-                                .attr("x", self._x(data[pnt].time))
+								.attr("x", self._x(data[pnt].time))
                         }
                     }
                 }
                 if (dataFlowVisuals.legend == null) {
                     dataFlowVisuals.legend_r = self._svg.append("rect")
-                        .attr("class", "legend")
-                        .attr("width", 10)
-                        .attr("height", 10)
-                        .attr("x", self._width + 50)
-                        .attr("y", 20 + (20 * pos))
-                        .style("fill", self._colors(dataGUID))
-                        .style("stroke", self._colors(dataGUID));
+						.attr("class", "legend")
+						.attr("width", 10)
+						.attr("height", 10)
+						.attr("x", self._width + 50)
+						.attr("y", 20 + (20 * pos))
+						.style("fill", self._colors(dataGUID))
+						.style("stroke", self._colors(dataGUID));
 
                     dataFlowVisuals.legend = self._svg.append("text")
-                        .attr("x", self._width + 65)
-                        .attr("y", 20 + (20 * pos) + 5)
-                        .attr("class", "legend")
-                        .style("fill", self._colors(dataGUID))
-                        .text(dataFlow.displayName());
-                }
-                else {
+						.attr("x", self._width + 65)
+						.attr("y", 20 + (20 * pos) + 5)
+						.attr("class", "legend")
+						.style("fill", self._colors(dataGUID))
+						.text(dataFlow.displayName());
+                } else {
                     dataFlowVisuals.legend.text(dataFlow.displayName());
                 }
                 pos++;
@@ -547,38 +533,24 @@ d3Chart.prototype = {
     _onMessageHandler: function (eventObject) {
         var self = this;
         var evt = eventObject.owner;
-        if (evt.bulkData != undefined) {
-            if (evt.bulkData == true) {
-                // clear all flows
-                self.clearDataFlows();
+        // the message is data for the charts. find chart for message
+        if (evt.hasOwnProperty('guid') && self._flows.hasOwnProperty(evt.guid)) {
+            // check event time
+            var now = new Date();
+            var cutoff = new Date(now - self._CONSTANTS.WINDOW_MINUTES * self._CONSTANTS.MS_PER_MINUTE)
 
-                self._isBulking = true;
-            } else {
-                // received bulk data. update graphs
-                self.raiseEvent('update');
-                self.raiseEvent('loaded');
-                self._isBulking = false;
+            if (evt.time < cutoff) {
+                return;
             }
-        } else {
-            // the message is data for the charts. find chart for message
-            if (evt.hasOwnProperty('guid') && self._flows.hasOwnProperty(evt.guid)) {
-                // check event time
-                var now = new Date();
-                var cutoff = new Date(now - self._CONSTANTS.WINDOW_MINUTES * self._CONSTANTS.MS_PER_MINUTE)
 
-                if (evt.time < cutoff) {
-                    return;
-                }
+            // add event
+            self.raiseEvent('newData', evt);
 
-                // add event
-                self.raiseEvent('newData', evt);
-
-                // check if nessasary to update
-                if (!self._isBulking) {
-                    self.raiseEvent('update');
-                } else {
-                    self.raiseEvent('loading', evt.displayname);
-                }
+            // check if nessasary to update
+            if (!self._isBulking) {
+                self.raiseEvent('update');
+            } else {
+                self.raiseEvent('loading', evt.displayname);
             }
         }
     }
