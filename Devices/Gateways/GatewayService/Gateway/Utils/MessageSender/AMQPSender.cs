@@ -212,38 +212,49 @@ namespace Gateway.Utils.MessageSender
 
         public async Task SendMessage(T data)
         {
-            if (data == null)
-                return;
-            string serializedData = JsonConvert.SerializeObject(data);
-            Message m = PrepareMessage(serializedData);
-            await TrySendPrepared(m);
-        }
-
-        public async Task SendSerialized(string jsonData)
-        {
-            if (jsonData == null)
-                return;
-            Message m = PrepareMessage(jsonData);
-            await TrySendPrepared(m);
-        }
-
-        public void Close()
-        {
-            _senders.Close( );
-        }
-
-        private async Task TrySendPrepared(Message m)
-        {
             try
             {
-                // send to the cloud asynchronously, but wait for completetion
-                // this is actually serializing access to the SenderLink type
-                await Task.Run(() => SendAmqpMessage( m ));
+                if (data == null)
+                {
+                    return;
+                }
+                string jsonData = JsonConvert.SerializeObject(data);
+                await PrepareAndSend(jsonData);
             }
             catch (Exception ex)
             {
                 Logger.LogError(_LogMesagePrefix + ex.Message);
             }
+        }
+
+        public async Task SendSerialized(string jsonData)
+        {
+            try
+            {
+                if (jsonData == null)
+                {
+                    return;
+                }
+                await PrepareAndSend(jsonData);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(_LogMesagePrefix + ex.Message);
+            }
+        }
+
+        public void Close()
+        {
+            Logger.LogInfo("Close signal to AMQP recieved.");
+            _senders.Close( );
+        }
+
+        private async Task PrepareAndSend(string jsonData)
+        {
+            Message m = PrepareMessage(jsonData);
+            // send to the cloud asynchronously, but wait for completetion
+            // this is actually serializing access to the SenderLink type
+            await Task.Run(() => SendAmqpMessage( m ));
         }
 
         private void SendAmqpMessage( Message m )

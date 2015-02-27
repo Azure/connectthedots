@@ -16,7 +16,7 @@ namespace Gateway.Models
     {
         public static SensorDataContract SensorDataContractFromQueuedItem(QueuedItem data, ILogger logger = null)
         {
-            SensorDataContract result = null;
+            SensorDataContract result;
             try
             {
                 result =
@@ -24,6 +24,7 @@ namespace Gateway.Models
             }
             catch (Exception ex)
             {
+                result = null;
                 //TODO: maybe better to add some metrics instead
                 if (logger != null)
                 {
