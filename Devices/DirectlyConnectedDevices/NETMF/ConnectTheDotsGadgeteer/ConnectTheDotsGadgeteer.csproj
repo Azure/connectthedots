@@ -53,8 +53,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Amqp.NetMF">
-      <HintPath>..\packages\AMQPNetLite.0.1.0-beta\lib\netmf43\Amqp.NetMF.dll</HintPath>
+    <Reference Include="Amqp.NetMF, Version=0.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\AMQPNetLite.0.1.1-beta\lib\netmf43\Amqp.NetMF.dll</HintPath>
     </Reference>
     <Reference Include="Gadgeteer" />
     <Reference Include="Gadgeteer.SPI, Version=2.43.1.0, Culture=neutral, processorArchitecture=MSIL">

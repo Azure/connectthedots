@@ -248,7 +248,7 @@ namespace ConnectTheDotsGadgeteer
                 if (0 == Interlocked.Exchange(ref IsSendingMessage, 1))
                 {
                     // Create the AMQP message
-                    var message = new Message();
+                    var message = new Message(new Data() { Binary = Encoding.UTF8.GetBytes(payload) });
                     message.Properties = new Properties()
                     {
                         Subject = "wthr",
@@ -263,7 +263,6 @@ namespace ConnectTheDotsGadgeteer
                     message.ApplicationProperties["from"] = DeviceID;
                     message.ApplicationProperties["dspl"] = DeviceName;
                     //message.Properties.ContentType = "text/json";
-                    message.Body = new Data() { Binary = Encoding.UTF8.GetBytes(payload) };
 
                     sender.Send(message);
 
