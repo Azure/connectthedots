@@ -226,7 +226,8 @@ namespace Gateway.Utils.Queue
                                         {
                                             //we don't want possibly race with other sending tasks
                                             //more safety would be just give message back to the queue
-                                            _DataSource.Push(popResult.Result);
+                                            if (popResult.Result != null)
+                                                _DataSource.Push(popResult.Result);
                                         }
                                     }
                                     catch (AggregateException) { }
