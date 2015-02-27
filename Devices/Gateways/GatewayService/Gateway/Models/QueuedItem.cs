@@ -36,6 +36,9 @@ namespace Gateway.Models
 
         public static SensorDataContract AddTimeCreated(SensorDataContract data)
         {
+            if (data == null)
+                return null;
+
             SensorDataContract result = data;
             if (result.TimeCreated == default(DateTime))
             {

@@ -212,15 +212,17 @@ namespace Gateway.Utils.MessageSender
 
         public async Task SendMessage(T data)
         {
-            string serializedData = null;
-            if (data != null)
-                serializedData = JsonConvert.SerializeObject(data);
+            if (data == null)
+                return;
+            string serializedData = JsonConvert.SerializeObject(data);
             Message m = PrepareMessage(serializedData);
             await TrySendPrepared(m);
         }
 
         public async Task SendSerialized(string jsonData)
         {
+            if (jsonData == null)
+                return;
             Message m = PrepareMessage(jsonData);
             await TrySendPrepared(m);
         }
