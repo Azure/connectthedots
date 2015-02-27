@@ -8,7 +8,7 @@ The hardware listed below is the one used to test the code. You can try with an 
  - [Gadgeteer FEZ Spider Mainboard][1]
  - [Gadgeteer USB DP Module][2]
  - [Gadgeteer Ethernet J11D Module][3]
- - [Gadgeteer Temp&Humidity Module][4]
+ - [Gadgeteer Temp&Humidity Module][4] (note that this is no longer available new. The [TempHumid S170][13] may be substituted with minor code and design surface changes)
 
 ##Software and tools requirements
 
@@ -74,3 +74,4 @@ If you are hitting an exception when running the application on your board in th
   [10]: https://www.ghielectronics.com/docs/165/netmf-and-gadgeteer-troubleshooting
   [11]: https://www.ghielectronics.com/docs/299/discontinued-gadgeteer-module-drivers
   [12]: http://netmftoolbox.codeplex.com/
+  [13]: https://www.ghielectronics.com/catalog/product/528
