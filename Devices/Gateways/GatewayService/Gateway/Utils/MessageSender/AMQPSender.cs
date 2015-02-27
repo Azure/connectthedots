@@ -255,7 +255,6 @@ namespace Gateway.Utils.MessageSender
                 try
                 {
                     rl.Sender.Send( m, SendOutcome, rl );
-                    Logger.LogInfo("Message to be sent: " + m);
                     break;
                 }
                 catch(Exception )
@@ -353,7 +352,7 @@ namespace Gateway.Utils.MessageSender
 
             if (outcome is Accepted)
             {
-                Logger.LogInfo("Message is accepted: " + message);
+                Logger.LogInfo("Message is accepted: " + Encoding.UTF8.GetString(message.Encode().Buffer));
 
                 if (sent == 1)
                 {
@@ -380,7 +379,7 @@ namespace Gateway.Utils.MessageSender
             }
             else
             {
-                Logger.LogInfo("Message is rejected: " + message);
+                Logger.LogInfo("Message is rejected: " + Encoding.UTF8.GetString(message.Encode().Buffer));
             }
         }
     }

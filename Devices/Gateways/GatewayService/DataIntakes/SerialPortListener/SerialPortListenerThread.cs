@@ -39,6 +39,8 @@ namespace SerialPortListener
         {
             _Enqueue = enqueue;
 
+            _DoWorkSwitch = true;
+
             Task.Run( ( ) => RunForSerial( ) );
 
             return true;
@@ -67,6 +69,7 @@ namespace SerialPortListener
 #endif
             do
             {
+                _Logger.LogInfo("RunForSerial loop for Serial Ports scan.");
                 // We will monitor available COM ports and create listening thread for each new valid port
 #if !SIMULATEDATA
                 // Identify which serial ports are connected to sensors
@@ -79,6 +82,7 @@ namespace SerialPortListener
                     if (Array.IndexOf(ports, serialPortThread.portName) == -1)
                     {
                         // Serial port is no longer valid. Abort the listening process
+                        _Logger.LogInfo("Killed serial port: " + serialPortThread.portName);
                         serialPortThread.listeningThread.Abort();
                         threadsKilled.Add(serialPortThread);
                     }
@@ -132,10 +136,10 @@ namespace SerialPortListener
         /// <param name="port">COM port name to listen on</param>
         public void ListeningForSensors(string port)
         {
+            _Logger.LogInfo("ListeningForSensors: " + port);
             string serialPortName = port;
             SerialPort serialPort = null;
             bool serialPortAlive = true;
-
             // We want the thread to restart listening on the serial port if it crashed
             while (_DoWorkSwitch)
             {
