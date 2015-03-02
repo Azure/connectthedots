@@ -146,7 +146,7 @@ path.line {
 }
 
 .chart {
-    height: 30%;
+    height: 300px;
     width: 100%;
     position: absolute;
 }
