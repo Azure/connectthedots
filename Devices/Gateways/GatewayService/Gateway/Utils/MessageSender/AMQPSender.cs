@@ -90,14 +90,21 @@ namespace Gateway.Utils.MessageSender
                         {
                             if (_alive == false)
                             {
-                                Connection connection = new Connection(_address);
-                                Session session = new Session(connection);
+                                try
+                                {
+                                    Connection connection = new Connection(_address);
+                                    Session session = new Session(connection);
 
-                                _sender = new SenderLink(session, "send-link:" + _EventHubName, _EventHubName);
+                                    _sender = new SenderLink(session, "send-link:" + _EventHubName, _EventHubName);
 
-                                _sender.Closed += OnSenderClosedCallback;
+                                    _sender.Closed += OnSenderClosedCallback;
 
-                                _alive = true;
+                                    _alive = true;
+                                }
+                                catch(Exception ex)
+                                {
+                                    _Logger.LogError("Error on lock: " + JsonConvert.SerializeObject(ex));
+                                }
                             }
                         }
                     }
@@ -112,6 +119,7 @@ namespace Gateway.Utils.MessageSender
 
             protected void OnSenderClosedCallback( AmqpObject sender, Error error )
             {
+                _Logger.LogError("OnSenderClosedCallback: " + error.Info + error.Description);
                 // signal the connection will fail 
                 SetDead( );
 
@@ -270,8 +278,10 @@ namespace Gateway.Utils.MessageSender
                     rl.Sender.Send( m, SendOutcome, rl );
                     break;
                 }
-                catch(Exception )
+                catch(Exception ex)
                 {
+                    Logger.LogError("Exception on send" + ex.Message);
+
                     if( firstTry )
                     {
                         firstTry = false;
@@ -363,9 +373,23 @@ namespace Gateway.Utils.MessageSender
         {
             int sent = Interlocked.Increment(ref _sentMessages);
 
+            string messageToLog = Encoding.UTF8.GetString(message.Encode().Buffer);
+
+            int jsonBracketIndex = messageToLog.IndexOf("{", System.StringComparison.Ordinal);
+            if (jsonBracketIndex > 0)
+            {
+                messageToLog = messageToLog.Substring(jsonBracketIndex);
+            }
+
+            jsonBracketIndex = messageToLog.LastIndexOf("}", System.StringComparison.Ordinal);
+            if (jsonBracketIndex > 0)
+            {
+                messageToLog = messageToLog.Substring(0,jsonBracketIndex + 1);
+            }
+
             if (outcome is Accepted)
             {
-                Logger.LogInfo("Message is accepted: " + Encoding.UTF8.GetString(message.Encode().Buffer));
+                Logger.LogInfo("Message is accepted: " + messageToLog);
 
                 if (sent == 1)
                 {
@@ -392,7 +416,7 @@ namespace Gateway.Utils.MessageSender
             }
             else
             {
-                Logger.LogInfo("Message is rejected: " + Encoding.UTF8.GetString(message.Encode().Buffer));
+                Logger.LogInfo("Message is rejected: " + messageToLog);
             }
         }
     }
