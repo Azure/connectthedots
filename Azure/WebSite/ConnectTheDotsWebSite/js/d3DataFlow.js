@@ -48,21 +48,29 @@ function d3DataFlow(flowGUID, params) {
         MAX_ARRAY_SIZE: 1000
     };
 
+    this._onEventObjectHandler = function (event) {
+        self._onNewDataHandler.call(self, event);
+    };
+
     self.clearData();
     return self;
 }
 
 d3DataFlow.prototype = {
     constructor: d3DataFlow,
+    destroy: function () {
+        var self = this;
+        if (self._dataSource) {
+            self._dataSource.removeEventListener('newData', this._onEventObjectHandler);
+        }
+    },
     attachToDataSource: function (dataSource) {
         var self = this;
         // remebmer data source
         self._dataSource = dataSource;
 
         // register events handler
-        dataSource.addEventListener('newData', function (event) {
-            self._onNewDataHandler.call(self, event);
-        });
+        dataSource.addEventListener('newData', this._onEventObjectHandler);
 
         return self;
     },

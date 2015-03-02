@@ -74,7 +74,7 @@
                 <p><strong>Select Sensor/R-PI:</strong></p>
 
                 <ul id="sensorList">
-                    <li class="selected">All</li>
+                    <li class="selected" id="selectAllOpt">All</li>
                 </ul>
 
             </div>

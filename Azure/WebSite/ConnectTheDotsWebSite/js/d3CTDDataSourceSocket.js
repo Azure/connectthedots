@@ -39,6 +39,7 @@ function d3CTDDataSourceSocket(uri, handlers) {
         }
     }
     self._firstMessage = true;
+    self._updatingState = false;
     self._deviceGUIDs = 'All';
 
     return self;
@@ -46,6 +47,10 @@ function d3CTDDataSourceSocket(uri, handlers) {
 
 d3CTDDataSourceSocket.prototype = {
     constructor: d3CTDDataSourceSocket,
+    onUpdating: function (state) {
+        var self = this;
+        self._updatingState = state;
+    },
     changeDeviceGUIDs: function (newDeviceGUIDs) {
         var self = this;
 
@@ -71,6 +76,7 @@ d3CTDDataSourceSocket.prototype = {
     },
     _onMessage: function (event) {
         var self = this;
+        if (self._updatingState) return;
         if (self._firstMessage) {
             self._firstMessage = false;
 

@@ -95,7 +95,10 @@ namespace ConnectTheDotsWebSite
 							}
 							else
 							{
-								DeviceFilterList.Add(deviceFilter.ToLower());
+								string[] guids = deviceFilter.Split(',');
+								foreach(var guid in guids) {
+									DeviceFilterList.Add(guid.ToLower());
+								}
 							}
 
 							break;

@@ -51,6 +51,10 @@ function d3Chart(containerId, dataFlows) {
         }
     }
 
+    self._onEventObjectHandler = function (event) {
+        self._onMessageHandler.call(self, event);
+    }
+
     // register update handler
     self.addEventListener('update', function (evt) {
         self.pruneOldData();
@@ -62,6 +66,18 @@ function d3Chart(containerId, dataFlows) {
 
 d3Chart.prototype = {
     constructor: d3Chart,
+    destroy: function () {
+        var self = this;
+
+        self.clearDataFlows();
+        self.removeChartVisual();
+
+        if (self._dataSource) {
+            self._dataSource.removeEventListener('eventObject', this._onEventObjectHandler);
+        }
+
+        window['resizeCallback@' + self._containerId] = false;
+    },
     setBulkMode: function (newVal) {
         var self = this;
         self._isBulking = newVal;
@@ -88,12 +104,11 @@ d3Chart.prototype = {
         self._dataSource = dataSource;
 
         // register events handler
-        dataSource.addEventListener('eventObject', function (event) {
-            self._onMessageHandler.call(self, event);
-        });
+        dataSource.addEventListener('eventObject', this._onEventObjectHandler);
 
         return self;
     },
+
     recalcFontSize: function () {
         //Standard height, for which the body font size is correct
         var preferredHeight = 768;
