@@ -95,9 +95,14 @@ namespace ConnectTheDotsWebSite
 							}
 							else
 							{
-								string[] guids = deviceFilter.Split(',');
-								foreach(var guid in guids) {
-									DeviceFilterList.Add(guid.ToLower());
+								string[] guids = deviceFilter != null ? deviceFilter.Split(',') : null;
+								if (guids == null) { DeviceFilterList.Add("All"); }
+								else
+								{
+									foreach (var guid in guids)
+									{
+										DeviceFilterList.Add(guid.ToLower());
+									}
 								}
 							}
 
@@ -135,7 +140,7 @@ namespace ConnectTheDotsWebSite
 		private void ResendDataToClient()
 		{
 			var bufferedMessages = WebSocketEventProcessor.GetAllBufferedMessages();
-			
+
 			// collect all guids for bulk data
 
 			this.Send(JsonConvert.SerializeObject(new Dictionary<string, object> 
