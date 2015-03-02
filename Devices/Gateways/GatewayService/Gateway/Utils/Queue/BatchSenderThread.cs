@@ -129,7 +129,7 @@ namespace Gateway.Utils.Queue
                         // If there are no tasks to be served, wait for some events to process
                         // Use a timeout to prevent race conditions on teh outstanding tasks count
                         // and the actual queue count
-                        _doWork.WaitOne( WAIT_TIMEOUT );
+                        _doWork.WaitOne(WAIT_TIMEOUT);
 
                         // Fish from the queue and accumulate, keep track of outstanding tasks to 
                         // avoid accumulating too many competing tasks. Note that we are going to schedule
@@ -139,7 +139,7 @@ namespace Gateway.Utils.Queue
                         // To prevent this race condition, we will wait with a timeout
                         int count = _DataSource.Count - _outstandingTasks;
 
-                        if(count == 0)
+                        if (count == 0)
                         {
                             continue;
                         }
@@ -162,59 +162,60 @@ namespace Gateway.Utils.Queue
                         var tasks = new List<Task>();
 
                         // process all messages that have not been processed yet 
-                        while( --count >= 0 )
+                        while (--count >= 0)
                         {
-                            var t = _DataSource.TryPop( );
+                            var t = _DataSource.TryPop();
 
                             // increment outstanding task count 
-                            Interlocked.Increment( ref _outstandingTasks );
+                            Interlocked.Increment(ref _outstandingTasks);
 
-                            t.ContinueWith<Task>( popped =>
+                            t.ContinueWith<Task>(popped =>
+                            {
+                                // Decrement the numbers of outstanding tasks. 
+                                // (*) Note that there is a race  condition because at this point in time the tasks 
+                                // is already out of the queue but we did not decrement the outstanding task count 
+                                // yet. This race condition may cause tasks to be left sitting in the queue. 
+                                // To deal with this race condition, we will wait with a timeout
+                                Interlocked.Decrement(ref _outstandingTasks);
+
+                                // because the outstanding task counter is incremented before 
+                                // adding, we should never incur a negative count 
+                                Debug.Assert(_outstandingTasks >= 0);
+
+                                if (popped.Result.IsSuccess && popped.Result != null)
+                                {
+                                    if (_DataTransform != null)
                                     {
-                                        // Decrement the numbers of outstanding tasks. 
-                                        // (*) Note that there is a race  condition because at this point in time the tasks 
-                                        // is already out of the queue but we did not decrement the outstanding task count 
-                                        // yet. This race condition may cause tasks to be left sitting in the queue. 
-                                        // To deal with this race condition, we will wait with a timeout
-                                        Interlocked.Decrement( ref _outstandingTasks );
+                                        return _DataTarget.SendMessage(_DataTransform(popped.Result.Result));
+                                    }
+                                    if (_SerializedData != null)
+                                    {
+                                        return _DataTarget.SendSerialized(_SerializedData(popped.Result.Result));
+                                    }
 
-                                        // because the outstanding task counter is incremented before 
-                                        // adding, we should never incur a negative count 
-                                        Debug.Assert( _outstandingTasks >= 0 );
+                                    Debug.Assert(false);
+                                }
 
-                                        if( popped.Result.IsSuccess )
-                                        {
-                                            if( _DataTransform != null )
-                                            {
-                                                return _DataTarget.SendMessage( _DataTransform( popped.Result.Result ) );
-                                            }
-                                            if( _SerializedData != null )
-                                            {
-                                                return _DataTarget.SendSerialized( _SerializedData( popped.Result.Result ) );
-                                            }
-
-                                            Debug.Assert( false );
-                                        }
-
-                                        return popped;
-                                    } );
-
+                                return popped;
+                            });
                             try
                             {
-                                tasks.Add( t );
+                                tasks.Add(t);
                             }
-                            catch( StackOverflowException /*ex*/ )
+                            catch (StackOverflowException /*ex*/)
                             {
                                 // do not hide stack overflow exceptions
                                 throw;
                             }
-                            catch( OutOfMemoryException /*ex*/ )
+                            catch (OutOfMemoryException /*ex*/)
                             {
                                 // do not hide memory exceptions
                                 throw;
                             }
-                            catch
+                            catch (Exception ex)
                             {
+                                Logger.LogError("Exception on adding task: " + ex.Message);
+
                                 // We should try and recover for Task 't' that we popped and did not process 
                                 if (t.Status == TaskStatus.RanToCompletion || t.Status == TaskStatus.Running)
                                 {
@@ -230,20 +231,24 @@ namespace Gateway.Utils.Queue
                                                 _DataSource.Push(popResult.Result);
                                         }
                                     }
-                                    catch (AggregateException) { }
+                                    catch (Exception ex2)
+                                    {
+                                        Logger.LogError("Exception on recovering: " + ex2.Message);
+                                    }
                                 }
 
-                                throw;
+                                //Dinar: temporary
+                                //throw;
                             }
                         }
-                        
+
                         // alert any client about outstanding message tasks
                         if (eventBatchProcessed != null)
                         {
                             Task.Run(() =>
-                                {
-                                    eventBatchProcessed(tasks);
-                                });
+                            {
+                                eventBatchProcessed(tasks);
+                            });
                         }
                     }
                     catch (StackOverflowException ex)
@@ -278,6 +283,10 @@ namespace Gateway.Utils.Queue
 
                     // go and check for more events
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(_LogMessagePrefix + ex.Message);
             }
             finally
             {

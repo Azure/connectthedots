@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using Gateway.Utils.OperationStatus;
@@ -16,17 +17,25 @@ namespace Gateway.Utils.Queue
 
         public async Task<OperationStatus<T>> TryPop()
         {
-            OperationStatus<T> result = await Task.Factory.StartNew(() =>
+            try
             {
-                T returnedItem;
-                bool isReturned = _Queue.TryDequeue(out returnedItem);
-                if (isReturned)
-                    return OperationStatusFactory.CreateSuccess<T>(returnedItem);
-                return OperationStatusFactory.CreateError<T>(ErrorCode.NoDataReceived);
-            },
-            CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default );
+                OperationStatus<T> result = await Task.Factory.StartNew(() =>
+                {
+                    T returnedItem;
+                    bool isReturned = _Queue.TryDequeue(out returnedItem);
+                    if (isReturned)
+                        return OperationStatusFactory.CreateSuccess<T>(returnedItem);
+                    return OperationStatusFactory.CreateError<T>(ErrorCode.NoDataReceived);
+                },
+                CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
 
-            return result;
+                return result;
+            }
+            catch(Exception ex)
+            {
+                //TODO: Dinar will add logger, or even delete ex handling
+                return null;
+            }
         }
 
         public int Count
