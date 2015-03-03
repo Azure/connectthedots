@@ -119,7 +119,7 @@ namespace Gateway.Utils.Queue
 
             try
             {
-                const int WAIT_TIMEOUT = 50;
+                const int WAIT_TIMEOUT = 50; // millisecods
 
                 // run until Stop() is called
                 while (_running == true)
@@ -198,6 +198,7 @@ namespace Gateway.Utils.Queue
 
                                 return popped;
                             });
+
                             try
                             {
                                 tasks.Add(t);
@@ -216,29 +217,14 @@ namespace Gateway.Utils.Queue
                             {
                                 Logger.LogError("Exception on adding task: " + ex.Message);
 
-                                // We should try and recover for Task 't' that we popped and did not process 
-                                if (t.Status == TaskStatus.RanToCompletion || t.Status == TaskStatus.Running)
-                                {
-                                    //We need to wait for a result if task was started
-                                    try
-                                    {
-                                        OperationStatus<TQueueItem> popResult = t.Result;
-                                        if (popResult.IsSuccess)
-                                        {
-                                            //we don't want possibly race with other sending tasks
-                                            //more safety would be just give message back to the queue
-                                            if (popResult.Result != null)
-                                                _DataSource.Push(popResult.Result);
-                                        }
-                                    }
-                                    catch (Exception ex2)
-                                    {
-                                        Logger.LogError("Exception on recovering: " + ex2.Message);
-                                    }
-                                }
+                                // catch all other exceptions
 
-                                //Dinar: temporary
-                                //throw;
+                                //
+                                // TODO
+                                // If we are here, the task that has been popped could not be added to the list
+                                // of tasks that the client will be notifed about
+                                // This does not mean that the task has not been processed though
+                                //
                             }
                         }
 
@@ -263,20 +249,14 @@ namespace Gateway.Utils.Queue
                     }
                     catch (OutOfMemoryException ex)
                     {
-                        if (Logger != null)
-                        {
-                            Logger.LogError(_LogMessagePrefix + ex.Message);
-                        }
+                        Logger.LogError(_LogMessagePrefix + ex.Message);
 
                         // do not hide memory exceptions
                         throw;
                     }
                     catch (Exception ex)
                     {
-                        if (Logger != null)
-                        {
-                            Logger.LogError(_LogMessagePrefix + ex.Message);
-                        }
+                        Logger.LogError(_LogMessagePrefix + ex.Message);
 
                         // catch all other exceptions
                     }
