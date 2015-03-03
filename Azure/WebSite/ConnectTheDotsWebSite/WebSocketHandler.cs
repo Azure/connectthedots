@@ -139,15 +139,24 @@ namespace ConnectTheDotsWebSite
 
 		private void ResendDataToClient()
 		{
+			// exit bulk mode
+			this.Send(JsonConvert.SerializeObject(new Dictionary<string, object> 
+                    { 
+                        { "bulkData", false }
+                    }
+			));
+
+			return;
+
 			var bufferedMessages = WebSocketEventProcessor.GetAllBufferedMessages();
 
 			// collect all guids for bulk data
 
-			/*this.Send(JsonConvert.SerializeObject(new Dictionary<string, object> 
+			this.Send(JsonConvert.SerializeObject(new Dictionary<string, object> 
                 { 
                     { "bulkData", true }
                 }
-			));*/
+			));
 
 			lock (bufferedMessages)
 			{

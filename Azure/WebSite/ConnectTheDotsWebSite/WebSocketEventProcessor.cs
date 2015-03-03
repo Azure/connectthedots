@@ -44,7 +44,7 @@ namespace ConnectTheDotsWebSite
 			 new ConcurrentDictionary<string, IDictionary<string, object>>();
 
 		// Keep a buffer of all messages for as long as the client UX needs them
-		static TimeSpan bufferTimeInterval = new TimeSpan(0, 10, 0);
+		static TimeSpan bufferTimeInterval = new TimeSpan(0, 1, 0);
 
 		// Message buffer (one per processor instance)
 		static SortedList<DateTime, List<IDictionary<string, object>>> sortedDataBuffer = new SortedList<DateTime, List<IDictionary<string, object>>>();
