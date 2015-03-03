@@ -40,7 +40,7 @@ namespace CoreTest
             _Sender = new MockSender<QueuedItem>(this);
             //_Sender = new AMQPSender<SensorDataContract>(Constants.AMQPSAddress, Constants.EventHubName, Constants.EventHubMessageSubject, Constants.EventHubDeviceId, Constants.EventHubDeviceDisplayName);
             //((AMQPSender<QueuedItem>)_Sender).Logger = new TestLogger();
-            _BatchSenderThread = new BatchSenderThread<QueuedItem, QueuedItem>(_GatewayQueue, _Sender, m => m, null);
+            _BatchSenderThread = new BatchSenderThread<QueuedItem, QueuedItem>( _GatewayQueue, _Sender, m => m, null, null ); 
         }
 
         public void Run()

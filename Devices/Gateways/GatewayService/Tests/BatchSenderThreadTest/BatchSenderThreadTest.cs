@@ -14,11 +14,11 @@ namespace BatchSenderThreadTest
 
         private void TestMessagesGoFromSourceToTarget()
         {
-            MockSenderMap<int> targetMap = new MockSenderMap<int>(),
-                sourceMap = new MockSenderMap<int>();
+            MockSenderMap<int> targetMap = new MockSenderMap<int>( );
+            MockSenderMap<int> sourceMap = new MockSenderMap<int>( );
 
             GatewayQueue<int> queue = new GatewayQueue<int>();
-            EventProcessor batchSenderThread = new BatchSenderThread<int, int>(queue, targetMap, m => m, null);
+            EventProcessor batchSenderThread = new BatchSenderThread<int, int>( queue, targetMap, m => m, null, null ); 
             batchSenderThread.Logger = _testLogger;
             batchSenderThread.Start();
 
@@ -58,8 +58,8 @@ namespace BatchSenderThreadTest
             MockSenderMap<int> sourceMap = new MockSenderMap<int>();
 
             GatewayQueue<int> queue = new GatewayQueue<int>();
-            EventProcessor batchSenderThreadA = new BatchSenderThread<int, int>(queue, targetQueue, m => m, null),
-                batchSenderThreadB = new BatchSenderThread<int, int>(queue, targetQueue, m => m, null);
+            EventProcessor batchSenderThreadA = new BatchSenderThread<int, int>( queue, targetQueue, m => m, null, null );
+            EventProcessor batchSenderThreadB = new BatchSenderThread<int, int>( queue, targetQueue, m => m, null, null );
 
             batchSenderThreadA.Logger = _testLogger;
             batchSenderThreadB.Logger = _testLogger;

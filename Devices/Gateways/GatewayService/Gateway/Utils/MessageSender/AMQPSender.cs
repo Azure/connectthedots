@@ -225,7 +225,9 @@ namespace Gateway.Utils.MessageSender
                 {
                     return;
                 }
+                
                 string jsonData = JsonConvert.SerializeObject(data);
+
                 await PrepareAndSend(jsonData);
             }
             catch (Exception ex)
@@ -238,11 +240,12 @@ namespace Gateway.Utils.MessageSender
         {
             try
             {
-                if (jsonData == null)
+                if( String.IsNullOrEmpty( jsonData ) ) 
                 {
                     return;
                 }
-                await PrepareAndSend(jsonData);
+                
+                await PrepareAndSend( jsonData ); 
             }
             catch (Exception ex)
             {

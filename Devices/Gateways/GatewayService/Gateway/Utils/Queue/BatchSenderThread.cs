@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Gateway.Utils.MessageSender;
 using Gateway.Utils.OperationStatus;
+using Gateway.Utils.Logger;
 using System.Diagnostics;
 using SharedInterfaces;
 
@@ -26,11 +27,9 @@ namespace Gateway.Utils.Queue
 
         private static readonly string _LogMessagePrefix = "BatchSenderThread error. ";
 
-        public BatchSenderThread(IAsyncQueue<TQueueItem> dataSource, IMessageSender<TMessage> dataTarget, Func<TQueueItem, TMessage> dataTransform, Func<TQueueItem, string> serializedData, ILogger logger = null)
+        public BatchSenderThread(IAsyncQueue<TQueueItem> dataSource, IMessageSender<TMessage> dataTarget, Func<TQueueItem, TMessage> dataTransform, Func<TQueueItem, string> serializedData, ILogger logger)
         {
-            Logger = logger;
-            if(Logger != null)
-                Logger.LogInfo("BatchSenderThread ctor");
+            Logger = SafeLogger.FromLogger( logger );
 
             if (dataSource == null || dataTarget == null)
             {
@@ -171,61 +170,58 @@ namespace Gateway.Utils.Queue
 
                             t.ContinueWith<Task>(popped =>
                             {
-                                // Decrement the numbers of outstanding tasks. 
-                                // (*) Note that there is a race  condition because at this point in time the tasks 
-                                // is already out of the queue but we did not decrement the outstanding task count 
-                                // yet. This race condition may cause tasks to be left sitting in the queue. 
-                                // To deal with this race condition, we will wait with a timeout
-                                Interlocked.Decrement(ref _outstandingTasks);
-
-                                // because the outstanding task counter is incremented before 
-                                // adding, we should never incur a negative count 
-                                Debug.Assert(_outstandingTasks >= 0);
-
-                                if (popped.Result.IsSuccess && popped.Result != null)
+                                try
                                 {
-                                    if (_DataTransform != null)
-                                    {
-                                        return _DataTarget.SendMessage(_DataTransform(popped.Result.Result));
-                                    }
-                                    if (_SerializedData != null)
-                                    {
-                                        return _DataTarget.SendSerialized(_SerializedData(popped.Result.Result));
-                                    }
+                                    // Decrement the numbers of outstanding tasks. 
+                                    // (*) Note that there is a race  condition because at this point in time the tasks 
+                                    // is already out of the queue but we did not decrement the outstanding task count 
+                                    // yet. This race condition may cause tasks to be left sitting in the queue. 
+                                    // To deal with this race condition, we will wait with a timeout
+                                    Interlocked.Decrement( ref _outstandingTasks );
 
-                                    Debug.Assert(false);
+                                    // because the outstanding task counter is incremented before 
+                                    // adding, we should never incur a negative count 
+                                    Debug.Assert( _outstandingTasks >= 0 );
+
+                                    if( popped.Result.IsSuccess && popped.Result != null )
+                                    {
+                                        if( _DataTransform != null )
+                                        {
+                                            return _DataTarget.SendMessage( _DataTransform( popped.Result.Result ) );
+                                        }
+                                        if( _SerializedData != null )
+                                        {
+                                            return _DataTarget.SendSerialized( _SerializedData( popped.Result.Result ) );
+                                        }
+
+                                        Debug.Assert( false );
+                                    }
+                                }
+                                catch( StackOverflowException ex )
+                                {
+                                    Logger.LogError( _LogMessagePrefix + ex.Message );
+
+                                    // do not hide stack overflow exceptions
+                                    throw;
+                                }
+                                catch( OutOfMemoryException ex )
+                                {
+                                    Logger.LogError( _LogMessagePrefix + ex.Message );
+
+                                    // do not hide memory exceptions
+                                    throw;
+                                }
+                                catch( Exception ex )
+                                {
+                                    Logger.LogError( _LogMessagePrefix + ex.Message );
+
+                                    // catch all other exceptions
                                 }
 
                                 return popped;
                             });
 
-                            try
-                            {
-                                tasks.Add(t);
-                            }
-                            catch (StackOverflowException /*ex*/)
-                            {
-                                // do not hide stack overflow exceptions
-                                throw;
-                            }
-                            catch (OutOfMemoryException /*ex*/)
-                            {
-                                // do not hide memory exceptions
-                                throw;
-                            }
-                            catch (Exception ex)
-                            {
-                                Logger.LogError("Exception on adding task: " + ex.Message);
-
-                                // catch all other exceptions
-
-                                //
-                                // TODO
-                                // If we are here, the task that has been popped could not be added to the list
-                                // of tasks that the client will be notifed about
-                                // This does not mean that the task has not been processed though
-                                //
-                            }
+                            AddToProcessed(tasks, t);
                         }
 
                         // alert any client about outstanding message tasks
@@ -239,10 +235,7 @@ namespace Gateway.Utils.Queue
                     }
                     catch (StackOverflowException ex)
                     {
-                        if (Logger != null)
-                        {
-                            Logger.LogError(_LogMessagePrefix + ex.Message);
-                        }
+                        Logger.LogError(_LogMessagePrefix + ex.Message);
 
                         // do not hide stack overflow exceptions
                         throw;
@@ -264,14 +257,41 @@ namespace Gateway.Utils.Queue
                     // go and check for more events
                 }
             }
-            catch (Exception ex)
-            {
-                Logger.LogError(_LogMessagePrefix + ex.Message);
-            }
             finally
             {
                 // signal stop
                 _operational.Set();
+            }
+        }
+
+        private void AddToProcessed( List<Task> tasks, Task<OperationStatus<TQueueItem>> t )
+        {
+            try
+            {
+                tasks.Add( t );
+            }
+            catch( StackOverflowException /*ex*/)
+            {
+                // do not hide stack overflow exceptions
+                throw;
+            }
+            catch( OutOfMemoryException /*ex*/)
+            {
+                // do not hide memory exceptions
+                throw;
+            }
+            catch( Exception ex )
+            {
+                Logger.LogError( "Exception on adding task: " + ex.Message );
+
+                // catch all other exceptions
+
+                //
+                // TODO
+                // If we are here, the task that has been popped could not be added to the list
+                // of tasks that the client will be notifed about
+                // This does not mean that the task has not been processed though
+                //
             }
         }
     }
