@@ -141,6 +141,10 @@ namespace ConnectTheDotsWebSite
 												messagePayload["value"] = dict["value"];
 												messagePayload["guid"] = dict["guid"];
 												messagePayload["displayname"] = dict["displayname"];
+												if (!messagePayload.ContainsKey("time"))
+												{
+													messagePayload["time"] = messagePayload["timestart"];
+												}
 												found = true;
 												break;
 											}
