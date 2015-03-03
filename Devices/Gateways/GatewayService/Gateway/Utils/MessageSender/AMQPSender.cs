@@ -30,7 +30,7 @@ namespace Gateway.Utils.MessageSender
             internal ReliableSender( string amqpsAddress, string eventHubName, ILogger logger )
             {
                 _EventHubName = eventHubName;
-                _Logger = new SafeLogger( logger );
+                _Logger = SafeLogger.FromLogger( logger );
 
                 try
                 {
@@ -201,10 +201,9 @@ namespace Gateway.Utils.MessageSender
 
         public AMQPSender(string amqpsAddress, string eventHubName, string defaultSubject, string defaultDeviceId, string defaultDeviceDisplayName, ILogger logger)
         {
-            Logger = new SafeLogger(logger);
+            Logger = SafeLogger.FromLogger( logger );
 
-            if (Logger!=null)
-                Logger.LogInfo("AMQPSender ctor");
+            Logger.LogInfo( "Connecting to Event hub" ); 
 
             if (defaultSubject == null || defaultDeviceId == null || defaultDeviceDisplayName == null || eventHubName == null)
             {

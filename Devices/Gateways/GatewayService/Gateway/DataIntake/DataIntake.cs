@@ -13,7 +13,7 @@ namespace Gateway.DataIntake
 
         protected DataIntakeAbstract( ILogger logger )
         {
-            _Logger = new SafeLogger( logger );
+            _Logger = SafeLogger.FromLogger( logger );
         }
 
         public abstract bool Start( Func<string, int> enqueue );

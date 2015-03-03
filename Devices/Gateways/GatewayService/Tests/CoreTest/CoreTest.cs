@@ -89,6 +89,11 @@ namespace CoreTest
                     _totalMessagesToSend += count;
                 }
 
+                const float mean = 39.6001f;
+                const int range  = 10;
+
+                Random rand = new Random( (int)(DateTime.Now.Ticks >> 32) ); 
+
                 // send the messages
                 for (int iteration = 0; iteration < TEST_ITERATIONS; ++iteration)
                 {
@@ -101,13 +106,20 @@ namespace CoreTest
                         // It will look something like this: 
                         // "{\"unitofmeasure\":\"%\",\"location\":\"Olivier's office\",\"measurename\":\"Humidity\",\"timecreated\":\"2/26/2015 12:50:29 AM\",\"organization\":\"MSOpenTech\",\"guid\":\"00000000-0000-0000-0000-000000000000\",\"value\":39.600000000000001,\"displayname\":\"NETMF\"}"
                         // 
+
+                        bool add = (rand.Next( ) % 2) == 0;
+                        int variant = rand.Next( ) % range;
+                        float value = mean; 
+
                         StringBuilder sb = new StringBuilder( );
                         sb.Append( "{\"unitofmeasure\":\"%\",\"location\":\"Olivier's office\",\"measurename\":\"Humidity\"," );
                         sb.Append( "\"timecreated\":\"" );
                         sb.Append( DateTime.UtcNow.ToString( ) ); // this should look like "2015-02-25T23:07:47.159Z"
                         sb.Append( "\",\"organization\":\"MSOpenTech\",\"guid\":\"" );
                         sb.Append( new Guid().ToString() );
-                        sb.Append( "\",\"value\":39.600000000000001,\"displayname\":\"NETMF\"}" );
+                        sb.Append( "\",\"value\":" );
+                        sb.Append( (value += add ? variant : -variant).ToString() );
+                        sb.Append( ",\"displayname\":\"NETMF\"}" );
 
                         string message = sb.ToString();
 

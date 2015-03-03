@@ -6,9 +6,19 @@ namespace Gateway.Utils.Logger
     {
         protected ILogger _Logger;
 
-        public SafeLogger( ILogger logger )
+        protected SafeLogger( ILogger logger )
         {
             _Logger = logger;
+        }
+
+        static public SafeLogger FromLogger( ILogger logger )
+        {
+            if(logger is SafeLogger)
+            {
+                return (SafeLogger)logger;
+            }
+
+            return new SafeLogger(logger); 
         }
 
         public void LogError( string logMessage )
