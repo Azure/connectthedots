@@ -19,15 +19,14 @@ namespace Gateway.Utils.Queue
         {
             try
             {
-                OperationStatus<T> result = await Task.Factory.StartNew(() =>
+                OperationStatus<T> result = await Task.Run(() =>
                 {
                     T returnedItem;
                     bool isReturned = _Queue.TryDequeue(out returnedItem);
                     if (isReturned)
                         return OperationStatusFactory.CreateSuccess<T>(returnedItem);
                     return OperationStatusFactory.CreateError<T>(ErrorCode.NoDataReceived);
-                },
-                CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+                });
 
                 return result;
             }
