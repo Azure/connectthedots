@@ -30,10 +30,10 @@ namespace Gateway.Utils.Queue
 
                 return result;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 //TODO: Dinar will add logger, or even delete ex handling
-                return null;
+                return OperationStatusFactory.CreateError<T>(ErrorCode.NoDataReceived);
             }
         }
 
