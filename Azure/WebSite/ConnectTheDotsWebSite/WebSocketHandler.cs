@@ -143,11 +143,11 @@ namespace ConnectTheDotsWebSite
 
 			// collect all guids for bulk data
 
-			this.Send(JsonConvert.SerializeObject(new Dictionary<string, object> 
+			/*this.Send(JsonConvert.SerializeObject(new Dictionary<string, object> 
                 { 
                     { "bulkData", true }
                 }
-			));
+			));*/
 
 			lock (bufferedMessages)
 			{

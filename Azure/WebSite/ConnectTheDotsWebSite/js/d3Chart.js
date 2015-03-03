@@ -39,6 +39,7 @@ function d3Chart(containerId, dataFlows) {
         MS_PER_MINUTE: 60000,
         WINDOW_MINUTES: 10,
     }
+    self._isBulking = false;
     self._colors = d3.scale.category10();
 
     if (dataFlows) {
