@@ -82,7 +82,10 @@ d3Chart.prototype = {
         var self = this;
         self._isBulking = newVal;
 
-        if (!newVal) { self.raiseEvent('loaded'); }
+        if (!newVal) {
+            self.raiseEvent('update');
+            self.raiseEvent('loaded');
+        }
         return self;
     },
     addFlow: function (newFlow, yAxis) {
