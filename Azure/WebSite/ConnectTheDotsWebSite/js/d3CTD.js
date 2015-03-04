@@ -52,7 +52,7 @@ function onChangeSensors(isAll) {
 
     $('#sensorList li').each(function () {
         if ($(this).hasClass('selected') && this.id) {
-            if(!isAll) newGUIDs.push(this.id.slice(4));
+            if (!isAll) newGUIDs.push(this.id.slice(4));
         } else
             if (isAll) {
                 $(this).addClass('selected');
@@ -90,22 +90,31 @@ function addNewDataFlow(eventObject) {
     if (!dataFlows.hasOwnProperty(measurename)) {
         dataFlows[measurename] = {
             containerId: 'chart_' + measurename,
+            controllerId: 'controller_' + measurename,
+            dataSourceFilter: new d3CTDDataSourceFilter(dataFlows.dataSource, { measurename: measurename }),
             flows: {}
         };
+        // create flows controller
+        $('#controllersContainer').append('<ul id="' + dataFlows[measurename].controllerId + '" style="top: ' + (Object.keys(dataFlows).length - 2) * 300 + 'px;" class="controller"></ul>');
+        dataFlows[measurename].controller = new d3ChartControl(dataFlows[measurename].controllerId)
+                    .attachToDataSource(dataFlows[measurename].dataSourceFilter);
+
         // add new div object
         $('#chartsContainer').height((Object.keys(dataFlows).length - 1) * 300 + 'px');
         $('#chartsContainer').append('<div id="' + dataFlows[measurename].containerId + '" style="top: ' + (Object.keys(dataFlows).length - 2) * 300 + 'px;" class="chart"></div>');
         // create chart
         dataFlows[measurename].chart = (new d3Chart(dataFlows[measurename].containerId))
                     .addEventListeners({ 'loading': onLoading, 'loaded': onLoaded })
-                    .attachToDataSource(dataFlows.dataSource)
+                    .attachToDataSource(dataFlows[measurename].dataSourceFilter)
+                    .setFilter(dataFlows[measurename].controller)
                     .setBulkMode(bulkMode);
+
     };
 
     // add new flow
-    var newFlow = new d3DataFlow(eventObject.guid, { filter: { measurename: measurename } });
+    var newFlow = new d3DataFlow(eventObject.guid);
 
-    addNewSensorOption(newFlow, eventObject);
+    //addNewSensorOption(newFlow, eventObject);
 
     dataFlows[measurename].flows[eventObject.guid] = newFlow;
 
@@ -241,25 +250,6 @@ $(document).ready(function () {
     $('#selectAllOpt').on('click', function () {
         onChangeSensors(true);
     });
-
-    /*
-    // create flows
-    var dataFlows = [new d3DataFlow('4dee9a68-0000-0000-0000-000000000000'), new d3DataFlow('339490f3-0000-0000-0000-000000000000'), new d3DataFlow('43a8c699-0000-0000-0000-000000000000'), new d3DataFlow('0bcb6a5d-0000-0000-0000-000000000000')];
-
-    // create charts
-    dataChartOne = (new d3Chart('chartOne'))
-        .addEventListeners({ 'loading': onLoading, 'loaded': onLoaded })
-        .attachToDataSource(dataSource);
-
-    dataChartTwo = (new d3Chart('chartTwo'))
-        .addEventListeners({ 'loading': onLoading, 'loaded': onLoaded })
-        .attachToDataSource(dataSource);
-    */
-
-    //  Handle a sensor selection change
-    // 'All' means all dataset are shown.
-    //  Anything else toggles that particular
-    //  dataset
 
     // create alerts table
     var table = $('#alertTable').DataTable({

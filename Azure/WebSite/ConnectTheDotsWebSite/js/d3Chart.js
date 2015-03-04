@@ -24,10 +24,8 @@
 // create dataFlow with
 /*
 containerId : string,
-dataFlows = [
-    dataFlowObject
 ]*/
-function d3Chart(containerId, dataFlows) {
+function d3Chart(containerId) {
     var self = this;
     // call base class contructor
     baseClass.call(self);
@@ -42,18 +40,16 @@ function d3Chart(containerId, dataFlows) {
     self._isBulking = false;
     self._colors = d3.scale.category10();
 
-    if (dataFlows) {
-        var axis = 0;
-        for (var id in dataFlows) {
-            self.addFlow(dataFlows[id], axis);
-            if (axis == 0) {
-                axis = 1;
-            }
-        }
-    }
-
     self._onEventObjectHandler = function (event) {
         self._onMessageHandler.call(self, event);
+    }
+
+    self._onEventRemoveGuid = function (event) {
+        self._onMessageRemoveGuid.call(self, event);
+    }
+
+    self._onEventAddGuid = function (event) {
+        self._onMessageAddGuid.call(self, event);
     }
 
     // register update handler
@@ -77,6 +73,11 @@ d3Chart.prototype = {
             self._dataSource.removeEventListener('eventObject', this._onEventObjectHandler);
         }
 
+        if (self._filter) {
+            self._filter.removeEventListener('removeGuid', this._onEventRemoveGuid);
+            self._filter.removeEventListener('addGuid', this._onEventAddGuid);
+        }
+
         window['resizeCallback@' + self._containerId] = false;
     },
     setBulkMode: function (newVal) {
@@ -97,7 +98,7 @@ d3Chart.prototype = {
         };
 
         newFlow.yAxis(yAxis);
-        newFlow.attachToDataSource(self);
+        newFlow.attachToChart(self);
         self._colors.domain(newFlow.getGUID());
 
         return self;
@@ -108,7 +109,18 @@ d3Chart.prototype = {
         self._dataSource = dataSource;
 
         // register events handler
-        dataSource.addEventListener('eventObject', this._onEventObjectHandler);
+        dataSource.addEventListener('eventObject', self._onEventObjectHandler);
+
+        return self;
+    },
+    setFilter: function (filter) {
+        var self = this;
+        // remebmer data source
+        self._filter = filter;
+
+        // register guid handlers
+        filter.addEventListener('removeGuid', self._onEventRemoveGuid);
+        filter.addEventListener('addGuid', self._onEventAddGuid);
 
         return self;
     },
@@ -150,6 +162,9 @@ d3Chart.prototype = {
         }
         if (self._y1 != null) {
             self._y1 = null;
+        }
+        if (self._y0Label != null) {
+            self._y0Label = null;
         }
         if (self._svg != null) {
             self._svg.remove();
@@ -212,6 +227,23 @@ d3Chart.prototype = {
 
         return self;
     },
+    setY0Label: function () {
+        var self = this;
+        if (self._y0Label) return;
+        for (var id in self._flows)
+            if (self._flows[id].label()) {
+                self._y0Label = self._svg.append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("class", "y0 label")
+                    .attr("text-anchor", "middle")
+                    .attr("y", -50)
+                    .attr("x", -self._height / 2)
+                    .attr("dy", "1em")
+                    .attr("font-size", self._fontSize + "px")
+                    .text(self._flows[id].label());
+                break;
+            }
+    },
     createChart: function () {
         var self = this;
 
@@ -238,11 +270,9 @@ d3Chart.prototype = {
             dataFlowsArray.push({
                 id: id,
                 yMin: self._flows[id].yMin(),
-                yMax: self._flows[id].yMax(),
-                label: self._flows[id].label(),
+                yMax: self._flows[id].yMax()
             });
         }
-
         // seed the axes with some dummy values
         self._x = d3.time.scale()
 			.domain([new Date("2015-01-01T04:02:39.867841Z"), new Date("2015-01-01T04:07:39.867841Z")])
@@ -269,18 +299,8 @@ d3Chart.prototype = {
 			.attr("class", "y0 axis")
 			.call(d3.svg.axis().scale(self._y0).ticks(7).orient("left"));
 
-        if (dataFlowsArray.length > 0 && dataFlowsArray[0].label) {
-            self._svg.append("text")
-				.attr("transform", "rotate(-90)")
-				.attr("class", "y0 label")
-				.attr("text-anchor", "middle")
-				.attr("y", -50)
-				.attr("x", -self._height / 2)
-				.attr("dy", "1em")
-				.attr("font-size", self._fontSize + "px")
-				//.style("fill", self._colors(dataFlowsArray[0].id))
-				.text(dataFlowsArray[0].label);
-        }
+        // check y0 label
+        self.setY0Label();
 
         self._svg.append("g")
 			.attr("class", "x axis")
@@ -352,6 +372,7 @@ d3Chart.prototype = {
 
         for (var id in self._flows) {
             var dataFlow = self._flows[id];
+            if (dataFlow.visible == false) continue;
             var data = dataFlow.getData();
             if (data.length == 0 || !dataFlow.displayName()) continue;
 
@@ -395,6 +416,9 @@ d3Chart.prototype = {
         if (self._svg == null) {
             self.createChart();
         }
+
+        // check y0 label
+        self.setY0Label();
 
         if (minVal[0] < Number.MAX_VALUE) {
             var scaleMargin = (maxVal[0] - minVal[0]) * 10 / 100;
@@ -462,6 +486,7 @@ d3Chart.prototype = {
             for (var id in self._flows) {
                 var dataGUID = id;
                 var dataFlow = self._flows[id];
+                if (dataFlow.visible == false) continue;
                 var dataFlowVisuals = self._flowsVisuals[id];
                 var data = dataFlow.getData();
                 var yAxis = dataFlow.yAxis();
@@ -548,12 +573,29 @@ d3Chart.prototype = {
         }
     },
 
+    _onMessageAddGuid: function (evt) {
+        var self = this;
+
+        if (self._flows.hasOwnProperty(evt.owner)) {
+            self._flows[evt.owner].visible = true;
+        }
+    },
+    _onMessageRemoveGuid: function (evt) {
+        var self = this;
+
+        self.removeFlowVisual(evt.owner);
+        if (self._flows.hasOwnProperty(evt.owner)) {
+            self._flows[evt.owner].visible = false;
+        }
+    },
     // private members
     _onMessageHandler: function (eventObject) {
         var self = this;
         var evt = eventObject.owner;
         // the message is data for the charts. find chart for message
         if (evt.hasOwnProperty('guid') && self._flows.hasOwnProperty(evt.guid)) {
+            // check filter
+            //if (self._filter && !self._filter.checkGUID(evt.guid)) return;
             // check event time
             var now = new Date();
             var cutoff = new Date(now - self._CONSTANTS.WINDOW_MINUTES * self._CONSTANTS.MS_PER_MINUTE)

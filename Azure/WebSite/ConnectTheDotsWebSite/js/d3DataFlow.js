@@ -60,17 +60,17 @@ d3DataFlow.prototype = {
     constructor: d3DataFlow,
     destroy: function () {
         var self = this;
-        if (self._dataSource) {
-            self._dataSource.removeEventListener('newData', this._onEventObjectHandler);
+        if (self._chart) {
+            self._chart.removeEventListener('newData', this._onEventObjectHandler);
         }
     },
-    attachToDataSource: function (dataSource) {
+    attachToChart: function (chart) {
         var self = this;
         // remebmer data source
-        self._dataSource = dataSource;
+        self._chart = chart;
 
         // register events handler
-        dataSource.addEventListener('newData', this._onEventObjectHandler);
+        chart.addEventListener('newData', this._onEventObjectHandler);
 
         return self;
     },
@@ -170,7 +170,7 @@ d3DataFlow.prototype = {
             self.displayName(eventObject.displayname);
         }
 
-        if (eventObject.hasOwnProperty("measurename")) {
+        if (eventObject.hasOwnProperty("measurename") && eventObject.hasOwnProperty("unitofmeasure")) {
             self.label(eventObject.measurename + " (" + eventObject.unitofmeasure + ")");
         }
 

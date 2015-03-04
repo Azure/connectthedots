@@ -44,8 +44,10 @@
     <script type="text/javascript" src="js/d3utils.js"></script>
     <script type="text/javascript" src="js/d3DataFlow.js"></script>
     <script type="text/javascript" src="js/d3Chart.js"></script>
+    <script type="text/javascript" src="js/d3ChartControl.js"></script>
     <script type="text/javascript" src="js/d3DataSourceSocket.js"></script>
     <script type="text/javascript" src="js/d3CTDDataSourceSocket.js"></script>
+    <script type="text/javascript" src="js/d3CTDDataSourceFilter.js"></script>
     <script type="text/javascript" src="js/d3CTD.js"></script>
 </head>
 <body>
@@ -73,9 +75,8 @@
 
                 <p><strong>Select Sensor/R-PI:</strong></p>
 
-                <ul id="sensorList">
-                    <li class="selected" id="selectAllOpt">All</li>
-                </ul>
+            <div id="controllersContainer">
+            </div>
 
             </div>
             <div id="chartsContainer">

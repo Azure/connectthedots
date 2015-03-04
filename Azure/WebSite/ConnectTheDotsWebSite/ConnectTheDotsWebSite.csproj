@@ -103,9 +103,11 @@
     <Content Include="css\connectthedots.css" />
     <Content Include="img\ajax-loader.gif" />
     <Content Include="js\d3Chart.js" />
+    <Content Include="js\d3ChartControl.js" />
     <Content Include="js\d3CTD.js" />
     <Content Include="js\d3CTDDataSourceSocket.js" />
     <Content Include="js\d3DataFlow.js" />
+    <Content Include="js\d3CTDDataSourceFilter.js" />
     <Content Include="js\d3DataSourceSocket.js" />
     <Content Include="js\d3utils.js" />
     <Content Include="packages.config">

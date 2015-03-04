@@ -139,10 +139,21 @@ path.line {
     position: absolute;
 }
 
+#controllersContainer {
+    position: relative;
+    text-align: center;
+}
+
+.controller {
+    height: 300px;
+    right : 10px;
+    position: absolute;
+    text-align: left;
+}
+
 #chartsContainer {
     margin-left: 200px;
     position: relative;
-    text-align: center;
 }
 
 .chart {
