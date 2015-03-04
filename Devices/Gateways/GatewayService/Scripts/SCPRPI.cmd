@@ -1,26 +1,37 @@
-@echo off
+rem @echo off
 set puttydir="C:\software\PuTTY\"
 set prjdir=..\
-set rpi_ip=<your Raspberry PI address here>
-set rpi_usr=<your Raspberry PI user name>
-set rpi_pw=<your Raspberry PI password>
-set Configuration=Debug
-set Folder=GatewayService
+set rpi_ip=10.121.204.248
+set rpi_usr=pi
+set rpi_pw=raspberry
+set Configuration=Release
+set GW_Home=GatewayService
+set Staging=%GW_Home%/Staging
+set PUTTY_CMD=%puttydir%putty %rpi_usr%@%rpi_ip% -pw %rpi_pw% 
+set PSCP_CMD=%puttydir%pscp -pw %rpi_pw% 
 
 echo Creating GatewayService directory
-echo mkdir %Folder% > %temp%\gatewayservicemkdir.tmp
-%puttydir%putty %rpi_usr%@%rpi_ip% -pw %rpi_pw% -m %temp%\gatewayservicemkdir.tmp
+del /f %temp%\gatewayservicemkdir.tmp
+echo rm -rf %Staging%  >> %temp%\gatewayservicemkdir.tmp
+echo rm -rf %GW_Home%  >> %temp%\gatewayservicemkdir.tmp
+echo mkdir  %GW_Home%  >> %temp%\gatewayservicemkdir.tmp
+echo mkdir  %Staging%  >> %temp%\gatewayservicemkdir.tmp
+%PUTTY_CMD% -m %temp%\gatewayservicemkdir.tmp
 
 echo Copying Gateway files
-%puttydir%pscp -pw %rpi_pw% %prjdir%WindowsService\bin\%Configuration%\*.* %rpi_usr%@%rpi_ip%:%Folder%/
+%PSCP_CMD% %prjdir%WindowsService\bin\%Configuration%\*.* %rpi_usr%@%rpi_ip%:%Staging%/
 
-%puttydir%pscp -pw %rpi_pw% %prjdir%DataIntakes\SerialPortListener\bin\%Configuration%\SerialPortListener.dll %rpi_usr%@%rpi_ip%:%Folder%/
-%puttydir%pscp -pw %rpi_pw% %prjdir%DataIntakes\SocketListener\bin\%Configuration%\SocketListener.dll %rpi_usr%@%rpi_ip%:%Folder%/
+%PSCP_CMD% %prjdir%DataIntakes\SerialPortListener\bin\%Configuration%\SerialPortListener.dll %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %prjdir%DataIntakes\SocketListener\bin\%Configuration%\SocketListener.dll         %rpi_usr%@%rpi_ip%:%Staging%/
 
 echo copying scripts
-%puttydir%pscp -pw %rpi_pw% %prjdir%Scripts\autorun.sh %rpi_usr%@%rpi_ip%:%Folder%/
-%puttydir%pscp -pw %rpi_pw% %prjdir%Scripts\runonce.sh %rpi_usr%@%rpi_ip%:%Folder%/
+%PSCP_CMD% %prjdir%Scripts\autorun_1.sh %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %prjdir%Scripts\runonce.sh %rpi_usr%@%rpi_ip%:%Staging%/
 
 echo Marking autorun.sh as executable
-rem echo chmod 755 %Folder%/autorun.sh > %temp%\rpigatewayautorunx.tmp
-rem %puttydir%putty %rpi_usr%@%rpi_ip% -pw %rpi_pw% -m %temp%\rpigatewayautorunx.tmp
+del /f %temp%\rpigatewayautorunx.tmp
+echo chmod 755 %Staging%/runonce.sh   >> %temp%\rpigatewayautorunx.tmp
+echo chmod 755 %Staging%/autorun_1.sh >> %temp%\rpigatewayautorunx.tmp
+echo dos2unix %Staging%/runonce.sh    >> %temp%\rpigatewayautorunx.tmp
+echo dos2unix %Staging%/autorun_1.sh  >> %temp%\rpigatewayautorunx.tmp
+%PUTTY_CMD% -m %temp%\rpigatewayautorunx.tmp

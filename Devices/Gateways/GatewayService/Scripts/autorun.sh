@@ -22,21 +22,39 @@
 #  THE SOFTWARE.
 #  ---------------------------------------------------------------------------------
 #!/bin/bash
-echo "Starting host processes"
+
+export GW_HOME=~/GatewayService
+export LOGS=$GW_HOME/Logs
+export STAGING=$GW_HOME/Staging
+
+# Kill all mono processes and GatewayService as well
+echo "Trying to kill all mono processes..."
+for KILLPID in `ps ax | grep -i 'mono'           | awk '{ print $1;}'`; do sudo kill -9 $KILLPID; done
+for KILLPID in `ps ax | grep -i 'gatewayservice' | awk '{ print $1;}'`; do sudo kill -9 $KILLPID; done
+echo "Trying to delete lock file if there is any..."
+sudo rm -f /tmp/GatewayService.exe.lock
+
+# move all files from Staging GW_HOME to runtime folder, delete logs
+echo upading files
+rm -rf $LOGS/*
+find $GW_HOME/ -type f -maxdepth 1 -delete
+cp $STAGING/* $GW_HOME/
+rm $GW_HOME/autorun_1.sh
+
+echo "Starting host processes..."
 #
-echo "Killing mono"
-sudo pkill mono
-#
-echo "Trying to delete lock file if there is any"
-sudo rm /tmp/GatewayService.exe.lock
 #
 # event log entries will be written to /var/lib/mono/EventLog/Application
 echo "Setting MONO_EVENTLOG_TYPE to local"
 export MONO_EVENTLOG_TYPE=local
 #
 echo "Starting Gateway"
-sudo MONO_LOG_LEVEL=debug /usr/bin/mono-service /home/pi/GatewayService/GatewayService.exe --debug > monoOutput.txt &
+MONO_LOG_LEVEL=debug /usr/bin/mono-service $GW_HOME/GatewayService.exe --debug > monoOutput.txt &
+
 #
 # Add the below line to /etc/rc.local
-#   /home/pi/GatewayService/autorun.sh &
+#
+#   export GW_HOME=~/GatewayService
+#   $GW_HOME/autorun.sh &
+#
 # and don't forget to make autorun.sh executable (sudo chmod 755 autorun)
