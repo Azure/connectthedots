@@ -10,11 +10,11 @@ namespace WindowsService.Utils.Logger
     {
         #region Singleton implementation
 
-		private static EventLogger _EventLogger;
+		      private static EventLogger _EventLogger;
         private static readonly object _SyncRoot = new object();
 
-		public static EventLogger Instance
-		{
+        public static EventLogger Instance
+        {
             get
             {
                 if (_EventLogger == null)
@@ -30,7 +30,7 @@ namespace WindowsService.Utils.Logger
 
                 return _EventLogger;
             }
-		}
+        }
 
         private static EventLog _EventLog;
         private static NLog.Logger _NLog;
