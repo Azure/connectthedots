@@ -39,7 +39,7 @@ echo upading files
 rm -rf $LOGS/*
 find $GW_HOME/ -type f -maxdepth 1 -delete
 cp $STAGING/* $GW_HOME/
-rm $GW_HOME/autorun_1.sh
+rm $GW_HOME/autorun.sh
 
 echo "Starting host processes..."
 #
@@ -49,7 +49,9 @@ echo "Setting MONO_EVENTLOG_TYPE to local"
 export MONO_EVENTLOG_TYPE=local
 #
 echo "Starting Gateway"
-MONO_LOG_LEVEL=debug /usr/bin/mono-service $GW_HOME/GatewayService.exe --debug > monoOutput.txt &
+cd $GW_HOME
+#MONO_LOG_LEVEL=debug /usr/bin/mono-service $GW_HOME/GatewayService.exe --debug > monoOutput.txt &
+/usr/bin/mono-service $GW_HOME/GatewayService.exe
 
 #
 # Add the below line to /etc/rc.local

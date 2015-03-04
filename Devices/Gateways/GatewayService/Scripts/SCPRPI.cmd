@@ -25,13 +25,13 @@ echo Copying Gateway files
 %PSCP_CMD% %prjdir%DataIntakes\SocketListener\bin\%Configuration%\SocketListener.dll         %rpi_usr%@%rpi_ip%:%Staging%/
 
 echo copying scripts
-%PSCP_CMD% %prjdir%Scripts\autorun_1.sh %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %prjdir%Scripts\autorun.sh %rpi_usr%@%rpi_ip%:%Staging%/
 %PSCP_CMD% %prjdir%Scripts\runonce.sh %rpi_usr%@%rpi_ip%:%Staging%/
 
 echo Marking autorun.sh as executable
 del /f %temp%\rpigatewayautorunx.tmp
 echo chmod 755 %Staging%/runonce.sh   >> %temp%\rpigatewayautorunx.tmp
-echo chmod 755 %Staging%/autorun_1.sh >> %temp%\rpigatewayautorunx.tmp
+echo chmod 755 %Staging%/autorun.sh >> %temp%\rpigatewayautorunx.tmp
 echo dos2unix %Staging%/runonce.sh    >> %temp%\rpigatewayautorunx.tmp
-echo dos2unix %Staging%/autorun_1.sh  >> %temp%\rpigatewayautorunx.tmp
+echo dos2unix %Staging%/autorun.sh  >> %temp%\rpigatewayautorunx.tmp
 %PUTTY_CMD% -m %temp%\rpigatewayautorunx.tmp
