@@ -10,6 +10,7 @@ using Gateway.Utils.Loader;
 using Gateway.Utils.MessageSender;
 using Gateway.Utils.Queue;
 using SharedInterfaces;
+using System.Threading.Tasks;
 
 
 namespace WindowsService
@@ -32,6 +33,8 @@ namespace WindowsService
 
         public WindowsService()
         {
+            TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+
             _Logger = EventLogger.Instance;
             _Logger.LogInfo("WindowsService ctor");
             try
@@ -142,6 +145,14 @@ namespace WindowsService
                     EventLogger.Instance.LogError(ex.ToString());
                 }
             }
+        }
+
+        private void OnUnobservedTaskException( object sender, UnobservedTaskExceptionEventArgs e )
+        {
+            // prevent exception escalation
+            e.SetObserved( );
+
+            _Logger.LogError( String.Format( "Task Exception: '{0}'\r\nTrace:\r\n{1}", e.Exception.Message, e.Exception.StackTrace ) );
         }
     }
 }
