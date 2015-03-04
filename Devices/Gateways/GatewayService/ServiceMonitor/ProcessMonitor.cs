@@ -49,8 +49,6 @@ namespace ServiceMonitor
 
         public bool Lock( string monitoringTarget )
         {
-            Process target = null;
-
             //
             // try and open the monitored process
             //

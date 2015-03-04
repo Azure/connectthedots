@@ -13,7 +13,7 @@ namespace ServiceMonitor
 		      private static MonitorLogger _logger;
         private static readonly object _SyncRoot = new object();
 
-        public static MonitorLogger Instance
+        internal static MonitorLogger Instance
         {
             get
             {

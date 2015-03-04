@@ -4,13 +4,14 @@ using BatchSenderThreadTest.Utils.MessageSender;
 using Gateway;
 using Gateway.Utils.Queue;
 using CoreTest.Utils.Logger;
+using SharedInterfaces;
 
 namespace BatchSenderThreadTest
 {
     public class BatchSenderThreadTest
     {
-        private readonly TestLogger _testLogger = new TestLogger();
-        readonly Random _Random = new Random((int)DateTime.Now.Ticks);
+        private readonly ILogger _testLogger;
+        private readonly Random _Random = new Random((int)DateTime.Now.Ticks);
 
         private void TestMessagesGoFromSourceToTarget()
         {
@@ -94,6 +95,15 @@ namespace BatchSenderThreadTest
             batchSenderThreadB.Stop(waitForBatchThreadTimeMs);
         }
 
+        public BatchSenderThreadTest( ILogger logger )
+        {
+            if( logger == null )
+            {
+                throw new ArgumentException( "Cannot run tests without logging" );
+            }
+
+            _testLogger = logger;
+        }
         public void Run()
         {
             TestMessagesGoFromSourceToTarget();

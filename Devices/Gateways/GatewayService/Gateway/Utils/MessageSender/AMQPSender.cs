@@ -255,7 +255,8 @@ namespace Gateway.Utils.MessageSender
 
         public void Close()
         {
-            Logger.LogInfo("Close signal to AMQP recieved.");
+            Logger.LogInfo("Close signal to AMQP recieved");
+
             _senders.Close( );
         }
 
@@ -391,7 +392,7 @@ namespace Gateway.Utils.MessageSender
 
             if (outcome is Accepted)
             {
-                Logger.LogInfo("Message is accepted: " + messageToLog);
+                Logger.LogInfo("Message is accepted");
 
                 if (sent == 1)
                 {

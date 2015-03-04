@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading;
+using CoreTest.Utils.Logger;
+using Gateway.Utils.Logger;
 
 namespace BatchSenderThreadTest
 {
@@ -7,7 +9,7 @@ namespace BatchSenderThreadTest
     {
         static void Main(string[] args)
         {
-            BatchSenderThreadTest t = new BatchSenderThreadTest();
+            BatchSenderThreadTest t = new BatchSenderThreadTest( SafeLogger.FromLogger( TestLogger.Instance ) );
             t.Run();
 
             // wait for logging tasks to complete

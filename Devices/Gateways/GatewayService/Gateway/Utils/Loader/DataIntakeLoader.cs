@@ -21,6 +21,7 @@ namespace Gateway.Utils.Loader
         public DataIntakeLoader(IList<String> sources, IList<SensorEndpoint> endpoints, ILogger logger)
         {
             _Logger = SafeLogger.FromLogger( logger );
+
             _Logger.LogInfo("Starting loading Data Intakes");
 
             //for each filename will store a flag - whether it was specified at config or not
@@ -149,6 +150,7 @@ namespace Gateway.Utils.Loader
                         if ( t.GetInterface( "IDataIntake", false ) != null )
                         {
                             _Logger.LogInfo("IDataIntake assembly loaded: " + t.Name);
+
                             nameTypeDict.Add( t.Name, t ); //Add to Dictonary
                         }
                     }

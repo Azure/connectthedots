@@ -20,8 +20,10 @@ namespace CoreTest
         public const int TEST_ITERATIONS = 100;
         public const int MAX_TEST_MESSAGES = 1000;
 
+        //--//
+
         string _url;
-        private readonly ILogger _testLogger = new TestLogger();
+        private readonly ILogger _testLogger;
         private readonly Random _rand;
         private int _totalMessagesSent;
         private int _totalMessagesToSend;
@@ -30,8 +32,17 @@ namespace CoreTest
         private const int STOP_TIMEOUT_MS = 5000; // ms
         private const int MIN_WAIT_BEETWEEN_BURSTS = 5 * MINUTES_TO_MILLISECONDS; // 5 minutes in milliseconds
 
-        public WebServiceTest(string url)
+        //--//
+
+        public WebServiceTest( string url, ILogger logger ) 
         {
+            if(logger == null)
+            {
+                throw new ArgumentException( "Cannot run tests without logging" );
+            }
+            
+            _testLogger = logger;
+
             _url = url;
             _rand = new Random( );
             _totalMessagesSent = 0;

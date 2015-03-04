@@ -73,6 +73,7 @@
     <Compile Include="ServiceInstantiation\ServiceInstanceProvider.cs" />
     <Compile Include="Utils\Loader\DataIntakeLoader.cs" />
     <Compile Include="Utils\Logger\SafeLogger.cs" />
+    <Compile Include="Utils\Logger\TunableLogger.cs" />
     <Compile Include="Utils\MessageSender\AMQPSender.cs" />
     <Compile Include="Utils\MessageSender\IMessageSender.cs" />
     <Compile Include="Utils\OperationStatus\ErrorCode.cs" />

@@ -24,7 +24,7 @@ namespace CoreTest
         public const int TEST_ITERATIONS = 5;
         public const int MAX_TEST_MESSAGES = 1000;
 
-        private readonly ILogger _testLogger = new TestLogger();
+        private readonly ILogger _testLogger;
         private readonly AutoResetEvent _completed = new AutoResetEvent(false);
         private readonly GatewayQueue<QueuedItem> _GatewayQueue;
         private readonly IMessageSender<SensorDataContract> _Sender;
@@ -35,8 +35,15 @@ namespace CoreTest
 
         private const int STOP_TIMEOUT_MS = 5000; // ms
 
-        public CoreTest()
+        public CoreTest( ILogger logger )
         {
+            if(logger == null)
+            {
+                throw new ArgumentException( "Cannot run tests without logging" );
+            }
+            
+            _testLogger = logger;
+
             _rand = new Random( );
             _totalMessagesSent = 0;
             _totalMessagesToSend = 0;

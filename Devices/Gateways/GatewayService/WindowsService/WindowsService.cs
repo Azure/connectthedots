@@ -11,6 +11,8 @@ using Gateway.Utils.MessageSender;
 using Gateway.Utils.Queue;
 using SharedInterfaces;
 using System.Threading.Tasks;
+using Gateway.Utils.Logger;
+using System.Configuration;
 
 
 namespace WindowsService
@@ -31,14 +33,26 @@ namespace WindowsService
 
         private readonly DataIntakeLoader _DataIntakeLoader;
 
-        public WindowsService()
+        public WindowsService( ILogger logger )
         {
-            TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+            if(logger == null)
+            {
+                throw new ArgumentException( "Cannot run service without logging" );
+            }
 
-            _Logger = EventLogger.Instance;
-            _Logger.LogInfo("WindowsService ctor");
+            _Logger = logger;
+
+            if(logger is TunableLogger)
+            {
+                TunableLogger.LoggingLevel loggingLevel = TunableLogger.LevelFromString( ConfigurationManager.AppSettings.Get( "LoggingLevel" ) );
+
+                ( ( TunableLogger )logger ).Level = (loggingLevel != TunableLogger.LoggingLevel.Undefined) ? loggingLevel : TunableLogger.LoggingLevel.Errors;
+            }
+
             try
             {
+                TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+
                 // Name the Windows Service
                 ServiceName = Constants.WindowsServiceName;
 
@@ -69,7 +83,7 @@ namespace WindowsService
             }
             catch (Exception ex)
             {
-                _Logger.LogInfo("Exception at WindowsService ctor: " + ex.Message);
+                _Logger.LogInfo("Exception creating WindowsService: " + ex.Message);
             }
         }
 
@@ -134,16 +148,26 @@ namespace WindowsService
 
         static void Main(string[] args)
         {
+            ILogger logger = null;
+
             try
             {
-                Run(new WindowsService());
+                logger = TunableLogger.FromLogger(
+                    SafeLogger.FromLogger( EventLogger.Instance )
+                    );
+
+                logger.LogInfo( "Creating WindowsService..." );
+
+                Run( new WindowsService( logger ) ); 
             }
             catch(Exception ex)
             {
-                if (EventLogger.Instance != null)
+                if (logger != null)
                 {
-                    EventLogger.Instance.LogError(ex.ToString());
+                    logger.LogError( ex.ToString( ) ); 
                 }
+
+                // just return...
             }
         }
 

@@ -2,6 +2,10 @@
 using Gateway.Models;
 using CoreTest.Utils.Generators;
 using Newtonsoft.Json;
+using SharedInterfaces;
+using Gateway.Utils.Logger;
+using CoreTest.Utils.Logger;
+using System.Configuration;
 
 namespace CoreTest
 {
@@ -9,10 +13,20 @@ namespace CoreTest
     {
         static void Main(string[] args)
         {
+            // we do not need a tunable logger, but this is a nice way to test it...
+            TunableLogger logger = TunableLogger.FromLogger(
+                    SafeLogger.FromLogger( TestLogger.Instance )
+                    );
+            
+            TunableLogger.LoggingLevel loggingLevel = TunableLogger.LevelFromString( ConfigurationManager.AppSettings.Get( "LoggingLevel" ) );
+
+            logger.Level = ( loggingLevel != TunableLogger.LoggingLevel.Undefined ) ? loggingLevel : TunableLogger.LoggingLevel.Errors;
+
+
             /////////////////////////////////////////////////////////////////////////////////////////////
             // Test core service 
             //
-            CoreTest t2 = new CoreTest( );
+            CoreTest t2 = new CoreTest( logger );
             t2.Run( );
             Console.WriteLine( String.Format( "Core Test completed" ) );
 
@@ -22,14 +36,14 @@ namespace CoreTest
             SensorDataContract sensorData = RandomSensorDataGenerator.Generate( );
             string serializedData = JsonConvert.SerializeObject( sensorData );
 
-            WebServiceTest t1 = new WebServiceTest( "http://localhost:8000/GatewayService/API/Enqueue?jsonData=" + serializedData );
+            WebServiceTest t1 = new WebServiceTest( "http://localhost:8000/GatewayService/API/Enqueue?jsonData=" + serializedData, logger );
             t1.Run( );
             Console.WriteLine(String.Format("WebService Test completed, {0} messages sent", t1.TotalMessagesSent));
 
             /////////////////////////////////////////////////////////////////////////////////////////////
             // Test Socket
             //
-            SocketTest t3 = new SocketTest();
+            SocketTest t3 = new SocketTest( logger );
             t3.Run();
             Console.WriteLine(String.Format("Socket Test completed"));
 
