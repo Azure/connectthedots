@@ -1,7 +1,4 @@
-﻿
-using Microsoft.ConnectTheDots.Gateway.DataIntake;
-
-namespace SocketListener
+﻿namespace SocketListener
 {
     using System;
     using System.Net.Sockets;

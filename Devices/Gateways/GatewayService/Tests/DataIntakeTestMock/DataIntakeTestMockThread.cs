@@ -1,6 +1,4 @@
-﻿using Microsoft.ConnectTheDots.Gateway.DataIntake;
-
-namespace Microsoft.ConnectTheDots.Test
+﻿namespace Microsoft.ConnectTheDots.Test
 {
     using System;
     using System.Threading;

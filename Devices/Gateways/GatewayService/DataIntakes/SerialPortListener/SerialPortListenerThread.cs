@@ -1,8 +1,5 @@
 ﻿//#define SIMULATEDATA
 
-
-using Microsoft.ConnectTheDots.Gateway.DataIntake;
-
 namespace SerialPortListener
 {
     using System;
