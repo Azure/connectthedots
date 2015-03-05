@@ -1,8 +1,8 @@
-﻿namespace Microsoft.ConnectTheDots.Gateway
-{
-    using System;
-    using Microsoft.ConnectTheDots.Common;
+﻿using System;
+using Microsoft.ConnectTheDots.Common;
 
+namespace Microsoft.ConnectTheDots.Gateway.DataIntake
+{
     //--//
 
     public delegate void DataArrivalEventHandler( string data );

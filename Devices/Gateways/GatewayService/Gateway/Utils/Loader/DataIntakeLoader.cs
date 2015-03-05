@@ -1,4 +1,6 @@
-﻿namespace Microsoft.ConnectTheDots.Gateway
+﻿using Microsoft.ConnectTheDots.Gateway.DataIntake;
+
+namespace Microsoft.ConnectTheDots.Gateway
 {
     using System;
     using System.Collections.Generic;
@@ -137,7 +139,7 @@
                             {
                                 notLoadedNotSpecifiedSources += fileName;
                             }
-                            notLoadedSpecifiedSources += ";";
+                            notLoadedSpecifiedSources += "; ";
                             continue;
                         }
                     }
@@ -166,6 +168,7 @@
                     {
                         notLoadedNotSpecifiedSources += fileName;
                     }
+                    notLoadedNotSpecifiedSources += "; ";
                 }
             }
 

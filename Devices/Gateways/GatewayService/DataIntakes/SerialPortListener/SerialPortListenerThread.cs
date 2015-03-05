@@ -1,6 +1,8 @@
 ﻿//#define SIMULATEDATA
 
 
+using Microsoft.ConnectTheDots.Gateway.DataIntake;
+
 namespace SerialPortListener
 {
     using System;
@@ -58,7 +60,7 @@ namespace SerialPortListener
             return true;
         }
 
-        public override bool SetEndpoint(SensorEndpoint endpoint)
+        public override bool SetEndpoint(SensorEndpoint endpoint = null)
         {
             //we don't need any endpoints for this Data Intake
             if (endpoint == null)

@@ -1,4 +1,6 @@
-﻿namespace Microsoft.ConnectTheDots.Test
+﻿using Microsoft.ConnectTheDots.Gateway.DataIntake;
+
+namespace Microsoft.ConnectTheDots.Test
 {
     using System;
     using System.Threading;
@@ -42,7 +44,7 @@
             return true;
         }
 
-        public override bool SetEndpoint( SensorEndpoint endpoint )
+        public override bool SetEndpoint( SensorEndpoint endpoint = null )
         {
             //we don't need any endpoints for this Data Intake
             if (endpoint == null)
