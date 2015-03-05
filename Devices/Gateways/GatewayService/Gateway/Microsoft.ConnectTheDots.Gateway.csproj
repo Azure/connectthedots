@@ -59,15 +59,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
-    <Compile Include="DataIntake\DataIntake.cs" />
-    <Compile Include="DataIntake\IDataIntake.cs" />
-    <Compile Include="DataIntake\SensorEndpoint.cs" />
+    <Compile Include="Adapter\DeviceAdapter.cs" />
     <Compile Include="GatewayService.cs" />
     <Compile Include="EventProcessor.cs" />
+    <Compile Include="Adapter\IDeviceAdapter.cs" />
     <Compile Include="IGatewayService.cs" />
     <Compile Include="Models\QueuedItem.cs" />
     <Compile Include="Models\SensorDataContract.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Adapter\SensorEndpoint.cs" />
     <Compile Include="ServiceInstantiation\IService.cs" />
     <Compile Include="ServiceInstantiation\ServiceBehavior.cs" />
     <Compile Include="ServiceInstantiation\ServiceInstanceProvider.cs" />
