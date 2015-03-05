@@ -68,8 +68,8 @@
                 _BatchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>(
                                                     _GatewayQueue,
                                                     _AMPQSender,
-                                                    m => DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromQueuedItem(m, _Logger)),
-                                                    null, //new Func<QueuedItem, string>( m => m.JsonData )
+                                                    null,//m => DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromQueuedItem(m, _Logger)),
+                                                    new Func<QueuedItem, string>( m => m.JsonData ),
                                                     _Logger);
 
                 _DataIntakeLoader = new DataIntakeLoader(Loader.GetSources(), Loader.GetEndpoints(), _Logger); 
@@ -94,7 +94,12 @@
             _BatchSenderThread.Start();
 
             _WebHost = new WebServiceHost( typeof( Microsoft.ConnectTheDots.Gateway.GatewayService ) );
-            Gateway.GatewayService service = new Microsoft.ConnectTheDots.Gateway.GatewayService( _GatewayQueue, _BatchSenderThread );
+            Gateway.GatewayService service = new Microsoft.ConnectTheDots.Gateway.GatewayService(
+                _GatewayQueue,
+                _BatchSenderThread,
+                m => DataTransforms.QueuedItemFromSensorDataContract(
+                        DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromString(m, _Logger)), _Logger)
+            );
             _WebHost.Description.Behaviors.Add(new ServiceBehavior(() => service));
 
             service.Logger = _Logger;

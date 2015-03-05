@@ -129,7 +129,9 @@
             _BatchSenderThread.Logger = _testLogger;
             _BatchSenderThread.Start();
 
-            GatewayService service = new GatewayService(_GatewayQueue, _BatchSenderThread);
+            GatewayService service = new GatewayService(_GatewayQueue, _BatchSenderThread,
+                m => DataTransforms.QueuedItemFromSensorDataContract(
+                        DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromString(m, _testLogger)), _testLogger));
 
             service.Logger = _testLogger;
             service.OnDataInQueue += DataInQueue;

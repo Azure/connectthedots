@@ -59,11 +59,11 @@ namespace Microsoft.ConnectTheDots.Test
                                                 );
 #endif
 
-            _BatchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>( 
-                _GatewayQueue, 
+            _BatchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>(
+                _GatewayQueue,
                 _Sender,
-                dataTransform  : m => DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromQueuedItem(m, _testLogger)), 
-                serializedData : null, 
+                dataTransform  : null,//m => DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromQueuedItem(m, _testLogger)), 
+                serializedData : m => (m == null) ? null : m.JsonData,
                 logger         : null);
         }
 
@@ -206,7 +206,10 @@ namespace Microsoft.ConnectTheDots.Test
             _BatchSenderThread.Logger = _testLogger;
             _BatchSenderThread.Start();
 
-            GatewayService service = new GatewayService(_GatewayQueue, _BatchSenderThread);
+            GatewayService service = new GatewayService(_GatewayQueue, _BatchSenderThread,
+                m => DataTransforms.QueuedItemFromSensorDataContract(
+                        DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromString(m, _testLogger)), _testLogger));
+
 
             service.Logger = _testLogger;
             service.OnDataInQueue += DataInQueue;

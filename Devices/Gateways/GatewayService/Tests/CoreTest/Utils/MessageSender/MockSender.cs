@@ -23,27 +23,32 @@
 
         public Task SendMessage(T data)
         {
+            SimulateSend();
+            return null;
+        }
+
+        public Task SendSerialized(string jsonData)
+        {
+            SimulateSend();
+            return null;
+        }
+
+        public void Close()
+        {
+        }
+
+        private void SimulateSend()
+        {
             // Naive atetmpt to simulate network latency
             Thread.Sleep(_rand.Next(MAX_LAG));
 
             int totalMessagesSent = _test.TotalMessagesSent;
 
             // LORENZO: print all data and validate that they match the data sent
-            if( Interlocked.Increment( ref _forSending ) == totalMessagesSent && totalMessagesSent >= _test.TotalMessagesToSend)
+            if (Interlocked.Increment(ref _forSending) == totalMessagesSent && totalMessagesSent >= _test.TotalMessagesToSend)
             {
                 _test.Completed();
             }
-
-            return null;
-        }
-
-        public Task SendSerialized(string jsonData)
-        {
-            throw new Exception("Not implemented");
-        }
-
-        public void Close()
-        {
         }
     }
 }

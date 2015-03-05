@@ -191,13 +191,17 @@
 
                         //adding instance without endpoint if acceptable
                         if (di.SetEndpoint())
+                        {
                             _DataIntakes.Add(di);
+                        }
 
                         foreach (SensorEndpoint sensorEndpoint in _SensorEndpoints)
                         {
                             DataIntakeAbstract diWithEndpoint = (DataIntakeAbstract)Activator.CreateInstance(t.Value, new object[] { _Logger });
                             if (diWithEndpoint.SetEndpoint(sensorEndpoint))
+                            {
                                 _DataIntakes.Add(diWithEndpoint);
+                            }
                         }
                     }
                 }
