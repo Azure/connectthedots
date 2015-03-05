@@ -81,7 +81,7 @@
                 SocketServiceTestDevice device = new SocketServiceTestDevice( _logger );
                 device.Start( endpoint );
 
-                DataIntakeLoader dataIntakeLoader = new DataIntakeLoader(
+                DeviceAdapterLoader dataIntakeLoader = new DeviceAdapterLoader(
                     sources,
                     endpoints,
                     _logger );

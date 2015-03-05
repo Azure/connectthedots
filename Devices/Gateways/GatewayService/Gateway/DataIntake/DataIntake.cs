@@ -7,13 +7,13 @@
 
     public delegate void DataArrivalEventHandler( string data );
 
-    public abstract class DataIntakeAbstract : IDataIntake
+    public abstract class DeviceAdapterAbstract : IDeviceAdapter
     {
         protected ILogger _logger;
 
         //--//
 
-        protected DataIntakeAbstract( ILogger logger )
+        protected DeviceAdapterAbstract( ILogger logger )
         {
             _logger = SafeLogger.FromLogger( logger );
         }

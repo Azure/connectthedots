@@ -54,13 +54,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\Microsoft.ConnectTheDots.Common.csproj">
+      <Project>{96feda4b-c7e0-4ddb-ad3a-bff2fd8d973d}</Project>
+      <Name>Microsoft.ConnectTheDots.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Gateway\Microsoft.ConnectTheDots.Gateway.csproj">
       <Project>{E14D1C61-1979-452E-BE8B-0303A95EF764}</Project>
       <Name>Microsoft.ConnectTheDots.Gateway</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\SharedInterfaces\Microsoft.ConnectTheDots.Common.csproj">
-      <Project>{96feda4b-c7e0-4ddb-ad3a-bff2fd8d973d}</Project>
-      <Name>Microsoft.ConnectTheDots.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\CoreTest\CoreTest.csproj">
       <Project>{ca90b613-c4d6-4011-bc6b-ccc8de62dac0}</Project>

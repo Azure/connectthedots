@@ -21,8 +21,8 @@ echo mkdir  %Staging%  >> %temp%\gatewayservicemkdir.tmp
 echo Copying Gateway files
 %PSCP_CMD% %prjdir%WindowsService\bin\%Configuration%\*.* %rpi_usr%@%rpi_ip%:%Staging%/
 
-%PSCP_CMD% %prjdir%DataIntakes\SerialPortListener\bin\%Configuration%\Microsoft.ConnectTheDots.SerialPortListener.dll %rpi_usr%@%rpi_ip%:%Staging%/
-%PSCP_CMD% %prjdir%DataIntakes\SocketListener\bin\%Configuration%\Microsoft.ConnectTheDots.SocketListener.dll         %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %prjdir%DeviceAdapters\SerialPort\bin\%Configuration%\Microsoft.ConnectTheDots.SerialPortAdapter.dll %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %prjdir%DeviceAdapters\Socket\bin\%Configuration%\Microsoft.ConnectTheDots.SocketAdapter.dll         %rpi_usr%@%rpi_ip%:%Staging%/
 
 echo copying scripts
 %PSCP_CMD% %prjdir%Scripts\autorun.sh %rpi_usr%@%rpi_ip%:%Staging%/

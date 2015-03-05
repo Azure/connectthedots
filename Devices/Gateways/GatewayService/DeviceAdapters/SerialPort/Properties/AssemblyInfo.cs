@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DataIntakeTestMock")]
+[assembly: AssemblyTitle("SerialPortAdapter")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DataIntakeTestMock")]
+[assembly: AssemblyProduct("SerialPortAdapter")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("12f9e116-ca5e-496d-b7b4-3c6439886213")]
+[assembly: Guid("a7f28ec8-2b75-449d-adae-29dd1d2f3c7a")]
 
 // Version information for an assembly consists of the following four values:
 //

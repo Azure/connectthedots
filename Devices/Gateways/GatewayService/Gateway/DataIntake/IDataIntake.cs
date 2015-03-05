@@ -4,7 +4,7 @@
 
     //--//
 
-    public interface IDataIntake
+    public interface IDeviceAdapter
     {
         bool Start( Func<string, int> enqueue );
 

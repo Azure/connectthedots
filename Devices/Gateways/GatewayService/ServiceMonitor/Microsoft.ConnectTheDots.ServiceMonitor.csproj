@@ -63,13 +63,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common\Microsoft.ConnectTheDots.Common.csproj">
+      <Project>{96feda4b-c7e0-4ddb-ad3a-bff2fd8d973d}</Project>
+      <Name>Microsoft.ConnectTheDots.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Gateway\Microsoft.ConnectTheDots.Gateway.csproj">
       <Project>{e14d1c61-1979-452e-be8b-0303a95ef764}</Project>
       <Name>Microsoft.ConnectTheDots.Gateway</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SharedInterfaces\Microsoft.ConnectTheDots.Common.csproj">
-      <Project>{96feda4b-c7e0-4ddb-ad3a-bff2fd8d973d}</Project>
-      <Name>Microsoft.ConnectTheDots.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

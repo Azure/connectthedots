@@ -9,13 +9,13 @@
 
     //--//
 
-    public class DataIntakeLoader
+    public class DeviceAdapterLoader
     {
         private static HashSet<SensorEndpoint> _SensorEndpoints = new HashSet<SensorEndpoint>( );
 
         //--//
 
-        private readonly IList<DataIntakeAbstract> _dataIntakes;
+        private readonly IList<DeviceAdapterAbstract> _dataIntakes;
         private readonly ILogger                   _logger;
 
         //--//
@@ -24,13 +24,13 @@
 
         //--//
 
-        public DataIntakeLoader( IList<String> sources, IList<SensorEndpoint> endpoints, ILogger logger )
+        public DeviceAdapterLoader( IList<String> sources, IList<SensorEndpoint> endpoints, ILogger logger )
         {
             _logger = SafeLogger.FromLogger( logger );
 
             _logger.LogInfo( "Starting loading Data Intakes" );
 
-            _dataIntakes = new List<DataIntakeAbstract>( );
+            _dataIntakes = new List<DeviceAdapterAbstract>( );
 
             //for each filename will store a flag - whether it was specified at config or not
             Dictionary<String, bool> sourcesToLoad = new Dictionary<string, bool>( );
@@ -43,7 +43,7 @@
             }
             else
             {
-                _logger.LogInfo( "No list of DataIntakes in configuration file, continuing..." );
+                _logger.LogInfo( "No list of DeviceAdapters in configuration file, continuing..." );
             }
 
             if( endpoints != null )
@@ -60,7 +60,7 @@
 
 
             //
-            // enumerate all types with a IDataIntake interface look in the current directory, in the 
+            // enumerate all types with a IDeviceAdapter interface look in the current directory, in the 
             // running assembly directory and in the entry and executing assembly
             //
             var directories = new List<String>( );
@@ -155,9 +155,9 @@
                     foreach( Type t in assm.GetExportedTypes( ) )
                     {
                         //Get all classes that implement the required interface
-                        if( t.GetInterface( "IDataIntake", false ) != null )
+                        if( t.GetInterface( "IDeviceAdapter", false ) != null )
                         {
-                            _logger.LogInfo( "IDataIntake assembly loaded: " + t.Name );
+                            _logger.LogInfo( "IDeviceAdapter assembly loaded: " + t.Name );
 
                             nameTypeDict.Add( t.Name, t ); //Add to Dictonary
                         }
@@ -191,11 +191,11 @@
             {
                 try
                 {
-                    DataIntakeAbstract di = ( DataIntakeAbstract )Activator.CreateInstance( t.Value, new object[] { _logger } );
+                    DeviceAdapterAbstract di = ( DeviceAdapterAbstract )Activator.CreateInstance( t.Value, new object[] { _logger } );
 
                     if( di != null )
                     {
-                        _logger.LogInfo( "IDataIntake instance created: " + t.Key );
+                        _logger.LogInfo( "IDeviceAdapter instance created: " + t.Key );
 
                         //adding instance without endpoint if acceptable
                         if( di.SetEndpoint( ) )
@@ -205,7 +205,7 @@
 
                         foreach( SensorEndpoint sensorEndpoint in _SensorEndpoints )
                         {
-                            DataIntakeAbstract diWithEndpoint = ( DataIntakeAbstract )Activator.CreateInstance( t.Value, new object[] { _logger } );
+                            DeviceAdapterAbstract diWithEndpoint = ( DeviceAdapterAbstract )Activator.CreateInstance( t.Value, new object[] { _logger } );
                             if( diWithEndpoint.SetEndpoint( sensorEndpoint ) )
                             {
                                 _dataIntakes.Add( diWithEndpoint );
@@ -216,22 +216,22 @@
                 catch( Exception ex )
                 {
                     // dont want to stop creating another instances if one fails
-                    _logger.LogError( String.Format( "Exception on Creating DataIntake Instance \"{0}\": {1}", t.Key, ex.Message ) );
+                    _logger.LogError( String.Format( "Exception on Creating DeviceAdapter Instance \"{0}\": {1}", t.Key, ex.Message ) );
                 }
             }
         }
 
-        public IList<IDataIntake> Intakes
+        public IList<IDeviceAdapter> Intakes
         {
             get
             {
-                return ( IList<IDataIntake> )_dataIntakes;
+                return ( IList<IDeviceAdapter> )_dataIntakes;
             }
         }
 
         public void StartAll( Func<string, int> enqueue, DataArrivalEventHandler onDataArrival = null )
         {
-            foreach( DataIntakeAbstract dataIntake in _dataIntakes )
+            foreach( DeviceAdapterAbstract dataIntake in _dataIntakes )
             {
                 try
                 {
@@ -254,7 +254,7 @@
                 }
                 catch( Exception ex )
                 {
-                    _logger.LogError( "Exception on Starting DataIntake: " + ex.StackTrace );
+                    _logger.LogError( "Exception on Starting DeviceAdapter: " + ex.StackTrace );
 
                     // catch all other exceptions
                 }
@@ -263,7 +263,7 @@
 
         public void StopAll( )
         {
-            foreach( DataIntakeAbstract dataIntake in _dataIntakes )
+            foreach( DeviceAdapterAbstract dataIntake in _dataIntakes )
             {
                 try
                 {

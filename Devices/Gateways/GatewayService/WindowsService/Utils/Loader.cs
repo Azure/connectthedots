@@ -21,11 +21,11 @@
         {
             var dataIntakes = new List<String>( );
 
-            DataIntakeConfigSection config = ConfigurationManager.GetSection( "dataIntakes" ) as DataIntakeConfigSection;
+            DeviceAdapterConfigSection config = ConfigurationManager.GetSection( "dataIntakes" ) as DeviceAdapterConfigSection;
 
             if( config != null )
             {
-                foreach( DataIntakeConfigInstanceElement e in config.Instances )
+                foreach( DeviceAdapterConfigInstanceElement e in config.Instances )
                 {
                     dataIntakes.Add( e.AssemblyPath );
                 }
@@ -145,30 +145,30 @@
         }
     }
 
-    public class DataIntakeConfigSection : ConfigurationSection
+    public class DeviceAdapterConfigSection : ConfigurationSection
     {
         [ConfigurationProperty( "", IsRequired = true, IsDefaultCollection = true )]
-        public DataIntakeConfigInstanceCollection Instances
+        public DeviceAdapterConfigInstanceCollection Instances
         {
-            get { return ( DataIntakeConfigInstanceCollection )this[ "" ]; }
+            get { return ( DeviceAdapterConfigInstanceCollection )this[ "" ]; }
             set { this[ "" ] = value; }
         }
     }
 
-    public class DataIntakeConfigInstanceCollection : ConfigurationElementCollection
+    public class DeviceAdapterConfigInstanceCollection : ConfigurationElementCollection
     {
         protected override ConfigurationElement CreateNewElement( )
         {
-            return new DataIntakeConfigInstanceElement( );
+            return new DeviceAdapterConfigInstanceElement( );
         }
 
         protected override object GetElementKey( ConfigurationElement element )
         {
-            return ( ( DataIntakeConfigInstanceElement )element ).Name;
+            return ( ( DeviceAdapterConfigInstanceElement )element ).Name;
         }
     }
 
-    public class DataIntakeConfigInstanceElement : ConfigurationElement
+    public class DeviceAdapterConfigInstanceElement : ConfigurationElement
     {
         [ConfigurationProperty( "name", IsKey = true, IsRequired = true )]
         public string Name

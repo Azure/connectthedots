@@ -80,7 +80,7 @@ namespace Microsoft.ConnectTheDots.Test
         public void Run( )
         {
             TestRepeatSend( );
-            TestDataIntake( );
+            TestDeviceAdapter( );
         }
 
         public void TestRepeatSend( )
@@ -159,13 +159,13 @@ namespace Microsoft.ConnectTheDots.Test
             }
         }
 
-        public void TestDataIntake( )
+        public void TestDeviceAdapter( )
         {
             try
             {
                 GatewayService service = PrepareGatewayService( );
 
-                DataIntakeLoader dataIntakeLoader = new DataIntakeLoader( Loader.GetSources( ), Loader.GetEndpoints( ), _logger );
+                DeviceAdapterLoader dataIntakeLoader = new DeviceAdapterLoader( Loader.GetSources( ), Loader.GetEndpoints( ), _logger );
 
                 _totalMessagesToSend += 5;
 

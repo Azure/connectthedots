@@ -7,8 +7,8 @@
     <ProjectGuid>{9D9DA1EB-90DA-4FC0-A97F-C650201DD994}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.ConnectTheDots.SocketListener</RootNamespace>
-    <AssemblyName>Microsoft.ConnectTheDots.SocketListener</AssemblyName>
+    <RootNamespace>Microsoft.ConnectTheDots.Adapters</RootNamespace>
+    <AssemblyName>Microsoft.ConnectTheDots.SocketAdapter</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -39,17 +39,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SocketListenerThread.cs" />
+    <Compile Include="SocketAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\Microsoft.ConnectTheDots.Common.csproj">
+      <Project>{96feda4b-c7e0-4ddb-ad3a-bff2fd8d973d}</Project>
+      <Name>Microsoft.ConnectTheDots.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Gateway\Microsoft.ConnectTheDots.Gateway.csproj">
       <Project>{e14d1c61-1979-452e-be8b-0303a95ef764}</Project>
       <Name>Microsoft.ConnectTheDots.Gateway</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\SharedInterfaces\Microsoft.ConnectTheDots.Common.csproj">
-      <Project>{96feda4b-c7e0-4ddb-ad3a-bff2fd8d973d}</Project>
-      <Name>Microsoft.ConnectTheDots.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

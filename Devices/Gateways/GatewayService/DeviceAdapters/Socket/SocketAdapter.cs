@@ -1,4 +1,4 @@
-﻿namespace SocketListener
+﻿namespace Microsoft.ConnectTheDots.Adapters
 {
     using System;
     using System.Net.Sockets;
@@ -11,7 +11,7 @@
 
     //--//
 
-    public class SocketListenerThread : DataIntakeAbstract
+    public class SocketAdapter : DeviceAdapterAbstract
     {
         private const int CONNECTION_RETRIES         = 20;
         private const int SLEEP_TIME_BETWEEN_RETRIES = 1000; // 1 sec
@@ -25,7 +25,7 @@
 
         //--//
 
-        public SocketListenerThread( ILogger logger )
+        public SocketAdapter( ILogger logger )
             : base( logger )
         {
         }

@@ -13,54 +13,31 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConnectTheDots.Ga
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BatchSenderThreadTest", "Tests\BatchSenderThreadTest\BatchSenderThreadTest.csproj", "{8279853A-07AE-4AF8-BC5F-FCD1696ABB4D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataIntakes", "DataIntakes", "{5094CC44-E8F8-4472-8042-BE7E78899225}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerialPortListener", "DataIntakes\SerialPortListener\SerialPortListener.csproj", "{A7B77408-0DBA-4384-A31A-404187CAEC89}"
-	ProjectSection(ProjectDependencies) = postProject
-		{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D} = {96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketListener", "DataIntakes\SocketListener\SocketListener.csproj", "{9D9DA1EB-90DA-4FC0-A97F-C650201DD994}"
-	ProjectSection(ProjectDependencies) = postProject
-		{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D} = {96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}
-	EndProjectSection
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DeviceAdapters", "DeviceAdapters", "{5094CC44-E8F8-4472-8042-BE7E78899225}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketServiceDeviceMock", "Tests\SocketServiceDeviceMock\SocketServiceDeviceMock.csproj", "{91C31E86-7DDB-4C29-8A65-56596478013C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataIntakeTestMock", "Tests\DataIntakeTestMock\DataIntakeTestMock.csproj", "{756AB4B0-BC00-4297-A4F0-3DB40B7E2181}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConnectTheDots.Common", "SharedInterfaces\Microsoft.ConnectTheDots.Common.csproj", "{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{A5D7B51F-689A-4BB1-AE4C-7C12F4B443FA}"
-	ProjectSection(SolutionItems) = preProject
-		Scripts\autorun.sh = Scripts\autorun.sh
-		Scripts\GetFile.cmd = Scripts\GetFile.cmd
-		Scripts\runonce.sh = Scripts\runonce.sh
-		Scripts\SCPRPI.cmd = Scripts\SCPRPI.cmd
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{91C9B120-0E62-4942-ACE1-FF1E38F960F3}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{34475128-5EFB-4A85-9FD5-30F9D7670DE0}"
-	ProjectSection(SolutionItems) = preProject
-		Config\Web\Web.config = Config\Web\Web.config
-		Config\Web\Web.Debug.config = Config\Web\Web.Debug.config
-		Config\Web\Web.Release.config = Config\Web\Web.Release.config
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CoreTest", "CoreTest", "{079B0668-D666-4CAB-BED3-C2093CBD20C8}"
-	ProjectSection(SolutionItems) = preProject
-		Config\CoreTest\App.config = Config\CoreTest\App.config
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WindowsService", "WindowsService", "{71E19A15-D3EA-4397-B641-1F2A6FD50C7D}"
-	ProjectSection(SolutionItems) = preProject
-		Config\WindowsService\App.config = Config\WindowsService\App.config
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConnectTheDots.ServiceMonitor", "ServiceMonitor\Microsoft.ConnectTheDots.ServiceMonitor.csproj", "{7DB057F5-2B79-4822-9A3F-1B7F30EB552F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Gateway", "Gateway", "{048641FD-5970-4D79-9DA2-07CDCD9FAC43}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RaspberryPi", "RaspberryPi", "{86E795DC-E649-4739-BB0D-4D8EC7D49E12}"
+	ProjectSection(SolutionItems) = preProject
+		Scripts\RaspberryPi\autorun.sh = Scripts\RaspberryPi\autorun.sh
+		Scripts\RaspberryPi\deploy.cmd = Scripts\RaspberryPi\deploy.cmd
+		Scripts\RaspberryPi\GetLogFile.cmd = Scripts\RaspberryPi\GetLogFile.cmd
+		Scripts\RaspberryPi\runonce.sh = Scripts\RaspberryPi\runonce.sh
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerialPortAdapter", "DeviceAdapters\SerialPort\SerialPortAdapter.csproj", "{A7B77408-0DBA-4384-A31A-404187CAEC89}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketAdapter", "DeviceAdapters\Socket\SocketAdapter.csproj", "{9D9DA1EB-90DA-4FC0-A97F-C650201DD994}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConnectTheDots.Common", "Common\Microsoft.ConnectTheDots.Common.csproj", "{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceAdapterTestMock", "Tests\DeviceAdapterTestMock\DeviceAdapterTestMock.csproj", "{756AB4B0-BC00-4297-A4F0-3DB40B7E2181}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -84,6 +61,14 @@ Global
 		{8279853A-07AE-4AF8-BC5F-FCD1696ABB4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8279853A-07AE-4AF8-BC5F-FCD1696ABB4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8279853A-07AE-4AF8-BC5F-FCD1696ABB4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91C31E86-7DDB-4C29-8A65-56596478013C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91C31E86-7DDB-4C29-8A65-56596478013C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91C31E86-7DDB-4C29-8A65-56596478013C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91C31E86-7DDB-4C29-8A65-56596478013C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DB057F5-2B79-4822-9A3F-1B7F30EB552F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DB057F5-2B79-4822-9A3F-1B7F30EB552F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DB057F5-2B79-4822-9A3F-1B7F30EB552F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DB057F5-2B79-4822-9A3F-1B7F30EB552F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A7B77408-0DBA-4384-A31A-404187CAEC89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A7B77408-0DBA-4384-A31A-404187CAEC89}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7B77408-0DBA-4384-A31A-404187CAEC89}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -92,22 +77,14 @@ Global
 		{9D9DA1EB-90DA-4FC0-A97F-C650201DD994}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D9DA1EB-90DA-4FC0-A97F-C650201DD994}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D9DA1EB-90DA-4FC0-A97F-C650201DD994}.Release|Any CPU.Build.0 = Release|Any CPU
-		{91C31E86-7DDB-4C29-8A65-56596478013C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{91C31E86-7DDB-4C29-8A65-56596478013C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{91C31E86-7DDB-4C29-8A65-56596478013C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{91C31E86-7DDB-4C29-8A65-56596478013C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{756AB4B0-BC00-4297-A4F0-3DB40B7E2181}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{756AB4B0-BC00-4297-A4F0-3DB40B7E2181}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{756AB4B0-BC00-4297-A4F0-3DB40B7E2181}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{756AB4B0-BC00-4297-A4F0-3DB40B7E2181}.Release|Any CPU.Build.0 = Release|Any CPU
 		{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7DB057F5-2B79-4822-9A3F-1B7F30EB552F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7DB057F5-2B79-4822-9A3F-1B7F30EB552F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7DB057F5-2B79-4822-9A3F-1B7F30EB552F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7DB057F5-2B79-4822-9A3F-1B7F30EB552F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{756AB4B0-BC00-4297-A4F0-3DB40B7E2181}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{756AB4B0-BC00-4297-A4F0-3DB40B7E2181}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{756AB4B0-BC00-4297-A4F0-3DB40B7E2181}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{756AB4B0-BC00-4297-A4F0-3DB40B7E2181}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -117,14 +94,12 @@ Global
 		{CA90B613-C4D6-4011-BC6B-CCC8DE62DAC0} = {74BF7EFF-11AD-4587-9C35-9419831D1116}
 		{E14D1C61-1979-452E-BE8B-0303A95EF764} = {048641FD-5970-4D79-9DA2-07CDCD9FAC43}
 		{8279853A-07AE-4AF8-BC5F-FCD1696ABB4D} = {74BF7EFF-11AD-4587-9C35-9419831D1116}
+		{91C31E86-7DDB-4C29-8A65-56596478013C} = {74BF7EFF-11AD-4587-9C35-9419831D1116}
+		{7DB057F5-2B79-4822-9A3F-1B7F30EB552F} = {048641FD-5970-4D79-9DA2-07CDCD9FAC43}
+		{86E795DC-E649-4739-BB0D-4D8EC7D49E12} = {A5D7B51F-689A-4BB1-AE4C-7C12F4B443FA}
 		{A7B77408-0DBA-4384-A31A-404187CAEC89} = {5094CC44-E8F8-4472-8042-BE7E78899225}
 		{9D9DA1EB-90DA-4FC0-A97F-C650201DD994} = {5094CC44-E8F8-4472-8042-BE7E78899225}
-		{91C31E86-7DDB-4C29-8A65-56596478013C} = {74BF7EFF-11AD-4587-9C35-9419831D1116}
-		{756AB4B0-BC00-4297-A4F0-3DB40B7E2181} = {74BF7EFF-11AD-4587-9C35-9419831D1116}
 		{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D} = {048641FD-5970-4D79-9DA2-07CDCD9FAC43}
-		{34475128-5EFB-4A85-9FD5-30F9D7670DE0} = {91C9B120-0E62-4942-ACE1-FF1E38F960F3}
-		{079B0668-D666-4CAB-BED3-C2093CBD20C8} = {91C9B120-0E62-4942-ACE1-FF1E38F960F3}
-		{71E19A15-D3EA-4397-B641-1F2A6FD50C7D} = {91C9B120-0E62-4942-ACE1-FF1E38F960F3}
-		{7DB057F5-2B79-4822-9A3F-1B7F30EB552F} = {048641FD-5970-4D79-9DA2-07CDCD9FAC43}
+		{756AB4B0-BC00-4297-A4F0-3DB40B7E2181} = {74BF7EFF-11AD-4587-9C35-9419831D1116}
 	EndGlobalSection
 EndGlobal

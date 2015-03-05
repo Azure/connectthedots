@@ -9,7 +9,7 @@
 
     //--//
 
-    public class DataIntakeTestMockThread : DataIntakeAbstract
+    public class DeviceAdapterTestMock : DeviceAdapterAbstract
     {
         private const int SLEEP_TIME_MS = 1000;
         private const int LOG_MESSAGE_RATE = 100;//should be positive
@@ -21,7 +21,7 @@
 
         //--//
 
-        public DataIntakeTestMockThread( ILogger logger )
+        public DeviceAdapterTestMock( ILogger logger )
             : base( logger )
         {
         }
@@ -68,7 +68,7 @@
 
                 if( ++messagesSent % LOG_MESSAGE_RATE == 0 )
                 {
-                    _logger.LogInfo( LOG_MESSAGE_RATE + " messages sent via DataIntakeTestMock." );
+                    _logger.LogInfo( LOG_MESSAGE_RATE + " messages sent via DeviceAdapterTestMock." );
                 }
 
                 Thread.Sleep( sleepTime );

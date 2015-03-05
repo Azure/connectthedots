@@ -1,6 +1,6 @@
 ﻿//#define SIMULATEDATA
 
-namespace SerialPortListener
+namespace Microsoft.ConnectTheDots.Adapters
 {
     using System;
     using System.Collections.Generic;
@@ -12,7 +12,7 @@ namespace SerialPortListener
 
     //--//
 
-    public class SerialPortListenerThread : DataIntakeAbstract
+    public class SerialPortAdapter : DeviceAdapterAbstract
     {
         private class SerialPortListeningThread
         {
@@ -37,7 +37,7 @@ namespace SerialPortListener
 
         //--//
 
-        public SerialPortListenerThread( ILogger logger )
+        public SerialPortAdapter( ILogger logger )
             : base( logger )
         {
             _listeningThreads = new List<SerialPortListeningThread>( );

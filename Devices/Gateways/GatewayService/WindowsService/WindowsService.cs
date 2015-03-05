@@ -24,7 +24,7 @@
         private readonly GatewayQueue<QueuedItem>       _gatewayQueue;
         private readonly AMQPSender<SensorDataContract> _AMPQSender;
         private readonly EventProcessor                 _batchSenderThread;
-        private readonly DataIntakeLoader               _dataIntakeLoader;
+        private readonly DeviceAdapterLoader               _dataIntakeLoader;
 
         //--//
 
@@ -74,7 +74,7 @@
                                                     new Func<QueuedItem, string>( m => m.JsonData ),
                                                     _logger );
 
-                _dataIntakeLoader = new DataIntakeLoader( Loader.GetSources( ), Loader.GetEndpoints( ), _logger );
+                _dataIntakeLoader = new DeviceAdapterLoader( Loader.GetSources( ), Loader.GetEndpoints( ), _logger );
             }
             catch( Exception ex )
             {
