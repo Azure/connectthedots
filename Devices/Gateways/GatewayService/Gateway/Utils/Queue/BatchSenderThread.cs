@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Gateway.Utils.MessageSender;
-using Gateway.Utils.OperationStatus;
-using Gateway.Utils.Logger;
-using System.Diagnostics;
-using SharedInterfaces;
-
-namespace Gateway.Utils.Queue
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using System.Diagnostics;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     public class BatchSenderThread<TQueueItem, TMessage> : EventProcessor
     {
         private readonly IAsyncQueue<TQueueItem> _DataSource;
@@ -227,10 +226,9 @@ namespace Gateway.Utils.Queue
                         // alert any client about outstanding message tasks
                         if (eventBatchProcessed != null)
                         {
-                            Task.Run(() =>
-                            {
-                                eventBatchProcessed(tasks);
-                            });
+                            var sh = new SafeAction<List<Task>>( t => eventBatchProcessed( t ), Logger );
+
+                            Task.Run( () => sh.SafeInvoke( tasks ) ); 
                         }
                     }
                     catch (StackOverflowException ex)

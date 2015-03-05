@@ -1,15 +1,18 @@
 ﻿//#define SIMULATEDATA
 
-using System;
-using System.Collections.Generic;
-using System.IO.Ports;
-using System.Threading;
-using System.Threading.Tasks;
-using Gateway.DataIntake;
-using SharedInterfaces;
 
 namespace SerialPortListener
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO.Ports;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Gateway;
+
+    //--//
+
     public class SerialPortListenerThread : DataIntakeAbstract
     {
         internal class SerialPortListeningThread
@@ -41,7 +44,9 @@ namespace SerialPortListener
 
             _DoWorkSwitch = true;
 
-            Task.Run( ( ) => RunForSerial( ) );
+            var sh = new SafeAction<int>( ( t ) => RunForSerial( t ), _Logger ); 
+
+            Task.Run( ( ) => sh.SafeInvoke( SLEEP_TIME_BETWEEN_SCAN ) );
 
             return true;
         }
@@ -62,7 +67,7 @@ namespace SerialPortListener
             return false;
         }
 
-        public int RunForSerial()
+        public int RunForSerial( int scanPeriod )
         {
 #if LOG_MESSAGE_RATE
             var stopWatch = Stopwatch.StartNew();
@@ -124,7 +129,7 @@ namespace SerialPortListener
                 }
 #endif
                 // Every 5 seconds we scan Serial COM ports
-                Thread.Sleep(SLEEP_TIME_BETWEEN_SCAN);
+                Thread.Sleep( scanPeriod );
             } while (_DoWorkSwitch);
             return 0;
         }

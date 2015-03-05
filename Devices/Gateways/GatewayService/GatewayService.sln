@@ -3,30 +3,33 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsService", "WindowsService\WindowsService.csproj", "{38A27FC0-2864-49A8-BDA3-D7E22D276B29}"
-	ProjectSection(ProjectDependencies) = postProject
-		{CA90B613-C4D6-4011-BC6B-CCC8DE62DAC0} = {CA90B613-C4D6-4011-BC6B-CCC8DE62DAC0}
-	EndProjectSection
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConnectTheDots.GatewayService", "WindowsService\Microsoft.ConnectTheDots.GatewayService.csproj", "{38A27FC0-2864-49A8-BDA3-D7E22D276B29}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreTest", "Tests\CoreTest\CoreTest.csproj", "{CA90B613-C4D6-4011-BC6B-CCC8DE62DAC0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{74BF7EFF-11AD-4587-9C35-9419831D1116}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gateway", "Gateway\Gateway.csproj", "{E14D1C61-1979-452E-BE8B-0303A95EF764}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConnectTheDots.Gateway", "Gateway\Microsoft.ConnectTheDots.Gateway.csproj", "{E14D1C61-1979-452E-BE8B-0303A95EF764}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BatchSenderThreadTest", "Tests\BatchSenderThreadTest\BatchSenderThreadTest.csproj", "{8279853A-07AE-4AF8-BC5F-FCD1696ABB4D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataIntakes", "DataIntakes", "{5094CC44-E8F8-4472-8042-BE7E78899225}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerialPortListener", "DataIntakes\SerialPortListener\SerialPortListener.csproj", "{A7B77408-0DBA-4384-A31A-404187CAEC89}"
+	ProjectSection(ProjectDependencies) = postProject
+		{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D} = {96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketListener", "DataIntakes\SocketListener\SocketListener.csproj", "{9D9DA1EB-90DA-4FC0-A97F-C650201DD994}"
+	ProjectSection(ProjectDependencies) = postProject
+		{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D} = {96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketServiceDeviceMock", "Tests\SocketServiceDeviceMock\SocketServiceDeviceMock.csproj", "{91C31E86-7DDB-4C29-8A65-56596478013C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataIntakeTestMock", "Tests\DataIntakeTestMock\DataIntakeTestMock.csproj", "{756AB4B0-BC00-4297-A4F0-3DB40B7E2181}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedInterfaces", "SharedInterfaces\SharedInterfaces.csproj", "{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConnectTheDots.Common", "SharedInterfaces\Microsoft.ConnectTheDots.Common.csproj", "{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{A5D7B51F-689A-4BB1-AE4C-7C12F4B443FA}"
 	ProjectSection(SolutionItems) = preProject
@@ -55,7 +58,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WindowsService", "WindowsSe
 		Config\WindowsService\App.config = Config\WindowsService\App.config
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceMonitor", "ServiceMonitor\ServiceMonitor.csproj", "{7DB057F5-2B79-4822-9A3F-1B7F30EB552F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConnectTheDots.ServiceMonitor", "ServiceMonitor\Microsoft.ConnectTheDots.ServiceMonitor.csproj", "{7DB057F5-2B79-4822-9A3F-1B7F30EB552F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Gateway", "Gateway", "{048641FD-5970-4D79-9DA2-07CDCD9FAC43}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -108,14 +113,18 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{38A27FC0-2864-49A8-BDA3-D7E22D276B29} = {048641FD-5970-4D79-9DA2-07CDCD9FAC43}
 		{CA90B613-C4D6-4011-BC6B-CCC8DE62DAC0} = {74BF7EFF-11AD-4587-9C35-9419831D1116}
+		{E14D1C61-1979-452E-BE8B-0303A95EF764} = {048641FD-5970-4D79-9DA2-07CDCD9FAC43}
 		{8279853A-07AE-4AF8-BC5F-FCD1696ABB4D} = {74BF7EFF-11AD-4587-9C35-9419831D1116}
 		{A7B77408-0DBA-4384-A31A-404187CAEC89} = {5094CC44-E8F8-4472-8042-BE7E78899225}
 		{9D9DA1EB-90DA-4FC0-A97F-C650201DD994} = {5094CC44-E8F8-4472-8042-BE7E78899225}
 		{91C31E86-7DDB-4C29-8A65-56596478013C} = {74BF7EFF-11AD-4587-9C35-9419831D1116}
 		{756AB4B0-BC00-4297-A4F0-3DB40B7E2181} = {74BF7EFF-11AD-4587-9C35-9419831D1116}
+		{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D} = {048641FD-5970-4D79-9DA2-07CDCD9FAC43}
 		{34475128-5EFB-4A85-9FD5-30F9D7670DE0} = {91C9B120-0E62-4942-ACE1-FF1E38F960F3}
 		{079B0668-D666-4CAB-BED3-C2093CBD20C8} = {91C9B120-0E62-4942-ACE1-FF1E38F960F3}
 		{71E19A15-D3EA-4397-B641-1F2A6FD50C7D} = {91C9B120-0E62-4942-ACE1-FF1E38F960F3}
+		{7DB057F5-2B79-4822-9A3F-1B7F30EB552F} = {048641FD-5970-4D79-9DA2-07CDCD9FAC43}
 	EndGlobalSection
 EndGlobal

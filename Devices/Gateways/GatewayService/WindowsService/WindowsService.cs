@@ -1,22 +1,15 @@
-﻿using System;
-using System.ServiceModel.Web;
-using System.ServiceProcess;
-using WindowsService.Utils;
-using WindowsService.Utils.Logger;
-using Gateway;
-using Gateway.Models;
-using Gateway.ServiceInstantiation;
-using Gateway.Utils.Loader;
-using Gateway.Utils.MessageSender;
-using Gateway.Utils.Queue;
-using SharedInterfaces;
-using System.Threading.Tasks;
-using Gateway.Utils.Logger;
-using System.Configuration;
-
-
-namespace WindowsService
+﻿namespace Microsoft.ConnectTheDots.GatewayService
 {
+    using System;
+    using System.ServiceModel.Web;
+    using System.ServiceProcess;
+    using System.Threading.Tasks;
+    using System.Configuration;
+    using Microsoft.ConnectTheDots.Gateway;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     public class WindowsService : ServiceBase
     {
         private const int STOP_TIMEOUT_MS = 5000; // ms
@@ -100,8 +93,8 @@ namespace WindowsService
 
             _BatchSenderThread.Start();
 
-            _WebHost = new WebServiceHost(typeof(Gateway.GatewayService));
-            Gateway.GatewayService service = new Gateway.GatewayService(_GatewayQueue, _BatchSenderThread);
+            _WebHost = new WebServiceHost( typeof( Microsoft.ConnectTheDots.Gateway.GatewayService ) );
+            Gateway.GatewayService service = new Microsoft.ConnectTheDots.Gateway.GatewayService( _GatewayQueue, _BatchSenderThread );
             _WebHost.Description.Behaviors.Add(new ServiceBehavior(() => service));
 
             service.Logger = _Logger;

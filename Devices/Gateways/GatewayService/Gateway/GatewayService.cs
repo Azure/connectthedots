@@ -1,15 +1,15 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Gateway.Models;
-using Gateway.Utils.Queue;
-using SharedInterfaces;
-
-namespace Gateway
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     public class GatewayService : IGatewayService
     {
-        public delegate void DataInQueueEventHandler(QueuedItem data);
+        public delegate void DataInQueueEventHandler( QueuedItem data ); 
 
         private readonly IAsyncQueue<QueuedItem> _Queue;
         private readonly EventProcessor _EventProcessor;
@@ -55,7 +55,9 @@ namespace Gateway
 
             if (newData != null)
             {
-                Task.Run(() => newData(data));
+                var sh = new SafeAction<QueuedItem>( d => newData( d ), Logger );
+
+                Task.Run( () => sh.SafeInvoke( data ) ); 
             }
 
             LogMessageReceived( );
@@ -80,12 +82,10 @@ namespace Gateway
 
                 _start = now;
 
-                Task.Run( ( ) =>
-                {
-                    Logger.LogInfo(
-                        String.Format( "GatewayService received {0} events succesfully in {1} ms ", Constants.MessagesLoggingThreshold, elapsed.TotalMilliseconds.ToString( ) )
-                        );
-                } );
+                var sh = new SafeAction<String>( s => Logger.LogInfo( s ), Logger );
+
+                Task.Run( () => sh.SafeInvoke( 
+                    String.Format( "GatewayService received {0} events succesfully in {1} ms ", Constants.MessagesLoggingThreshold, elapsed.TotalMilliseconds.ToString( ) ) ) );
             }
         }
     }

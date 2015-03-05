@@ -1,7 +1,9 @@
-﻿using System;
-
-namespace Gateway.Utils.OperationStatus
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+    using System;
+
+    //--//
+
     public static class OperationStatusFactory
     {
         private static readonly OperationStatus _SuccessConst = new OperationStatus { OperationCode = ErrorCode.Success };

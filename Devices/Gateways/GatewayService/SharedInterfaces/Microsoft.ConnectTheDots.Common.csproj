@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7DB057F5-2B79-4822-9A3F-1B7F30EB552F}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ServiceMonitor</RootNamespace>
-    <AssemblyName>ServiceMonitor</AssemblyName>
+    <RootNamespace>Microsoft.ConnectTheDots.Common</RootNamespace>
+    <AssemblyName>Microsoft.ConnectTheDots.Common</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -32,13 +30,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NLog">
-      <HintPath>..\packages\NLog.3.2.0.0\lib\net45\NLog.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,33 +39,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IMonitor.cs" />
-    <Compile Include="ProcessMonitor.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="ILogger.cs" />
+    <Compile Include="Logger\SafeLogger.cs" />
+    <Compile Include="Logger\TunableLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServiceMonitor.cs" />
-    <Compile Include="Utils\Logger\Logger.cs" />
+    <Compile Include="SafeAction.cs" />
+    <Compile Include="SafeFunction.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-    <Content Include="NLog.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <None Include="NLog.xsd">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Gateway\Gateway.csproj">
-      <Project>{e14d1c61-1979-452e-be8b-0303a95ef764}</Project>
-      <Name>Gateway</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SharedInterfaces\SharedInterfaces.csproj">
-      <Project>{96feda4b-c7e0-4ddb-ad3a-bff2fd8d973d}</Project>
-      <Name>SharedInterfaces</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,11 +1,10 @@
-﻿using System.ServiceModel;
-using System.ServiceModel.Web;
-using System.Threading.Tasks;
-using Gateway.Models;
-using Gateway.ServiceInstantiation;
-
-namespace Gateway
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+    using System.ServiceModel;
+    using System.ServiceModel.Web;
+
+    //--//
+
     [ServiceContract(Namespace = "GatewayService")]
     public interface IGatewayService : IService
     {

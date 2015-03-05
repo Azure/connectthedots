@@ -1,7 +1,9 @@
-﻿using System.Threading.Tasks;
-
-namespace Gateway.Utils.MessageSender
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+    using System.Threading.Tasks;
+
+    //--//
+
     public interface IMessageSender<in T>
     {
         Task SendMessage(T data);

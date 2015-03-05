@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Amqp;
-using Amqp.Framing;
-using Gateway.Utils.Logger;
-using Newtonsoft.Json;
-using SharedInterfaces;
-
-namespace Gateway.Utils.MessageSender
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Amqp;
+    using Amqp.Framing;
+    using Newtonsoft.Json;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     public class AMQPSender<T> : IMessageSender<T>
     {
         private const int STOP_TIMEOUT_MS = 5000; // ms
@@ -262,10 +263,13 @@ namespace Gateway.Utils.MessageSender
 
         private async Task PrepareAndSend(string jsonData)
         {
-            Message m = PrepareMessage(jsonData);
+            Message msg = PrepareMessage(jsonData);
             // send to the cloud asynchronously, but wait for completetion
             // this is actually serializing access to the SenderLink type
-            await Task.Run(() => SendAmqpMessage( m ));
+
+            var sh = new SafeAction<Message>( m => SendAmqpMessage( m ), Logger );
+
+            await Task.Run( () => sh.SafeInvoke( msg ) ); 
         }
 
         private void SendAmqpMessage( Message m )
@@ -408,13 +412,11 @@ namespace Gateway.Utils.MessageSender
 
                     _start = now;
 
-                    Task.Run(() =>
-                    {
-                        Logger.LogInfo(
-                            String.Format("GatewayService sent {0} events to Event Hub succesfully in {1} ms ",
-                                Constants.MessagesLoggingThreshold, elapsed.TotalMilliseconds.ToString())
-                            );
-                    });
+                    var sh = new SafeAction<String>( s => Logger.LogInfo( s ), Logger );
+
+                    Task.Run( () => sh.SafeInvoke(
+                        String.Format( "GatewayService sent {0} events to Event Hub succesfully in {1} ms ",
+                                Constants.MessagesLoggingThreshold, elapsed.TotalMilliseconds.ToString() ) ) );
                 }
             }
             else

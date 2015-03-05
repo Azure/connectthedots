@@ -1,10 +1,10 @@
-﻿using System;
-using System.Threading;
-using CoreTest.Utils.Logger;
-using Gateway.Utils.Logger;
-
-namespace BatchSenderThreadTest
+﻿namespace Microsoft.ConnectTheDots.Test
 {
+    using System;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     class TestRunner
     {
         static void Main(string[] args)

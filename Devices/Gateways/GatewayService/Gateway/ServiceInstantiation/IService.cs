@@ -1,4 +1,4 @@
-﻿namespace Gateway.ServiceInstantiation
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
     public interface IService
     {

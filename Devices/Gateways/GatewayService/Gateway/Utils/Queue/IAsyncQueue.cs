@@ -1,8 +1,9 @@
-﻿using System.Threading.Tasks;
-using Gateway.Utils.OperationStatus;
-
-namespace Gateway.Utils.Queue
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+    using System.Threading.Tasks;
+
+    //--//
+
     public interface IAsyncQueue<T>
     {
         void Push(T item);

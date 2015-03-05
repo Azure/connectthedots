@@ -1,21 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Configuration;
-using System.Diagnostics;
-using System.Collections.Specialized;
-using SharedInterfaces;
-using Gateway.Utils.Logger;
-using System.Reflection;
-using System.ComponentModel;
-
-
-namespace ServiceMonitor
+﻿namespace ServiceMonitor
 {
+    using System;
+    using System.Configuration;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     class Program
     {
         private static ILogger _logger = SafeLogger.FromLogger( MonitorLogger.Instance );

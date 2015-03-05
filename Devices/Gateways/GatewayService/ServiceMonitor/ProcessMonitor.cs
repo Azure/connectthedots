@@ -1,18 +1,14 @@
-﻿using Gateway.Utils.Logger;
-using SharedInterfaces;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace ServiceMonitor
+﻿namespace ServiceMonitor
 {
+    using System;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Reflection;
+    using System.Threading;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     internal class ProcessMonitor : IMonitor
     {
         protected const int MONITORING_INTERVAL = 1000; // ms

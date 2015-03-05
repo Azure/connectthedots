@@ -1,10 +1,12 @@
-﻿using System;
-using System.ServiceModel;
-using System.ServiceModel.Channels;
-using System.ServiceModel.Dispatcher;
-
-namespace Gateway.ServiceInstantiation
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+    using System;
+    using System.ServiceModel;
+    using System.ServiceModel.Channels;
+    using System.ServiceModel.Dispatcher;
+
+    //--//
+
     class ServiceInstanceProvider : IInstanceProvider
     {
         readonly Func<IService> serviceCreator;

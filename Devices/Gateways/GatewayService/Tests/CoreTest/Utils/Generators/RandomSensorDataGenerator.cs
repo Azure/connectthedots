@@ -1,8 +1,10 @@
-﻿using System;
-using Gateway.Models;
-
-namespace CoreTest.Utils.Generators
+﻿namespace Microsoft.ConnectTheDots.Test
 {
+    using System;
+    using Microsoft.ConnectTheDots.Gateway;
+
+    //--//
+
     public static class RandomSensorDataGenerator
     {
         //Simple generator for initial testing

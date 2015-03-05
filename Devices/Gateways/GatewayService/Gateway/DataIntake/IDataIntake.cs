@@ -1,7 +1,9 @@
-﻿using System;
-
-namespace Gateway.DataIntake
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+    using System;
+
+    //--//
+
     public interface IDataIntake
     {
         bool Start( Func<string, int> enqueue );

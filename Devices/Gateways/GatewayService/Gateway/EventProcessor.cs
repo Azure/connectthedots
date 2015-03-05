@@ -1,10 +1,11 @@
-﻿using System.Threading.Tasks;
-using Gateway.Utils.Logger;
-using System.Collections.Generic;
-using SharedInterfaces;
-
-namespace Gateway
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+    using System.Threading.Tasks;
+    using System.Collections.Generic;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     public abstract class EventProcessor
     {
         public delegate void EventBatchProcessedEventHandler( List<Task> messages );

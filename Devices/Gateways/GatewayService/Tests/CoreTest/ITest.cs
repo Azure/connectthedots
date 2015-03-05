@@ -1,4 +1,4 @@
-﻿namespace CoreTest
+﻿namespace Microsoft.ConnectTheDots.Test
 {
     interface ITest
     {

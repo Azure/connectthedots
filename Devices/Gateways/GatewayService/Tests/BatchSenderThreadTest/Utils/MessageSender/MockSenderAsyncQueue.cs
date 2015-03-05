@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Gateway.Utils.MessageSender;
-using Gateway.Utils.Queue;
-
-namespace BatchSenderThreadTest.Utils.MessageSender
+﻿namespace Microsoft.ConnectTheDots.Test
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.ConnectTheDots.Gateway;
+    
+    //--//
+
     internal class MockSenderAsyncQueue<T> : IMessageSender<T>
     {
         protected GatewayQueue<T> _SentMessagesQueue = new GatewayQueue<T>();

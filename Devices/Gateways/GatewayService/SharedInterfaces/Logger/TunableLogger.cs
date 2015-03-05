@@ -1,8 +1,9 @@
-﻿using System;
-using SharedInterfaces;
-
-namespace Gateway.Utils.Logger
+﻿namespace Microsoft.ConnectTheDots.Common
 {
+    using System;
+
+    //--//
+
     public class TunableLogger : ILogger
     {
         public enum LoggingLevel

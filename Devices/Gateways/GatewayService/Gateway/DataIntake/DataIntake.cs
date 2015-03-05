@@ -1,9 +1,10 @@
-﻿using System;
-using Gateway.Utils.Logger;
-using SharedInterfaces;
-
-namespace Gateway.DataIntake
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+    using System;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     public delegate void DataArrivalEventHandler( string data );
 
     public abstract class DataIntakeAbstract : IDataIntake

@@ -1,10 +1,12 @@
-﻿using System.ComponentModel;
-using System.Configuration.Install;
-using System.ServiceProcess;
-using Gateway;
-
-namespace WindowsService
+﻿namespace Microsoft.ConnectTheDots.GatewayService
 {
+    using System.ComponentModel;
+    using System.Configuration.Install;
+    using System.ServiceProcess;
+    using Microsoft.ConnectTheDots.Gateway;
+
+    //--//
+
     [RunInstaller(true)]
     public class ProjectInstaller : Installer
     {

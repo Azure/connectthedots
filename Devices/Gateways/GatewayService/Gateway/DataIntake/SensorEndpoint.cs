@@ -1,5 +1,8 @@
-﻿namespace Gateway.DataIntake
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+
+    //--//
+
     public class SensorEndpoint
     {
         public string Name { get; set; }

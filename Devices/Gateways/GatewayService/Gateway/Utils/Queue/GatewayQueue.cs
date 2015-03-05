@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Tasks;
-using Gateway.Utils.OperationStatus;
-
-namespace Gateway.Utils.Queue
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Threading.Tasks;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     public class GatewayQueue<T> : IAsyncQueue<T>
     {
         private readonly ConcurrentQueue<T> _Queue = new ConcurrentQueue<T>();
@@ -19,14 +20,22 @@ namespace Gateway.Utils.Queue
         {
             try
             {
-                OperationStatus<T> result = await Task.Run(() =>
-                {
+                Func<OperationStatus<T>> deque = ( ) => {
                     T returnedItem;
+
                     bool isReturned = _Queue.TryDequeue(out returnedItem);
+
                     if (isReturned)
-                        return OperationStatusFactory.CreateSuccess<T>(returnedItem);
-                    return OperationStatusFactory.CreateError<T>(ErrorCode.NoDataReceived);
-                });
+                    {
+                        return OperationStatusFactory.CreateSuccess<T>(returnedItem); 
+                    }
+
+                    return OperationStatusFactory.CreateError<T>( ErrorCode.NoDataReceived );
+                };
+
+                var sf = new SafeFunc<OperationStatus<T>>( deque, null );
+
+                OperationStatus<T> result = await Task.Run( () => sf.SafeInvoke() ); 
 
                 return result;
             }

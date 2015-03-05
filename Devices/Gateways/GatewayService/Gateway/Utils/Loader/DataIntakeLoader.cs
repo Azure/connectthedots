@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using Gateway.DataIntake;
-using Gateway.Utils.Logger;
-using SharedInterfaces;
-using System.IO;
-using System.Diagnostics;
-
-namespace Gateway.Utils.Loader
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Reflection;
+    using System.IO;
+    using System.Diagnostics;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     public class DataIntakeLoader
     {
         private readonly IList<DataIntakeAbstract> _DataIntakes = new List<DataIntakeAbstract>();

@@ -1,13 +1,12 @@
-﻿using System;
-using System.Threading;
-using BatchSenderThreadTest.Utils.MessageSender;
-using Gateway;
-using Gateway.Utils.Queue;
-using CoreTest.Utils.Logger;
-using SharedInterfaces;
-
-namespace BatchSenderThreadTest
+﻿namespace Microsoft.ConnectTheDots.Test
 {
+    using System;
+    using System.Threading;
+    using Microsoft.ConnectTheDots.Gateway;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     public class BatchSenderThreadTest
     {
         private readonly ILogger _testLogger;

@@ -1,4 +1,4 @@
-﻿namespace Gateway
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
     public static class Constants
     {

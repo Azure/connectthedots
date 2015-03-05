@@ -32,7 +32,7 @@ echo "Trying to kill all mono processes..."
 for KILLPID in `ps ax | grep -i 'mono'           | awk '{ print $1;}'`; do sudo kill -9 $KILLPID; done
 for KILLPID in `ps ax | grep -i 'gatewayservice' | awk '{ print $1;}'`; do sudo kill -9 $KILLPID; done
 echo "Trying to delete lock file if there is any..."
-sudo rm -f /tmp/GatewayService.exe.lock
+sudo rm -f /tmp/Microsoft.ConnectTheDots.GatewayService.exe.lock
 
 # move all files from Staging GW_HOME to runtime folder, delete logs
 echo upading files
@@ -50,8 +50,8 @@ export MONO_EVENTLOG_TYPE=local
 #
 echo "Starting Gateway"
 cd $GW_HOME
-#MONO_LOG_LEVEL=debug /usr/bin/mono-service $GW_HOME/GatewayService.exe --debug > monoOutput.txt &
-/usr/bin/mono-service $GW_HOME/GatewayService.exe
+#MONO_LOG_LEVEL=debug /usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.exe --debug > monoOutput.txt &
+/usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.exe
 
 #
 # Add the below line to /etc/rc.local

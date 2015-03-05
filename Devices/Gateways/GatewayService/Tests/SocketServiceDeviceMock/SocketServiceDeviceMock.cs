@@ -1,9 +1,9 @@
-﻿using Gateway.DataIntake;
-using CoreTest.Devices;
-using SocketDeviceMock.Utils.Logger;
-
-namespace SocketServiceDeviceMock
+﻿namespace Microsoft.ConnectTheDots.Test
 {
+    using Microsoft.ConnectTheDots.Gateway;
+
+    //--//
+
     class SocketServiceDeviceMock
     {
         static void Main(string[] args)

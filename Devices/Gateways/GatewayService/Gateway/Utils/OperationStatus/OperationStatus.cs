@@ -1,7 +1,9 @@
-﻿using System.Diagnostics;
-
-namespace Gateway.Utils.OperationStatus
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+    using System.Diagnostics;
+
+    //--//
+
     [DebuggerDisplay("OperationCode = {OperationCode}")]
     public sealed class OperationStatus
     {

@@ -1,11 +1,13 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
-using Gateway;
-using SharedInterfaces;
-using NLog;
-
-namespace WindowsService.Utils.Logger
+﻿namespace Microsoft.ConnectTheDots.GatewayService
 {
+    using System.ComponentModel;
+    using System.Diagnostics;
+    using Gateway;
+    using Microsoft.ConnectTheDots.Common;
+    using NLog;
+
+    //--//
+
     public class EventLogger : ILogger
     {
         #region Singleton implementation

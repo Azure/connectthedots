@@ -1,7 +1,6 @@
-﻿using SharedInterfaces;
-
-namespace Gateway.Utils.Logger
+﻿namespace Microsoft.ConnectTheDots.Common
 {
+
     public class SafeLogger : ILogger
     {
         protected ILogger _Logger;

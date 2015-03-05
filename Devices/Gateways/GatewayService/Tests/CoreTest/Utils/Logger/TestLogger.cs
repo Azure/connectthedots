@@ -1,8 +1,10 @@
-﻿using System.Diagnostics;
-using SharedInterfaces;
-
-namespace CoreTest.Utils.Logger
+﻿namespace Microsoft.ConnectTheDots.Test
 {
+    using System.Diagnostics;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     public class TestLogger : ILogger
     {
         #region Singleton implementation

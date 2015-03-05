@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using Gateway.DataIntake;
-
-namespace CoreTest.Utils.Loader
+﻿namespace Microsoft.ConnectTheDots.Test
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Configuration;
+    using Microsoft.ConnectTheDots.Gateway;
+
+    //--//
+
     internal class AMQPConfig
     {
         public string AMQPSAddress;

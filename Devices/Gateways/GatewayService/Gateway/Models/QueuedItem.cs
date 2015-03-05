@@ -1,10 +1,12 @@
-﻿using System;
-using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using SharedInterfaces;
-
-namespace Gateway.Models
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+    using System;
+    using System.Runtime.Serialization;
+    using Newtonsoft.Json;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     [DataContract]
     public class QueuedItem
     {

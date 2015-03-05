@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using Gateway.DataIntake;
-
-namespace WindowsService.Utils
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Configuration;
+
+    //--//
+
     internal class AMQPConfig
     {
         public string AMQPSAddress;
@@ -37,12 +38,11 @@ namespace WindowsService.Utils
         {
             var sensorEndpoints = new List<SensorEndpoint>();
 
-            CoreTest.Utils.Loader.SensorEndpointConfigSection sensorEndpointItems = ConfigurationManager.GetSection("sensorEndpoints")
-                as CoreTest.Utils.Loader.SensorEndpointConfigSection;
+            SensorEndpointConfigSection sensorEndpointItems = ConfigurationManager.GetSection("sensorEndpoints") as SensorEndpointConfigSection;
 
             if (sensorEndpointItems != null)
             {
-                foreach (CoreTest.Utils.Loader.SensorEndpointConfigInstanceElement sensorEndpointItem in sensorEndpointItems.Instances)
+                foreach (SensorEndpointConfigInstanceElement sensorEndpointItem in sensorEndpointItems.Instances)
                 {
                     sensorEndpoints.Add(new SensorEndpoint
                     {

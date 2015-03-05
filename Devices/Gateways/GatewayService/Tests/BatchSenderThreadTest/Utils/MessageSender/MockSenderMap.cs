@@ -1,26 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Gateway.Utils.MessageSender;
-
-namespace BatchSenderThreadTest.Utils.MessageSender
+﻿namespace Microsoft.ConnectTheDots.Test
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Gateway;
+
+    //--//
+
     internal class MockSenderMap<T> : IMessageSender<T>
     {
         protected SortedDictionary<T, int> _SentMessages = new SortedDictionary<T,int>();
 
         public async Task SendMessage(T data)
         {
-            await Task.Run(() =>
-            {
+            Action<T> send = (d) => {
                 lock (_SentMessages)
                 {
-                    if (_SentMessages.ContainsKey(data))
-                        _SentMessages[data]++;
-                    else _SentMessages.Add(data, 1);
+                    if (_SentMessages.ContainsKey(d))
+                        _SentMessages[d]++;
+                    else _SentMessages.Add(d, 1);
                 }
-            });
+            };
+
+            var sh = new SafeAction<T>( ( d ) => send( d ), null ); 
+
+            await Task.Run(() => sh.SafeInvoke( data ) ); 
         }
 
         public Task SendSerialized(string jsonData)

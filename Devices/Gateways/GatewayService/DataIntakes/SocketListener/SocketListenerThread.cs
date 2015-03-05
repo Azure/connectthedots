@@ -1,14 +1,17 @@
-﻿using System;
-using System.Net.Sockets;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using Gateway.DataIntake;
-using SharedInterfaces;
-
+﻿
 namespace SocketListener
 {
+    using System;
+    using System.Net.Sockets;
+    using System.Text;
+    using System.Text.RegularExpressions;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Gateway;
+
+    //--//
+
     public class SocketListenerThread : DataIntakeAbstract
     {
         const int CONNECTION_RETRIES = 20;
@@ -31,7 +34,9 @@ namespace SocketListener
 
             _DoWorkSwitch = true;
 
-            Task.Run( ( ) => RunForSocket( ) );
+            var sh = new SafeAction<int>( ( t ) => RunForSocket( t ), _Logger );
+
+            Task.Run( () => sh.SafeInvoke( CONNECTION_RETRIES ) );
 
             return true;
         }
@@ -56,9 +61,9 @@ namespace SocketListener
             return true;
         }
 
-        private int RunForSocket()
+        private int RunForSocket( int retries )
         {
-            int step = CONNECTION_RETRIES;
+            int step = retries;
 
             Socket client = null;
             while (_DoWorkSwitch)//--step > 0 &&

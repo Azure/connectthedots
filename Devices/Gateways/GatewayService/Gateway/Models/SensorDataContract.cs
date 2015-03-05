@@ -1,8 +1,10 @@
-﻿using System;
-using System.Runtime.Serialization;
-
-namespace Gateway.Models
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
+    using System;
+    using System.Runtime.Serialization;
+
+    //--//
+
     [DataContract]
     public class SensorDataContract
     {

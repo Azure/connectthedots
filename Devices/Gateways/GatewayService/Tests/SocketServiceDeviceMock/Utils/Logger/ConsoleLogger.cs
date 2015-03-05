@@ -1,8 +1,10 @@
-﻿using System;
-using SharedInterfaces;
-
-namespace SocketDeviceMock.Utils.Logger
+﻿namespace Microsoft.ConnectTheDots.Test
 {
+    using System;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     public class ConsoleLogger : ILogger
     {
         public void LogError(string logMessage)

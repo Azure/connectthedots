@@ -1,14 +1,14 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Gateway.DataIntake;
-using Gateway.Models;
-using CoreTest.Utils.Generators;
-using Newtonsoft.Json;
-using SharedInterfaces;
-
-namespace DataIntakeTestMock
+﻿namespace Microsoft.ConnectTheDots.Test
 {
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Newtonsoft.Json;
+    using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Gateway;
+
+    //--//
+
     public class DataIntakeTestMockThread : DataIntakeAbstract
     {
         private const int SLEEP_TIME_MS = 1000;
@@ -28,7 +28,9 @@ namespace DataIntakeTestMock
 
             _DoWorkSwitch = true;
 
-            Task.Run( ( ) => TestRun( ) );
+            var sh = new SafeAction<int>( ( t ) => TestRun( t ), _Logger );
+
+            Task.Run( () => sh.SafeInvoke( SLEEP_TIME_MS ) );
 
             return true;
         }
@@ -49,7 +51,7 @@ namespace DataIntakeTestMock
             return false;
         }
 
-        public void TestRun()
+        public void TestRun( int sleepTime )
         {
             int messagesSent = 0;
             do
@@ -65,7 +67,7 @@ namespace DataIntakeTestMock
                     _Logger.LogInfo(LOG_MESSAGE_RATE + " messages sent via DataIntakeTestMock.");
                 }
 
-                Thread.Sleep(SLEEP_TIME_MS);
+                Thread.Sleep( sleepTime );
 
             } while (_DoWorkSwitch);
         }

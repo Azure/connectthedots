@@ -64,13 +64,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Gateway\Gateway.csproj">
+    <ProjectReference Include="..\..\Gateway\Microsoft.ConnectTheDots.Gateway.csproj">
       <Project>{e14d1c61-1979-452e-be8b-0303a95ef764}</Project>
-      <Name>Gateway</Name>
+      <Name>Microsoft.ConnectTheDots.Gateway</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\SharedInterfaces\SharedInterfaces.csproj">
-      <Project>{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}</Project>
-      <Name>SharedInterfaces</Name>
+    <ProjectReference Include="..\..\SharedInterfaces\Microsoft.ConnectTheDots.Common.csproj">
+      <Project>{96feda4b-c7e0-4ddb-ad3a-bff2fd8d973d}</Project>
+      <Name>Microsoft.ConnectTheDots.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

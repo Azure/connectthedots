@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Gateway;
-using Gateway.Models;
-using Gateway.Utils.Logger;
-using Gateway.Utils.MessageSender;
-using Gateway.Utils.Queue;
-using CoreTest.Utils.Logger;
-using System.Net;
-using System.Diagnostics;
-using SharedInterfaces;
-
-
-namespace CoreTest
+﻿namespace Microsoft.ConnectTheDots.Test
 {
+    using System;
+    using System.Threading;
+    using System.Net;
+    using System.Diagnostics;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     public class WebServiceTest : ITest
     {
         public const int TEST_ITERATIONS = 100;

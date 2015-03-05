@@ -1,22 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using CoreTest.Devices;
-using CoreTest.Utils.MessageSender;
-using Gateway;
-using Gateway.DataIntake;
-using Gateway.Models;
-using Gateway.Utils.Loader;
-using Gateway.Utils.MessageSender;
-using Gateway.Utils.Queue;
-using CoreTest.Utils.Logger;
-using CoreTest.Utils.Loader;
-using SharedInterfaces;
-
-namespace CoreTest
+﻿namespace Microsoft.ConnectTheDots.Test
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Microsoft.ConnectTheDots.Gateway;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     public class SocketTest : ITest
     {
         public const int TEST_ITERATIONS = 5;

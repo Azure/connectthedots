@@ -1,14 +1,13 @@
-﻿using System;
-using Gateway.Models;
-using CoreTest.Utils.Generators;
-using Newtonsoft.Json;
-using SharedInterfaces;
-using Gateway.Utils.Logger;
-using CoreTest.Utils.Logger;
-using System.Configuration;
-
-namespace CoreTest
+﻿namespace Microsoft.ConnectTheDots.Test
 {
+    using System;
+    using System.Configuration;
+    using Newtonsoft.Json;
+    using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Gateway;
+
+    //--//
+
     public class TestRunner
     {
         static void Main(string[] args)

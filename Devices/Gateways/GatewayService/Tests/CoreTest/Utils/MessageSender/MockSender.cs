@@ -1,10 +1,12 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Gateway.Utils.MessageSender;
-using System;
-
-namespace CoreTest.Utils.MessageSender
+﻿namespace Microsoft.ConnectTheDots.Test
 {
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Microsoft.ConnectTheDots.Gateway;
+
+    //--//
+
     internal class MockSender<T> : IMessageSender<T>
     {
         private static readonly int MAX_LAG = 1; // ms

@@ -7,7 +7,7 @@
     <ProjectGuid>{8279853A-07AE-4AF8-BC5F-FCD1696ABB4D}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BatchSenderThreadTest</RootNamespace>
+    <RootNamespace>Microsoft.ConnectTheDots.Test</RootNamespace>
     <AssemblyName>BatchSenderThreadTest</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -51,17 +51,17 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\SharedInterfaces\SharedInterfaces.csproj">
-      <Project>{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}</Project>
-      <Name>SharedInterfaces</Name>
+    <ProjectReference Include="..\..\SharedInterfaces\Microsoft.ConnectTheDots.Common.csproj">
+      <Project>{96feda4b-c7e0-4ddb-ad3a-bff2fd8d973d}</Project>
+      <Name>Microsoft.ConnectTheDots.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\WindowsService\WindowsService.csproj">
+    <ProjectReference Include="..\..\WindowsService\Microsoft.ConnectTheDots.GatewayService.csproj">
       <Project>{38A27FC0-2864-49A8-BDA3-D7E22D276B29}</Project>
-      <Name>WindowsService</Name>
+      <Name>Microsoft.ConnectTheDots.GatewayService</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Gateway\Gateway.csproj">
+    <ProjectReference Include="..\..\Gateway\Microsoft.ConnectTheDots.Gateway.csproj">
       <Project>{E14D1C61-1979-452E-BE8B-0303A95EF764}</Project>
-      <Name>Gateway</Name>
+      <Name>Microsoft.ConnectTheDots.Gateway</Name>
     </ProjectReference>
     <ProjectReference Include="..\CoreTest\CoreTest.csproj">
       <Project>{CA90B613-C4D6-4011-BC6B-CCC8DE62DAC0}</Project>

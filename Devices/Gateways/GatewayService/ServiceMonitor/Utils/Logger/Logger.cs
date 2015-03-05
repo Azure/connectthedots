@@ -1,11 +1,12 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
-using Gateway;
-using SharedInterfaces;
-using NLog;
-
-namespace ServiceMonitor
+﻿namespace ServiceMonitor
 {
+    using System.ComponentModel;
+    using System.Diagnostics;
+    using NLog;
+    using Microsoft.ConnectTheDots.Common;
+
+    //--//
+
     public class MonitorLogger : ILogger
     {
         #region Singleton implementation

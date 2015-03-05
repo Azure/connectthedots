@@ -1,4 +1,4 @@
-﻿namespace SharedInterfaces
+﻿namespace Microsoft.ConnectTheDots.Common
 {
     public interface ILogger
     {

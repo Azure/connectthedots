@@ -1,4 +1,4 @@
-﻿namespace Gateway.Utils.OperationStatus
+﻿namespace Microsoft.ConnectTheDots.Gateway
 {
     public enum ErrorCode
     {

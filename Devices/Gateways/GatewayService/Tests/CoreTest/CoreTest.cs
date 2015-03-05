@@ -1,24 +1,19 @@
 ﻿//#define MOCK_SENDER
 
-using System;
-using System.Diagnostics;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using CoreTest.Utils.MessageSender;
-using Gateway;
-using Gateway.DataIntake;
-using Gateway.Models;
-using Gateway.Utils.Loader;
-using Gateway.Utils.MessageSender;
-using Gateway.Utils.Queue;
-using CoreTest.Utils.Logger;
-using CoreTest.Utils.Loader;
-using SharedInterfaces;
-using System.Text;
-
-namespace CoreTest
+namespace Microsoft.ConnectTheDots.Test
 {
+
+    using System;
+    using System.Diagnostics;
+    using System.Collections.Generic;
+    using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Gateway;
+
+    //--//
+
     public class CoreTest : ITest
     {
         public const int TEST_ITERATIONS = 5;

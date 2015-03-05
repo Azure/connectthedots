@@ -1,17 +1,17 @@
-﻿using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using CoreTest.Utils.Generators;
-using Gateway.DataIntake;
-using Gateway.Models;
-using Newtonsoft.Json;
-using SharedInterfaces;
-
-namespace CoreTest.Devices
+﻿namespace Microsoft.ConnectTheDots.Test
 {
+    using System;
+    using System.Net;
+    using System.Net.Sockets;
+    using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Newtonsoft.Json;
+    using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Gateway;
+
+    //--//
+
     public class SocketServiceTestDevice
     {
         private readonly ILogger _Logger;
@@ -27,8 +27,11 @@ namespace CoreTest.Devices
 
         public void Start(SensorEndpoint endpoint)
         {
-            Task.Run(() => RunSocketServer(endpoint));
+            var sh = new SafeAction<SensorEndpoint>( e => RunSocketServer( e ), _Logger );
+
+            Task.Run( () => sh.SafeInvoke( endpoint ) ); 
         }
+
         public void RunSocketServer(SensorEndpoint endpoint)
         {
             IPAddress ipAddress;
