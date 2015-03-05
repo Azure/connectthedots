@@ -25,7 +25,8 @@
             }
             catch( Exception ex )
             {
-                _logger.LogError( "Exception in task: " + ex.StackTrace );
+                _logger.LogError("Exception in task: " + ex.StackTrace);
+                _logger.LogError("Message in task: " + ex.Message);
             }
         }
     }

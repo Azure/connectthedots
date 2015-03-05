@@ -27,7 +27,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RaspberryPi", "RaspberryPi"
 	ProjectSection(SolutionItems) = preProject
 		Scripts\RaspberryPi\autorun.sh = Scripts\RaspberryPi\autorun.sh
 		Scripts\RaspberryPi\deploy.cmd = Scripts\RaspberryPi\deploy.cmd
-		Scripts\RaspberryPi\GetLogFile.cmd = Scripts\RaspberryPi\GetLogFile.cmd
 		Scripts\RaspberryPi\runonce.sh = Scripts\RaspberryPi\runonce.sh
 	EndProjectSection
 EndProject
