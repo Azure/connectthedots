@@ -23,12 +23,12 @@
             {
                 return _function( );
             }
-            catch(Exception ex)
+            catch( Exception ex )
             {
                 _logger.LogError( "Exception in task: " + ex.StackTrace );
             }
 
-            return default( TResult ); 
+            return default( TResult );
         }
     }
 }

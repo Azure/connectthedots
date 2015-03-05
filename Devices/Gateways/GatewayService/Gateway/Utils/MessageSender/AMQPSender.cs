@@ -55,13 +55,13 @@
                 }
             }
 
-            internal void SetDead()
+            internal void SetDead( )
             {
                 if( _alive )
                 {
-                    lock( _sync)
-                    { 
-                        if( _alive)
+                    lock( _sync )
+                    {
+                        if( _alive )
                         {
                             _alive = false;
 
@@ -76,51 +76,51 @@
                 }
             }
 
-            internal void Close()
+            internal void Close( )
             {
                 _sender.Close( STOP_TIMEOUT_MS );
             }
 
-            protected void EstablishSender()
+            protected void EstablishSender( )
             {
                 try
                 {
-                    if (_alive == false)
+                    if( _alive == false )
                     {
-                        lock (_sync)
+                        lock( _sync )
                         {
-                            if (_alive == false)
+                            if( _alive == false )
                             {
                                 try
                                 {
-                                    Connection connection = new Connection(_address);
-                                    Session session = new Session(connection);
+                                    Connection connection = new Connection( _address );
+                                    Session session = new Session( connection );
 
-                                    _sender = new SenderLink(session, "send-link:" + _EventHubName, _EventHubName);
+                                    _sender = new SenderLink( session, "send-link:" + _EventHubName, _EventHubName );
 
                                     _sender.Closed += OnSenderClosedCallback;
 
                                     _alive = true;
                                 }
-                                catch(Exception ex)
+                                catch( Exception ex )
                                 {
-                                    _Logger.LogError("Error on lock: " + JsonConvert.SerializeObject(ex));
+                                    _Logger.LogError( "Error on lock: " + JsonConvert.SerializeObject( ex ) );
                                 }
                             }
                         }
                     }
                 }
-                catch (Exception ex)
+                catch( Exception ex )
                 {
                     //we don't want service to stop working when exception was thrown at connection creation 
                     //TODO: add reraise for some cases
-                    _Logger.LogError("Error on establishing sender: " + JsonConvert.SerializeObject(ex));
+                    _Logger.LogError( "Error on establishing sender: " + JsonConvert.SerializeObject( ex ) );
                 }
             }
 
             protected void OnSenderClosedCallback( AmqpObject sender, Error error )
             {
-                _Logger.LogError("OnSenderClosedCallback: " + error.Info + error.Description);
+                _Logger.LogError( "OnSenderClosedCallback: " + error.Info + error.Description );
                 // signal the connection will fail 
                 SetDead( );
 
@@ -135,50 +135,50 @@
 
             private ReliableSender[] _pool;
             private int _current;
-            private readonly object _sync = new object();
+            private readonly object _sync = new object( );
 
             private ILogger _Logger;
 
-            public SendersPool( string amqpAddress, string eventHubName, int size, ILogger logger)
+            public SendersPool( string amqpAddress, string eventHubName, int size, ILogger logger )
             {
                 _Logger = logger;
 
-                if(size > MAX_POOL_SIZE)
+                if( size > MAX_POOL_SIZE )
                 {
                     size = MAX_POOL_SIZE;
                 }
 
                 _pool = new ReliableSender[ size ];
 
-                for(int i = 0; i < size; ++i)
+                for( int i = 0; i < size; ++i )
                 {
-                    _pool[i] = new ReliableSender(amqpAddress, eventHubName, logger); 
+                    _pool[ i ] = new ReliableSender( amqpAddress, eventHubName, logger );
                 }
 
                 _current = 0;
             }
 
-            public ReliableSender PickSender()
+            public ReliableSender PickSender( )
             {
                 ReliableSender rs;
 
                 lock( _sync )
                 {
-                    rs = _pool[_current]; 
-                    
-                    _current = (_current + 1) % _pool.Length;
+                    rs = _pool[ _current ];
+
+                    _current = ( _current + 1 ) % _pool.Length;
                 }
 
                 return rs;
             }
 
-            public void Close()
+            public void Close( )
             {
                 lock( _sync )
                 {
-                    foreach (ReliableSender rs in _pool)
+                    foreach( ReliableSender rs in _pool )
                     {
-                        rs.Close();
+                        rs.Close( );
                     }
                 }
             }
@@ -200,83 +200,83 @@
             set { _LogMesagePrefix = value; }
         }
 
-        public AMQPSender(string amqpsAddress, string eventHubName, string defaultSubject, string defaultDeviceId, string defaultDeviceDisplayName, ILogger logger)
+        public AMQPSender( string amqpsAddress, string eventHubName, string defaultSubject, string defaultDeviceId, string defaultDeviceDisplayName, ILogger logger )
         {
             Logger = SafeLogger.FromLogger( logger );
 
-            Logger.LogInfo( "Connecting to Event hub" ); 
+            Logger.LogInfo( "Connecting to Event hub" );
 
-            if (defaultSubject == null || defaultDeviceId == null || defaultDeviceDisplayName == null || eventHubName == null)
+            if( defaultSubject == null || defaultDeviceId == null || defaultDeviceDisplayName == null || eventHubName == null )
             {
-                throw new ArgumentException("defaultSubject, defaultDeviceId, defaultDeviceDisplayName, eventHubName cannot be null");
+                throw new ArgumentException( "defaultSubject, defaultDeviceId, defaultDeviceDisplayName, eventHubName cannot be null" );
             }
 
             _DefaultSubject = defaultSubject;
             _DefaultDeviceId = defaultDeviceId;
             _DefaultDeviceDisplayName = defaultDeviceDisplayName;
 
-            _senders = new SendersPool(amqpsAddress, eventHubName, Constants.ConcurrentConnections, Logger);
+            _senders = new SendersPool( amqpsAddress, eventHubName, Constants.ConcurrentConnections, Logger );
         }
 
-        public async Task SendMessage(T data)
+        public async Task SendMessage( T data )
         {
             try
             {
-                if (data == null)
+                if( data == null )
                 {
                     return;
                 }
-                
-                string jsonData = JsonConvert.SerializeObject(data);
 
-                await PrepareAndSend(jsonData);
+                string jsonData = JsonConvert.SerializeObject( data );
+
+                await PrepareAndSend( jsonData );
             }
-            catch (Exception ex)
+            catch( Exception ex )
             {
-                Logger.LogError(_LogMesagePrefix + ex.Message);
+                Logger.LogError( _LogMesagePrefix + ex.Message );
             }
         }
 
-        public async Task SendSerialized(string jsonData)
+        public async Task SendSerialized( string jsonData )
         {
             try
             {
-                if( String.IsNullOrEmpty( jsonData ) ) 
+                if( String.IsNullOrEmpty( jsonData ) )
                 {
                     return;
                 }
-                
-                await PrepareAndSend( jsonData ); 
+
+                await PrepareAndSend( jsonData );
             }
-            catch (Exception ex)
+            catch( Exception ex )
             {
-                Logger.LogError(_LogMesagePrefix + ex.Message);
+                Logger.LogError( _LogMesagePrefix + ex.Message );
             }
         }
 
-        public void Close()
+        public void Close( )
         {
-            Logger.LogInfo("Close signal to AMQP recieved");
+            Logger.LogInfo( "Close signal to AMQP recieved" );
 
             _senders.Close( );
         }
 
-        private async Task PrepareAndSend(string jsonData)
+        private async Task PrepareAndSend( string jsonData )
         {
-            Message msg = PrepareMessage(jsonData);
+            Message msg = PrepareMessage( jsonData );
             // send to the cloud asynchronously, but wait for completetion
             // this is actually serializing access to the SenderLink type
 
             var sh = new SafeAction<Message>( m => SendAmqpMessage( m ), Logger );
 
-            await Task.Run( () => sh.SafeInvoke( msg ) ); 
+            await Task.Run( ( ) => sh.SafeInvoke( msg ) );
         }
 
         private void SendAmqpMessage( Message m )
         {
             bool firstTry = true;
 
-            ReliableSender rl = _senders.PickSender();
+            ReliableSender rl = _senders.PickSender( );
 
             while( true )
             {
@@ -285,15 +285,15 @@
                     rl.Sender.Send( m, SendOutcome, rl );
                     break;
                 }
-                catch(Exception ex)
+                catch( Exception ex )
                 {
-                    Logger.LogError("Exception on send" + ex.Message);
+                    Logger.LogError( "Exception on send" + ex.Message );
 
                     if( firstTry )
                     {
                         firstTry = false;
 
-                        rl.SetDead();
+                        rl.SetDead( );
                     }
                     else
                     {
@@ -304,7 +304,7 @@
             }
         }
 
-        protected Message PrepareMessage(string serializedData, string subject = default(string), string deviceId = default(string), string deviceDisplayName = default(string))
+        protected Message PrepareMessage( string serializedData, string subject = default(string), string deviceId = default(string), string deviceDisplayName = default(string) )
         {
             if( subject == default( string ) )
                 subject = _DefaultSubject;
@@ -320,38 +320,38 @@
             bool setMessageData = false;
 
             Message message = null;
-            
+
             //// Event Hub partition key: device id - ensures that all messages from this device go to the same partition and thus preserve order/co-location at processing time
             //message.MessageAnnotations[new Symbol("x-opt-partition-key")] = deviceId;
 
             Dictionary<string, object> outDictionary = null;
-            if (serializedData != null)
+            if( serializedData != null )
             {
                 //string serializedData = JsonConvert.SerializeObject( messageData );
                 outDictionary =
                     JsonConvert.DeserializeObject<Dictionary<string, object>>( serializedData );
 
-                outDictionary["Subject"] = subject; // Message Type
+                outDictionary[ "Subject" ] = subject; // Message Type
                 outDictionary[ "from" ] = deviceId; // Originating device
                 outDictionary[ "dspl" ] = deviceDisplayName; // Display name for originating device
 
                 setMessageData = true;
             }
 
-            if(setMessageData)
+            if( setMessageData )
             {
-                message = new Message(new Data
+                message = new Message( new Data
                 {
-                    Binary = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(outDictionary))
-                })
+                    Binary = Encoding.UTF8.GetBytes( JsonConvert.SerializeObject( outDictionary ) )
+                } )
                 {
                     Properties = new Properties
                     {
                         Subject = subject, // Message type
                         CreationTime = creationTime, // Time of data sampling
                     },
-                    MessageAnnotations = new MessageAnnotations(),
-                    ApplicationProperties = new ApplicationProperties()
+                    MessageAnnotations = new MessageAnnotations( ),
+                    ApplicationProperties = new ApplicationProperties( )
                 };
                 message.Properties.ContentType = "text/json";
             }
@@ -364,8 +364,8 @@
                         Subject = subject, // Message type
                         CreationTime = creationTime, // Time of data sampling
                     },
-                    MessageAnnotations = new MessageAnnotations(),
-                    ApplicationProperties = new ApplicationProperties()
+                    MessageAnnotations = new MessageAnnotations( ),
+                    ApplicationProperties = new ApplicationProperties( )
                 };
                 // No data: send an empty message with message type "weather error" to help diagnose problems "from the cloud"
                 message.Properties.Subject = subject + "err";
@@ -376,52 +376,52 @@
 
         int _sentMessages = 0;
         DateTime _start;
-        private void SendOutcome(Message message, Outcome outcome, object state)
+        private void SendOutcome( Message message, Outcome outcome, object state )
         {
-            int sent = Interlocked.Increment(ref _sentMessages);
+            int sent = Interlocked.Increment( ref _sentMessages );
 
-            string messageToLog = Encoding.UTF8.GetString(message.Encode().Buffer);
+            string messageToLog = Encoding.UTF8.GetString( message.Encode( ).Buffer );
 
-            int jsonBracketIndex = messageToLog.IndexOf("{", System.StringComparison.Ordinal);
-            if (jsonBracketIndex > 0)
+            int jsonBracketIndex = messageToLog.IndexOf( "{", System.StringComparison.Ordinal );
+            if( jsonBracketIndex > 0 )
             {
-                messageToLog = messageToLog.Substring(jsonBracketIndex);
+                messageToLog = messageToLog.Substring( jsonBracketIndex );
             }
 
-            jsonBracketIndex = messageToLog.LastIndexOf("}", System.StringComparison.Ordinal);
-            if (jsonBracketIndex > 0)
+            jsonBracketIndex = messageToLog.LastIndexOf( "}", System.StringComparison.Ordinal );
+            if( jsonBracketIndex > 0 )
             {
-                messageToLog = messageToLog.Substring(0,jsonBracketIndex + 1);
+                messageToLog = messageToLog.Substring( 0, jsonBracketIndex + 1 );
             }
 
-            if (outcome is Accepted)
+            if( outcome is Accepted )
             {
-                Logger.LogInfo("Message is accepted");
+                Logger.LogInfo( "Message is accepted" );
 
-                if (sent == 1)
+                if( sent == 1 )
                 {
                     _start = DateTime.Now;
                 }
 
-                if (Interlocked.CompareExchange(ref _sentMessages, 0, Constants.MessagesLoggingThreshold) ==
-                    Constants.MessagesLoggingThreshold)
+                if( Interlocked.CompareExchange( ref _sentMessages, 0, Constants.MessagesLoggingThreshold ) ==
+                    Constants.MessagesLoggingThreshold )
                 {
                     DateTime now = DateTime.Now;
 
-                    TimeSpan elapsed = (now - _start);
+                    TimeSpan elapsed = ( now - _start );
 
                     _start = now;
 
                     var sh = new SafeAction<String>( s => Logger.LogInfo( s ), Logger );
 
-                    Task.Run( () => sh.SafeInvoke(
+                    Task.Run( ( ) => sh.SafeInvoke(
                         String.Format( "GatewayService sent {0} events to Event Hub succesfully in {1} ms ",
-                                Constants.MessagesLoggingThreshold, elapsed.TotalMilliseconds.ToString() ) ) );
+                                Constants.MessagesLoggingThreshold, elapsed.TotalMilliseconds.ToString( ) ) ) );
                 }
             }
             else
             {
-                Logger.LogInfo("Message is rejected: " + messageToLog);
+                Logger.LogInfo( "Message is rejected: " + messageToLog );
             }
         }
     }

@@ -6,9 +6,9 @@
 
     public interface IAsyncQueue<T>
     {
-        void Push(T item);
+        void Push( T item );
 
-        Task<OperationStatus<T>> TryPop();
+        Task<OperationStatus<T>> TryPop( );
 
         int Count { get; }
     }

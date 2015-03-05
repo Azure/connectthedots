@@ -12,27 +12,27 @@
     public class ServiceBehavior : IServiceBehavior
     {
         readonly Func<IService> serviceCreator;
-        public ServiceBehavior(Func<IService> serviceCreator)
+        public ServiceBehavior( Func<IService> serviceCreator )
         {
             this.serviceCreator = serviceCreator;
         }
 
-        public void AddBindingParameters(ServiceDescription serviceDescription, ServiceHostBase serviceHostBase, Collection<ServiceEndpoint> endpoints, BindingParameterCollection bindingParameters)
+        public void AddBindingParameters( ServiceDescription serviceDescription, ServiceHostBase serviceHostBase, Collection<ServiceEndpoint> endpoints, BindingParameterCollection bindingParameters )
         {
         }
 
-        public void ApplyDispatchBehavior(ServiceDescription serviceDescription, ServiceHostBase serviceHostBase)
+        public void ApplyDispatchBehavior( ServiceDescription serviceDescription, ServiceHostBase serviceHostBase )
         {
-            foreach (ChannelDispatcher cd in serviceHostBase.ChannelDispatchers)
+            foreach( ChannelDispatcher cd in serviceHostBase.ChannelDispatchers )
             {
-                foreach (EndpointDispatcher ed in cd.Endpoints)
+                foreach( EndpointDispatcher ed in cd.Endpoints )
                 {
-                    ed.DispatchRuntime.InstanceProvider = new ServiceInstanceProvider(this.serviceCreator);
+                    ed.DispatchRuntime.InstanceProvider = new ServiceInstanceProvider( this.serviceCreator );
                 }
             }
         }
 
-        public void Validate(ServiceDescription serviceDescription, ServiceHostBase serviceHostBase)
+        public void Validate( ServiceDescription serviceDescription, ServiceHostBase serviceHostBase )
         {
         }
     }

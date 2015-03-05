@@ -18,7 +18,7 @@
         private bool _DoWorkSwitch;
 
         public DataIntakeTestMockThread( ILogger logger )
-            : base( logger ) 
+            : base( logger )
         {
         }
 
@@ -30,7 +30,7 @@
 
             var sh = new SafeAction<int>( ( t ) => TestRun( t ), _Logger );
 
-            Task.Run( () => sh.SafeInvoke( SLEEP_TIME_MS ) );
+            Task.Run( ( ) => sh.SafeInvoke( SLEEP_TIME_MS ) );
 
             return true;
         }
@@ -45,7 +45,7 @@
         public override bool SetEndpoint( SensorEndpoint endpoint = null )
         {
             //we don't need any endpoints for this Data Intake
-            if (endpoint == null)
+            if( endpoint == null )
                 return true;
 
             return false;
@@ -56,20 +56,20 @@
             int messagesSent = 0;
             do
             {
-                SensorDataContract sensorData = RandomSensorDataGenerator.Generate();
-                
-                string serializedData = JsonConvert.SerializeObject(sensorData);
+                SensorDataContract sensorData = RandomSensorDataGenerator.Generate( );
 
-                _Enqueue(serializedData);
+                string serializedData = JsonConvert.SerializeObject( sensorData );
 
-                if (++messagesSent % LOG_MESSAGE_RATE == 0)
+                _Enqueue( serializedData );
+
+                if( ++messagesSent % LOG_MESSAGE_RATE == 0 )
                 {
-                    _Logger.LogInfo(LOG_MESSAGE_RATE + " messages sent via DataIntakeTestMock.");
+                    _Logger.LogInfo( LOG_MESSAGE_RATE + " messages sent via DataIntakeTestMock." );
                 }
 
                 Thread.Sleep( sleepTime );
 
-            } while (_DoWorkSwitch);
+            } while( _DoWorkSwitch );
         }
     }
 }

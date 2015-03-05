@@ -5,11 +5,11 @@
 
     //--//
 
-    [ServiceContract(Namespace = "GatewayService")]
+    [ServiceContract( Namespace = "GatewayService" )]
     public interface IGatewayService : IService
     {
-        [WebGet()]
+        [WebGet( )]
         [OperationContract]
-        int Enqueue(string jsonData);
+        int Enqueue( string jsonData );
     }
 }

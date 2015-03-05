@@ -12,20 +12,20 @@
     {
         #region Singleton implementation
 
-		      private static EventLogger _EventLogger;
-        private static readonly object _SyncRoot = new object();
+        private static EventLogger _EventLogger;
+        private static readonly object _SyncRoot = new object( );
 
         internal static EventLogger Instance
         {
             get
             {
-                if (_EventLogger == null)
+                if( _EventLogger == null )
                 {
-                    lock (_SyncRoot)
+                    lock( _SyncRoot )
                     {
-                        if (_EventLogger == null)
+                        if( _EventLogger == null )
                         {
-                            _EventLogger = new EventLogger();
+                            _EventLogger = new EventLogger( );
                         }
                     }
                 }
@@ -37,35 +37,35 @@
         private static EventLog _EventLog;
         private static NLog.Logger _NLog;
 
-        private EventLogger()
+        private EventLogger( )
         {
-            _NLog = LogManager.GetCurrentClassLogger();
+            _NLog = LogManager.GetCurrentClassLogger( );
             _EventLog = new EventLog
             {
                 Source = Constants.WindowsServiceName,
                 Log = "Application"
             };
 
-            ((ISupportInitialize)(_EventLog)).BeginInit();
-            if (!EventLog.SourceExists(_EventLog.Source))
+            ( ( ISupportInitialize )( _EventLog ) ).BeginInit( );
+            if( !EventLog.SourceExists( _EventLog.Source ) )
             {
-                EventLog.CreateEventSource(_EventLog.Source, _EventLog.Log);
+                EventLog.CreateEventSource( _EventLog.Source, _EventLog.Log );
             }
-            ((ISupportInitialize)(_EventLog)).EndInit(); 
+            ( ( ISupportInitialize )( _EventLog ) ).EndInit( );
         }
 
-		#endregion
+        #endregion
 
-        public void LogError(string logMessage)
+        public void LogError( string logMessage )
         {
-            _NLog.Error(logMessage);
-            _EventLog.WriteEntry(logMessage, EventLogEntryType.Error);
+            _NLog.Error( logMessage );
+            _EventLog.WriteEntry( logMessage, EventLogEntryType.Error );
         }
 
-        public void LogInfo(string logMessage)
+        public void LogInfo( string logMessage )
         {
-            _NLog.Info(logMessage);
-            _EventLog.WriteEntry(logMessage, EventLogEntryType.Information);
+            _NLog.Info( logMessage );
+            _EventLog.WriteEntry( logMessage, EventLogEntryType.Information );
         }
     }
 }

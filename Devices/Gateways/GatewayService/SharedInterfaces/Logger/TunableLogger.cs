@@ -8,9 +8,9 @@
     {
         public enum LoggingLevel
         {
-            Disabled  = 0,
-            Errors    = 1,
-            Verbose   = 2,
+            Disabled = 0,
+            Errors = 1,
+            Verbose = 2,
             Undefined = 3,
         }
 
@@ -60,7 +60,7 @@
                 return ( TunableLogger )logger;
             }
 
-            return new TunableLogger( logger ); 
+            return new TunableLogger( logger );
         }
 
         //--//
@@ -75,7 +75,7 @@
 
         public void LogInfo( string logMessage )
         {
-            if( _level >= LoggingLevel.Verbose ) 
+            if( _level >= LoggingLevel.Verbose )
             {
                 _Logger.LogInfo( logMessage );
             }

@@ -12,12 +12,12 @@
 
         static public SafeLogger FromLogger( ILogger logger )
         {
-            if(logger is SafeLogger)
+            if( logger is SafeLogger )
             {
-                return (SafeLogger)logger;
+                return ( SafeLogger )logger;
             }
 
-            return new SafeLogger(logger); 
+            return new SafeLogger( logger );
         }
 
         public void LogError( string logMessage )

@@ -18,7 +18,7 @@
 
     internal static class Loader
     {
-        internal static IList<String> GetSources() 
+        internal static IList<String> GetSources( )
         {
             var dataIntakes = new List<String>( );
 
@@ -35,23 +35,23 @@
             return dataIntakes;
         }
 
-        internal static IList<SensorEndpoint> GetEndpoints() 
+        internal static IList<SensorEndpoint> GetEndpoints( )
         {
-            var sensorEndpoints = new List<SensorEndpoint>();
+            var sensorEndpoints = new List<SensorEndpoint>( );
 
-            SensorEndpointConfigSection sensorEndpointItems = ConfigurationManager.GetSection("sensorEndpoints")
+            SensorEndpointConfigSection sensorEndpointItems = ConfigurationManager.GetSection( "sensorEndpoints" )
                 as SensorEndpointConfigSection;
 
-            if (sensorEndpointItems != null)
+            if( sensorEndpointItems != null )
             {
-                foreach (SensorEndpointConfigInstanceElement sensorEndpointItem in sensorEndpointItems.Instances)
+                foreach( SensorEndpointConfigInstanceElement sensorEndpointItem in sensorEndpointItems.Instances )
                 {
-                    sensorEndpoints.Add(new SensorEndpoint
+                    sensorEndpoints.Add( new SensorEndpoint
                     {
                         Name = sensorEndpointItem.Name,
                         Host = sensorEndpointItem.Host,
                         Port = sensorEndpointItem.Port,
-                    });
+                    } );
                 }
             }
 
@@ -63,7 +63,7 @@
             AMQPServiceConfigSection section = ConfigurationManager.GetSection( "AMQPServiceConfig" ) as AMQPServiceConfigSection;
             AMQPConfig configData = null;
 
-            if ( section != null )
+            if( section != null )
             {
                 configData = new AMQPConfig
                 {
@@ -86,7 +86,7 @@
         {
             get
             {
-                return (string)this[ "AMQPSAddress" ];
+                return ( string )this[ "AMQPSAddress" ];
             }
             set
             {
@@ -99,7 +99,7 @@
         {
             get
             {
-                return (string)this[ "EventHubName" ];
+                return ( string )this[ "EventHubName" ];
             }
             set
             {
@@ -112,7 +112,7 @@
         {
             get
             {
-                return (string)this[ "EventHubMessageSubject" ];
+                return ( string )this[ "EventHubMessageSubject" ];
             }
             set
             {
@@ -125,7 +125,7 @@
         {
             get
             {
-                return (string)this[ "EventHubDeviceId" ];
+                return ( string )this[ "EventHubDeviceId" ];
             }
             set
             {
@@ -138,7 +138,7 @@
         {
             get
             {
-                return (string)this[ "EventHubDeviceDisplayName" ];
+                return ( string )this[ "EventHubDeviceDisplayName" ];
             }
             set
             {

@@ -7,13 +7,13 @@
 
     //--//
 
-    [RunInstaller(true)]
+    [RunInstaller( true )]
     public class ProjectInstaller : Installer
     {
         private ServiceProcessInstaller process;
         private ServiceInstaller service;
 
-        public ProjectInstaller()
+        public ProjectInstaller( )
         {
             process = new ServiceProcessInstaller
             {
@@ -23,8 +23,8 @@
             {
                 ServiceName = Constants.WindowsServiceName
             };
-            Installers.Add(process);
-            Installers.Add(service);
+            Installers.Add( process );
+            Installers.Add( service );
         }
     }
 }

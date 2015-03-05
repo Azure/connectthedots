@@ -15,39 +15,39 @@
         protected readonly Random _rand;
         protected int _forSending = 0;
 
-        internal MockSender(ITest test)
+        internal MockSender( ITest test )
         {
             _test = test;
-            _rand = new Random();
+            _rand = new Random( );
         }
 
-        public Task SendMessage(T data)
+        public Task SendMessage( T data )
         {
-            SimulateSend();
+            SimulateSend( );
             return null;
         }
 
-        public Task SendSerialized(string jsonData)
+        public Task SendSerialized( string jsonData )
         {
-            SimulateSend();
+            SimulateSend( );
             return null;
         }
 
-        public void Close()
+        public void Close( )
         {
         }
 
-        private void SimulateSend()
+        private void SimulateSend( )
         {
             // Naive atetmpt to simulate network latency
-            Thread.Sleep(_rand.Next(MAX_LAG));
+            Thread.Sleep( _rand.Next( MAX_LAG ) );
 
             int totalMessagesSent = _test.TotalMessagesSent;
 
             // LORENZO: print all data and validate that they match the data sent
-            if (Interlocked.Increment(ref _forSending) == totalMessagesSent && totalMessagesSent >= _test.TotalMessagesToSend)
+            if( Interlocked.Increment( ref _forSending ) == totalMessagesSent && totalMessagesSent >= _test.TotalMessagesToSend )
             {
-                _test.Completed();
+                _test.Completed( );
             }
         }
     }

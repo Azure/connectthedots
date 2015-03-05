@@ -7,14 +7,14 @@
 
     public class ConsoleLogger : ILogger
     {
-        public void LogError(string logMessage)
+        public void LogError( string logMessage )
         {
-            Console.Out.WriteLine("[ERROR]: " + logMessage);
+            Console.Out.WriteLine( "[ERROR]: " + logMessage );
         }
 
-        public void LogInfo(string logMessage)
+        public void LogInfo( string logMessage )
         {
-            Console.Out.WriteLine("[INFO ] : " + logMessage);
+            Console.Out.WriteLine( "[INFO ] : " + logMessage );
         }
     }
 }

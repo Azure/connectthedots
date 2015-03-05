@@ -28,18 +28,18 @@
 
         public WindowsService( ILogger logger )
         {
-            if(logger == null)
+            if( logger == null )
             {
                 throw new ArgumentException( "Cannot run service without logging" );
             }
 
             _Logger = logger;
 
-            if(logger is TunableLogger)
+            if( logger is TunableLogger )
             {
                 TunableLogger.LoggingLevel loggingLevel = TunableLogger.LevelFromString( ConfigurationManager.AppSettings.Get( "LoggingLevel" ) );
 
-                ( ( TunableLogger )logger ).Level = (loggingLevel != TunableLogger.LoggingLevel.Undefined) ? loggingLevel : TunableLogger.LoggingLevel.Errors;
+                ( ( TunableLogger )logger ).Level = ( loggingLevel != TunableLogger.LoggingLevel.Undefined ) ? loggingLevel : TunableLogger.LoggingLevel.Errors;
             }
 
             try
@@ -49,12 +49,12 @@
                 // Name the Windows Service
                 ServiceName = Constants.WindowsServiceName;
 
-                _GatewayQueue = new GatewayQueue<QueuedItem>();
-                AMQPConfig amqpConfig = Loader.GetAMQPConfig();
+                _GatewayQueue = new GatewayQueue<QueuedItem>( );
+                AMQPConfig amqpConfig = Loader.GetAMQPConfig( );
 
-                if (amqpConfig == null)
+                if( amqpConfig == null )
                 {
-                    _Logger.LogError("AMQP configuration is missing");
+                    _Logger.LogError( "AMQP configuration is missing" );
                     return;
                 }
                 _AMPQSender = new AMQPSender<SensorDataContract>(
@@ -70,81 +70,81 @@
                                                     _AMPQSender,
                                                     null,//m => DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromQueuedItem(m, _Logger)),
                                                     new Func<QueuedItem, string>( m => m.JsonData ),
-                                                    _Logger);
+                                                    _Logger );
 
-                _DataIntakeLoader = new DataIntakeLoader(Loader.GetSources(), Loader.GetEndpoints(), _Logger); 
+                _DataIntakeLoader = new DataIntakeLoader( Loader.GetSources( ), Loader.GetEndpoints( ), _Logger );
             }
-            catch (Exception ex)
+            catch( Exception ex )
             {
-                _Logger.LogInfo("Exception creating WindowsService: " + ex.Message);
+                _Logger.LogInfo( "Exception creating WindowsService: " + ex.Message );
             }
         }
 
-        protected override void OnStart(string[] args)
+        protected override void OnStart( string[] args )
         {
-            _Logger.LogInfo("Service starting... ");
+            _Logger.LogInfo( "Service starting... " );
 
-            if (_WebHost != null)
+            if( _WebHost != null )
             {
-                _WebHost.Close();
+                _WebHost.Close( );
             }
 
             _AMPQSender.LogMessagePrefix = Constants.LogMessageTexts.AMQPSenderErrorPrefix;
 
-            _BatchSenderThread.Start();
+            _BatchSenderThread.Start( );
 
             _WebHost = new WebServiceHost( typeof( Microsoft.ConnectTheDots.Gateway.GatewayService ) );
             Gateway.GatewayService service = new Microsoft.ConnectTheDots.Gateway.GatewayService(
                 _GatewayQueue,
                 _BatchSenderThread,
                 m => DataTransforms.QueuedItemFromSensorDataContract(
-                        DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromString(m, _Logger)), _Logger)
+                        DataTransforms.AddTimeCreated( DataTransforms.SensorDataContractFromString( m, _Logger ) ), _Logger )
             );
-            _WebHost.Description.Behaviors.Add(new ServiceBehavior(() => service));
+            _WebHost.Description.Behaviors.Add( new ServiceBehavior( ( ) => service ) );
 
             service.Logger = _Logger;
             service.OnDataInQueue += OnData;
 
-            _WebHost.Open();
+            _WebHost.Open( );
 
-            _DataIntakeLoader.StartAll( service.Enqueue ); 
-	    
-            _Logger.LogInfo("...started");
+            _DataIntakeLoader.StartAll( service.Enqueue );
+
+            _Logger.LogInfo( "...started" );
         }
 
-        protected override void OnStop()
+        protected override void OnStop( )
         {
-            _Logger.LogInfo("Service stopping... ");
+            _Logger.LogInfo( "Service stopping... " );
 
-            _DataIntakeLoader.StopAll( ); 
+            _DataIntakeLoader.StopAll( );
 
             // close web host first (message intake)
-            if (_WebHost != null)
+            if( _WebHost != null )
             {
-                _WebHost.Close();
+                _WebHost.Close( );
                 _WebHost = null;
             }
 
             // shutdown processor (message processing)
             _BatchSenderThread.Logger = _Logger;
-            _BatchSenderThread.Stop(STOP_TIMEOUT_MS);
+            _BatchSenderThread.Stop( STOP_TIMEOUT_MS );
 
             // shut down connection to event hub last
-            if (_AMPQSender != null)
+            if( _AMPQSender != null )
             {
-                _AMPQSender.Close();
+                _AMPQSender.Close( );
             }
 
-            _Logger.LogInfo("...stopped");
+            _Logger.LogInfo( "...stopped" );
         }
 
-        protected virtual void OnData(QueuedItem data)
+        protected virtual void OnData( QueuedItem data )
         {
             // LORENZO: test behaviours such as accumulating data an processing in batch
-            _BatchSenderThread.Process();
+            _BatchSenderThread.Process( );
         }
 
-        static void Main(string[] args)
+        static void Main( string[] args )
         {
             ILogger logger = null;
 
@@ -156,13 +156,13 @@
 
                 logger.LogInfo( "Creating WindowsService..." );
 
-                Run( new WindowsService( logger ) ); 
+                Run( new WindowsService( logger ) );
             }
-            catch(Exception ex)
+            catch( Exception ex )
             {
-                if (logger != null)
+                if( logger != null )
                 {
-                    logger.LogError( ex.ToString( ) ); 
+                    logger.LogError( ex.ToString( ) );
                 }
 
                 // just return...

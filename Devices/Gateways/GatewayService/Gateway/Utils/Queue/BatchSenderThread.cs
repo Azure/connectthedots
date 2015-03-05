@@ -20,23 +20,23 @@
         private Thread _WorkerThread;
         private AutoResetEvent _operational;
         private AutoResetEvent _doWork;
-        private bool _running; 
+        private bool _running;
 
-        private object _SyncRoot = new object();
+        private object _SyncRoot = new object( );
 
         private static readonly string _LogMessagePrefix = "BatchSenderThread error. ";
 
-        public BatchSenderThread(IAsyncQueue<TQueueItem> dataSource, IMessageSender<TMessage> dataTarget, Func<TQueueItem, TMessage> dataTransform, Func<TQueueItem, string> serializedData, ILogger logger)
+        public BatchSenderThread( IAsyncQueue<TQueueItem> dataSource, IMessageSender<TMessage> dataTarget, Func<TQueueItem, TMessage> dataTransform, Func<TQueueItem, string> serializedData, ILogger logger )
         {
             Logger = SafeLogger.FromLogger( logger );
 
-            if (dataSource == null || dataTarget == null)
+            if( dataSource == null || dataTarget == null )
             {
-                throw new ArgumentException("data source and data target cannot be null");
+                throw new ArgumentException( "data source and data target cannot be null" );
             }
 
-            _operational = new AutoResetEvent(false);
-            _doWork = new AutoResetEvent(false);
+            _operational = new AutoResetEvent( false );
+            _doWork = new AutoResetEvent( false );
             _running = false;
             _DataSource = dataSource;
             _DataTarget = dataTarget;
@@ -45,57 +45,57 @@
             _outstandingTasks = 0;
         }
 
-        public override bool Start()
+        public override bool Start( )
         {
             bool start = false;
 
-            lock (_SyncRoot)
+            lock( _SyncRoot )
             {
-                if (_running == false)
+                if( _running == false )
                 {
                     start = true;
                 }
             }
 
-            if (start)
+            if( start )
             {
-                _WorkerThread = new Thread(ThreadJob);
+                _WorkerThread = new Thread( ThreadJob );
                 _running = true;
-                _WorkerThread.Start();
-                return _operational.WaitOne();
+                _WorkerThread.Start( );
+                return _operational.WaitOne( );
             }
 
             return false;
         }
 
-        public override bool Stop(int timeout)
+        public override bool Stop( int timeout )
         {
             bool stop = false;
 
-            lock(_SyncRoot)
+            lock( _SyncRoot )
             {
-                if (_running == true)
+                if( _running == true )
                 {
                     // There must exist a worker thread
-                    System.Diagnostics.Debug.Assert(_WorkerThread != null);
+                    System.Diagnostics.Debug.Assert( _WorkerThread != null );
 
                     // signal the worker thread that exit is impending
                     _running = false;
-                    _doWork.Set();
+                    _doWork.Set( );
 
                     stop = true;
                 }
             }
 
-            if (stop) 
+            if( stop )
             {
-                if (_operational.WaitOne(timeout) == false)
+                if( _operational.WaitOne( timeout ) == false )
                 {
                     // no other choice than forcing a stop
-                    _WorkerThread.Abort();
+                    _WorkerThread.Abort( );
                 }
 
-                _WorkerThread.Join();
+                _WorkerThread.Join( );
 
                 return true;
             }
@@ -103,31 +103,31 @@
             return false;
         }
 
-        public override void Process()
+        public override void Process( )
         {
-            _doWork.Set();
+            _doWork.Set( );
         }
 
         public event EventBatchProcessedEventHandler OnEventsBatchProcessed;
 
-        private void ThreadJob()
+        private void ThreadJob( )
         {
             // signal that the worker thread has actually started processing the events
-            _operational.Set();
+            _operational.Set( );
 
             try
             {
                 const int WAIT_TIMEOUT = 50; // millisecods
 
                 // run until Stop() is called
-                while (_running == true)
+                while( _running == true )
                 {
                     try
                     {
                         // If there are no tasks to be served, wait for some events to process
                         // Use a timeout to prevent race conditions on teh outstanding tasks count
                         // and the actual queue count
-                        _doWork.WaitOne(WAIT_TIMEOUT);
+                        _doWork.WaitOne( WAIT_TIMEOUT );
 
                         // Fish from the queue and accumulate, keep track of outstanding tasks to 
                         // avoid accumulating too many competing tasks. Note that we are going to schedule
@@ -137,7 +137,7 @@
                         // To prevent this race condition, we will wait with a timeout
                         int count = _DataSource.Count - _outstandingTasks;
 
-                        if (count == 0)
+                        if( count == 0 )
                         {
                             continue;
                         }
@@ -145,9 +145,9 @@
                         // check if we have been woken up to actually stop processing 
                         EventBatchProcessedEventHandler eventBatchProcessed = null;
 
-                        lock (_SyncRoot)
+                        lock( _SyncRoot )
                         {
-                            if (_running == false)
+                            if( _running == false )
                             {
                                 return;
                             }
@@ -157,17 +157,17 @@
                         }
 
                         // allocate a container to keep track of tasks for events in the queue
-                        var tasks = new List<Task>();
+                        var tasks = new List<Task>( );
 
                         // process all messages that have not been processed yet 
-                        while (--count >= 0)
+                        while( --count >= 0 )
                         {
-                            var t = _DataSource.TryPop();
+                            var t = _DataSource.TryPop( );
 
                             // increment outstanding task count 
-                            Interlocked.Increment(ref _outstandingTasks);
+                            Interlocked.Increment( ref _outstandingTasks );
 
-                            t.ContinueWith<Task>(popped =>
+                            t.ContinueWith<Task>( popped =>
                             {
                                 try
                                 {
@@ -218,36 +218,36 @@
                                 }
 
                                 return popped;
-                            });
+                            } );
 
-                            AddToProcessed(tasks, t);
+                            AddToProcessed( tasks, t );
                         }
 
                         // alert any client about outstanding message tasks
-                        if (eventBatchProcessed != null)
+                        if( eventBatchProcessed != null )
                         {
                             var sh = new SafeAction<List<Task>>( t => eventBatchProcessed( t ), Logger );
 
-                            Task.Run( () => sh.SafeInvoke( tasks ) ); 
+                            Task.Run( ( ) => sh.SafeInvoke( tasks ) );
                         }
                     }
-                    catch (StackOverflowException ex)
+                    catch( StackOverflowException ex )
                     {
-                        Logger.LogError(_LogMessagePrefix + ex.Message);
+                        Logger.LogError( _LogMessagePrefix + ex.Message );
 
                         // do not hide stack overflow exceptions
                         throw;
                     }
-                    catch (OutOfMemoryException ex)
+                    catch( OutOfMemoryException ex )
                     {
-                        Logger.LogError(_LogMessagePrefix + ex.Message);
+                        Logger.LogError( _LogMessagePrefix + ex.Message );
 
                         // do not hide memory exceptions
                         throw;
                     }
-                    catch (Exception ex)
+                    catch( Exception ex )
                     {
-                        Logger.LogError(_LogMessagePrefix + ex.Message);
+                        Logger.LogError( _LogMessagePrefix + ex.Message );
 
                         // catch all other exceptions
                     }
@@ -258,7 +258,7 @@
             finally
             {
                 // signal stop
-                _operational.Set();
+                _operational.Set( );
             }
         }
 

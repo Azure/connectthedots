@@ -10,15 +10,15 @@
     [DataContract]
     public class QueuedItem
     {
-        [DataMember(Name = "serializedData")]
+        [DataMember( Name = "serializedData" )]
         public string JsonData { get; set; }
     }
 
     public static class DataTransforms
     {
-        public static QueuedItem QueuedItemFromSensorDataContract(SensorDataContract sensorData, ILogger logger = null)
+        public static QueuedItem QueuedItemFromSensorDataContract( SensorDataContract sensorData, ILogger logger = null )
         {
-            if (sensorData == null)
+            if( sensorData == null )
             {
                 return null;
             }
@@ -28,59 +28,59 @@
             {
                 result = new QueuedItem
                 {
-                    JsonData = JsonConvert.SerializeObject(sensorData)
+                    JsonData = JsonConvert.SerializeObject( sensorData )
                 };
             }
-            catch (Exception ex)
+            catch( Exception ex )
             {
-                if (logger != null)
+                if( logger != null )
                 {
-                    logger.LogError("Error on serialize item: " + ex.Message);
+                    logger.LogError( "Error on serialize item: " + ex.Message );
                 }
             }
 
             return result;
         }
-        public static SensorDataContract SensorDataContractFromString(string data, ILogger logger = null)
+        public static SensorDataContract SensorDataContractFromString( string data, ILogger logger = null )
         {
             SensorDataContract result;
             try
             {
                 result =
-                    JsonConvert.DeserializeObject<SensorDataContract>(data);
+                    JsonConvert.DeserializeObject<SensorDataContract>( data );
             }
-            catch (Exception ex)
+            catch( Exception ex )
             {
                 result = null;
                 //TODO: maybe better to add some metrics instead
-                if (logger != null)
+                if( logger != null )
                 {
-                    logger.LogError("Error on deserialize item: " + ex.Message);
+                    logger.LogError( "Error on deserialize item: " + ex.Message );
                 }
             }
 
             return result;
         }
-        public static SensorDataContract SensorDataContractFromQueuedItem(QueuedItem data, ILogger logger = null)
+        public static SensorDataContract SensorDataContractFromQueuedItem( QueuedItem data, ILogger logger = null )
         {
-            if (data == null)
+            if( data == null )
             {
                 return null;
             }
 
-            SensorDataContract result = SensorDataContractFromString(data.JsonData);
+            SensorDataContract result = SensorDataContractFromString( data.JsonData );
             return result;
         }
 
-        public static SensorDataContract AddTimeCreated(SensorDataContract data)
+        public static SensorDataContract AddTimeCreated( SensorDataContract data )
         {
-            if (data == null)
+            if( data == null )
             {
                 return null;
             }
 
             SensorDataContract result = data;
-            if (result.TimeCreated == default(DateTime))
+            if( result.TimeCreated == default( DateTime ) )
             {
                 var creationTime = DateTime.UtcNow;
                 result.TimeCreated = creationTime;

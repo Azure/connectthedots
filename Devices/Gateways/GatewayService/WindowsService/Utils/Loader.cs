@@ -17,7 +17,7 @@
 
     internal static class Loader
     {
-        internal static IList<String> GetSources() 
+        internal static IList<String> GetSources( )
         {
             var dataIntakes = new List<String>( );
 
@@ -34,34 +34,34 @@
             return dataIntakes;
         }
 
-        internal static IList<SensorEndpoint> GetEndpoints()
+        internal static IList<SensorEndpoint> GetEndpoints( )
         {
-            var sensorEndpoints = new List<SensorEndpoint>();
+            var sensorEndpoints = new List<SensorEndpoint>( );
 
-            SensorEndpointConfigSection sensorEndpointItems = ConfigurationManager.GetSection("sensorEndpoints") as SensorEndpointConfigSection;
+            SensorEndpointConfigSection sensorEndpointItems = ConfigurationManager.GetSection( "sensorEndpoints" ) as SensorEndpointConfigSection;
 
-            if (sensorEndpointItems != null)
+            if( sensorEndpointItems != null )
             {
-                foreach (SensorEndpointConfigInstanceElement sensorEndpointItem in sensorEndpointItems.Instances)
+                foreach( SensorEndpointConfigInstanceElement sensorEndpointItem in sensorEndpointItems.Instances )
                 {
-                    sensorEndpoints.Add(new SensorEndpoint
+                    sensorEndpoints.Add( new SensorEndpoint
                     {
                         Name = sensorEndpointItem.Name,
                         Host = sensorEndpointItem.Host,
                         Port = sensorEndpointItem.Port,
-                    });
+                    } );
                 }
             }
 
             return sensorEndpoints;
         }
 
-        internal static AMQPConfig GetAMQPConfig()
+        internal static AMQPConfig GetAMQPConfig( )
         {
-            AMQPServiceConfigSection section = ConfigurationManager.GetSection("AMQPServiceConfig") as AMQPServiceConfigSection;
+            AMQPServiceConfigSection section = ConfigurationManager.GetSection( "AMQPServiceConfig" ) as AMQPServiceConfigSection;
             AMQPConfig configData = null;
 
-            if (section != null)
+            if( section != null )
             {
                 configData = new AMQPConfig
                 {
@@ -72,75 +72,75 @@
                     EventHubDeviceDisplayName = section.EventHubDeviceDisplayName
                 };
             }
-            
+
             return configData;
         }
     }
 
     internal class AMQPServiceConfigSection : ConfigurationSection
     {
-        [ConfigurationProperty("AMQPSAddress", DefaultValue = "AMQPSAddress", IsRequired = true)]
+        [ConfigurationProperty( "AMQPSAddress", DefaultValue = "AMQPSAddress", IsRequired = true )]
         public string AMQPSAddress
         {
             get
             {
-                return (string)this["AMQPSAddress"];
+                return ( string )this[ "AMQPSAddress" ];
             }
             set
             {
-                this["AMQPSAddress"] = value;
+                this[ "AMQPSAddress" ] = value;
             }
         }
 
-        [ConfigurationProperty("EventHubName", DefaultValue = "EventHubName", IsRequired = true)]
+        [ConfigurationProperty( "EventHubName", DefaultValue = "EventHubName", IsRequired = true )]
         public string EventHubName
         {
             get
             {
-                return (string)this["EventHubName"];
+                return ( string )this[ "EventHubName" ];
             }
             set
             {
-                this["EventHubName"] = value;
+                this[ "EventHubName" ] = value;
             }
         }
 
-        [ConfigurationProperty("EventHubMessageSubject", DefaultValue = "EventHubMessageSubject", IsRequired = true)]
+        [ConfigurationProperty( "EventHubMessageSubject", DefaultValue = "EventHubMessageSubject", IsRequired = true )]
         public string EventHubMessageSubject
         {
             get
             {
-                return (string)this["EventHubMessageSubject"];
+                return ( string )this[ "EventHubMessageSubject" ];
             }
             set
             {
-                this["EventHubMessageSubject"] = value;
+                this[ "EventHubMessageSubject" ] = value;
             }
         }
 
-        [ConfigurationProperty("EventHubDeviceId", DefaultValue = "EventHubDeviceId", IsRequired = true)]
+        [ConfigurationProperty( "EventHubDeviceId", DefaultValue = "EventHubDeviceId", IsRequired = true )]
         public string EventHubDeviceId
         {
             get
             {
-                return (string)this["EventHubDeviceId"];
+                return ( string )this[ "EventHubDeviceId" ];
             }
             set
             {
-                this["EventHubDeviceId"] = value;
+                this[ "EventHubDeviceId" ] = value;
             }
         }
 
-        [ConfigurationProperty("EventHubDeviceDisplayName", DefaultValue = "EventHubDeviceDisplayName", IsRequired = true)]
+        [ConfigurationProperty( "EventHubDeviceDisplayName", DefaultValue = "EventHubDeviceDisplayName", IsRequired = true )]
         public string EventHubDeviceDisplayName
         {
             get
             {
-                return (string)this["EventHubDeviceDisplayName"];
+                return ( string )this[ "EventHubDeviceDisplayName" ];
             }
             set
             {
-                this["EventHubDeviceDisplayName"] = value;
+                this[ "EventHubDeviceDisplayName" ] = value;
             }
         }
     }

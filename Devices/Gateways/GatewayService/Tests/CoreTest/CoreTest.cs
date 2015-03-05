@@ -20,7 +20,7 @@ namespace Microsoft.ConnectTheDots.Test
         public const int MAX_TEST_MESSAGES = 1000;
 
         private readonly ILogger _testLogger;
-        private readonly AutoResetEvent _completed = new AutoResetEvent(false);
+        private readonly AutoResetEvent _completed = new AutoResetEvent( false );
         private readonly GatewayQueue<QueuedItem> _GatewayQueue;
         private readonly IMessageSender<SensorDataContract> _Sender;
         private readonly BatchSenderThread<QueuedItem, SensorDataContract> _BatchSenderThread;
@@ -32,11 +32,11 @@ namespace Microsoft.ConnectTheDots.Test
 
         public CoreTest( ILogger logger )
         {
-            if(logger == null)
+            if( logger == null )
             {
                 throw new ArgumentException( "Cannot run tests without logging" );
             }
-            
+
             _testLogger = logger;
 
             _rand = new Random( );
@@ -48,7 +48,7 @@ namespace Microsoft.ConnectTheDots.Test
 #else
 
             AMQPConfig amqpConfig = Loader.GetAMQPConfig( );
-                
+
             _Sender = new AMQPSender<SensorDataContract>(
                                                 amqpConfig.AMQPSAddress,
                                                 amqpConfig.EventHubName,
@@ -62,32 +62,32 @@ namespace Microsoft.ConnectTheDots.Test
             _BatchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>(
                 _GatewayQueue,
                 _Sender,
-                dataTransform  : null,//m => DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromQueuedItem(m, _testLogger)), 
-                serializedData : m => (m == null) ? null : m.JsonData,
-                logger         : null);
+                dataTransform: null,//m => DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromQueuedItem(m, _testLogger)), 
+                serializedData: m => ( m == null ) ? null : m.JsonData,
+                logger: null );
         }
 
-        public void Run()
+        public void Run( )
         {
             TestRepeatSend( );
-            TestDataIntake();
+            TestDataIntake( );
         }
 
-        public void TestRepeatSend()
+        public void TestRepeatSend( )
         {
             try
             {
-                GatewayService service = PrepareGatewayService();
+                GatewayService service = PrepareGatewayService( );
 
                 // Send a flurry of messages, repeat a few times
 
                 // script message sequence
-                int[] sequence = new int[TEST_ITERATIONS];
-                for (int iteration = 0; iteration < TEST_ITERATIONS; ++iteration)
+                int[] sequence = new int[ TEST_ITERATIONS ];
+                for( int iteration = 0; iteration < TEST_ITERATIONS; ++iteration )
                 {
-                    int count = _rand.Next(MAX_TEST_MESSAGES);
+                    int count = _rand.Next( MAX_TEST_MESSAGES );
 
-                    sequence[iteration] = count;
+                    sequence[ iteration ] = count;
 
                     _totalMessagesToSend += count;
                 }
@@ -95,14 +95,14 @@ namespace Microsoft.ConnectTheDots.Test
                 const float mean = 39.6001f;
                 const int range  = 10;
 
-                Random rand = new Random( (int)(DateTime.Now.Ticks >> 32) ); 
+                Random rand = new Random( ( int )( DateTime.Now.Ticks >> 32 ) );
 
                 // send the messages
-                for (int iteration = 0; iteration < TEST_ITERATIONS; ++iteration)
+                for( int iteration = 0; iteration < TEST_ITERATIONS; ++iteration )
                 {
-                    int count = sequence[iteration];
+                    int count = sequence[ iteration ];
 
-                    while (--count >= 0)
+                    while( --count >= 0 )
                     {
                         //
                         // Build a message. 
@@ -110,71 +110,71 @@ namespace Microsoft.ConnectTheDots.Test
                         // "{\"unitofmeasure\":\"%\",\"location\":\"Olivier's office\",\"measurename\":\"Humidity\",\"timecreated\":\"2/26/2015 12:50:29 AM\",\"organization\":\"MSOpenTech\",\"guid\":\"00000000-0000-0000-0000-000000000000\",\"value\":39.600000000000001,\"displayname\":\"NETMF\"}"
                         // 
 
-                        bool add = (rand.Next( ) % 2) == 0;
+                        bool add = ( rand.Next( ) % 2 ) == 0;
                         int variant = rand.Next( ) % range;
-                        float value = mean; 
+                        float value = mean;
 
                         StringBuilder sb = new StringBuilder( );
                         sb.Append( "{\"unitofmeasure\":\"%\",\"location\":\"Olivier's office\",\"measurename\":\"Humidity\"," );
                         sb.Append( "\"timecreated\":\"" );
                         sb.Append( DateTime.UtcNow.ToString( ) ); // this should look like "2015-02-25T23:07:47.159Z"
                         sb.Append( "\",\"organization\":\"MSOpenTech\",\"guid\":\"" );
-                        sb.Append( new Guid().ToString() );
+                        sb.Append( new Guid( ).ToString( ) );
                         sb.Append( "\",\"value\":" );
-                        sb.Append( (value += add ? variant : -variant).ToString() );
+                        sb.Append( ( value += add ? variant : -variant ).ToString( ) );
                         sb.Append( ",\"displayname\":\"NETMF\"}" );
 
-                        string message = sb.ToString();
+                        string message = sb.ToString( );
 
-                        service.Enqueue( message ); 
+                        service.Enqueue( message );
 
-                        DataArrived( message ); 
+                        DataArrived( message );
                     }
                 }
 
                 Debug.Assert( _totalMessagesSent == _totalMessagesToSend );
 
-                _completed.WaitOne();
+                _completed.WaitOne( );
 
-                _BatchSenderThread.Stop( STOP_TIMEOUT_MS ); 
+                _BatchSenderThread.Stop( STOP_TIMEOUT_MS );
             }
-            catch (Exception ex)
+            catch( Exception ex )
             {
-                _testLogger.LogError("exception caught: " + ex.StackTrace);
+                _testLogger.LogError( "exception caught: " + ex.StackTrace );
             }
             finally
             {
-                _BatchSenderThread.Stop(STOP_TIMEOUT_MS);
+                _BatchSenderThread.Stop( STOP_TIMEOUT_MS );
                 _Sender.Close( );
             }
         }
 
-        public void TestDataIntake()
+        public void TestDataIntake( )
         {
             try
             {
-                GatewayService service = PrepareGatewayService();
+                GatewayService service = PrepareGatewayService( );
 
-                DataIntakeLoader dataIntakeLoader = new DataIntakeLoader( Loader.GetSources( ), Loader.GetEndpoints(), _testLogger ); 
+                DataIntakeLoader dataIntakeLoader = new DataIntakeLoader( Loader.GetSources( ), Loader.GetEndpoints( ), _testLogger );
 
                 _totalMessagesToSend += 5;
 
-                dataIntakeLoader.StartAll( service.Enqueue, DataArrived ); 
+                dataIntakeLoader.StartAll( service.Enqueue, DataArrived );
 
-                _completed.WaitOne();
+                _completed.WaitOne( );
 
                 dataIntakeLoader.StopAll( );
 
-                _BatchSenderThread.Stop(STOP_TIMEOUT_MS);
+                _BatchSenderThread.Stop( STOP_TIMEOUT_MS );
             }
-            catch (Exception ex)
+            catch( Exception ex )
             {
-                _testLogger.LogError("exception caught: " + ex.StackTrace);
+                _testLogger.LogError( "exception caught: " + ex.StackTrace );
             }
             finally
             {
-                _BatchSenderThread.Stop(STOP_TIMEOUT_MS);
-                _Sender.Close();
+                _BatchSenderThread.Stop( STOP_TIMEOUT_MS );
+                _Sender.Close( );
             }
         }
 
@@ -194,21 +194,21 @@ namespace Microsoft.ConnectTheDots.Test
             }
         }
 
-        public void Completed()
+        public void Completed( )
         {
             _completed.Set( );
 
             Console.WriteLine( String.Format( "Test completed, {0} messages sent", _totalMessagesToSend ) );
         }
 
-        private GatewayService PrepareGatewayService()
+        private GatewayService PrepareGatewayService( )
         {
             _BatchSenderThread.Logger = _testLogger;
-            _BatchSenderThread.Start();
+            _BatchSenderThread.Start( );
 
-            GatewayService service = new GatewayService(_GatewayQueue, _BatchSenderThread,
+            GatewayService service = new GatewayService( _GatewayQueue, _BatchSenderThread,
                 m => DataTransforms.QueuedItemFromSensorDataContract(
-                        DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromString(m, _testLogger)), _testLogger));
+                        DataTransforms.AddTimeCreated( DataTransforms.SensorDataContractFromString( m, _testLogger ) ), _testLogger ) );
 
 
             service.Logger = _testLogger;
@@ -235,17 +235,17 @@ namespace Microsoft.ConnectTheDots.Test
         protected virtual void EventBatchProcessed( List<Task> messages )
         {
             // LORENZO: test behaviours such as waiting for messages to be delivered or re-transmission
-            
-            foreach(Task t in messages)
+
+            foreach( Task t in messages )
             {
-                _testLogger.LogInfo(String.Format("Task {0} status is '{1}'", t.Id, t.Status.ToString()));
+                _testLogger.LogInfo( String.Format( "Task {0} status is '{1}'", t.Id, t.Status.ToString( ) ) );
             }
 
-            Task.WaitAll(((List<Task>)messages).ToArray());
+            Task.WaitAll( ( ( List<Task> )messages ).ToArray( ) );
 
-            foreach(Task t in messages)
+            foreach( Task t in messages )
             {
-                _testLogger.LogInfo(String.Format("Task {0} status is '{1}'", t.Id, t.Status.ToString()));
+                _testLogger.LogInfo( String.Format( "Task {0} status is '{1}'", t.Id, t.Status.ToString( ) ) );
             }
         }
     }

@@ -11,20 +11,20 @@
     {
         #region Singleton implementation
 
-		      private static MonitorLogger _logger;
-        private static readonly object _SyncRoot = new object();
+        private static MonitorLogger _logger;
+        private static readonly object _SyncRoot = new object( );
 
         internal static MonitorLogger Instance
         {
             get
             {
-                if (_logger == null)
+                if( _logger == null )
                 {
-                    lock (_SyncRoot)
+                    lock( _SyncRoot )
                     {
-                        if (_logger == null)
+                        if( _logger == null )
                         {
-                            _logger = new MonitorLogger();
+                            _logger = new MonitorLogger( );
                         }
                     }
                 }
@@ -37,19 +37,19 @@
 
         private MonitorLogger( )
         {
-            _NLog = LogManager.GetCurrentClassLogger();
+            _NLog = LogManager.GetCurrentClassLogger( );
         }
 
-		#endregion
+        #endregion
 
-        public void LogError(string logMessage)
+        public void LogError( string logMessage )
         {
-            _NLog.Error(logMessage);
+            _NLog.Error( logMessage );
         }
 
-        public void LogInfo(string logMessage)
+        public void LogInfo( string logMessage )
         {
-            _NLog.Info(logMessage);
+            _NLog.Info( logMessage );
         }
     }
 }

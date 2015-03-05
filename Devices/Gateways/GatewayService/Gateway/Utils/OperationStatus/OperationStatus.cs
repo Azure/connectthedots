@@ -4,10 +4,10 @@
 
     //--//
 
-    [DebuggerDisplay("OperationCode = {OperationCode}")]
+    [DebuggerDisplay( "OperationCode = {OperationCode}" )]
     public sealed class OperationStatus
     {
-        internal OperationStatus() { }
+        internal OperationStatus( ) { }
 
         public ErrorCode OperationCode { get; set; }
 
@@ -19,10 +19,10 @@
         }
     }
 
-    [DebuggerDisplay("OperationCode = {OperationCode}, Result = {Result}")]
+    [DebuggerDisplay( "OperationCode = {OperationCode}, Result = {Result}" )]
     public sealed class OperationStatus<T>
     {
-        internal OperationStatus() { }
+        internal OperationStatus( ) { }
 
         public T Result { get; set; }
 

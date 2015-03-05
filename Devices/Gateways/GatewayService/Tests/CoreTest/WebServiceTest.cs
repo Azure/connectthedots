@@ -20,20 +20,20 @@
         private readonly Random _rand;
         private int _totalMessagesSent;
         private int _totalMessagesToSend;
-        
+
         private const int MINUTES_TO_MILLISECONDS = 60 * 1000;
         private const int STOP_TIMEOUT_MS = 5000; // ms
         private const int MIN_WAIT_BEETWEEN_BURSTS = 5 * MINUTES_TO_MILLISECONDS; // 5 minutes in milliseconds
 
         //--//
 
-        public WebServiceTest( string url, ILogger logger ) 
+        public WebServiceTest( string url, ILogger logger )
         {
-            if(logger == null)
+            if( logger == null )
             {
                 throw new ArgumentException( "Cannot run tests without logging" );
             }
-            
+
             _testLogger = logger;
 
             _url = url;
@@ -42,23 +42,23 @@
             _totalMessagesToSend = 0;
         }
 
-        public void Run()
+        public void Run( )
         {
             try
             {
                 // Send a flurry of messages, repeat a few times
-                for (int iteration = 0; iteration < TEST_ITERATIONS; ++iteration)
+                for( int iteration = 0; iteration < TEST_ITERATIONS; ++iteration )
                 {
-                    int count = _rand.Next(MAX_TEST_MESSAGES);
+                    int count = _rand.Next( MAX_TEST_MESSAGES );
 
-                    while (--count >= 0)
+                    while( --count >= 0 )
                     {
-                        HttpWebRequest request = (HttpWebRequest)WebRequest.Create(_url);
+                        HttpWebRequest request = ( HttpWebRequest )WebRequest.Create( _url );
                         request.Method = "GET";
 
-                        using(HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                        { 
-                            if(response.StatusCode != HttpStatusCode.OK) 
+                        using( HttpWebResponse response = ( HttpWebResponse )request.GetResponse( ) )
+                        {
+                            if( response.StatusCode != HttpStatusCode.OK )
                             {
                                 SignalError( response.StatusCode );
                             }
@@ -70,22 +70,22 @@
                     }
 
                     // sleep 5 to 10 minutes
-                    int sleepMS = MIN_WAIT_BEETWEEN_BURSTS + _rand.Next(MIN_WAIT_BEETWEEN_BURSTS);
+                    int sleepMS = MIN_WAIT_BEETWEEN_BURSTS + _rand.Next( MIN_WAIT_BEETWEEN_BURSTS );
 
-                    Console.WriteLine(String.Format("Sent {0} messages, sleeping now for {1} minutes", _totalMessagesSent, sleepMS / MINUTES_TO_MILLISECONDS));
+                    Console.WriteLine( String.Format( "Sent {0} messages, sleeping now for {1} minutes", _totalMessagesSent, sleepMS / MINUTES_TO_MILLISECONDS ) );
 
-                    Thread.Sleep(sleepMS);
+                    Thread.Sleep( sleepMS );
                 }
             }
-            catch (Exception ex)
+            catch( Exception ex )
             {
-                _testLogger.LogError("exception caught: " + ex.StackTrace);
+                _testLogger.LogError( "exception caught: " + ex.StackTrace );
             }
         }
 
-        public void Completed()
+        public void Completed( )
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException( );
         }
 
         public int TotalMessagesSent
@@ -106,9 +106,9 @@
 
         protected void SignalError( HttpStatusCode code )
         {
-            _testLogger.LogError("Response yielded error: " + code.ToString());
+            _testLogger.LogError( "Response yielded error: " + code.ToString( ) );
 
-            Debug.Assert(false);
+            Debug.Assert( false );
         }
 
     }

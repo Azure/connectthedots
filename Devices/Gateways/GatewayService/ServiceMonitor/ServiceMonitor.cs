@@ -35,17 +35,17 @@
 
             ServiceController[] svcs = ServiceController.GetServices( );
 
-            foreach(ServiceController svc in svcs)
+            foreach( ServiceController svc in svcs )
             {
-                if(svc.DisplayName == serviceName)
+                if( svc.DisplayName == serviceName )
                 {
                     _target = svc;
                 }
             }
 
-            if( _target == null ) 
+            if( _target == null )
             {
-                _logger.LogInfo( String.Format( "Service '{0}' is not installed", serviceName ) ); 
+                _logger.LogInfo( String.Format( "Service '{0}' is not installed", serviceName ) );
             }
 
             _exit = false;
@@ -53,7 +53,7 @@
 
         public bool Lock( string monitoringTarget )
         {
-            if(_target == null)
+            if( _target == null )
             {
                 return false;
             }
@@ -96,7 +96,7 @@
 
         private void Restart( )
         {
-            _target.Start();
+            _target.Start( );
         }
     }
 }

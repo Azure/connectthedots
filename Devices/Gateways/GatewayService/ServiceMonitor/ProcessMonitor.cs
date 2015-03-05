@@ -34,7 +34,7 @@
             // is in the path or already running
             Directory.SetCurrentDirectory( Path.GetDirectoryName( Assembly.GetExecutingAssembly( ).Location ) );
 
-            if ( !File.Exists( _executableName ) )
+            if( !File.Exists( _executableName ) )
             {
                 // cannot find executable, we may still be able to run based on the target
                 _logger.LogInfo( "Executable does not exists in the current directory" );
@@ -50,15 +50,15 @@
             //
             Process[] processes = Process.GetProcessesByName( monitoringTarget );
 
-            if ( processes.Length == 1 )
+            if( processes.Length == 1 )
             {
                 _target = processes[ 0 ];
             }
 
-            if ( processes.Length > 1 || processes.Length == 0 )
+            if( processes.Length > 1 || processes.Length == 0 )
             {
                 // if there is more than 1, kill them all and restart
-                foreach ( Process p in processes )
+                foreach( Process p in processes )
                 {
                     _logger.LogInfo( String.Format( "Killing process {0}, PID: {1}", p.ProcessName, p.Id ) );
 
@@ -92,12 +92,12 @@
             }
         }
 
-        public void QuitMonitor()
+        public void QuitMonitor( )
         {
             _exit = true;
         }
 
-        private Process CreateProcess( string monitoringExecutable  )
+        private Process CreateProcess( string monitoringExecutable )
         {
             Process p = new Process( );
 
@@ -105,7 +105,7 @@
 
             p.Exited += Restart;
 
-            if(!p.Start( ))
+            if( !p.Start( ) )
             {
                 _logger.LogError( String.Format( "Process '{0}'could not be started", monitoringExecutable ) );
 
@@ -115,9 +115,9 @@
             return p;
         }
 
-        private void Restart( object sender, EventArgs e)
+        private void Restart( object sender, EventArgs e )
         {
-            _target = CreateProcess( _executableName ); 
+            _target = CreateProcess( _executableName );
         }
     }
 }

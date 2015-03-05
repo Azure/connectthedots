@@ -6,9 +6,9 @@
 
     public interface IMessageSender<in T>
     {
-        Task SendMessage(T data);
-        Task SendSerialized(string jsonData);
+        Task SendMessage( T data );
+        Task SendSerialized( string jsonData );
 
-        void Close();
+        void Close( );
     }
 }

@@ -23,9 +23,9 @@
             {
                 _action( obj );
             }
-            catch(Exception ex)
+            catch( Exception ex )
             {
-                _logger.LogError( "Exception in task: " + ex.StackTrace ); 
+                _logger.LogError( "Exception in task: " + ex.StackTrace );
             }
         }
     }
