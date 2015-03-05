@@ -12,6 +12,8 @@
     {
         protected GatewayQueue<T> _SentMessagesQueue = new GatewayQueue<T>( );
 
+        //--//
+
         public async Task SendMessage( T data )
         {
             _SentMessagesQueue.Push( data );

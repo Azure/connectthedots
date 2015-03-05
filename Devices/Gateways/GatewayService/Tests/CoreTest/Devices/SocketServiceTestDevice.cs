@@ -14,20 +14,28 @@
 
     public class SocketServiceTestDevice
     {
-        private readonly ILogger _Logger;
+        private const int SLEEP_TIME_MS = 1000;
+
+        //--//
+
+        private readonly ILogger _logger;
+
+        //--//
+
         public SocketServiceTestDevice( ILogger logger )
         {
             if( logger == null )
+            {
                 throw new ArgumentException( "Please provide logger to SocketServiceDevice" );
+            }
 
-            _Logger = logger;
+            _logger = logger;
         }
 
-        private const int SLEEP_TIME_MS = 1000;
 
         public void Start( SensorEndpoint endpoint )
         {
-            var sh = new SafeAction<SensorEndpoint>( e => RunSocketServer( e ), _Logger );
+            var sh = new SafeAction<SensorEndpoint>( e => RunSocketServer( e ), _logger );
 
             Task.Run( ( ) => sh.SafeInvoke( endpoint ) );
         }
@@ -38,13 +46,13 @@
             if( !IPAddress.TryParse( endpoint.Host, out ipAddress ) )
                 return;
 
-            _Logger.LogInfo( "Starting Socket server..." );
+            _logger.LogInfo( "Starting Socket server..." );
 
             TcpListener serverSocket = new TcpListener( ipAddress, endpoint.Port );
             serverSocket.Start( );
 
             TcpClient clientSocket = serverSocket.AcceptTcpClient( );
-            _Logger.LogInfo( "Accepted connection from client." );
+            _logger.LogInfo( "Accepted connection from client." );
 
             try
             {
@@ -66,13 +74,13 @@
                     networkStream.Write( sendBytes, 0, sendBytes.Length );
                     networkStream.Flush( );
 
-                    _Logger.LogInfo( "Sent: " + serializedData );
+                    _logger.LogInfo( "Sent: " + serializedData );
                     Thread.Sleep( SLEEP_TIME_MS );
                 }
             }
             catch( Exception ex )
             {
-                _Logger.LogError( ex.ToString( ) );
+                _logger.LogError( ex.ToString( ) );
             }
 
             try
@@ -81,7 +89,7 @@
             }
             catch( Exception ex )
             {
-                _Logger.LogError( ex.ToString( ) );
+                _logger.LogError( ex.ToString( ) );
             }
         }
     }

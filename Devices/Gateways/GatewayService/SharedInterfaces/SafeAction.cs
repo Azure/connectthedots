@@ -6,8 +6,8 @@
 
     public class SafeAction<TParam>
     {
-        Action<TParam> _action;
-        ILogger _logger;
+        private readonly Action<TParam> _action;
+        private readonly ILogger        _logger;
 
         //--//
 

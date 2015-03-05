@@ -10,21 +10,23 @@
     [RunInstaller( true )]
     public class ProjectInstaller : Installer
     {
-        private ServiceProcessInstaller process;
-        private ServiceInstaller service;
+        private ServiceProcessInstaller _process;
+        private ServiceInstaller        _service;
+
+        //--//
 
         public ProjectInstaller( )
         {
-            process = new ServiceProcessInstaller
+            _process = new ServiceProcessInstaller
             {
                 Account = ServiceAccount.LocalSystem
             };
-            service = new ServiceInstaller
+            _service = new ServiceInstaller
             {
                 ServiceName = Constants.WindowsServiceName
             };
-            Installers.Add( process );
-            Installers.Add( service );
+            Installers.Add( _process );
+            Installers.Add( _service );
         }
     }
 }

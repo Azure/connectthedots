@@ -11,10 +11,13 @@
     {
         public delegate void DataInQueueEventHandler( QueuedItem data );
 
-        private readonly IAsyncQueue<QueuedItem> _Queue;
-        private readonly EventProcessor _EventProcessor;
+        //--//
 
-        private readonly Func<string, QueuedItem> _DataTransform;
+        private readonly IAsyncQueue<QueuedItem>    _queue;
+        private readonly EventProcessor             _eventProcessor;
+        private readonly Func<string, QueuedItem>   _dataTransform;
+
+        //--//
 
         public GatewayService( IAsyncQueue<QueuedItem> queue, EventProcessor processor, Func<string, QueuedItem> dataTransform = null )
         {
@@ -25,18 +28,18 @@
 
             if( dataTransform != null )
             {
-                _DataTransform = dataTransform;
+                _dataTransform = dataTransform;
             }
             else
             {
-                _DataTransform = m => new QueuedItem
+                _dataTransform = m => new QueuedItem
                     {
                         JsonData = m
                     };
             }
 
-            _Queue = queue;
-            _EventProcessor = processor;
+            _queue = queue;
+            _eventProcessor = processor;
         }
 
         public ILogger Logger { get; set; }
@@ -47,18 +50,18 @@
 
             if( jsonData != null )//not filling a queue by empty items
             {
-                QueuedItem sensorData = _DataTransform( jsonData );
+                QueuedItem sensorData = _dataTransform( jsonData );
 
                 if( sensorData != null )
                 {
                     //TODO: we can check status of BatchSender and indicate error on request if needed
-                    _Queue.Push( sensorData );
+                    _queue.Push( sensorData );
 
                     DataInQueue( sensorData );
                 }
             }
 
-            return _Queue.Count;
+            return _queue.Count;
         }
 
         public event DataInQueueEventHandler OnDataInQueue;

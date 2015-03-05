@@ -11,12 +11,17 @@
     {
         private static readonly int MAX_LAG = 1; // ms
 
-        protected readonly ITest _test;
+        //--//
+
+        protected readonly ITest  _test;
         protected readonly Random _rand;
-        protected int _forSending = 0;
+        protected          int    _forSending;
+
+        //--//
 
         internal MockSender( ITest test )
         {
+            _forSending = 0;
             _test = test;
             _rand = new Random( );
         }

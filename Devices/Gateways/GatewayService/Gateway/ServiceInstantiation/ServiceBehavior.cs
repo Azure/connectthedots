@@ -11,10 +11,13 @@
 
     public class ServiceBehavior : IServiceBehavior
     {
-        readonly Func<IService> serviceCreator;
+        private readonly Func<IService> _serviceCreator;
+
+        //--//
+
         public ServiceBehavior( Func<IService> serviceCreator )
         {
-            this.serviceCreator = serviceCreator;
+            this._serviceCreator = serviceCreator;
         }
 
         public void AddBindingParameters( ServiceDescription serviceDescription, ServiceHostBase serviceHostBase, Collection<ServiceEndpoint> endpoints, BindingParameterCollection bindingParameters )
@@ -27,7 +30,7 @@
             {
                 foreach( EndpointDispatcher ed in cd.Endpoints )
                 {
-                    ed.DispatchRuntime.InstanceProvider = new ServiceInstanceProvider( this.serviceCreator );
+                    ed.DispatchRuntime.InstanceProvider = new ServiceInstanceProvider( this._serviceCreator );
                 }
             }
         }

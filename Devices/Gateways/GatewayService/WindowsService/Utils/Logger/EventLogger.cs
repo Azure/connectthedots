@@ -12,46 +12,46 @@
     {
         #region Singleton implementation
 
-        private static EventLogger _EventLogger;
-        private static readonly object _SyncRoot = new object( );
+        private static EventLogger _eventLogger;
+        private static readonly object _syncRoot = new object( );
 
         internal static EventLogger Instance
         {
             get
             {
-                if( _EventLogger == null )
+                if( _eventLogger == null )
                 {
-                    lock( _SyncRoot )
+                    lock( _syncRoot )
                     {
-                        if( _EventLogger == null )
+                        if( _eventLogger == null )
                         {
-                            _EventLogger = new EventLogger( );
+                            _eventLogger = new EventLogger( );
                         }
                     }
                 }
 
-                return _EventLogger;
+                return _eventLogger;
             }
         }
 
-        private static EventLog _EventLog;
+        private static EventLog    _eventLog;
         private static NLog.Logger _NLog;
 
         private EventLogger( )
         {
             _NLog = LogManager.GetCurrentClassLogger( );
-            _EventLog = new EventLog
+            _eventLog = new EventLog
             {
                 Source = Constants.WindowsServiceName,
                 Log = "Application"
             };
 
-            ( ( ISupportInitialize )( _EventLog ) ).BeginInit( );
-            if( !EventLog.SourceExists( _EventLog.Source ) )
+            ( ( ISupportInitialize )( _eventLog ) ).BeginInit( );
+            if( !EventLog.SourceExists( _eventLog.Source ) )
             {
-                EventLog.CreateEventSource( _EventLog.Source, _EventLog.Log );
+                EventLog.CreateEventSource( _eventLog.Source, _eventLog.Log );
             }
-            ( ( ISupportInitialize )( _EventLog ) ).EndInit( );
+            ( ( ISupportInitialize )( _eventLog ) ).EndInit( );
         }
 
         #endregion
@@ -59,13 +59,13 @@
         public void LogError( string logMessage )
         {
             _NLog.Error( logMessage );
-            _EventLog.WriteEntry( logMessage, EventLogEntryType.Error );
+            _eventLog.WriteEntry( logMessage, EventLogEntryType.Error );
         }
 
         public void LogInfo( string logMessage )
         {
             _NLog.Info( logMessage );
-            _EventLog.WriteEntry( logMessage, EventLogEntryType.Information );
+            _eventLog.WriteEntry( logMessage, EventLogEntryType.Information );
         }
     }
 }

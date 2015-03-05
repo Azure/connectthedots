@@ -9,25 +9,25 @@
     {
         #region Singleton implementation
 
-        private static TestLogger _testLogger;
-        private static readonly object _SyncRoot = new object( );
+        private static readonly object     _syncRoot = new object( );
+        private static          TestLogger _logger;
 
         internal static TestLogger Instance
         {
             get
             {
-                if( _testLogger == null )
+                if( _logger == null )
                 {
-                    lock( _SyncRoot )
+                    lock( _syncRoot )
                     {
-                        if( _testLogger == null )
+                        if( _logger == null )
                         {
-                            _testLogger = new TestLogger( );
+                            _logger = new TestLogger( );
                         }
                     }
                 }
 
-                return _testLogger;
+                return _logger;
             }
         }
 

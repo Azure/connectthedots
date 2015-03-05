@@ -19,16 +19,22 @@ namespace Microsoft.ConnectTheDots.Test
         public const int TEST_ITERATIONS = 5;
         public const int MAX_TEST_MESSAGES = 1000;
 
-        private readonly ILogger _testLogger;
-        private readonly AutoResetEvent _completed = new AutoResetEvent( false );
-        private readonly GatewayQueue<QueuedItem> _GatewayQueue;
-        private readonly IMessageSender<SensorDataContract> _Sender;
-        private readonly BatchSenderThread<QueuedItem, SensorDataContract> _BatchSenderThread;
-        private readonly Random _rand;
-        private int _totalMessagesSent;
-        private int _totalMessagesToSend;
+        //--//
 
         private const int STOP_TIMEOUT_MS = 5000; // ms
+
+        //--//
+
+        private readonly ILogger                                            _logger;
+        private readonly AutoResetEvent                                     _completed;
+        private readonly GatewayQueue<QueuedItem>                           _gatewayQueue;
+        private readonly IMessageSender<SensorDataContract>                 _sender;
+        private readonly BatchSenderThread<QueuedItem, SensorDataContract>  _batchSenderThread;
+        private readonly Random                                             _rand;
+        private          int                                                _totalMessagesSent;
+        private          int                                                _totalMessagesToSend;
+
+        //--//
 
         public CoreTest( ILogger logger )
         {
@@ -37,34 +43,38 @@ namespace Microsoft.ConnectTheDots.Test
                 throw new ArgumentException( "Cannot run tests without logging" );
             }
 
-            _testLogger = logger;
+            _completed = new AutoResetEvent( false );
+
+            _logger = logger;
 
             _rand = new Random( );
             _totalMessagesSent = 0;
             _totalMessagesToSend = 0;
-            _GatewayQueue = new GatewayQueue<QueuedItem>( );
+            _gatewayQueue = new GatewayQueue<QueuedItem>( );
+
 #if MOCK_SENDER
             _Sender = new MockSender<SensorDataContract>(this);
 #else
 
             AMQPConfig amqpConfig = Loader.GetAMQPConfig( );
 
-            _Sender = new AMQPSender<SensorDataContract>(
+            _sender = new AMQPSender<SensorDataContract>(
                                                 amqpConfig.AMQPSAddress,
                                                 amqpConfig.EventHubName,
                                                 amqpConfig.EventHubMessageSubject,
                                                 amqpConfig.EventHubDeviceId,
                                                 amqpConfig.EventHubDeviceDisplayName,
-                                                _testLogger
+                                                _logger
                                                 );
 #endif
 
-            _BatchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>(
-                _GatewayQueue,
-                _Sender,
-                dataTransform: null,//m => DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromQueuedItem(m, _testLogger)), 
+            _batchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>(
+                _gatewayQueue,
+                _sender,
+                dataTransform : null, 
                 serializedData: m => ( m == null ) ? null : m.JsonData,
-                logger: null );
+                logger        : _logger 
+                );
         }
 
         public void Run( )
@@ -136,16 +146,16 @@ namespace Microsoft.ConnectTheDots.Test
 
                 _completed.WaitOne( );
 
-                _BatchSenderThread.Stop( STOP_TIMEOUT_MS );
+                _batchSenderThread.Stop( STOP_TIMEOUT_MS );
             }
             catch( Exception ex )
             {
-                _testLogger.LogError( "exception caught: " + ex.StackTrace );
+                _logger.LogError( "exception caught: " + ex.StackTrace );
             }
             finally
             {
-                _BatchSenderThread.Stop( STOP_TIMEOUT_MS );
-                _Sender.Close( );
+                _batchSenderThread.Stop( STOP_TIMEOUT_MS );
+                _sender.Close( );
             }
         }
 
@@ -155,7 +165,7 @@ namespace Microsoft.ConnectTheDots.Test
             {
                 GatewayService service = PrepareGatewayService( );
 
-                DataIntakeLoader dataIntakeLoader = new DataIntakeLoader( Loader.GetSources( ), Loader.GetEndpoints( ), _testLogger );
+                DataIntakeLoader dataIntakeLoader = new DataIntakeLoader( Loader.GetSources( ), Loader.GetEndpoints( ), _logger );
 
                 _totalMessagesToSend += 5;
 
@@ -165,16 +175,16 @@ namespace Microsoft.ConnectTheDots.Test
 
                 dataIntakeLoader.StopAll( );
 
-                _BatchSenderThread.Stop( STOP_TIMEOUT_MS );
+                _batchSenderThread.Stop( STOP_TIMEOUT_MS );
             }
             catch( Exception ex )
             {
-                _testLogger.LogError( "exception caught: " + ex.StackTrace );
+                _logger.LogError( "exception caught: " + ex.StackTrace );
             }
             finally
             {
-                _BatchSenderThread.Stop( STOP_TIMEOUT_MS );
-                _Sender.Close( );
+                _batchSenderThread.Stop( STOP_TIMEOUT_MS );
+                _sender.Close( );
             }
         }
 
@@ -203,18 +213,17 @@ namespace Microsoft.ConnectTheDots.Test
 
         private GatewayService PrepareGatewayService( )
         {
-            _BatchSenderThread.Logger = _testLogger;
-            _BatchSenderThread.Start( );
+            _batchSenderThread.Start( );
 
-            GatewayService service = new GatewayService( _GatewayQueue, _BatchSenderThread,
+            GatewayService service = new GatewayService( _gatewayQueue, _batchSenderThread,
                 m => DataTransforms.QueuedItemFromSensorDataContract(
-                        DataTransforms.AddTimeCreated( DataTransforms.SensorDataContractFromString( m, _testLogger ) ), _testLogger ) );
+                        DataTransforms.AddTimeCreated( DataTransforms.SensorDataContractFromString( m, _logger ) ), _logger ) );
 
 
-            service.Logger = _testLogger;
+            service.Logger = _logger;
             service.OnDataInQueue += DataInQueue;
 
-            _BatchSenderThread.OnEventsBatchProcessed += EventBatchProcessed;
+            _batchSenderThread.OnEventsBatchProcessed += EventBatchProcessed;
 
             return service;
         }
@@ -229,7 +238,7 @@ namespace Microsoft.ConnectTheDots.Test
             // LORENZO: test behaviours such as accumulating data an processing in batch
             // as it stands, we are processing every event as it comes in
 
-            _BatchSenderThread.Process( );
+            _batchSenderThread.Process( );
         }
 
         protected virtual void EventBatchProcessed( List<Task> messages )
@@ -238,14 +247,14 @@ namespace Microsoft.ConnectTheDots.Test
 
             foreach( Task t in messages )
             {
-                _testLogger.LogInfo( String.Format( "Task {0} status is '{1}'", t.Id, t.Status.ToString( ) ) );
+                _logger.LogInfo( String.Format( "Task {0} status is '{1}'", t.Id, t.Status.ToString( ) ) );
             }
 
             Task.WaitAll( ( ( List<Task> )messages ).ToArray( ) );
 
             foreach( Task t in messages )
             {
-                _testLogger.LogInfo( String.Format( "Task {0} status is '{1}'", t.Id, t.Status.ToString( ) ) );
+                _logger.LogInfo( String.Format( "Task {0} status is '{1}'", t.Id, t.Status.ToString( ) ) );
             }
         }
     }

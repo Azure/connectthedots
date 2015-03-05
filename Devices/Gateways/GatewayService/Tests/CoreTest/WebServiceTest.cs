@@ -15,15 +15,17 @@
 
         //--//
 
-        string _url;
-        private readonly ILogger _testLogger;
-        private readonly Random _rand;
-        private int _totalMessagesSent;
-        private int _totalMessagesToSend;
-
-        private const int MINUTES_TO_MILLISECONDS = 60 * 1000;
-        private const int STOP_TIMEOUT_MS = 5000; // ms
+        private const int MINUTES_TO_MILLISECONDS  = 60 * 1000;
+        private const int STOP_TIMEOUT_MS          = 5000;                        // ms
         private const int MIN_WAIT_BEETWEEN_BURSTS = 5 * MINUTES_TO_MILLISECONDS; // 5 minutes in milliseconds
+
+        //--//
+
+        private readonly ILogger _logger;
+        private readonly Random  _rand;
+        private          string  _url;
+        private          int     _totalMessagesSent;
+        private          int     _totalMessagesToSend;
 
         //--//
 
@@ -34,7 +36,7 @@
                 throw new ArgumentException( "Cannot run tests without logging" );
             }
 
-            _testLogger = logger;
+            _logger = logger;
 
             _url = url;
             _rand = new Random( );
@@ -79,7 +81,7 @@
             }
             catch( Exception ex )
             {
-                _testLogger.LogError( "exception caught: " + ex.StackTrace );
+                _logger.LogError( "exception caught: " + ex.StackTrace );
             }
         }
 
@@ -106,7 +108,7 @@
 
         protected void SignalError( HttpStatusCode code )
         {
-            _testLogger.LogError( "Response yielded error: " + code.ToString( ) );
+            _logger.LogError( "Response yielded error: " + code.ToString( ) );
 
             Debug.Assert( false );
         }

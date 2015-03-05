@@ -7,14 +7,17 @@
 
     public static class RandomSensorDataGenerator
     {
-        //Simple generator for initial testing
         private const int DEVICE_COUNT = 4;
 
-        private static readonly Random _Random = new Random( );
-        private static readonly string[] _Guids = new string[ DEVICE_COUNT ];
-        private static readonly string[] _MeasureName = new string[ DEVICE_COUNT ];
+        //--//
+
+        private static readonly Random   _Random        = new Random( );
+        private static readonly string[] _Guids         = new string[ DEVICE_COUNT ];
+        private static readonly string[] _MeasureName   = new string[ DEVICE_COUNT ];
         private static readonly string[] _UnitOfMeasure = new string[ DEVICE_COUNT ];
-        private static readonly string[] _DisplayName = new string[ DEVICE_COUNT ];
+        private static readonly string[] _DisplayName   = new string[ DEVICE_COUNT ];
+
+        //--//
 
         static RandomSensorDataGenerator( )
         {

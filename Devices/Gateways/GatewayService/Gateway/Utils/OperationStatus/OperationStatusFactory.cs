@@ -6,11 +6,13 @@
 
     public static class OperationStatusFactory
     {
-        private static readonly OperationStatus _SuccessConst = new OperationStatus { OperationCode = ErrorCode.Success };
+        private static readonly OperationStatus _successConst = new OperationStatus { OperationCode = ErrorCode.Success };
+
+        //--//
 
         public static OperationStatus CreateSuccess( )
         {
-            return _SuccessConst;
+            return _successConst;
         }
 
         public static OperationStatus<T> CreateSuccess<T>( T result )
@@ -22,8 +24,7 @@
         {
             return new OperationStatus { OperationCode = errorCode };
         }
-
-
+        
         public static OperationStatus CreateError( ErrorCode errorCode, string errorMessage )
         {
             return new OperationStatus { OperationCode = errorCode, ErrorMessage = errorMessage };

@@ -11,17 +11,19 @@
 
     internal class MockSenderMap<T> : IMessageSender<T>
     {
-        protected SortedDictionary<T, int> _SentMessages = new SortedDictionary<T, int>( );
+        protected SortedDictionary<T, int> _sentMessages = new SortedDictionary<T, int>( );
+
+        //--//
 
         public async Task SendMessage( T data )
         {
             Action<T> send = ( d ) =>
             {
-                lock( _SentMessages )
+                lock( _sentMessages )
                 {
-                    if( _SentMessages.ContainsKey( d ) )
-                        _SentMessages[ d ]++;
-                    else _SentMessages.Add( d, 1 );
+                    if( _sentMessages.ContainsKey( d ) )
+                        _sentMessages[ d ]++;
+                    else _sentMessages.Add( d, 1 );
                 }
             };
 
@@ -37,17 +39,17 @@
 
         public bool Contains( T data )
         {
-            lock( _SentMessages )
+            lock( _sentMessages )
             {
-                return _SentMessages.ContainsKey( data );
+                return _sentMessages.ContainsKey( data );
             }
         }
 
         public bool ContainsOthersItems( MockSenderMap<T> other )
         {
-            lock( _SentMessages )
+            lock( _sentMessages )
             {
-                if( other._SentMessages.Any( key => !_SentMessages.Contains( key ) ) )
+                if( other._sentMessages.Any( key => !_sentMessages.Contains( key ) ) )
                 {
                     return false;
                 }

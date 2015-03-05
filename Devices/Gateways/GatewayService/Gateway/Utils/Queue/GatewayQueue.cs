@@ -11,6 +11,8 @@
     {
         private readonly ConcurrentQueue<T> _Queue = new ConcurrentQueue<T>( );
 
+        //--//
+
         public void Push( T item )
         {
             _Queue.Enqueue( item );

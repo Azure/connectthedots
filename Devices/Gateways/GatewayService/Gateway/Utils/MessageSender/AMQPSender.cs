@@ -14,23 +14,26 @@
 
     public class AMQPSender<T> : IMessageSender<T>
     {
-        private const int STOP_TIMEOUT_MS = 5000; // ms
+
+        //--//
 
         internal class ReliableSender
         {
-            private readonly string _EventHubName;
+            private readonly object _syncRoot = new object( );
 
-            private Address _address;
-            private SenderLink _sender;
-            private bool _alive;
+            //--//
 
-            private ILogger _Logger;
+            private readonly string     _eventHubName;
+            private          Address    _address;
+            private          SenderLink _sender;
+            private          bool       _alive;
+            private          ILogger    _Logger;
 
-            private object _sync = new object( );
+            //--//
 
             internal ReliableSender( string amqpsAddress, string eventHubName, ILogger logger )
             {
-                _EventHubName = eventHubName;
+                _eventHubName = eventHubName;
                 _Logger = SafeLogger.FromLogger( logger );
 
                 try
@@ -59,7 +62,7 @@
             {
                 if( _alive )
                 {
-                    lock( _sync )
+                    lock( _syncRoot )
                     {
                         if( _alive )
                         {
@@ -87,7 +90,7 @@
                 {
                     if( _alive == false )
                     {
-                        lock( _sync )
+                        lock( _syncRoot )
                         {
                             if( _alive == false )
                             {
@@ -96,7 +99,7 @@
                                     Connection connection = new Connection( _address );
                                     Session session = new Session( connection );
 
-                                    _sender = new SenderLink( session, "send-link:" + _EventHubName, _EventHubName );
+                                    _sender = new SenderLink( session, "send-link:" + _eventHubName, _eventHubName );
 
                                     _sender.Closed += OnSenderClosedCallback;
 
@@ -129,19 +132,27 @@
             }
         }
 
+        //--//
+
         internal class SendersPool
         {
             public static readonly int MAX_POOL_SIZE = 64;
 
-            private ReliableSender[] _pool;
-            private int _current;
-            private readonly object _sync = new object( );
+            //--//
 
-            private ILogger _Logger;
+            private readonly object _sync = new object( );
+            
+            //--//
+
+            private readonly ILogger          _logger;
+            private readonly ReliableSender[] _pool;
+            private          int              _current;
+
+            //--//
 
             public SendersPool( string amqpAddress, string eventHubName, int size, ILogger logger )
             {
-                _Logger = logger;
+                _logger = logger;
 
                 if( size > MAX_POOL_SIZE )
                 {
@@ -184,21 +195,22 @@
             }
         }
 
+        //--//
 
-        private readonly string _DefaultSubject;
-        private readonly string _DefaultDeviceId;
-        private readonly string _DefaultDeviceDisplayName;
+        private const           int     STOP_TIMEOUT_MS = 5000; // ms
 
-        private SendersPool _senders;
+        //--//
+
+        private static readonly string _logMesagePrefix = "AMQPSender error. ";
+
+        //--//
+
+        private readonly string         _defaultSubject;
+        private readonly string         _defaultDeviceId;
+        private readonly string         _defaultDeviceDisplayName;
+        private          SendersPool    _senders;
 
         public ILogger Logger { private get; set; }
-
-        private string _LogMesagePrefix = "AMQPSender error. ";
-
-        public string LogMessagePrefix
-        {
-            set { _LogMesagePrefix = value; }
-        }
 
         public AMQPSender( string amqpsAddress, string eventHubName, string defaultSubject, string defaultDeviceId, string defaultDeviceDisplayName, ILogger logger )
         {
@@ -211,9 +223,9 @@
                 throw new ArgumentException( "defaultSubject, defaultDeviceId, defaultDeviceDisplayName, eventHubName cannot be null" );
             }
 
-            _DefaultSubject = defaultSubject;
-            _DefaultDeviceId = defaultDeviceId;
-            _DefaultDeviceDisplayName = defaultDeviceDisplayName;
+            _defaultSubject = defaultSubject;
+            _defaultDeviceId = defaultDeviceId;
+            _defaultDeviceDisplayName = defaultDeviceDisplayName;
 
             _senders = new SendersPool( amqpsAddress, eventHubName, Constants.ConcurrentConnections, Logger );
         }
@@ -233,7 +245,7 @@
             }
             catch( Exception ex )
             {
-                Logger.LogError( _LogMesagePrefix + ex.Message );
+                Logger.LogError( _logMesagePrefix + ex.Message );
             }
         }
 
@@ -250,7 +262,7 @@
             }
             catch( Exception ex )
             {
-                Logger.LogError( _LogMesagePrefix + ex.Message );
+                Logger.LogError( _logMesagePrefix + ex.Message );
             }
         }
 
@@ -307,13 +319,13 @@
         protected Message PrepareMessage( string serializedData, string subject = default(string), string deviceId = default(string), string deviceDisplayName = default(string) )
         {
             if( subject == default( string ) )
-                subject = _DefaultSubject;
+                subject = _defaultSubject;
 
             if( deviceId == default( string ) )
-                deviceId = _DefaultDeviceId;
+                deviceId = _defaultDeviceId;
 
             if( deviceDisplayName == default( string ) )
-                deviceDisplayName = _DefaultDeviceDisplayName;
+                deviceDisplayName = _defaultDeviceDisplayName;
 
             var creationTime = DateTime.UtcNow;
 

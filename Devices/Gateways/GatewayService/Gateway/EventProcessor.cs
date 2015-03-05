@@ -8,6 +8,15 @@
 
     public abstract class EventProcessor
     {
+        protected readonly ILogger _logger;
+
+        //--//
+
+        protected EventProcessor( ILogger logger )
+        {
+            _logger = logger;
+        }
+
         public delegate void EventBatchProcessedEventHandler( List<Task> messages );
 
         public abstract bool Start( );
@@ -16,6 +25,12 @@
 
         public abstract void Process( );
 
-        public ILogger Logger { get; set; }
+        protected ILogger Logger 
+        {
+            get
+            {
+                return _logger;
+            }
+        }
     }
 }

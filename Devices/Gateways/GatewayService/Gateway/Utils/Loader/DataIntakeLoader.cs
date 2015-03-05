@@ -11,18 +11,26 @@
 
     public class DataIntakeLoader
     {
-        private readonly IList<DataIntakeAbstract> _DataIntakes = new List<DataIntakeAbstract>( );
-
-        //dont want duplicated endpoints
         private static HashSet<SensorEndpoint> _SensorEndpoints = new HashSet<SensorEndpoint>( );
 
-        private readonly ILogger _Logger;
+        //--//
+
+        private readonly IList<DataIntakeAbstract> _dataIntakes;
+        private readonly ILogger                   _logger;
+
+        //--//
+
+        protected Func<string, int> OnDataToEnqueue;
+
+        //--//
 
         public DataIntakeLoader( IList<String> sources, IList<SensorEndpoint> endpoints, ILogger logger )
         {
-            _Logger = SafeLogger.FromLogger( logger );
+            _logger = SafeLogger.FromLogger( logger );
 
-            _Logger.LogInfo( "Starting loading Data Intakes" );
+            _logger.LogInfo( "Starting loading Data Intakes" );
+
+            _dataIntakes = new List<DataIntakeAbstract>( );
 
             //for each filename will store a flag - whether it was specified at config or not
             Dictionary<String, bool> sourcesToLoad = new Dictionary<string, bool>( );
@@ -35,7 +43,7 @@
             }
             else
             {
-                _Logger.LogInfo( "No list of DataIntakes in configuration file, continuing..." );
+                _logger.LogInfo( "No list of DataIntakes in configuration file, continuing..." );
             }
 
             if( endpoints != null )
@@ -47,7 +55,7 @@
             }
             else
             {
-                _Logger.LogInfo( "No list of SensorEndpoints in configuration file, continuing..." );
+                _logger.LogInfo( "No list of SensorEndpoints in configuration file, continuing..." );
             }
 
 
@@ -149,7 +157,7 @@
                         //Get all classes that implement the required interface
                         if( t.GetInterface( "IDataIntake", false ) != null )
                         {
-                            _Logger.LogInfo( "IDataIntake assembly loaded: " + t.Name );
+                            _logger.LogInfo( "IDataIntake assembly loaded: " + t.Name );
 
                             nameTypeDict.Add( t.Name, t ); //Add to Dictonary
                         }
@@ -172,35 +180,35 @@
 
             if( notLoadedSpecifiedSources.Length > 0 )
             {
-                _Logger.LogError( String.Format( "Following Data Intakes were specificied, but could not be loaded: {0}", notLoadedSpecifiedSources ) );
+                _logger.LogError( String.Format( "Following Data Intakes were specificied, but could not be loaded: {0}", notLoadedSpecifiedSources ) );
             }
             if( notLoadedNotSpecifiedSources.Length > 0 )
             {
-                _Logger.LogError( String.Format( "Following files are not specificied, and could not be loaded as Data Intakes: {0}", notLoadedNotSpecifiedSources ) );
+                _logger.LogError( String.Format( "Following files are not specificied, and could not be loaded as Data Intakes: {0}", notLoadedNotSpecifiedSources ) );
             }
 
             foreach( KeyValuePair<string, Type> t in nameTypeDict )
             {
                 try
                 {
-                    DataIntakeAbstract di = ( DataIntakeAbstract )Activator.CreateInstance( t.Value, new object[] { _Logger } );
+                    DataIntakeAbstract di = ( DataIntakeAbstract )Activator.CreateInstance( t.Value, new object[] { _logger } );
 
                     if( di != null )
                     {
-                        _Logger.LogInfo( "IDataIntake instance created: " + t.Key );
+                        _logger.LogInfo( "IDataIntake instance created: " + t.Key );
 
                         //adding instance without endpoint if acceptable
                         if( di.SetEndpoint( ) )
                         {
-                            _DataIntakes.Add( di );
+                            _dataIntakes.Add( di );
                         }
 
                         foreach( SensorEndpoint sensorEndpoint in _SensorEndpoints )
                         {
-                            DataIntakeAbstract diWithEndpoint = ( DataIntakeAbstract )Activator.CreateInstance( t.Value, new object[] { _Logger } );
+                            DataIntakeAbstract diWithEndpoint = ( DataIntakeAbstract )Activator.CreateInstance( t.Value, new object[] { _logger } );
                             if( diWithEndpoint.SetEndpoint( sensorEndpoint ) )
                             {
-                                _DataIntakes.Add( diWithEndpoint );
+                                _dataIntakes.Add( diWithEndpoint );
                             }
                         }
                     }
@@ -208,7 +216,7 @@
                 catch( Exception ex )
                 {
                     // dont want to stop creating another instances if one fails
-                    _Logger.LogError( String.Format( "Exception on Creating DataIntake Instance \"{0}\": {1}", t.Key, ex.Message ) );
+                    _logger.LogError( String.Format( "Exception on Creating DataIntake Instance \"{0}\": {1}", t.Key, ex.Message ) );
                 }
             }
         }
@@ -217,14 +225,13 @@
         {
             get
             {
-                return ( IList<IDataIntake> )_DataIntakes;
+                return ( IList<IDataIntake> )_dataIntakes;
             }
         }
 
-        protected Func<string, int> OnDataToEnqueue;
         public void StartAll( Func<string, int> enqueue, DataArrivalEventHandler onDataArrival = null )
         {
-            foreach( DataIntakeAbstract dataIntake in _DataIntakes )
+            foreach( DataIntakeAbstract dataIntake in _dataIntakes )
             {
                 try
                 {
@@ -247,15 +254,16 @@
                 }
                 catch( Exception ex )
                 {
-                    _Logger.LogError( "Exception on Starting DataIntake: " + ex.StackTrace );
+                    _logger.LogError( "Exception on Starting DataIntake: " + ex.StackTrace );
 
                     // catch all other exceptions
                 }
             }
         }
+
         public void StopAll( )
         {
-            foreach( DataIntakeAbstract dataIntake in _DataIntakes )
+            foreach( DataIntakeAbstract dataIntake in _dataIntakes )
             {
                 try
                 {
@@ -263,7 +271,7 @@
                 }
                 catch( Exception ex )
                 {
-                    _Logger.LogError( ex.StackTrace );
+                    _logger.LogError( ex.StackTrace );
 
                     // catch all exceptions
                 }

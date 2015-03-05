@@ -14,7 +14,7 @@ namespace SerialPortListener
 
     public class SerialPortListenerThread : DataIntakeAbstract
     {
-        internal class SerialPortListeningThread
+        private class SerialPortListeningThread
         {
             public SerialPortListeningThread( string name, Thread thread )
             {
@@ -25,25 +25,31 @@ namespace SerialPortListener
             public Thread listeningThread { get; set; }
         }
 
-        const int SLEEP_TIME_BETWEEN_SCAN = 5000; // 5 sec
+        //--//
 
-        private readonly List<SerialPortListeningThread> _ListeningThreads = new List<SerialPortListeningThread>( );
+        private const    int SLEEP_TIME_BETWEEN_SCAN = 5000; // 5 sec
 
-        private Func<string, int> _Enqueue;
-        private bool _DoWorkSwitch;
+        //--//
+
+        private readonly List<SerialPortListeningThread> _listeningThreads;
+        private          Func<string, int>               _enqueue;
+        private          bool                            _doWorkSwitch;
+
+        //--//
 
         public SerialPortListenerThread( ILogger logger )
             : base( logger )
         {
+            _listeningThreads = new List<SerialPortListeningThread>( );
         }
 
         public override bool Start( Func<string, int> enqueue )
         {
-            _Enqueue = enqueue;
+            _enqueue = enqueue;
 
-            _DoWorkSwitch = true;
+            _doWorkSwitch = true;
 
-            var sh = new SafeAction<int>( ( t ) => RunForSerial( t ), _Logger );
+            var sh = new SafeAction<int>( ( t ) => RunForSerial( t ), _logger );
 
             Task.Run( ( ) => sh.SafeInvoke( SLEEP_TIME_BETWEEN_SCAN ) );
 
@@ -52,7 +58,7 @@ namespace SerialPortListener
 
         public override bool Stop( )
         {
-            _DoWorkSwitch = false;
+            _doWorkSwitch = false;
 
             return true;
         }
@@ -73,7 +79,7 @@ namespace SerialPortListener
 #endif
             do
             {
-                _Logger.LogInfo( "RunForSerial loop for Serial Ports scan." );
+                _logger.LogInfo( "RunForSerial loop for Serial Ports scan." );
                 // We will monitor available COM ports and create listening thread for each new valid port
 #if !SIMULATEDATA
                 // Identify which serial ports are connected to sensors
@@ -81,12 +87,12 @@ namespace SerialPortListener
 
                 // First we make sure we kill listening threads for COM port that are no longer available
                 var threadsKilled = new List<SerialPortListeningThread>( );
-                foreach( SerialPortListeningThread serialPortThread in _ListeningThreads )
+                foreach( SerialPortListeningThread serialPortThread in _listeningThreads )
                 {
                     if( Array.IndexOf( ports, serialPortThread.portName ) == -1 )
                     {
                         // Serial port is no longer valid. Abort the listening process
-                        _Logger.LogInfo( "Killed serial port: " + serialPortThread.portName );
+                        _logger.LogInfo( "Killed serial port: " + serialPortThread.portName );
                         serialPortThread.listeningThread.Abort( );
                         threadsKilled.Add( serialPortThread );
                     }
@@ -95,28 +101,28 @@ namespace SerialPortListener
                 // we cannot remove a list item in a foreach loop
                 foreach( SerialPortListeningThread threadKilled in threadsKilled )
                 {
-                    _ListeningThreads.Remove( threadKilled );
+                    _listeningThreads.Remove( threadKilled );
                 }
 
                 // For each of the valid serial ports, start a new listening thread if not already created
                 foreach( string serialPortName in ports )
                 {
-                    if( !_ListeningThreads.Exists( x => x.portName.Equals( serialPortName ) ) )
+                    if( !_listeningThreads.Exists( x => x.portName.Equals( serialPortName ) ) )
                     {
-                        _Logger.LogInfo( "Found serial port with Normal attribute: " + serialPortName );
+                        _logger.LogInfo( "Found serial port with Normal attribute: " + serialPortName );
 
                         // Start a listening thread for each serial port
                         string name = serialPortName;
                         var listeningThread = new Thread( ( ) => ListeningForSensors( name ) );
                         listeningThread.Start( );
-                        _ListeningThreads.Add( new SerialPortListeningThread( serialPortName, listeningThread ) );
+                        _listeningThreads.Add( new SerialPortListeningThread( serialPortName, listeningThread ) );
                     }
                 }
 
                 // If we have no serial port connect, log it
-                if( _ListeningThreads.Count == 0 )
+                if( _listeningThreads.Count == 0 )
                 {
-                    _Logger.LogError( "No connected serial ports" );
+                    _logger.LogError( "No connected serial ports" );
                 }
 #else
                 if(_ListeningThreads.Count == 0)
@@ -129,25 +135,20 @@ namespace SerialPortListener
 #endif
                 // Every 5 seconds we scan Serial COM ports
                 Thread.Sleep( scanPeriod );
-            } while( _DoWorkSwitch );
+            } while( _doWorkSwitch );
             return 0;
         }
 
-        /// <summary>
-        /// Thread function for listening on a specific COM port for a JSON message.
-        /// When a new message is received, send it directly to Azure Event Hubs using the SendAMQPMessage function
-        /// </summary>
-        /// <param name="port">COM port name to listen on</param>
         public void ListeningForSensors( string port )
         {
-            _Logger.LogInfo( "ListeningForSensors: " + port );
+            _logger.LogInfo( "ListeningForSensors: " + port );
             string serialPortName = port;
             SerialPort serialPort = null;
             bool serialPortAlive = true;
             // We want the thread to restart listening on the serial port if it crashed
-            while( _DoWorkSwitch )
+            while( _doWorkSwitch )
             {
-                _Logger.LogInfo( "Starting listening loop for serial port " + serialPortName );
+                _logger.LogInfo( "Starting listening loop for serial port " + serialPortName );
 
                 try
                 {
@@ -156,7 +157,7 @@ namespace SerialPortListener
                     serialPort.DtrEnable = true;
                     serialPort.Open( );
 
-                    _Logger.LogInfo( "Opened Serial Port " + serialPortName );
+                    _logger.LogInfo( "Opened Serial Port " + serialPortName );
 #endif
                     do
                     {
@@ -170,7 +171,7 @@ namespace SerialPortListener
                         }
                         catch( Exception e )
                         {
-                            _Logger.LogError( "Error Reading from Serial Portand sending data from serial port " + serialPortName + ":" + e.Message );
+                            _logger.LogError( "Error Reading from Serial Portand sending data from serial port " + serialPortName + ":" + e.Message );
 
                             serialPort.Close( );
                             serialPortAlive = false;
@@ -191,11 +192,11 @@ namespace SerialPortListener
                                 //_Logger.Info(valuesJson);
 
                                 // Send JSON message to the Cloud
-                                _Enqueue( valuesJson );
+                                _enqueue( valuesJson );
                             }
                             catch( Exception e )
                             {
-                                _Logger.LogError( "Error sending AMQP data: " + e.Message );
+                                _logger.LogError( "Error sending AMQP data: " + e.Message );
                             }
                         }
                     } while( serialPortAlive );
@@ -203,7 +204,7 @@ namespace SerialPortListener
                 }
                 catch( Exception e )
                 {
-                    _Logger.LogError( "Error processing data from serial port: " + e.Message );
+                    _logger.LogError( "Error processing data from serial port: " + e.Message );
                 }
 
                 // When we are reaching this point, that means whether the COM port reading failled or the sensors has been disconnected
@@ -222,7 +223,7 @@ namespace SerialPortListener
                 }
                 catch( Exception e )
                 {
-                    _Logger.LogError( "Error when trying to close the serial port: " + e.Message );
+                    _logger.LogError( "Error when trying to close the serial port: " + e.Message );
                 }
                 // We restart the thread if there has been some failure when reading from serial port
                 Thread.Sleep( 800 );

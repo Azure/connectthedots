@@ -13,18 +13,20 @@
     public class WindowsService : ServiceBase
     {
         private const int STOP_TIMEOUT_MS = 5000; // ms
+        
+        //--//
 
-        private static WebServiceHost _WebHost;
+        private static WebServiceHost _webHost;
 
-        private readonly ILogger _Logger;
+        //--//
 
-        private readonly GatewayQueue<QueuedItem> _GatewayQueue;
-
+        private readonly ILogger                        _logger;
+        private readonly GatewayQueue<QueuedItem>       _gatewayQueue;
         private readonly AMQPSender<SensorDataContract> _AMPQSender;
+        private readonly EventProcessor                 _batchSenderThread;
+        private readonly DataIntakeLoader               _dataIntakeLoader;
 
-        private readonly EventProcessor _BatchSenderThread;
-
-        private readonly DataIntakeLoader _DataIntakeLoader;
+        //--//
 
         public WindowsService( ILogger logger )
         {
@@ -33,7 +35,7 @@
                 throw new ArgumentException( "Cannot run service without logging" );
             }
 
-            _Logger = logger;
+            _logger = logger;
 
             if( logger is TunableLogger )
             {
@@ -49,12 +51,12 @@
                 // Name the Windows Service
                 ServiceName = Constants.WindowsServiceName;
 
-                _GatewayQueue = new GatewayQueue<QueuedItem>( );
+                _gatewayQueue = new GatewayQueue<QueuedItem>( );
                 AMQPConfig amqpConfig = Loader.GetAMQPConfig( );
 
                 if( amqpConfig == null )
                 {
-                    _Logger.LogError( "AMQP configuration is missing" );
+                    _logger.LogError( "AMQP configuration is missing" );
                     return;
                 }
                 _AMPQSender = new AMQPSender<SensorDataContract>(
@@ -63,71 +65,68 @@
                                                     amqpConfig.EventHubMessageSubject,
                                                     amqpConfig.EventHubDeviceId,
                                                     amqpConfig.EventHubDeviceDisplayName,
-                                                    _Logger
+                                                    _logger
                                                     );
-                _BatchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>(
-                                                    _GatewayQueue,
+                _batchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>(
+                                                    _gatewayQueue,
                                                     _AMPQSender,
                                                     null,//m => DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromQueuedItem(m, _Logger)),
                                                     new Func<QueuedItem, string>( m => m.JsonData ),
-                                                    _Logger );
+                                                    _logger );
 
-                _DataIntakeLoader = new DataIntakeLoader( Loader.GetSources( ), Loader.GetEndpoints( ), _Logger );
+                _dataIntakeLoader = new DataIntakeLoader( Loader.GetSources( ), Loader.GetEndpoints( ), _logger );
             }
             catch( Exception ex )
             {
-                _Logger.LogInfo( "Exception creating WindowsService: " + ex.Message );
+                _logger.LogInfo( "Exception creating WindowsService: " + ex.Message );
             }
         }
 
         protected override void OnStart( string[] args )
         {
-            _Logger.LogInfo( "Service starting... " );
+            _logger.LogInfo( "Service starting... " );
 
-            if( _WebHost != null )
+            if( _webHost != null )
             {
-                _WebHost.Close( );
+                _webHost.Close( );
             }
 
-            _AMPQSender.LogMessagePrefix = Constants.LogMessageTexts.AMQPSenderErrorPrefix;
+            _batchSenderThread.Start( );
 
-            _BatchSenderThread.Start( );
-
-            _WebHost = new WebServiceHost( typeof( Microsoft.ConnectTheDots.Gateway.GatewayService ) );
+            _webHost = new WebServiceHost( typeof( Microsoft.ConnectTheDots.Gateway.GatewayService ) );
             Gateway.GatewayService service = new Microsoft.ConnectTheDots.Gateway.GatewayService(
-                _GatewayQueue,
-                _BatchSenderThread,
+                _gatewayQueue,
+                _batchSenderThread,
                 m => DataTransforms.QueuedItemFromSensorDataContract(
-                        DataTransforms.AddTimeCreated( DataTransforms.SensorDataContractFromString( m, _Logger ) ), _Logger )
+                        DataTransforms.AddTimeCreated( DataTransforms.SensorDataContractFromString( m, _logger ) ), _logger )
             );
-            _WebHost.Description.Behaviors.Add( new ServiceBehavior( ( ) => service ) );
+            _webHost.Description.Behaviors.Add( new ServiceBehavior( ( ) => service ) );
 
-            service.Logger = _Logger;
+            service.Logger = _logger;
             service.OnDataInQueue += OnData;
 
-            _WebHost.Open( );
+            _webHost.Open( );
 
-            _DataIntakeLoader.StartAll( service.Enqueue );
+            _dataIntakeLoader.StartAll( service.Enqueue );
 
-            _Logger.LogInfo( "...started" );
+            _logger.LogInfo( "...started" );
         }
 
         protected override void OnStop( )
         {
-            _Logger.LogInfo( "Service stopping... " );
+            _logger.LogInfo( "Service stopping... " );
 
-            _DataIntakeLoader.StopAll( );
+            _dataIntakeLoader.StopAll( );
 
             // close web host first (message intake)
-            if( _WebHost != null )
+            if( _webHost != null )
             {
-                _WebHost.Close( );
-                _WebHost = null;
+                _webHost.Close( );
+                _webHost = null;
             }
 
             // shutdown processor (message processing)
-            _BatchSenderThread.Logger = _Logger;
-            _BatchSenderThread.Stop( STOP_TIMEOUT_MS );
+            _batchSenderThread.Stop( STOP_TIMEOUT_MS );
 
             // shut down connection to event hub last
             if( _AMPQSender != null )
@@ -135,13 +134,13 @@
                 _AMPQSender.Close( );
             }
 
-            _Logger.LogInfo( "...stopped" );
+            _logger.LogInfo( "...stopped" );
         }
 
         protected virtual void OnData( QueuedItem data )
         {
             // LORENZO: test behaviours such as accumulating data an processing in batch
-            _BatchSenderThread.Process( );
+            _batchSenderThread.Process( );
         }
 
         static void Main( string[] args )
@@ -174,7 +173,7 @@
             // prevent exception escalation
             e.SetObserved( );
 
-            _Logger.LogError( String.Format( "Task Exception: '{0}'\r\nTrace:\r\n{1}", e.Exception.Message, e.Exception.StackTrace ) );
+            _logger.LogError( String.Format( "Task Exception: '{0}'\r\nTrace:\r\n{1}", e.Exception.Message, e.Exception.StackTrace ) );
         }
     }
 }

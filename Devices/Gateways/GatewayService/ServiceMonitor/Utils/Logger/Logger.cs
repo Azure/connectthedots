@@ -11,8 +11,11 @@
     {
         #region Singleton implementation
 
-        private static MonitorLogger _logger;
-        private static readonly object _SyncRoot = new object( );
+        private static readonly object          _SyncRoot = new object( );
+        private static          MonitorLogger   _logger;
+        private static          NLog.Logger     _NLog;
+
+        //--//
 
         internal static MonitorLogger Instance
         {
@@ -32,8 +35,6 @@
                 return _logger;
             }
         }
-
-        private static NLog.Logger _NLog;
 
         private MonitorLogger( )
         {

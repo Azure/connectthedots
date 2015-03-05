@@ -20,7 +20,7 @@
 
         //--//
 
-        protected ILogger _Logger;
+        protected readonly ILogger _Logger;
 
         //--//
 

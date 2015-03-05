@@ -14,8 +14,12 @@
         private const int SLEEP_TIME_MS = 1000;
         private const int LOG_MESSAGE_RATE = 100;//should be positive
 
+        //--//
+
         private Func<string, int> _Enqueue;
-        private bool _DoWorkSwitch;
+        private bool              _DoWorkSwitch;
+
+        //--//
 
         public DataIntakeTestMockThread( ILogger logger )
             : base( logger )
@@ -28,7 +32,7 @@
 
             _DoWorkSwitch = true;
 
-            var sh = new SafeAction<int>( ( t ) => TestRun( t ), _Logger );
+            var sh = new SafeAction<int>( ( t ) => TestRun( t ), _logger );
 
             Task.Run( ( ) => sh.SafeInvoke( SLEEP_TIME_MS ) );
 
@@ -64,7 +68,7 @@
 
                 if( ++messagesSent % LOG_MESSAGE_RATE == 0 )
                 {
-                    _Logger.LogInfo( LOG_MESSAGE_RATE + " messages sent via DataIntakeTestMock." );
+                    _logger.LogInfo( LOG_MESSAGE_RATE + " messages sent via DataIntakeTestMock." );
                 }
 
                 Thread.Sleep( sleepTime );

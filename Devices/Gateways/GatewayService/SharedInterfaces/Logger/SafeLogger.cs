@@ -3,11 +3,13 @@
 
     public class SafeLogger : ILogger
     {
-        protected ILogger _Logger;
+        protected readonly ILogger _logger;
+
+        //--//
 
         protected SafeLogger( ILogger logger )
         {
-            _Logger = logger;
+            _logger = logger;
         }
 
         static public SafeLogger FromLogger( ILogger logger )
@@ -22,17 +24,17 @@
 
         public void LogError( string logMessage )
         {
-            if( _Logger != null )
+            if( _logger != null )
             {
-                _Logger.LogError( logMessage );
+                _logger.LogError( logMessage );
             }
         }
 
         public void LogInfo( string logMessage )
         {
-            if( _Logger != null )
+            if( _logger != null )
             {
-                _Logger.LogInfo( logMessage );
+                _logger.LogInfo( logMessage );
             }
         }
     }

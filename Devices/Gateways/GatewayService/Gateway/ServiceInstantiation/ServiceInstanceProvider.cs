@@ -9,20 +9,23 @@
 
     class ServiceInstanceProvider : IInstanceProvider
     {
-        readonly Func<IService> serviceCreator;
+        private readonly Func<IService> _serviceCreator;
+
+        //--//
+
         public ServiceInstanceProvider( Func<IService> serviceCreator )
         {
-            this.serviceCreator = serviceCreator;
+            this._serviceCreator = serviceCreator;
         }
 
         public object GetInstance( InstanceContext instanceContext, Message message )
         {
-            return serviceCreator( );
+            return _serviceCreator( );
         }
 
         public object GetInstance( InstanceContext instanceContext )
         {
-            return serviceCreator( );
+            return _serviceCreator( );
         }
 
         public void ReleaseInstance( InstanceContext instanceContext, object instance )

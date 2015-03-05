@@ -11,24 +11,24 @@
 
     public class BatchSenderThread<TQueueItem, TMessage> : EventProcessor
     {
-        private readonly IAsyncQueue<TQueueItem> _DataSource;
-        private readonly IMessageSender<TMessage> _DataTarget;
-        private readonly Func<TQueueItem, TMessage> _DataTransform;
-        private readonly Func<TQueueItem, string> _SerializedData;
-        private int _outstandingTasks;
+        private static readonly string _logMessagePrefix = "BatchSenderThread error. ";
+        private        readonly object _syncRoot         = new object( );
 
-        private Thread _WorkerThread;
-        private AutoResetEvent _operational;
-        private AutoResetEvent _doWork;
-        private bool _running;
+        //--//
 
-        private object _SyncRoot = new object( );
+        private readonly IAsyncQueue<TQueueItem>    _dataSource;
+        private readonly IMessageSender<TMessage>   _dataTarget;
+        private readonly Func<TQueueItem, TMessage> _dataTransform;
+        private readonly Func<TQueueItem, string>   _serializedData;
+        private          Thread                     _worker;
+        private          AutoResetEvent             _operational;
+        private          AutoResetEvent             _doWork;
+        private          bool                       _running;
+        private          int                        _outstandingTasks;
 
-        private static readonly string _LogMessagePrefix = "BatchSenderThread error. ";
-
-        public BatchSenderThread( IAsyncQueue<TQueueItem> dataSource, IMessageSender<TMessage> dataTarget, Func<TQueueItem, TMessage> dataTransform, Func<TQueueItem, string> serializedData, ILogger logger )
+        public BatchSenderThread( IAsyncQueue<TQueueItem> dataSource, IMessageSender<TMessage> dataTarget, Func<TQueueItem, TMessage> dataTransform, Func<TQueueItem, string> serializedData, ILogger logger ) 
+            : base( SafeLogger.FromLogger( logger ) )
         {
-            Logger = SafeLogger.FromLogger( logger );
 
             if( dataSource == null || dataTarget == null )
             {
@@ -38,10 +38,10 @@
             _operational = new AutoResetEvent( false );
             _doWork = new AutoResetEvent( false );
             _running = false;
-            _DataSource = dataSource;
-            _DataTarget = dataTarget;
-            _DataTransform = dataTransform;
-            _SerializedData = serializedData;
+            _dataSource = dataSource;
+            _dataTarget = dataTarget;
+            _dataTransform = dataTransform;
+            _serializedData = serializedData;
             _outstandingTasks = 0;
         }
 
@@ -49,7 +49,7 @@
         {
             bool start = false;
 
-            lock( _SyncRoot )
+            lock( _syncRoot )
             {
                 if( _running == false )
                 {
@@ -59,9 +59,9 @@
 
             if( start )
             {
-                _WorkerThread = new Thread( ThreadJob );
+                _worker = new Thread( ThreadJob );
                 _running = true;
-                _WorkerThread.Start( );
+                _worker.Start( );
                 return _operational.WaitOne( );
             }
 
@@ -72,12 +72,12 @@
         {
             bool stop = false;
 
-            lock( _SyncRoot )
+            lock( _syncRoot )
             {
                 if( _running == true )
                 {
                     // There must exist a worker thread
-                    System.Diagnostics.Debug.Assert( _WorkerThread != null );
+                    System.Diagnostics.Debug.Assert( _worker != null );
 
                     // signal the worker thread that exit is impending
                     _running = false;
@@ -92,10 +92,10 @@
                 if( _operational.WaitOne( timeout ) == false )
                 {
                     // no other choice than forcing a stop
-                    _WorkerThread.Abort( );
+                    _worker.Abort( );
                 }
 
-                _WorkerThread.Join( );
+                _worker.Join( );
 
                 return true;
             }
@@ -135,7 +135,7 @@
                         // because of the race condition on the outstanding task count (_outstandingTasks) 
                         // and the tasks actually sitting in the queue.  (*)
                         // To prevent this race condition, we will wait with a timeout
-                        int count = _DataSource.Count - _outstandingTasks;
+                        int count = _dataSource.Count - _outstandingTasks;
 
                         if( count == 0 )
                         {
@@ -145,7 +145,7 @@
                         // check if we have been woken up to actually stop processing 
                         EventBatchProcessedEventHandler eventBatchProcessed = null;
 
-                        lock( _SyncRoot )
+                        lock( _syncRoot )
                         {
                             if( _running == false )
                             {
@@ -162,7 +162,7 @@
                         // process all messages that have not been processed yet 
                         while( --count >= 0 )
                         {
-                            var t = _DataSource.TryPop( );
+                            var t = _dataSource.TryPop( );
 
                             // increment outstanding task count 
                             Interlocked.Increment( ref _outstandingTasks );
@@ -184,13 +184,13 @@
 
                                     if( popped.Result.IsSuccess && popped.Result != null )
                                     {
-                                        if( _DataTransform != null )
+                                        if( _dataTransform != null )
                                         {
-                                            return _DataTarget.SendMessage( _DataTransform( popped.Result.Result ) );
+                                            return _dataTarget.SendMessage( _dataTransform( popped.Result.Result ) );
                                         }
-                                        if( _SerializedData != null )
+                                        if( _serializedData != null )
                                         {
-                                            return _DataTarget.SendSerialized( _SerializedData( popped.Result.Result ) );
+                                            return _dataTarget.SendSerialized( _serializedData( popped.Result.Result ) );
                                         }
 
                                         Debug.Assert( false );
@@ -198,21 +198,21 @@
                                 }
                                 catch( StackOverflowException ex )
                                 {
-                                    Logger.LogError( _LogMessagePrefix + ex.Message );
+                                    Logger.LogError( _logMessagePrefix + ex.Message );
 
                                     // do not hide stack overflow exceptions
                                     throw;
                                 }
                                 catch( OutOfMemoryException ex )
                                 {
-                                    Logger.LogError( _LogMessagePrefix + ex.Message );
+                                    Logger.LogError( _logMessagePrefix + ex.Message );
 
                                     // do not hide memory exceptions
                                     throw;
                                 }
                                 catch( Exception ex )
                                 {
-                                    Logger.LogError( _LogMessagePrefix + ex.Message );
+                                    Logger.LogError( _logMessagePrefix + ex.Message );
 
                                     // catch all other exceptions
                                 }
@@ -233,21 +233,21 @@
                     }
                     catch( StackOverflowException ex )
                     {
-                        Logger.LogError( _LogMessagePrefix + ex.Message );
+                        Logger.LogError( _logMessagePrefix + ex.Message );
 
                         // do not hide stack overflow exceptions
                         throw;
                     }
                     catch( OutOfMemoryException ex )
                     {
-                        Logger.LogError( _LogMessagePrefix + ex.Message );
+                        Logger.LogError( _logMessagePrefix + ex.Message );
 
                         // do not hide memory exceptions
                         throw;
                     }
                     catch( Exception ex )
                     {
-                        Logger.LogError( _LogMessagePrefix + ex.Message );
+                        Logger.LogError( _logMessagePrefix + ex.Message );
 
                         // catch all other exceptions
                     }

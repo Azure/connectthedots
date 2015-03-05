@@ -93,7 +93,6 @@
             _exit = true;
         }
 
-
         private void Restart( )
         {
             _target.Start( );

@@ -9,12 +9,13 @@
 
     public abstract class DataIntakeAbstract : IDataIntake
     {
+        protected ILogger _logger;
 
-        protected ILogger _Logger;
+        //--//
 
         protected DataIntakeAbstract( ILogger logger )
         {
-            _Logger = SafeLogger.FromLogger( logger );
+            _logger = SafeLogger.FromLogger( logger );
         }
 
         public abstract bool Start( Func<string, int> enqueue );

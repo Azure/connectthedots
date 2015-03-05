@@ -6,8 +6,8 @@
 
     public class SafeFunc<TResult>
     {
-        Func<TResult> _function;
-        ILogger _logger;
+        private readonly Func<TResult>  _function;
+        private readonly ILogger        _logger;
 
         //--//
 
