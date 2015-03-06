@@ -27,16 +27,19 @@ export GW_HOME=~/GatewayService
 export LOGS=$GW_HOME/logs
 export STAGING=$GW_HOME/Staging
 
-# Kill all mono processes and GatewayService as well
+# Kill all mono processes and GatewayService as well, kill the monitoring process that is performing a sleep
 echo "Trying to kill all mono processes..."
-for KILLPID in `ps ax | grep -i 'mono'           | awk '{ print $1;}'`; do sudo kill -9 $KILLPID; done
-for KILLPID in `ps ax | grep -i 'gatewayservice' | awk '{ print $1;}'`; do sudo kill -9 $KILLPID; done
+for KILLPID in `ps axo pid,ppid,cmd | grep -i 'mono'           | awk '{ print $1;}'`; do sudo kill -9 $KILLPID; done
+for KILLPID in `ps axo pid,ppid,cmd | grep -i 'gatewayservice' | awk '{ print $1;}'`; do sudo kill -9 $KILLPID; done
+for KILLPID in `ps axo pid,ppid,cmd | grep -i 'sleep'          | awk '{ print $2;}'`; do sudo kill -9 $KILLPID; done
+
 echo "Trying to delete lock file if there is any..."
 sudo rm -f /tmp/Microsoft.ConnectTheDots.GatewayService.exe.lock
 
 # move all files from Staging GW_HOME to runtime folder, delete logs
-echo upading files
+echo updating files
 rm -rf $LOGS/*
+mkdir $LOGS
 find $GW_HOME/ -type f -maxdepth 1 -delete
 cp $STAGING/* $GW_HOME/
 rm $GW_HOME/autorun.sh
@@ -53,7 +56,7 @@ echo "Starting Gateway"
 cd $GW_HOME
 #MONO_LOG_LEVEL=debug /usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.exe --debug > monoOutput.txt &
 #/usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.exe
-$GW_HOME/autorun.sh&
+$GW_HOME/autorun.sh &
 
 #
 # Add the below line to /etc/rc.local

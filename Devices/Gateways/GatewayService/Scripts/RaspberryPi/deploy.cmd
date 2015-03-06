@@ -49,19 +49,16 @@ echo Copying Gateway files
 %PSCP_CMD% %prjdir%DeviceAdapters\Socket\bin\%Configuration%\Microsoft.ConnectTheDots.SocketAdapter.dll         %rpi_usr%@%rpi_ip%:%Staging%/
 
 echo copying scripts
-%PSCP_CMD% %prjdir%Scripts\RaspberryPi\autorun.sh %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %prjdir%Scripts\RaspberryPi\autorun_once.sh    %rpi_usr%@%rpi_ip%:%Staging%/
 %PSCP_CMD% %prjdir%Scripts\RaspberryPi\autorun_install.sh %rpi_usr%@%rpi_ip%:%Staging%/
-%PSCP_CMD% %prjdir%Scripts\RaspberryPi\runonce.sh %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %prjdir%Scripts\RaspberryPi\runonce.sh         %rpi_usr%@%rpi_ip%:%Staging%/
 
-echo Marking autorun.sh and autorun_install.sh as executable
+echo Marking autorun_once.sh and autorun_install.sh as executable
 del /f %temp%\rpigatewayautorunx.tmp
-echo chmod 755 %Staging%/runonce.sh   >> %temp%\rpigatewayautorunx.tmp
-echo chmod 755 %Staging%/autorun.sh >> %temp%\rpigatewayautorunx.tmp
-echo chmod 755 %Staging%/autorun_install.sh >> %temp%\rpigatewayautorunx.tmp
-echo dos2unix %Staging%/runonce.sh    >> %temp%\rpigatewayautorunx.tmp
-echo dos2unix %Staging%/autorun.sh  >> %temp%\rpigatewayautorunx.tmp
-echo dos2unix %Staging%/autorun_install.sh  >> %temp%\rpigatewayautorunx.tmp
-REM uncomment to start on deploy
-REM echo %Staging%/autorun.sh
-REM
-%PUTTY_CMD% -m %temp%\rpigatewayautorunx.tmp
+echo chmod 755 %Staging%/runonce.sh            >> %temp%\rpigatewayautorunx.tmp
+echo chmod 755 %Staging%/autorun_once.sh       >> %temp%\rpigatewayautorunx.tmp
+echo chmod 755 %Staging%/autorun_install.sh    >> %temp%\rpigatewayautorunx.tmp
+echo dos2unix  %Staging%/runonce.sh            >> %temp%\rpigatewayautorunx.tmp
+echo dos2unix  %Staging%/autorun_once.sh       >> %temp%\rpigatewayautorunx.tmp
+echo dos2unix  %Staging%/autorun_install.sh    >> %temp%\rpigatewayautorunx.tmp
+%PUTTY_CMD% -m                                    %temp%\rpigatewayautorunx.tmp

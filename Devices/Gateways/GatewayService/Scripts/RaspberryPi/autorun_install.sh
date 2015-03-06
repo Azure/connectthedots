@@ -35,7 +35,7 @@ export MONO_EVENTLOG_TYPE=local
 # Start monitoring gateway process
 #
 echo "Monitoring Gateway"
-LOG=$(date +"%m-%d-%Y-%T")_monitor
+LOG=monitor_$(date +"%m-%d-%Y-%T").log
 MONITORED="GatewayService"
 PERIOD=5
 DELETE_LOCK="sudo rm -f /tmp/Microsoft.ConnectTheDots.GatewayService.exe.lock"
@@ -45,7 +45,7 @@ cd $GW_HOME
 
 while :
 do
-	test `ps ax | grep $MONITORED | awk '{ print $1;}' | wc | awk '{ print $1;}'` -gt 1 && RUNNING=1 || RUNNING=0
-	test $RUNNING -eq 0 && echo "Restarting..." && $DELETE_LOCK && $RESTART || echo "$MONITORED is running..." 
-	sleep $PERIOD
+	 test `ps ax | grep $MONITORED | awk '{ print $1;}' | wc | awk '{ print $1;}'` -gt 1 && RUNNING=1 || RUNNING=0
+	 test $RUNNING -eq 0 && echo "Restarting..." && $DELETE_LOCK && $RESTART || echo "$MONITORED is running..." >> $LOGS/$LOG
+	 sleep $PERIOD
 done
