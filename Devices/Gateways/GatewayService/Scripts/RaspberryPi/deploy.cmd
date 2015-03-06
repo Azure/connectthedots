@@ -1,29 +1,29 @@
-//  ---------------------------------------------------------------------------------
-//  Copyright (c) Microsoft Open Technologies, Inc.  All rights reserved.
-// 
-//  The MIT License (MIT)
-// 
-//  Permission is hereby granted, free of charge, to any person obtaining a copy
-//  of this software and associated documentation files (the "Software"), to deal
-//  in the Software without restriction, including without limitation the rights
-//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//  copies of the Software, and to permit persons to whom the Software is
-//  furnished to do so, subject to the following conditions:
-// 
-//  The above copyright notice and this permission notice shall be included in
-//  all copies or substantial portions of the Software.
-// 
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  THE SOFTWARE.
-//  ---------------------------------------------------------------------------------
-
 @echo off
-set puttydir="C:\software\PuTTY\"
+REM //  ---------------------------------------------------------------------------------
+REM //  Copyright (c) Microsoft Open Technologies, Inc.  All rights reserved.
+REM // 
+REM //  The MIT License (MIT)
+REM // 
+REM //  Permission is hereby granted, free of charge, to any person obtaining a copy
+REM //  of this software and associated documentation files (the "Software"), to deal
+REM //  in the Software without restriction, including without limitation the rights
+REM //  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+REM //  copies of the Software, and to permit persons to whom the Software is
+REM //  furnished to do so, subject to the following conditions:
+REM // 
+REM //  The above copyright notice and this permission notice shall be included in
+REM //  all copies or substantial portions of the Software.
+REM // 
+REM //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+REM //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+REM //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+REM //  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+REM //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+REM //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+REM //  THE SOFTWARE.
+REM //  ---------------------------------------------------------------------------------
+
+set puttydir="E:\tools\Raspeberry\"
 set prjdir=..\..\
 set rpi_ip=10.121.204.248
 set rpi_usr=pi
@@ -50,12 +50,18 @@ echo Copying Gateway files
 
 echo copying scripts
 %PSCP_CMD% %prjdir%Scripts\RaspberryPi\autorun.sh %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %prjdir%Scripts\RaspberryPi\autorun_install.sh %rpi_usr%@%rpi_ip%:%Staging%/
 %PSCP_CMD% %prjdir%Scripts\RaspberryPi\runonce.sh %rpi_usr%@%rpi_ip%:%Staging%/
 
-echo Marking autorun.sh as executable
+echo Marking autorun.sh and autorun_install.sh as executable
 del /f %temp%\rpigatewayautorunx.tmp
 echo chmod 755 %Staging%/runonce.sh   >> %temp%\rpigatewayautorunx.tmp
 echo chmod 755 %Staging%/autorun.sh >> %temp%\rpigatewayautorunx.tmp
+echo chmod 755 %Staging%/autorun_install.sh >> %temp%\rpigatewayautorunx.tmp
 echo dos2unix %Staging%/runonce.sh    >> %temp%\rpigatewayautorunx.tmp
 echo dos2unix %Staging%/autorun.sh  >> %temp%\rpigatewayautorunx.tmp
+echo dos2unix %Staging%/autorun_install.sh  >> %temp%\rpigatewayautorunx.tmp
+REM uncomment to start on deploy
+REM echo %Staging%/autorun.sh
+REM
 %PUTTY_CMD% -m %temp%\rpigatewayautorunx.tmp

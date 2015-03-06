@@ -24,7 +24,7 @@
 #!/bin/bash
 
 export GW_HOME=~/GatewayService
-export LOGS=$GW_HOME/Logs
+export LOGS=$GW_HOME/logs
 export STAGING=$GW_HOME/Staging
 
 # Kill all mono processes and GatewayService as well
@@ -40,18 +40,20 @@ rm -rf $LOGS/*
 find $GW_HOME/ -type f -maxdepth 1 -delete
 cp $STAGING/* $GW_HOME/
 rm $GW_HOME/autorun.sh
+mv $GW_HOME/autorun_install.sh $GW_HOME/autorun.sh
 
 echo "Starting host processes..."
 #
-#
 # event log entries will be written to /var/lib/mono/EventLog/Application
+#
 echo "Setting MONO_EVENTLOG_TYPE to local"
 export MONO_EVENTLOG_TYPE=local
 #
 echo "Starting Gateway"
 cd $GW_HOME
 #MONO_LOG_LEVEL=debug /usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.exe --debug > monoOutput.txt &
-/usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.exe
+#/usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.exe
+$GW_HOME/autorun.sh&
 
 #
 # Add the below line to /etc/rc.local
