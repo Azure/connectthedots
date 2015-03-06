@@ -37,7 +37,7 @@ namespace Microsoft.ConnectTheDots.Adapters
 
     public class SocketAdapter : DeviceAdapterAbstract
     {
-        private const int CONNECTION_RETRIES         = 20;
+        private const int CONNECTION_RETRIES         = 20000;
         private const int SLEEP_TIME_BETWEEN_RETRIES = 1000; // 1 sec
 
         //--//
@@ -91,20 +91,35 @@ namespace Microsoft.ConnectTheDots.Adapters
         {
             int step = retries;
 
-            Socket client = null;
-            while( _doWorkSwitch )//--step > 0 &&
+            while( --step > 0 && _doWorkSwitch )
             {
                 try
                 {
                     _logger.LogInfo( "Try connecting to device - step: " + ( CONNECTION_RETRIES - step ) );
 
-                    client = new Socket( AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Unspecified );
+                    Socket client = new Socket( AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Unspecified );
 
                     client.Connect( _endpoint.Host, _endpoint.Port );
 
                     if( client.Connected )
                     {
-                        break;
+                        _logger.LogInfo( string.Format( "Socket connected to {0}", client.RemoteEndPoint.ToString() ) );
+
+                        _listeningThread = new Thread( ( ) => SensorDataClient( client ) );
+                        _listeningThread.Start( );
+
+                        _logger.LogInfo( string.Format( "Reader thread started" ) );
+
+                        _listeningThread.Join( );
+
+                        _logger.LogInfo( "Listening thread terminated. Quitting." );
+
+                        //reset number of retries to connect
+                        step = retries;
+                    }
+                    else
+                    {
+                        _logger.LogError( "No sensor connection detected. Quitting." );
                     }
                 }
                 catch( Exception ex )
@@ -117,23 +132,6 @@ namespace Microsoft.ConnectTheDots.Adapters
                 Thread.Sleep( SLEEP_TIME_BETWEEN_RETRIES );
             }
 
-            if( client != null && client.Connected )
-            {
-                _logger.LogInfo( string.Format( "Socket connected to {0}", client.RemoteEndPoint.ToString( ) ) );
-
-                _listeningThread = new Thread( ( ) => SensorDataClient( client ) );
-                _listeningThread.Start( );
-
-                _logger.LogInfo( string.Format( "Reader thread started" ) );
-
-                _listeningThread.Join( );
-
-                _logger.LogInfo( "Listening thread terminated. Quitting." );
-            }
-            else
-            {
-                _logger.LogError( "No sensor connection detected. Quitting." );
-            }
             return 0;
         }
 
@@ -153,6 +151,11 @@ namespace Microsoft.ConnectTheDots.Adapters
                 {
                     try
                     {
+                        if( !client.Connected )
+                        {
+                            client.Close( );
+                            break;
+                        }
                         int bytesRec = client.Receive( buffer );
                         int matchCount = 1;
                         // Read string from buffer
