@@ -11,7 +11,7 @@ To build your own end-to-end configuration you need to identify and configure th
 For the starter solution, follow the instructions for configuring the following:
 
 1. [Arduino UNO with weather shield](GatewayConnectedDevices/Arduino/Weather/WeatherShieldJson/Arduino-and-Weather-Shield-setup.md) 
-2. [Raspberry Pi](Gateways/RaspberryPi/RaspberryPi-Gateway-setup.md) 
+2. [Raspberry Pi](Gateways/GatewayService/RaspberryPi-Gateway-setup.md) 
 
 ## Build a sensor infrastructure ##
 For additional scenarios, or more advanced configurations, follow the setup instructions in the folders for the devices or gateways listed above. For example, to include a Gadgeteer using the .NET Microframework code, follow [these instructions](DirectlyConnectedDevices/NETMF/ConnectTheDotsGadgeteer/Docs/NETMF%20Gadgeteer%20setup.md).
