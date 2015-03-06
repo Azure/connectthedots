@@ -162,7 +162,18 @@
                         // process all messages that have not been processed yet 
                         while( --count >= 0 )
                         {
-                            var t = _dataSource.TryPop( );
+                            Task<OperationStatus<TQueueItem>> t = null;
+
+                            try
+                            {
+                                t = _dataSource.TryPop( );
+                            }
+                            catch
+                            {
+                                Interlocked.Decrement( ref _outstandingTasks ); 
+                                
+                                continue;
+                            }
 
                             // increment outstanding task count 
                             Interlocked.Increment( ref _outstandingTasks );

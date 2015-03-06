@@ -18,35 +18,25 @@
             _Queue.Enqueue( item );
         }
 
-        public async Task<OperationStatus<T>> TryPop( )
+        public Task<OperationStatus<T>> TryPop( )
         {
-            try
+            Func<OperationStatus<T>> deque = ( ) =>
             {
-                Func<OperationStatus<T>> deque = ( ) =>
+                T returnedItem;
+
+                bool isReturned = _Queue.TryDequeue( out returnedItem );
+
+                if( isReturned )
                 {
-                    T returnedItem;
+                    return OperationStatusFactory.CreateSuccess<T>( returnedItem );
+                }
 
-                    bool isReturned = _Queue.TryDequeue( out returnedItem );
-
-                    if( isReturned )
-                    {
-                        return OperationStatusFactory.CreateSuccess<T>( returnedItem );
-                    }
-
-                    return OperationStatusFactory.CreateError<T>( ErrorCode.NoDataReceived );
-                };
-
-                var sf = new SafeFunc<OperationStatus<T>>( deque, null );
-
-                OperationStatus<T> result = await Task.Run( ( ) => sf.SafeInvoke( ) );
-
-                return result;
-            }
-            catch( Exception )
-            {
-                //TODO: Dinar will add logger, or even delete ex handling
                 return OperationStatusFactory.CreateError<T>( ErrorCode.NoDataReceived );
-            }
+            };
+
+            var sf = new SafeFunc<OperationStatus<T>>( deque, null );
+
+            return Task.Run( ( ) => sf.SafeInvoke( ) );
         }
 
         public int Count

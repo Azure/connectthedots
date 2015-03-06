@@ -7,8 +7,8 @@
     <ProjectGuid>{756AB4B0-BC00-4297-A4F0-3DB40B7E2181}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DataIntakeTestMock</RootNamespace>
-    <AssemblyName>DataIntakeTestMock</AssemblyName>
+    <RootNamespace>Microsoft.ConnectTheDots.Test</RootNamespace>
+    <AssemblyName>DataAdapterTestMock</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
