@@ -46,6 +46,14 @@ namespace Microsoft.ConnectTheDots.Common
             return new SafeLogger( logger );
         }
 
+        public void Flush( )
+        {
+            if( _logger != null )
+            {
+                _logger.Flush( );
+            }
+        }
+
         public void LogError( string logMessage )
         {
             if( _logger != null )

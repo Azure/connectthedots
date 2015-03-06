@@ -67,6 +67,11 @@ namespace ServiceMonitor
 
         #endregion
 
+        public void Flush( )
+        {
+            LogManager.Flush( );
+        }
+
         public void LogError( string logMessage )
         {
             _NLog.Error( logMessage );

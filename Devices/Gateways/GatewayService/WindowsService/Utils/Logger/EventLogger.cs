@@ -36,8 +36,15 @@ namespace Microsoft.ConnectTheDots.GatewayService
     {
         #region Singleton implementation
 
-        private static EventLogger _eventLogger;
-        private static readonly object _syncRoot = new object( );
+        private static readonly object  _syncRoot = new object();
+
+        //--//
+
+        private static EventLogger      _eventLogger;
+        private static EventLog         _eventLog;
+        private static NLog.Logger      _NLog;
+
+        //--//
 
         internal static EventLogger Instance
         {
@@ -58,9 +65,6 @@ namespace Microsoft.ConnectTheDots.GatewayService
             }
         }
 
-        private static EventLog    _eventLog;
-        private static NLog.Logger _NLog;
-
         private EventLogger( )
         {
             _NLog = LogManager.GetCurrentClassLogger( );
@@ -79,6 +83,11 @@ namespace Microsoft.ConnectTheDots.GatewayService
         }
 
         #endregion
+
+        public void Flush( )
+        {
+            LogManager.Flush( );
+        }
 
         public void LogError( string logMessage )
         {
