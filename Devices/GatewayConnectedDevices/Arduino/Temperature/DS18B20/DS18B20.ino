@@ -21,17 +21,23 @@
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  Arduino code to read data from a DS18B20 temperature sensor, then augment and format as JSON to send via serial connection.
  Example of sending temperature data to Microsoft Azure and analyzing with Azure Stream Analytics or Azure Machine Learning.
- Real time output viewable at http://connectthedots.msopentech.com .
 */
+#include <OneWire.h> 
 
 // Constants used to add self-describing fields to the data before sending to Azure
-char SensorSubject[] = "wthr";      // determines how Azure website will chart the data
-char DeviceDisplayName[] = "Digital temp sensor";    // will be the label for the curve on the chart
-char DeviceGUID[] = "2150719D-0FFF-4312-B61C-75AD5219D8FF";    // ensures all the data from this sensor appears on the same chart. You can use the Tools/Create GUID in Visual Studio to create.
-char SensorDataType[]="temp";   // describes what is being sent to the gateway. Interpreted by the website.
-char *SensorType; //describes model of sensor
-
-#include <OneWire.h> 
+// Disp value will be the label for the curve on the chart
+// GUID ensures all the data from this sensor appears on the same chart
+// You can use Visual Studio to create DeviceGUID and copy it here. In VS, On the Tools menu, click Create GUID. The Create GUID
+// tool appears with a GUID in the Result box. Click Copy, and paste below.
+//
+char GUID[] = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx";
+char Org[] = "My organization";
+char Disp[] = "Arduino + DS18B20";
+char Locn[] = "here";
+char Measure[] = "temperature";
+char Units[] = "F";
+char buffer[300];
+char dtostrfbuffer[15];
 
 int DS18S20_Pin = 2; //DS18S20 Signal pin on digital 2
 
@@ -42,32 +48,33 @@ void setup(void) {
   Serial.begin(9600);
 }
 
-void loop(void) {
+void loop(void) 
+{
+
   float temperature = getTemp();
-  Serial.print("{");
-  Serial.print("\"dspl\":");
-  Serial.print("\"");
-  Serial.print(DeviceDisplayName);
-  Serial.print("\"");
-  Serial.print(",\"Subject\":");
-  Serial.print("\"");
-  Serial.print(SensorSubject);
-  Serial.print("\"");
-  Serial.print(",\"DeviceGUID\":");
-  Serial.print("\"");
-  Serial.print(DeviceGUID);
-  Serial.print("\"");
-  Serial.print(",\"Device\":");
-  Serial.print("\"");
-  Serial.print(SensorType);
-  Serial.print("\"");
-  Serial.print(",\"");
-  Serial.print(SensorDataType);
-  Serial.print("\":");
-  Serial.print(temperature);
-  Serial.println("}");
-  delay(100); //just here to slow down the output so it is easier to read
+
+  // print string for temperature, separated by line for ease of reading
+  // sent as one Serial.Print to reduce risk of serial errors
   
+  memset(buffer,'\0',sizeof(buffer));
+  strcat(buffer,"{");
+  strcat(buffer,"\"guid\":\"");
+  strcat(buffer,GUID);
+  strcat(buffer,"\",\"organization\":\"");
+  strcat(buffer,Org);
+  strcat(buffer,"\",\"displayname\":\"");
+  strcat(buffer,Disp);
+  strcat(buffer,"\",\"location\":\"");
+  strcat(buffer,Locn);  
+  strcat(buffer,"\",\"measurename\":\"");
+  strcat(buffer,Measure);
+  strcat(buffer,"\",\"unitofmeasure\":\"");
+  strcat(buffer,Units);
+  strcat(buffer,"\",\"value\":");
+  strcat(buffer,dtostrf(temperature,8,2,dtostrfbuffer));
+  strcat(buffer,"}");
+  Serial.println(buffer);
+  delay(100); //just here to slow down the output so it is easier to read
 }
 
 float getTemp(){
@@ -88,10 +95,10 @@ float getTemp(){
   }
 
   if ( addr[0] == 0x10 ) {
-      SensorType= "DS18S20";
+      //Sensor is a DS18S20
   }
   else if (addr[0] == 0x28){
-      SensorType= "DS18BS20";
+      //Sensor is a DS18BS20
   }
   else
   {
