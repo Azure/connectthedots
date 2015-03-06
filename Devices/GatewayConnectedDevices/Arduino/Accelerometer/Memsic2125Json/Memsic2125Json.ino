@@ -19,6 +19,7 @@ THE SOFTWARE.
 Based upon David A. Mellis's Memsic2125 Example, as stated below, which is in the public domain
 
 Modifications by Neal Analytics and Microsoft Open Technologies, Inc include adding self-describing fields in each output string, and changing output format to JSON string. the labels on charts in the Azure website.
+Further mods by MS Open Tech updating JSON for website rev
 
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -41,10 +42,23 @@ modified 30 Aug 2011
 by Tom Igoe
 This example code is in the public domain.
 */
-// these constants won't change:
-char SensorSubject[] = "acceleration";                          // determines how Azure website will chart the data
-char DeviceDisplayName[] = "Cool Devuce 01";                    // will be the label for the curve on the chart
-char DeviceGUID[] = "2150719D-0FFF-4312-B61C-75AD5219D8FF";     // ensures all the data from this sensor appears on the same chart. You can use the Tools/Create GUID in Visual Studio to create
+
+// Disp value will be the label for the curve on the chart
+// GUID ensures all the data from this sensor appears on the same chart
+// You can use Visual Studio to create DeviceGUID and copy it here. In VS, On the Tools menu, click Create GUID. The Create GUID
+// tool appears with a GUID in the Result box. Click Copy, and paste below.
+//
+char GUID1[] = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx";
+char GUID2[] = "yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy";
+char Org[] = "My organization";
+char Disp[] = "Arduino + Memsic2125";
+char Locn[] = "here";
+char Measure1[] = "accelerationX";
+char Units1[] = "ft/sec/sec";
+char Measure2[] = "accelerationY";
+char Units2[] = "ft/sec/sec";
+char buffer[300];
+char dtostrfbuffer[15];
 
 #define MYSERIAL Serial
 
@@ -72,26 +86,47 @@ void loop() {
   // earth's gravity is 1000 milli‐g's, or 1g.
   accelerationX = ((pulseX / 10) - 500) * 8;
   accelerationY = ((pulseY / 10) - 500) * 8;
-  // print the acceleration
   
-  MYSERIAL.print("{");
-  MYSERIAL.print("\"dspl\":");
-  MYSERIAL.print("\"");
-  MYSERIAL.print(DeviceDisplayName);
-  MYSERIAL.print("\"");
-  MYSERIAL.print(",\"Subject\":");
-  MYSERIAL.print("\"");
-  MYSERIAL.print(SensorSubject);
-  MYSERIAL.print("\"");
-  MYSERIAL.print(",\"DeviceGUID\":");
-  MYSERIAL.print("\"");
-  MYSERIAL.print(DeviceGUID);
-  MYSERIAL.print("\"");
-  MYSERIAL.print(",\"accelerationx\":");
-  MYSERIAL.print(accelerationX);
-  MYSERIAL.print(",\"accelerationY\":");
-  MYSERIAL.print(accelerationY);
-  MYSERIAL.println("}");
+  // print string for humidity, separated by line for ease of reading
+  memset(buffer,'\0',sizeof(buffer));
+  strcat(buffer,"{");
+  strcat(buffer,"\"guid\":\"");
+  strcat(buffer,GUID1);
+  strcat(buffer,"\",\"organization\":\"");
+  strcat(buffer,Org);
+  strcat(buffer,"\",\"displayname\":\"");
+  strcat(buffer,Disp);
+  strcat(buffer,"\",\"location\":\"");
+  strcat(buffer,Locn);  
+  strcat(buffer,"\",\"measurename\":\"");
+  strcat(buffer,Measure1);
+  strcat(buffer,"\",\"unitofmeasure\":\"");
+  strcat(buffer,Units1);
+  strcat(buffer,"\",\"value\":");
+  strcat(buffer,dtostrf(accelerationX,8,2,dtostrfbuffer));
+  strcat(buffer,"}");
+  MYSERIAL.println(buffer);
+  
+  // print string for humidity, separated by line for ease of reading
+  memset(buffer,'\0',sizeof(buffer));
+  strcat(buffer,"{");
+  strcat(buffer,"\"guid\":\"");
+  strcat(buffer,GUID2);
+  strcat(buffer,"\",\"organization\":\"");
+  strcat(buffer,Org);
+  strcat(buffer,"\",\"displayname\":\"");
+  strcat(buffer,Disp);
+  strcat(buffer,"\",\"location\":\"");
+  strcat(buffer,Locn);  
+  strcat(buffer,"\",\"measurename\":\"");
+  strcat(buffer,Measure2);
+  strcat(buffer,"\",\"unitofmeasure\":\"");
+  strcat(buffer,Units2);
+  strcat(buffer,"\",\"value\":");
+  strcat(buffer,dtostrf(accelerationY,6,2,dtostrfbuffer));
+  strcat(buffer,"}");
+  MYSERIAL.println(buffer);
+  
   delay(100);
 
 }
