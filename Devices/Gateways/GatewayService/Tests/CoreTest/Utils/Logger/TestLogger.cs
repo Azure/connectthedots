@@ -61,6 +61,10 @@ namespace Microsoft.ConnectTheDots.Test
 
         #endregion
 
+        public void Flush( )
+        {
+        }
+
         public void LogError( string logMessage )
         {
             Debug.WriteLine( "[ERROR]: " + logMessage );

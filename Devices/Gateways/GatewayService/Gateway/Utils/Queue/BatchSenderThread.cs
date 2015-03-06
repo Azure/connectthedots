@@ -153,6 +153,8 @@ namespace Microsoft.ConnectTheDots.Gateway
                         // and the actual queue count
                         _doWork.WaitOne( WAIT_TIMEOUT );
 
+                        _logger.Flush( );
+
                         // Fish from the queue and accumulate, keep track of outstanding tasks to 
                         // avoid accumulating too many competing tasks. Note that we are going to schedule
                         // one more tasks than strictly needed, so that we prevent tasks to sit in the queue

@@ -31,6 +31,10 @@ namespace Microsoft.ConnectTheDots.Test
 
     public class ConsoleLogger : ILogger
     {
+        public void Flush( )
+        {
+        }
+
         public void LogError( string logMessage )
         {
             Console.Out.WriteLine( "[ERROR]: " + logMessage );

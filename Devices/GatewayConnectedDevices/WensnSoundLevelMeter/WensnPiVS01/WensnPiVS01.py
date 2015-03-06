@@ -23,6 +23,7 @@ import sys
 import usb.core
 import socket
 import time
+import datetime
 
 SensorSubject = "sound"                                 # determines how Azure website will chart the data
 DeviceDisplayName = "Wensn SLM 01"                      # will be the label for the curve on the chart
@@ -55,15 +56,15 @@ print(hex(dev.idVendor) + ", " + hex(dev.idProduct))
  
 conn, addr = s.accept()
 while 1:
-	ret = dev.ctrl_transfer(0xC0, 4, 0, 0, 200)
-	dB = (ret[0] + ((ret[1] & 3) * 256)) * 0.1 + 30
-	timeStr = datetime.datetime.utcnow().isoformat()
+        ret = dev.ctrl_transfer(0xC0, 4, 0, 0, 200)
+        dB = (ret[0] + ((ret[1] & 3) * 256)) * 0.1 + 30
+        timeStr = datetime.datetime.utcnow().isoformat()
 	try:
-		JSONdB="{\"value\":"+str(dB)+",\"guid\":"+DeviceGUID+",\"organization\":\"contoso\",\"displayname\":\""+DeviceDisplayName +"\",\"unitofmeasure\":\"decibels\",\"measurename\":\"sound\",\"location\":\"here\",\"timecreated\":"+timeStr+"}"
-		conn.send("<" + JSONdB + ">");                  # sends to gateway over socket interface
-		print(JSONdB)                                   # print only for debugging purposes
-	except Exception as msg:
-		print(msg[1])
-
-	time.sleep(1)
+                JSONdB="{\"value\":"+str(dB)+",\"guid\":\""+DeviceGUID+"\",\"organization\":\"contoso\",\"displayname\":\""+DeviceDisplayName +"\",\"unitofmeasure\":\"decibels\",\"measurename\":\"sound\",\"location\":\"here\",\"timecreated\":\""+timeStr+"\"}"
+                conn.send("<" + JSONdB + ">");                  # sends to gateway over socket interface
+                print(JSONdB)                                   # print only for debugging purposes
+        except Exception as msg:
+                print(msg[1])
+                
+        time.sleep(1)
 s.close()

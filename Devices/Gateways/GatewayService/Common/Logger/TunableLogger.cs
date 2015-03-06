@@ -89,6 +89,14 @@ namespace Microsoft.ConnectTheDots.Common
 
         //--//
 
+        public void Flush( )
+        {
+            if (_Logger != null)
+            {
+                _Logger.Flush( );
+            }
+        }
+
         public void LogError( string logMessage )
         {
             if( _level >= LoggingLevel.Errors )
