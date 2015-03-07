@@ -22,7 +22,7 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-namespace ServiceMonitor
+namespace Microsoft.ConnectTheDots.GatewayServiceMonitor
 {
     using System;
     using System.Diagnostics;
@@ -33,26 +33,17 @@ namespace ServiceMonitor
 
     //--//
 
-    internal class ProcessMonitor : IMonitor
+    internal class ProcessMonitor : AbstractMonitor
     {
-        protected const int MONITORING_INTERVAL = 1000; // ms
-
-        //--//
-
         private  string _executableName;
         private Process _target;
         private bool    _exit;
 
         //--//
 
-        protected ILogger _logger;
-
-        //--//
-
-        public ProcessMonitor( string executableName, ILogger logger )
+        public ProcessMonitor( string executableName, ILogger logger ) : base( logger )
         {
             _executableName = executableName;
-            _logger = SafeLogger.FromLogger( logger );
 
             // cannot find executable, we may still be able to run based if such executable 
             // is in the path or already running
@@ -61,13 +52,13 @@ namespace ServiceMonitor
             if( !File.Exists( _executableName ) )
             {
                 // cannot find executable, we may still be able to run based on the target
-                _logger.LogInfo( "Executable does not exists in the current directory" );
+                Logger.LogInfo( "Executable does not exists in the current directory" );
             }
 
             _exit = false;
         }
 
-        public bool Lock( string monitoringTarget )
+        public override bool Lock( string monitoringTarget )
         {
             //
             // try and open the monitored process
@@ -84,7 +75,7 @@ namespace ServiceMonitor
                 // if there is more than 1, kill them all and restart
                 foreach( Process p in processes )
                 {
-                    _logger.LogInfo( String.Format( "Killing process {0}, PID: {1}", p.ProcessName, p.Id ) );
+                    Logger.LogInfo( String.Format( "Killing process {0}, PID: {1}", p.ProcessName, p.Id ) );
 
                     try
                     {
@@ -102,21 +93,23 @@ namespace ServiceMonitor
             return _target == null ? false : true;
         }
 
-        public void Monitor( )
+        public override void Monitor()
         {
             // monitoring loop
             while( _exit == false && _target != null )
             {
-                Thread.Sleep( MONITORING_INTERVAL );
+                Thread.Sleep( MonitoringInterval );
 
-                if( _target.HasExited )
+                Process t = _target;
+
+                if( t.HasExited )
                 {
-                    _logger.LogInfo( String.Format( "Process '{0}' exited at time {1} with code {2}", _executableName, _target.ExitTime, _target.ExitCode ) );
+                    Logger.LogInfo( String.Format( "Process '{0}' exited at time {1} with code {2}", _executableName, t.ExitTime, t.ExitCode ) );
                 }
             }
         }
 
-        public void QuitMonitor( )
+        public override void QuitMonitor()
         {
             _exit = true;
         }
@@ -131,7 +124,7 @@ namespace ServiceMonitor
 
             if( !p.Start( ) )
             {
-                _logger.LogError( String.Format( "Process '{0}'could not be started", monitoringExecutable ) );
+                Logger.LogError( String.Format( "Process '{0}'could not be started", monitoringExecutable ) );
 
                 return null;
             }

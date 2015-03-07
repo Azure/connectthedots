@@ -22,7 +22,7 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-namespace ServiceMonitor
+namespace Microsoft.ConnectTheDots.GatewayServiceMonitor
 {
     using System.ComponentModel;
     using System.Diagnostics;
