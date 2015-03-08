@@ -22,7 +22,7 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-//#define MOCK_SENDER
+#define MOCK_SENDER
 
 namespace Microsoft.ConnectTheDots.Test
 {
@@ -77,7 +77,7 @@ namespace Microsoft.ConnectTheDots.Test
             _gatewayQueue = new GatewayQueue<QueuedItem>( );
 
 #if MOCK_SENDER
-            _Sender = new MockSender<SensorDataContract>(this);
+            _sender = new MockSender<SensorDataContract>(this);
 #else
 
             AMQPConfig amqpConfig = Loader.GetAMQPConfig( );
@@ -268,6 +268,11 @@ namespace Microsoft.ConnectTheDots.Test
         protected virtual void EventBatchProcessed( List<TaskWrapper> messages )
         {
             // LORENZO: test behaviours such as waiting for messages to be delivered or re-transmission
+
+            if(messages == null || messages.Count == 0)
+            {
+                return;
+            }
 
             foreach( TaskWrapper t in messages )
             {

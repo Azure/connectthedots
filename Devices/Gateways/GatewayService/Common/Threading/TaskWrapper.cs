@@ -22,6 +22,8 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
+#define USE_TASKS
+
 namespace Microsoft.ConnectTheDots.Common.Threading
 {
     using System;
@@ -29,6 +31,9 @@ namespace Microsoft.ConnectTheDots.Common.Threading
     using System.Diagnostics;
     using System.Linq;
     using System.Text;
+#if !USE_TASKS
+    using System.Threading;
+#endif
     using _THREADING = System.Threading.Tasks;
 
     //--//
@@ -73,10 +78,9 @@ namespace Microsoft.ConnectTheDots.Common.Threading
         Faulted = 7,
     }
 
+#if USE_TASKS
     public class TaskWrapper
     {
-        //private readonly int             _id;
-        //private          TaskStatus      _status;
         private _THREADING.Task _t;
 
         //--//
@@ -166,10 +170,6 @@ namespace Microsoft.ConnectTheDots.Common.Threading
 
         //--//
 
-        TResult _result = default( TResult );
-
-        //--//
-
         public static TaskWrapper<TResult> Run( Func<TResult> function )
         {
             var t = new TaskWrapper<TResult>( function );
@@ -208,8 +208,193 @@ namespace Microsoft.ConnectTheDots.Common.Threading
         {
             get
             {
-                return _result;
+                return _t.Result;
             }
         }
     }
+#else
+    
+    public class TaskWrapper
+    {
+        private static int _unique_id = 0;
+
+        //--//
+
+        private readonly int             _id;
+        private          TaskStatus      _status;
+        private          AutoResetEvent  _completed;
+
+        //--//
+
+        protected readonly Action        _action;
+
+        //--//
+
+        public static TaskWrapper Run( Action action )
+        {
+            var t = new TaskWrapper( action );
+
+            t.Start();
+
+            return t;
+        }
+
+        public static void WaitAll( params TaskWrapper[] tasks )
+        {
+            WaitHandle[] wh = new WaitHandle[ tasks.Length ];
+            
+            for( int i = 0; i < tasks.Length; ++i )
+            {
+                wh[ i ] = tasks[ i ]._completed;
+            }
+
+            AutoResetEvent.WaitAll( wh, Timeout.Infinite );
+        }
+
+        //--//
+
+        protected TaskWrapper( )
+        {
+            _id = Interlocked.Increment( ref _unique_id );
+            _status = TaskStatus.Created;
+            _completed = new AutoResetEvent( false );
+        }
+
+        protected TaskWrapper( Action action ) : this ()
+        {
+            _action = action;
+        }
+
+        public virtual void Start()
+        {
+            ThreadPool.QueueUserWorkItem( Execute );
+        }
+
+        public void Wait()
+        {
+            _completed.WaitOne();
+        }
+
+        public int Id
+        {
+            get
+            {
+                return _id;
+            }
+        }
+
+        public TaskStatus Status
+        {
+            get
+            {
+                return _status;
+            }
+        }
+
+        protected void SetStatus( TaskStatus status )
+        {
+            _status = status;
+        }
+
+        protected void SetCompleted()
+        {
+            _completed.Set();
+        }
+
+        private void Execute( object state )
+        {
+            _status = TaskStatus.Running;
+
+            try
+            {
+                _action();
+            }
+            catch
+            {
+                _status = TaskStatus.Faulted;
+            }
+            
+            _status = TaskStatus.RanToCompletion;
+
+            _completed.Set();
+        }
+    }
+
+    public class TaskWrapper<TResult> : TaskWrapper
+    {
+        private readonly Func<TResult> _func;
+        private          object        _contTask;
+
+        //--//
+
+        TResult _result = default( TResult );
+
+        //--//
+
+        public static TaskWrapper<TResult> Run( Func<TResult> function )
+        {
+            var t = new TaskWrapper<TResult>( function );
+
+            t.Start();
+
+            return t;
+        }
+
+        //--//
+
+        private TaskWrapper( Func<TResult> func )
+            : base()
+        {
+            _func = func;
+        }
+
+        public override void Start()
+        {
+            ThreadPool.QueueUserWorkItem( Execute );
+        }
+
+        private TaskWrapper<TOutput> MakeTask<TInput, TOutput>( Func<TaskWrapper<TResult>, TOutput> continuationFunction )
+        {
+            return new TaskWrapper<TOutput>( () => { return continuationFunction( this ); }  ); 
+        }
+
+        public TaskWrapper<TNewResult> ContinueWith<TNewResult>( Func<TaskWrapper<TResult>, TNewResult> continuationFunction )
+        {
+            _contTask = MakeTask<TaskWrapper<TResult>, TNewResult>( continuationFunction );
+
+            return (TaskWrapper<TNewResult>)_contTask;
+        }
+
+        public TResult Result
+        {
+            get
+            {
+                return _result;
+            }
+        }
+
+        private void Execute( object state )
+        {
+            SetStatus( TaskStatus.Running );
+
+            try
+            {
+                _result = _func();
+            }
+            catch
+            {
+                SetStatus( TaskStatus.Faulted );
+            }
+
+            SetStatus( TaskStatus.RanToCompletion );
+
+            SetCompleted();
+
+            if(_contTask != null)
+            {
+                ((TaskWrapper)_contTask).Start();
+            }
+        }
+    }
+#endif
 }

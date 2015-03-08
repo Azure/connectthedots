@@ -22,6 +22,8 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
+#define USE_TASKS
+
 namespace Microsoft.ConnectTheDots.Gateway
 {
     using System;
@@ -254,7 +256,11 @@ namespace Microsoft.ConnectTheDots.Gateway
                                     // catch all other exceptions
                                 }
 
-                                return new TaskWrapper(popped);
+#if USE_TASKS
+                                return new TaskWrapper( popped );
+#else
+                                return popped;
+#endif
                             } );
 
                             AddToProcessed( tasks, t );
@@ -263,7 +269,7 @@ namespace Microsoft.ConnectTheDots.Gateway
                         // alert any client about outstanding message tasks
                         if( eventBatchProcessed != null )
                         {
-                            var sh = new SafeAction<List<TaskWrapper>>( t => eventBatchProcessed( t ), Logger );
+                            var sh = new SafeAction<List<TaskWrapper>>( allScheduledTasks => eventBatchProcessed( allScheduledTasks ), Logger );
 
                             TaskWrapper.Run( ( ) => sh.SafeInvoke( tasks ) );
                         }

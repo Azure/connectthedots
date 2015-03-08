@@ -42,6 +42,7 @@
     <Compile Include="ILogger.cs" />
     <Compile Include="Logger\SafeLogger.cs" />
     <Compile Include="Logger\TunableLogger.cs" />
+    <Compile Include="Platform.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SafeAction.cs" />
     <Compile Include="SafeFunction.cs" />
