@@ -22,7 +22,7 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-namespace ServiceMonitor
+namespace Microsoft.ConnectTheDots.GatewayServiceMonitor
 {
     using System;
     using System.Configuration;
@@ -30,39 +30,56 @@ namespace ServiceMonitor
 
     //--//
 
-    class Program
+    class MonitorProgram
     {
-        private static ILogger _logger = SafeLogger.FromLogger( MonitorLogger.Instance );
+        private const int MONITORING_INTERVAL = 1000; // ms
 
         //--//
 
         static void Main( string[] args )
         {
+            ILogger logger = SafeLogger.FromLogger( MonitorLogger.Instance );
+
             // try and open the GatewayService process
             string monitoringTarget = ConfigurationManager.AppSettings.Get( "MonitoringTarget" );
             string monitoringExecutable = ConfigurationManager.AppSettings.Get( "TargetExecutable" );
+            string type = ConfigurationManager.AppSettings.Get( "TargetType" );
 
-            if( String.IsNullOrEmpty( monitoringTarget ) || String.IsNullOrEmpty( monitoringExecutable ) )
+            if(String.IsNullOrEmpty( monitoringTarget ) || String.IsNullOrEmpty( monitoringExecutable ))
             {
-                _logger.LogError( "Error in configuration, cannot start monitoring" );
+                logger.LogError( "Error in configuration, cannot start monitoring" );
+
+                return;
+            }
+            if(String.IsNullOrEmpty( type ))
+            {
+                logger.LogInfo( "No type specified, defaulting to 'process'" );
+
+                type = AbstractMonitor.ProcessType;
 
                 return;
             }
 
-            IMonitor sm = new ServiceMonitor( monitoringTarget, _logger );
-            if( sm.Lock( monitoringTarget ) )
+            AbstractMonitor monitor = null;
+
+            switch(type)
             {
-                sm.Monitor( );
+                case AbstractMonitor.ProcessType:
+                    monitor = new ProcessMonitor( monitoringExecutable, logger );
+                    break;
+                case AbstractMonitor.ServiceType:
+                    monitor = new ServiceMonitor( monitoringTarget, logger );
+                    break;
+                default:
+                    throw new ArgumentException( String.Format( "Monitoring type {0} is unrecognized", type ) ); 
             }
 
-            IMonitor pm = new ProcessMonitor( monitoringExecutable, _logger );
+            monitor.MonitoringInterval = MONITORING_INTERVAL;
 
-            if( pm.Lock( monitoringTarget ) )
+            if(monitor.Lock( monitoringTarget ))
             {
-                // never returns unless IMonitor.QuitMonitor is called
-                pm.Monitor( );
+                monitor.Monitor();
             }
-
         }
 
     }

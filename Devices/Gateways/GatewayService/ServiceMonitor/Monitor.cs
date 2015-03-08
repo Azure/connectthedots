@@ -24,15 +24,35 @@
 
 namespace Microsoft.ConnectTheDots.GatewayServiceMonitor
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using Microsoft.ConnectTheDots.Common;
 
     //--//
 
-    interface IMonitor
+    internal abstract class AbstractMonitor : IMonitor
     {
-        bool Lock( string monitoringTarget );
+        public const string ProcessType = "process";
+        public const string ServiceType = "service";
 
-        void Monitor( );
+        //--//
 
-        void QuitMonitor( );
+        protected AbstractMonitor( ILogger logger )
+        {
+            Logger = SafeLogger.FromLogger( logger );
+        }
+
+        protected ILogger Logger { get; private set; }
+
+        public int MonitoringInterval { get; set; }
+
+        public abstract bool Lock( string monitoringTarget );
+
+        public abstract void Monitor();
+
+        public abstract void QuitMonitor();
     }
 }

@@ -22,7 +22,7 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-namespace ServiceMonitor
+namespace Microsoft.ConnectTheDots.GatewayServiceMonitor
 {
     using System;
     using System.IO;
@@ -33,26 +33,17 @@ namespace ServiceMonitor
 
     //--//
 
-    internal class ServiceMonitor : IMonitor
+    internal class ServiceMonitor : AbstractMonitor
     {
-        protected const int MONITORING_INTERVAL = 1000; // ms
-
-        //--//
-
         private string            _serviceName;
         private ServiceController _target;
         private bool              _exit;
 
         //--//
 
-        protected ILogger _logger;
-
-        //--//
-
-        public ServiceMonitor( string serviceName, ILogger logger )
+        public ServiceMonitor( string serviceName, ILogger logger ) : base( logger )
         {
             _serviceName = serviceName;
-            _logger = SafeLogger.FromLogger( logger );
 
             // check that the file we are supposed to launch actually exists 
             Directory.SetCurrentDirectory( Path.GetDirectoryName( Assembly.GetExecutingAssembly( ).Location ) );
@@ -69,13 +60,13 @@ namespace ServiceMonitor
 
             if( _target == null )
             {
-                _logger.LogInfo( String.Format( "Service '{0}' is not installed", serviceName ) );
+                Logger.LogInfo( String.Format( "Service '{0}' is not installed", serviceName ) );
             }
 
             _exit = false;
         }
 
-        public bool Lock( string monitoringTarget )
+        public override bool Lock( string monitoringTarget )
         {
             if( _target == null )
             {
@@ -91,12 +82,12 @@ namespace ServiceMonitor
             return true;
         }
 
-        public void Monitor( )
+        public override void Monitor()
         {
             // monitoring loop
             while( _exit == false )
             {
-                Thread.Sleep( MONITORING_INTERVAL );
+                Thread.Sleep( MonitoringInterval );
 
                 if( _target != null )
                 {
@@ -104,7 +95,7 @@ namespace ServiceMonitor
 
                     if( _target.Status == ServiceControllerStatus.Stopped )
                     {
-                        _logger.LogInfo( String.Format( "Service '{0}' stopped at time {1} or earlier", _serviceName, DateTime.Now.ToString( ) ) );
+                        Logger.LogInfo( String.Format( "Service '{0}' stopped at time {1} or earlier", _serviceName, DateTime.Now.ToString( ) ) );
 
                         Restart( );
                     }
@@ -112,7 +103,7 @@ namespace ServiceMonitor
             }
         }
 
-        public void QuitMonitor( )
+        public override void QuitMonitor()
         {
             _exit = true;
         }

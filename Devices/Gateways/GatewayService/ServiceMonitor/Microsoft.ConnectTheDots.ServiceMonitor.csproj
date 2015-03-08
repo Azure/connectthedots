@@ -47,8 +47,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IMonitor.cs" />
+    <Compile Include="Monitor.cs" />
     <Compile Include="ProcessMonitor.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="MonitorProgram.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceMonitor.cs" />
     <Compile Include="Utils\Logger\Logger.cs" />
