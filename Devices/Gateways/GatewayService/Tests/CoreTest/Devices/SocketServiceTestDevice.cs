@@ -29,10 +29,10 @@ namespace Microsoft.ConnectTheDots.Test
     using System.Net.Sockets;
     using System.Text;
     using System.Threading;
-    using System.Threading.Tasks;
     using Newtonsoft.Json;
     using Microsoft.ConnectTheDots.Common;
     using Microsoft.ConnectTheDots.Gateway;
+    using Microsoft.ConnectTheDots.Common.Threading;
 
     //--//
 
@@ -61,7 +61,7 @@ namespace Microsoft.ConnectTheDots.Test
         {
             var sh = new SafeAction<SensorEndpoint>( e => RunSocketServer( e ), _logger );
 
-            Task.Run( ( ) => sh.SafeInvoke( endpoint ) );
+            TaskWrapper.Run( ( ) => sh.SafeInvoke( endpoint ) );
         }
 
         public void RunSocketServer( SensorEndpoint endpoint )

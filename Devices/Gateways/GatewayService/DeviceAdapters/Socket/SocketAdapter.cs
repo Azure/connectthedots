@@ -29,8 +29,8 @@ namespace Microsoft.ConnectTheDots.Adapters
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading;
-    using System.Threading.Tasks;
     using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Common.Threading;
     using Microsoft.ConnectTheDots.Gateway;
 
     //--//
@@ -62,7 +62,7 @@ namespace Microsoft.ConnectTheDots.Adapters
 
             var sh = new SafeAction<int>( ( t ) => RunForSocket( t ), _logger );
 
-            Task.Run( ( ) => sh.SafeInvoke( CONNECTION_RETRIES ) );
+            TaskWrapper.Run( ( ) => sh.SafeInvoke( CONNECTION_RETRIES ) );
 
             return true;
         }

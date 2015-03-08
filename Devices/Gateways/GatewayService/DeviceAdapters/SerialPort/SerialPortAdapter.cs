@@ -30,8 +30,8 @@ namespace Microsoft.ConnectTheDots.Adapters
     using System.Collections.Generic;
     using System.IO.Ports;
     using System.Threading;
-    using System.Threading.Tasks;
     using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Common.Threading;
     using Microsoft.ConnectTheDots.Gateway;
 
     //--//
@@ -75,7 +75,7 @@ namespace Microsoft.ConnectTheDots.Adapters
 
             var sh = new SafeAction<int>( ( t ) => RunForSerial( t ), _logger );
 
-            Task.Run( ( ) => sh.SafeInvoke( SLEEP_TIME_BETWEEN_SCAN ) );
+            TaskWrapper.Run( ( ) => sh.SafeInvoke( SLEEP_TIME_BETWEEN_SCAN ) );
 
             return true;
         }

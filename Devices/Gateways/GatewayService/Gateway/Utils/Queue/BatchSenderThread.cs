@@ -27,9 +27,9 @@ namespace Microsoft.ConnectTheDots.Gateway
     using System;
     using System.Collections.Generic;
     using System.Threading;
-    using System.Threading.Tasks;
     using System.Diagnostics;
     using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Common.Threading;
 
     //--//
 
@@ -183,12 +183,12 @@ namespace Microsoft.ConnectTheDots.Gateway
                         }
 
                         // allocate a container to keep track of tasks for events in the queue
-                        var tasks = new List<Task>( );
+                        var tasks = new List<TaskWrapper>( );
 
                         // process all messages that have not been processed yet 
                         while( --count >= 0 )
                         {
-                            Task<OperationStatus<TQueueItem>> t = null;
+                            TaskWrapper<OperationStatus<TQueueItem>> t = null;
 
                             try
                             {
@@ -204,7 +204,7 @@ namespace Microsoft.ConnectTheDots.Gateway
                             // increment outstanding task count 
                             Interlocked.Increment( ref _outstandingTasks );
 
-                            t.ContinueWith<Task>( popped =>
+                            t.ContinueWith<TaskWrapper>( popped =>
                             {
                                 try
                                 {
@@ -254,7 +254,7 @@ namespace Microsoft.ConnectTheDots.Gateway
                                     // catch all other exceptions
                                 }
 
-                                return popped;
+                                return new TaskWrapper(popped);
                             } );
 
                             AddToProcessed( tasks, t );
@@ -263,9 +263,9 @@ namespace Microsoft.ConnectTheDots.Gateway
                         // alert any client about outstanding message tasks
                         if( eventBatchProcessed != null )
                         {
-                            var sh = new SafeAction<List<Task>>( t => eventBatchProcessed( t ), Logger );
+                            var sh = new SafeAction<List<TaskWrapper>>( t => eventBatchProcessed( t ), Logger );
 
-                            Task.Run( ( ) => sh.SafeInvoke( tasks ) );
+                            TaskWrapper.Run( ( ) => sh.SafeInvoke( tasks ) );
                         }
                     }
                     catch( StackOverflowException ex )
@@ -299,7 +299,7 @@ namespace Microsoft.ConnectTheDots.Gateway
             }
         }
 
-        private void AddToProcessed( List<Task> tasks, Task<OperationStatus<TQueueItem>> t )
+        private void AddToProcessed( List<TaskWrapper> tasks, TaskWrapper<OperationStatus<TQueueItem>> t )
         {
             try
             {

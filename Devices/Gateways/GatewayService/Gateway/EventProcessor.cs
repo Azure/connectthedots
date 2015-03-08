@@ -24,9 +24,9 @@
 
 namespace Microsoft.ConnectTheDots.Gateway
 {
-    using System.Threading.Tasks;
     using System.Collections.Generic;
     using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Common.Threading;
 
     //--//
 
@@ -41,7 +41,7 @@ namespace Microsoft.ConnectTheDots.Gateway
             _logger = logger;
         }
 
-        public delegate void EventBatchProcessedEventHandler( List<Task> messages );
+        public delegate void EventBatchProcessedEventHandler( List<TaskWrapper> messages );
 
         public abstract bool Start( );
 

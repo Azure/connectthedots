@@ -27,10 +27,11 @@ namespace Microsoft.ConnectTheDots.GatewayService
     using System;
     using System.ServiceModel.Web;
     using System.ServiceProcess;
-    using System.Threading.Tasks;
     using System.Configuration;
+    using _THREADING = System.Threading.Tasks;
     using Microsoft.ConnectTheDots.Gateway;
     using Microsoft.ConnectTheDots.Common;
+
 
     //--//
 
@@ -70,7 +71,7 @@ namespace Microsoft.ConnectTheDots.GatewayService
 
             try
             {
-                TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+                _THREADING.TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
                 // Name the Windows Service
                 ServiceName = Constants.WindowsServiceName;
@@ -192,12 +193,12 @@ namespace Microsoft.ConnectTheDots.GatewayService
             }
         }
 
-        private void OnUnobservedTaskException( object sender, UnobservedTaskExceptionEventArgs e )
+        private void OnUnobservedTaskException( object sender, _THREADING.UnobservedTaskExceptionEventArgs e )
         {
             // prevent exception escalation
             e.SetObserved( );
 
-            _logger.LogError( String.Format( "Task Exception: '{0}'\r\nTrace:\r\n{1}", e.Exception.Message, e.Exception.StackTrace ) );
+            _logger.LogError( String.Format( "task Exception: '{0}'\r\nTrace:\r\n{1}", e.Exception.Message, e.Exception.StackTrace ) );
         }
     }
 }

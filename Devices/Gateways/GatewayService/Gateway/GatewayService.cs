@@ -26,8 +26,8 @@ namespace Microsoft.ConnectTheDots.Gateway
 {
     using System;
     using System.Threading;
-    using System.Threading.Tasks;
     using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Common.Threading;
 
     //--//
 
@@ -47,7 +47,7 @@ namespace Microsoft.ConnectTheDots.Gateway
         {
             if( queue == null || processor == null )
             {
-                throw new ArgumentException( "Task queue and event processor cannot be null" );
+                throw new ArgumentException( "task queue and event processor cannot be null" );
             }
 
             if( dataTransform != null )
@@ -98,7 +98,7 @@ namespace Microsoft.ConnectTheDots.Gateway
             {
                 var sh = new SafeAction<QueuedItem>( d => newData( d ), Logger );
 
-                Task.Run( ( ) => sh.SafeInvoke( data ) );
+                TaskWrapper.Run( ( ) => sh.SafeInvoke( data ) );
             }
 
             LogMessageReceived( );
@@ -125,7 +125,7 @@ namespace Microsoft.ConnectTheDots.Gateway
 
                 var sh = new SafeAction<String>( s => Logger.LogInfo( s ), Logger );
 
-                Task.Run( ( ) => sh.SafeInvoke(
+                TaskWrapper.Run( ( ) => sh.SafeInvoke(
                     String.Format( "GatewayService received {0} events succesfully in {1} ms ", Constants.MessagesLoggingThreshold, elapsed.TotalMilliseconds.ToString( ) ) ) );
             }
         }

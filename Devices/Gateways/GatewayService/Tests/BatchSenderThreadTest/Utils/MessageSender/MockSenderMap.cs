@@ -27,9 +27,9 @@ namespace Microsoft.ConnectTheDots.Test
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
     using Microsoft.ConnectTheDots.Common;
     using Microsoft.ConnectTheDots.Gateway;
+    using Microsoft.ConnectTheDots.Common.Threading;
 
     //--//
 
@@ -39,7 +39,7 @@ namespace Microsoft.ConnectTheDots.Test
 
         //--//
 
-        public async Task SendMessage( T data )
+        public TaskWrapper SendMessage( T data )
         {
             Action<T> send = ( d ) =>
             {
@@ -53,10 +53,10 @@ namespace Microsoft.ConnectTheDots.Test
 
             var sh = new SafeAction<T>( ( d ) => send( d ), null );
 
-            await Task.Run( ( ) => sh.SafeInvoke( data ) );
+            return TaskWrapper.Run( ( ) => sh.SafeInvoke( data ) );
         }
 
-        public Task SendSerialized( string jsonData )
+        public TaskWrapper SendSerialized( string jsonData )
         {
             throw new Exception( "Not implemented" );
         }

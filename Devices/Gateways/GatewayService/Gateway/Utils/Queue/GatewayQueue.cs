@@ -26,8 +26,8 @@ namespace Microsoft.ConnectTheDots.Gateway
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Threading.Tasks;
     using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Common.Threading;
 
     //--//
 
@@ -42,7 +42,7 @@ namespace Microsoft.ConnectTheDots.Gateway
             _Queue.Enqueue( item );
         }
 
-        public Task<OperationStatus<T>> TryPop( )
+        public TaskWrapper<OperationStatus<T>> TryPop( )
         {
             Func<OperationStatus<T>> deque = ( ) =>
             {
@@ -60,7 +60,7 @@ namespace Microsoft.ConnectTheDots.Gateway
 
             var sf = new SafeFunc<OperationStatus<T>>( deque, null );
 
-            return Task.Run( ( ) => sf.SafeInvoke( ) );
+            return TaskWrapper<OperationStatus<T>>.Run( () => sf.SafeInvoke() );
         }
 
         public int Count

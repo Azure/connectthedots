@@ -26,8 +26,8 @@ namespace Microsoft.ConnectTheDots.Test
 {
     using System;
     using System.Threading;
-    using System.Threading.Tasks;
     using Microsoft.ConnectTheDots.Gateway;
+    using Microsoft.ConnectTheDots.Common.Threading;
 
     //--//
 
@@ -50,13 +50,13 @@ namespace Microsoft.ConnectTheDots.Test
             _rand = new Random( );
         }
 
-        public Task SendMessage( T data )
+        public TaskWrapper SendMessage( T data )
         {
             SimulateSend( );
             return null;
         }
 
-        public Task SendSerialized( string jsonData )
+        public TaskWrapper SendSerialized( string jsonData )
         {
             SimulateSend( );
             return null;
