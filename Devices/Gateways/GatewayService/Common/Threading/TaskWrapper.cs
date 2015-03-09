@@ -31,52 +31,11 @@ namespace Microsoft.ConnectTheDots.Common.Threading
     using System.Diagnostics;
     using System.Linq;
     using System.Text;
-#if !USE_TASKS
     using System.Threading;
-#endif
+    //--//
     using _THREADING = System.Threading.Tasks;
 
     //--//
-
-    public enum TaskStatus
-    {
-        // Summary:
-        //     The task has been initialized but has not yet been scheduled.
-        Created = 0,
-        //
-        // Summary:
-        //     The task is waiting to be activated and scheduled internally by the .NET
-        //     Framework infrastructure.
-        WaitingForActivation = 1,
-        //
-        // Summary:
-        //     The task has been scheduled for execution but has not yet begun executing.
-        WaitingToRun = 2,
-        //
-        // Summary:
-        //     The task is running but has not yet completed.
-        Running = 3,
-        //
-        // Summary:
-        //     The task has finished executing and is implicitly waiting for attached child
-        //     tasks to complete.
-        WaitingForChildrenToComplete = 4,
-        //
-        // Summary:
-        //     The task completed execution successfully.
-        RanToCompletion = 5,
-        //
-        // Summary:
-        //     The task acknowledged cancellation by throwing an OperationCanceledException
-        //     with its own CancellationToken while the token was in signaled state, or
-        //     the task's CancellationToken was already signaled before the task started
-        //     executing. For more information, see Task Cancellation.
-        Canceled = 6,
-        //
-        // Summary:
-        //     The task completed due to an unhandled exception.
-        Faulted = 7,
-    }
 
 #if USE_TASKS
     public class TaskWrapper
@@ -141,11 +100,11 @@ namespace Microsoft.ConnectTheDots.Common.Threading
             }
         }
 
-        public TaskStatus Status
+        public _THREADING.TaskStatus Status
         {
             get
             {
-                return (TaskStatus)_t.Status;
+                return (_THREADING.TaskStatus)_t.Status;
             }
         }
 
@@ -220,9 +179,9 @@ namespace Microsoft.ConnectTheDots.Common.Threading
 
         //--//
 
-        private readonly int                _id;
-        private          TaskStatus         _status;
-        private          ManualResetEvent   _completed;
+        private readonly int                    _id;
+        private          _THREADING.TaskStatus  _status;
+        private          ManualResetEvent       _completed;
 
         //--//
 
@@ -256,7 +215,7 @@ namespace Microsoft.ConnectTheDots.Common.Threading
         protected TaskWrapper( )
         {
             _id = Interlocked.Increment( ref _unique_id );
-            _status = TaskStatus.Created;
+            _status = _THREADING.TaskStatus.Created;
             _completed = new ManualResetEvent( false );
         }
 
@@ -284,7 +243,7 @@ namespace Microsoft.ConnectTheDots.Common.Threading
             }
         }
 
-        public TaskStatus Status
+        public _THREADING.TaskStatus Status
         {
             get
             {
@@ -292,17 +251,17 @@ namespace Microsoft.ConnectTheDots.Common.Threading
             }
         }
 
-        protected void SetStatus( TaskStatus status )
+        protected void SetStatus( _THREADING.TaskStatus status )
         {
             _status = status;
         }
 
         protected bool IsRunningOrDone( )
         {
-            return _status == TaskStatus.WaitingToRun ||
-                   _status == TaskStatus.Running ||
-                   _status == TaskStatus.Faulted ||
-                   _status == TaskStatus.RanToCompletion;
+            return _status == _THREADING.TaskStatus.WaitingToRun ||
+                   _status == _THREADING.TaskStatus.Running ||
+                   _status == _THREADING.TaskStatus.Faulted ||
+                   _status == _THREADING.TaskStatus.RanToCompletion;
         }
 
         protected void SetCompleted( )
@@ -317,7 +276,7 @@ namespace Microsoft.ConnectTheDots.Common.Threading
 
         private void Execute( object state )
         {
-            _status = TaskStatus.Running;
+            _status = _THREADING.TaskStatus.Running;
 
             try
             {
@@ -325,10 +284,10 @@ namespace Microsoft.ConnectTheDots.Common.Threading
             }
             catch
             {
-                _status = TaskStatus.Faulted;
+                _status = _THREADING.TaskStatus.Faulted;
             }
 
-            _status = TaskStatus.RanToCompletion;
+            _status = _THREADING.TaskStatus.RanToCompletion;
 
             _completed.Set( );
         }
@@ -412,7 +371,7 @@ namespace Microsoft.ConnectTheDots.Common.Threading
 
                     _func = null;
 
-                    SetStatus( TaskStatus.WaitingToRun );
+                    SetStatus( _THREADING.TaskStatus.WaitingToRun );
                 }
             }
 
@@ -420,16 +379,16 @@ namespace Microsoft.ConnectTheDots.Common.Threading
             {
                 try
                 {
-                    SetStatus( TaskStatus.Running );
+                    SetStatus( _THREADING.TaskStatus.Running );
 
                     _result = f( );
                 }
                 catch
                 {
-                    SetStatus( TaskStatus.Faulted );
+                    SetStatus( _THREADING.TaskStatus.Faulted );
                 }
 
-                SetStatus( TaskStatus.RanToCompletion );
+                SetStatus( _THREADING.TaskStatus.RanToCompletion );
 
                 SetCompleted( );
             }
