@@ -76,7 +76,7 @@ namespace Microsoft.ConnectTheDots.Common.Threading
             _t = new _THREADING.Task( action );
         }
 
-        public TaskWrapper( _THREADING.Task t )
+        protected TaskWrapper( _THREADING.Task t )
         {
             Debug.Assert( t != null );
             _t = t;
@@ -119,8 +119,6 @@ namespace Microsoft.ConnectTheDots.Common.Threading
                 _t = value;
             }
         }
-
-
     }
 
     public class TaskWrapper<TResult> : TaskWrapper

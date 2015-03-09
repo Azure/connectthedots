@@ -208,59 +208,30 @@ namespace Microsoft.ConnectTheDots.Gateway
 
                             t.ContinueWith<TaskWrapper>( popped =>
                             {
-                                try
+                                // Decrement the numbers of outstanding tasks. 
+                                // (*) Note that there is a race  condition because at this point in time the tasks 
+                                // is already out of the queue but we did not decrement the outstanding task count 
+                                // yet. This race condition may cause tasks to be left sitting in the queue. 
+                                // To deal with this race condition, we will wait with a timeout
+                                Interlocked.Decrement( ref _outstandingTasks );
+
+                                // because the outstanding task counter is incremented before 
+                                // adding, we should never incur a negative count 
+                                Debug.Assert( _outstandingTasks >= 0 );
+
+                                if( popped.Result != null && popped.Result.IsSuccess )
                                 {
-                                    // Decrement the numbers of outstanding tasks. 
-                                    // (*) Note that there is a race  condition because at this point in time the tasks 
-                                    // is already out of the queue but we did not decrement the outstanding task count 
-                                    // yet. This race condition may cause tasks to be left sitting in the queue. 
-                                    // To deal with this race condition, we will wait with a timeout
-                                    Interlocked.Decrement( ref _outstandingTasks );
-
-                                    // because the outstanding task counter is incremented before 
-                                    // adding, we should never incur a negative count 
-                                    Debug.Assert( _outstandingTasks >= 0 );
-
-                                    if( popped.Result.IsSuccess && popped.Result != null )
+                                    if( _dataTransform != null )
                                     {
-                                        if( _dataTransform != null )
-                                        {
-                                            return _dataTarget.SendMessage( _dataTransform( popped.Result.Result ) );
-                                        }
-                                        if( _serializedData != null )
-                                        {
-                                            return _dataTarget.SendSerialized( _serializedData( popped.Result.Result ) );
-                                        }
-
-                                        Debug.Assert( false );
+                                        return _dataTarget.SendMessage( _dataTransform( popped.Result.Result ) );
+                                    }
+                                    if( _serializedData != null )
+                                    {
+                                        return _dataTarget.SendSerialized( _serializedData( popped.Result.Result ) );
                                     }
                                 }
-                                catch( StackOverflowException ex )
-                                {
-                                    Logger.LogError( _logMessagePrefix + ex.Message );
 
-                                    // do not hide stack overflow exceptions
-                                    throw;
-                                }
-                                catch( OutOfMemoryException ex )
-                                {
-                                    Logger.LogError( _logMessagePrefix + ex.Message );
-
-                                    // do not hide memory exceptions
-                                    throw;
-                                }
-                                catch( Exception ex )
-                                {
-                                    Logger.LogError( _logMessagePrefix + ex.Message );
-
-                                    // catch all other exceptions
-                                }
-
-#if USE_TASKS
-                                return new TaskWrapper( popped );
-#else
-                                return popped;
-#endif
+                                return null;
                             } );
 
                             AddToProcessed( tasks, t );
