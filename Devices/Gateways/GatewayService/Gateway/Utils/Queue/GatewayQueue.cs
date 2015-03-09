@@ -37,7 +37,7 @@ namespace Microsoft.ConnectTheDots.Gateway
 
         //--//
 
-        public void Push( T item )
+        async public void Push( T item )
         {
             _Queue.Enqueue( item );
         }

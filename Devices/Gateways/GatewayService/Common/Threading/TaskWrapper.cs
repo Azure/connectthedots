@@ -255,9 +255,9 @@ namespace Microsoft.ConnectTheDots.Common.Threading
 
         protected TaskWrapper( )
         {
-            _id         = Interlocked.Increment( ref _unique_id );
-            _status     = TaskStatus.Created;
-            _completed  = new ManualResetEvent( false );
+            _id = Interlocked.Increment( ref _unique_id );
+            _status = TaskStatus.Created;
+            _completed = new ManualResetEvent( false );
         }
 
         protected TaskWrapper( Action action )
@@ -296,12 +296,12 @@ namespace Microsoft.ConnectTheDots.Common.Threading
         {
             _status = status;
         }
-        
+
         protected bool IsRunningOrDone( )
         {
-            return _status == TaskStatus.WaitingToRun       ||
-                   _status == TaskStatus.Running            ||
-                   _status == TaskStatus.Faulted            ||
+            return _status == TaskStatus.WaitingToRun ||
+                   _status == TaskStatus.Running ||
+                   _status == TaskStatus.Faulted ||
                    _status == TaskStatus.RanToCompletion;
         }
 
@@ -377,11 +377,12 @@ namespace Microsoft.ConnectTheDots.Common.Threading
         {
             _cont = MakeTask<TaskWrapper<TResult>, TNewResult>( continuationFunction );
 
-            lock(_syncRoot)
+            lock( _syncRoot )
             {
-                if( IsRunningOrDone() )
+                if( IsRunningOrDone( ) )
                 {
-                    // Task is executing, schedule again
+                    // Task is executing or done, schedule againto 
+                    // make sure continuation will be served
                     Start( );
                 }
             }
@@ -432,23 +433,24 @@ namespace Microsoft.ConnectTheDots.Common.Threading
 
                 SetCompleted( );
             }
-            
+
             //
             // we want to execute _cont only once 
             //
             TaskWrapper cont = null;
-            lock(_syncRoot)
+            lock( _syncRoot )
             {
-                if(_cont != null)
+                if( _cont != null )
                 {
                     cont = (TaskWrapper)_cont;
 
-                    _cont = null; 
+                    _cont = null;
                 }
             }
 
             if( cont != null )
             {
+                // do not start the continuation before the task is completed
                 WaitCompleted( );
 
                 ( (TaskWrapper)cont ).Start( );

@@ -22,7 +22,7 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-#define MOCK_SENDER
+//#define MOCK_SENDER
 
 namespace Microsoft.ConnectTheDots.Test
 {
