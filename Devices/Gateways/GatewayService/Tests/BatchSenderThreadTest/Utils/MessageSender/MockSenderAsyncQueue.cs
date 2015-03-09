@@ -27,8 +27,8 @@ namespace Microsoft.ConnectTheDots.Test
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
     using Microsoft.ConnectTheDots.Gateway;
+    using Microsoft.ConnectTheDots.Common.Threading;
 
     //--//
 
@@ -38,11 +38,14 @@ namespace Microsoft.ConnectTheDots.Test
 
         //--//
 
-        public async Task SendMessage( T data )
+        public TaskWrapper SendMessage( T data )
         {
-            _SentMessagesQueue.Push( data );
+             _SentMessagesQueue.Push( data );
+
+             return default( TaskWrapper );
         }
-        public Task SendSerialized( string jsonData )
+
+        public TaskWrapper SendSerialized( string jsonData )
         {
             throw new Exception( "Not implemented" );
         }
@@ -52,7 +55,7 @@ namespace Microsoft.ConnectTheDots.Test
             MockSenderMap<T> result = new MockSenderMap<T>( );
 
             int count = _SentMessagesQueue.Count;
-            var tasks = new Task[ count ];
+            var tasks = new TaskWrapper[ count ];
             for( int processedCount = 0; processedCount < count; )
             {
                 var popped = _SentMessagesQueue.TryPop( ).Result;

@@ -26,9 +26,9 @@ namespace Microsoft.ConnectTheDots.Test
 {
     using System;
     using System.Threading;
-    using System.Threading.Tasks;
     using Newtonsoft.Json;
     using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Common.Threading;
     using Microsoft.ConnectTheDots.Gateway;
 
     //--//
@@ -58,7 +58,7 @@ namespace Microsoft.ConnectTheDots.Test
 
             var sh = new SafeAction<int>( ( t ) => TestRun( t ), _logger );
 
-            Task.Run( ( ) => sh.SafeInvoke( SLEEP_TIME_MS ) );
+            TaskWrapper.Run( ( ) => sh.SafeInvoke( SLEEP_TIME_MS ) );
 
             return true;
         }

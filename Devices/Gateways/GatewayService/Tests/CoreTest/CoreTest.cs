@@ -32,9 +32,9 @@ namespace Microsoft.ConnectTheDots.Test
     using System.Collections.Generic;
     using System.Text;
     using System.Threading;
-    using System.Threading.Tasks;
     using Microsoft.ConnectTheDots.Common;
     using Microsoft.ConnectTheDots.Gateway;
+    using Microsoft.ConnectTheDots.Common.Threading;
 
     //--//
 
@@ -77,7 +77,7 @@ namespace Microsoft.ConnectTheDots.Test
             _gatewayQueue = new GatewayQueue<QueuedItem>( );
 
 #if MOCK_SENDER
-            _Sender = new MockSender<SensorDataContract>(this);
+            _sender = new MockSender<SensorDataContract>(this);
 #else
 
             AMQPConfig amqpConfig = Loader.GetAMQPConfig( );
@@ -265,20 +265,25 @@ namespace Microsoft.ConnectTheDots.Test
             _batchSenderThread.Process( );
         }
 
-        protected virtual void EventBatchProcessed( List<Task> messages )
+        protected virtual void EventBatchProcessed( List<TaskWrapper> messages )
         {
             // LORENZO: test behaviours such as waiting for messages to be delivered or re-transmission
 
-            foreach( Task t in messages )
+            if(messages == null || messages.Count == 0)
             {
-                _logger.LogInfo( String.Format( "Task {0} status is '{1}'", t.Id, t.Status.ToString( ) ) );
+                return;
             }
 
-            Task.WaitAll( ( ( List<Task> )messages ).ToArray( ) );
-
-            foreach( Task t in messages )
+            foreach( TaskWrapper t in messages )
             {
-                _logger.LogInfo( String.Format( "Task {0} status is '{1}'", t.Id, t.Status.ToString( ) ) );
+                _logger.LogInfo( String.Format( "task {0} status is '{1}'", t.Id, t.Status.ToString( ) ) );
+            }
+
+            TaskWrapper.WaitAll( ( ( List<TaskWrapper> )messages ).ToArray( ) );
+
+            foreach( TaskWrapper t in messages )
+            {
+                _logger.LogInfo( String.Format( "task {0} status is '{1}'", t.Id, t.Status.ToString( ) ) );
             }
         }
     }

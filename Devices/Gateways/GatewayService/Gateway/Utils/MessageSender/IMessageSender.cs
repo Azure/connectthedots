@@ -24,14 +24,14 @@
 
 namespace Microsoft.ConnectTheDots.Gateway
 {
-    using System.Threading.Tasks;
+    using Microsoft.ConnectTheDots.Common.Threading;
 
     //--//
 
     public interface IMessageSender<in T>
     {
-        Task SendMessage( T data );
-        Task SendSerialized( string jsonData );
+        TaskWrapper SendMessage( T data );
+        TaskWrapper SendSerialized( string jsonData );
 
         void Close( );
     }

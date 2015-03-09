@@ -28,11 +28,11 @@ namespace Microsoft.ConnectTheDots.Gateway
     using System.Collections.Generic;
     using System.Text;
     using System.Threading;
-    using System.Threading.Tasks;
     using Amqp;
     using Amqp.Framing;
     using Newtonsoft.Json;
     using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Common.Threading;
 
     //--//
 
@@ -254,40 +254,48 @@ namespace Microsoft.ConnectTheDots.Gateway
             _senders = new SendersPool( amqpsAddress, eventHubName, Constants.ConcurrentConnections, Logger );
         }
 
-        public async Task SendMessage( T data )
+        public TaskWrapper SendMessage( T data )
         {
+            TaskWrapper result = null;
+
             try
             {
                 if( data == null )
                 {
-                    return;
+                    return default(TaskWrapper);
                 }
 
                 string jsonData = JsonConvert.SerializeObject( data );
 
-                await PrepareAndSend( jsonData );
+                result = PrepareAndSend( jsonData );
             }
             catch( Exception ex )
             {
                 Logger.LogError( _logMesagePrefix + ex.Message );
             }
+
+            return result;
         }
 
-        public async Task SendSerialized( string jsonData )
+        public TaskWrapper SendSerialized( string jsonData )
         {
+            TaskWrapper result = null;
+
             try
             {
                 if( String.IsNullOrEmpty( jsonData ) )
                 {
-                    return;
+                    return default(TaskWrapper);
                 }
 
-                await PrepareAndSend( jsonData );
+                result = PrepareAndSend( jsonData );
             }
             catch( Exception ex )
             {
                 Logger.LogError( _logMesagePrefix + ex.Message );
             }
+
+            return result;
         }
 
         public void Close( )
@@ -297,7 +305,7 @@ namespace Microsoft.ConnectTheDots.Gateway
             _senders.Close( );
         }
 
-        private async Task PrepareAndSend( string jsonData )
+        private TaskWrapper PrepareAndSend( string jsonData )
         {
             Message msg = PrepareMessage( jsonData );
             // send to the cloud asynchronously, but wait for completetion
@@ -305,7 +313,7 @@ namespace Microsoft.ConnectTheDots.Gateway
 
             var sh = new SafeAction<Message>( m => SendAmqpMessage( m ), Logger );
 
-            await Task.Run( ( ) => sh.SafeInvoke( msg ) );
+            return TaskWrapper.Run( ( ) => sh.SafeInvoke( msg ) );
         }
 
         private void SendAmqpMessage( Message m )
@@ -450,7 +458,7 @@ namespace Microsoft.ConnectTheDots.Gateway
 
                     var sh = new SafeAction<String>( s => Logger.LogInfo( s ), Logger );
 
-                    Task.Run( ( ) => sh.SafeInvoke(
+                    TaskWrapper.Run( ( ) => sh.SafeInvoke(
                         String.Format( "GatewayService sent {0} events to Event Hub succesfully in {1} ms ",
                                 Constants.MessagesLoggingThreshold, elapsed.TotalMilliseconds.ToString( ) ) ) );
                 }

@@ -24,7 +24,7 @@
 
 namespace Microsoft.ConnectTheDots.Gateway
 {
-    using System.Threading.Tasks;
+    using Microsoft.ConnectTheDots.Common.Threading;
 
     //--//
 
@@ -32,7 +32,7 @@ namespace Microsoft.ConnectTheDots.Gateway
     {
         void Push( T item );
 
-        Task<OperationStatus<T>> TryPop( );
+        TaskWrapper<OperationStatus<T>> TryPop( );
 
         int Count { get; }
     }
