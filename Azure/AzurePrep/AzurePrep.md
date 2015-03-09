@@ -14,16 +14,16 @@ Make sure you have all software installed and necessary subscriptions as indicat
 * Download the publishsettings file from Azure for your subscription. This will contain information about your current subscription and be used to configure other components of your solution. To download this file
     * Go to https://manage.windowsazure.com/publishsettings/ and save to local disk `<publishsettingsfile>` (contains keys to manage all resources in your subscriptions, so handle with care). Save this to a folder of your choice such as C:\MyTempFolder\MyAzureSubscription.publishsettings
     * **If you have access to multiple subscriptions, make sure the file only contains the subscription that you want to use. Otherwise, edit and remove the other XML elements for the other subscriptions**.
-* Change directory to the bin\Release directory where the solution built, and run AzurePrep.exe from an elevated command prompt (“Run as administrator”), passing a name to be used for all cloud resources, and the publishsetting file (including its full path if not in the same folder as the exe). Choose a name`that has only letters and numbers – no spaces, dashes, underlines, etc and should be **at least 3 characters and less than 47**. (If the publishsettingsfile filename has spaces in it, you will get an error saying the file cannot be found. Surround just the publishsettingsfile with quotation marks and re-run AzurePrep.exe.):
+* Change directory to the bin\Release directory where the solution built, and run ConnectTheDotsAzurePrep.exe from an elevated command prompt (“Run as administrator”), passing a name to be used for all cloud resources, and the publishsetting file (including its full path if not in the same folder as the exe). Choose a name`that has only letters and numbers – no spaces, dashes, underlines, etc and should be **at least 3 characters and less than 47**. (If the publishsettingsfile filename has spaces in it, you will get an error saying the file cannot be found. Surround just the publishsettingsfile with quotation marks and re-run ConnectTheDotsAzurePrep.exe.):
     
-			cd ConnectTheDots\Azure\AzurePrep\AzurePrep\bin\release\
-			AzurePrep.exe –n <name> -ps <publishsettingsfile>
+			cd ConnectTheDots\Azure\AzurePrep\ConnectTheDotsAzurePrep\bin\release\
+			ConnectTheDotsAzurePrep.exe –n <name> -ps <publishsettingsfile>
 			
 
 * Note the device connection strings displayed by the tool, as you will need them to provision the devices later. You might copy and paste into Notepad for easy retrieval.
     
-			C:\MyProjectLocation\connectthedots\Azure\AzurePrep\AzurePrep\bin\Release>
-			AzurePrep.exe -n ctdtest1 -ps C:\MyTempFolder\MyAzureSubscription.publishsettings
+			C:\MyProjectLocation\connectthedots\Azure\AzurePrep\ConnectTheDotsAzurePrep\bin\Release>
+			ConnectTheDotsAzurePrep.exe -n ctdtest1 -ps C:\MyTempFolder\MyAzureSubscription.publishsettings
 			Creating Service Bus namespace ctdtest1-ns in location Central US
 			Namespace cdttest1-ns in state Activating. Waiting...
 			Namespace cdttest1-ns in state Activating. Waiting...
@@ -45,9 +45,9 @@ Make sure you have all software installed and necessary subscriptions as indicat
 			amqps://D3:xxxxxxxx@yyyyyyyy.servicebus.windows.net
 			amqps://D4:xxxxxxxx@yyyyyyyy.servicebus.windows.net
 
-			Web.Config saved to C:\MyProjectLocation\connectthedots\Azure\AzurePrep\Website\ConnectTheDotsWebSite\web.config
+			Web.Config saved to C:\MyProjectLocation\connectthedots\Azure\Website\ConnectTheDotsWebSite\web.config
 
-The AzurePrep.exe command created two Event Hubs, EHDevices and EHAlerts. It also created four endpoints for AMQP connections from your remote devices such as Raspberry Pi devices. If you did not copy the output above to the a file and closed the window, you can retrieve the endpoint strings by 
+The ConnectTheDotsAzurePrep.exe command created two Event Hubs, EHDevices and EHAlerts. It also created four endpoints for AMQP connections from your remote devices such as Raspberry Pi devices. If you did not copy the output above to the a file and closed the window, you can retrieve the endpoint strings by 
 
 1. launching http://manage.windowsazure.com
 2. selecting Service Bus in the left nav menu
