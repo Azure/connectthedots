@@ -22,7 +22,7 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-#define USE_TASKS
+//#define USE_TASKS
 
 namespace Microsoft.ConnectTheDots.Common.Threading
 {
@@ -213,16 +213,16 @@ namespace Microsoft.ConnectTheDots.Common.Threading
         }
     }
 #else
-    
+
     public class TaskWrapper
     {
         private static int _unique_id = 0;
 
         //--//
 
-        private readonly int             _id;
-        private          TaskStatus      _status;
-        private          AutoResetEvent  _completed;
+        private readonly int                _id;
+        private          TaskStatus         _status;
+        private          ManualResetEvent   _completed;
 
         //--//
 
@@ -234,7 +234,7 @@ namespace Microsoft.ConnectTheDots.Common.Threading
         {
             var t = new TaskWrapper( action );
 
-            t.Start();
+            t.Start( );
 
             return t;
         }
@@ -242,7 +242,7 @@ namespace Microsoft.ConnectTheDots.Common.Threading
         public static void WaitAll( params TaskWrapper[] tasks )
         {
             WaitHandle[] wh = new WaitHandle[ tasks.Length ];
-            
+
             for( int i = 0; i < tasks.Length; ++i )
             {
                 wh[ i ] = tasks[ i ]._completed;
@@ -255,24 +255,25 @@ namespace Microsoft.ConnectTheDots.Common.Threading
 
         protected TaskWrapper( )
         {
-            _id = Interlocked.Increment( ref _unique_id );
-            _status = TaskStatus.Created;
-            _completed = new AutoResetEvent( false );
+            _id         = Interlocked.Increment( ref _unique_id );
+            _status     = TaskStatus.Created;
+            _completed  = new ManualResetEvent( false );
         }
 
-        protected TaskWrapper( Action action ) : this ()
+        protected TaskWrapper( Action action )
+            : this( )
         {
             _action = action;
         }
 
-        public virtual void Start()
+        public virtual void Start( )
         {
             ThreadPool.QueueUserWorkItem( Execute );
         }
 
-        public void Wait()
+        public void Wait( )
         {
-            _completed.WaitOne();
+            _completed.WaitOne( );
         }
 
         public int Id
@@ -295,10 +296,23 @@ namespace Microsoft.ConnectTheDots.Common.Threading
         {
             _status = status;
         }
-
-        protected void SetCompleted()
+        
+        protected bool IsRunningOrDone( )
         {
-            _completed.Set();
+            return _status == TaskStatus.WaitingToRun       ||
+                   _status == TaskStatus.Running            ||
+                   _status == TaskStatus.Faulted            ||
+                   _status == TaskStatus.RanToCompletion;
+        }
+
+        protected void SetCompleted( )
+        {
+            _completed.Set( );
+        }
+
+        protected void WaitCompleted( )
+        {
+            _completed.WaitOne( );
         }
 
         private void Execute( object state )
@@ -307,27 +321,25 @@ namespace Microsoft.ConnectTheDots.Common.Threading
 
             try
             {
-                _action();
+                _action( );
             }
             catch
             {
                 _status = TaskStatus.Faulted;
             }
-            
+
             _status = TaskStatus.RanToCompletion;
 
-            _completed.Set();
+            _completed.Set( );
         }
     }
 
     public class TaskWrapper<TResult> : TaskWrapper
     {
-        private readonly Func<TResult> _func;
-        private          object        _contTask;
-
-        //--//
-
-        TResult _result = default( TResult );
+        private          Func<TResult> _func;
+        private          object        _cont;
+        private          TResult       _result   = default( TResult );
+        private readonly object        _syncRoot = new object( );
 
         //--//
 
@@ -335,7 +347,7 @@ namespace Microsoft.ConnectTheDots.Common.Threading
         {
             var t = new TaskWrapper<TResult>( function );
 
-            t.Start();
+            t.Start( );
 
             return t;
         }
@@ -343,26 +355,38 @@ namespace Microsoft.ConnectTheDots.Common.Threading
         //--//
 
         private TaskWrapper( Func<TResult> func )
-            : base()
+            : base( )
         {
             _func = func;
         }
 
-        public override void Start()
+        public override void Start( )
         {
             ThreadPool.QueueUserWorkItem( Execute );
         }
 
         private TaskWrapper<TOutput> MakeTask<TInput, TOutput>( Func<TaskWrapper<TResult>, TOutput> continuationFunction )
         {
-            return new TaskWrapper<TOutput>( () => { return continuationFunction( this ); }  ); 
+            return new TaskWrapper<TOutput>( ( ) =>
+            {
+                return continuationFunction( this );
+            } );
         }
 
         public TaskWrapper<TNewResult> ContinueWith<TNewResult>( Func<TaskWrapper<TResult>, TNewResult> continuationFunction )
         {
-            _contTask = MakeTask<TaskWrapper<TResult>, TNewResult>( continuationFunction );
+            _cont = MakeTask<TaskWrapper<TResult>, TNewResult>( continuationFunction );
 
-            return (TaskWrapper<TNewResult>)_contTask;
+            lock(_syncRoot)
+            {
+                if( IsRunningOrDone() )
+                {
+                    // Task is executing, schedule again
+                    Start( );
+                }
+            }
+
+            return (TaskWrapper<TNewResult>)_cont;
         }
 
         public TResult Result
@@ -375,24 +399,59 @@ namespace Microsoft.ConnectTheDots.Common.Threading
 
         private void Execute( object state )
         {
-            SetStatus( TaskStatus.Running );
-
-            try
+            //
+            // we want to execute _func only once 
+            //
+            Func<TResult> f = null;
+            lock( _syncRoot )
             {
-                _result = _func();
+                if( _func != null )
+                {
+                    f = _func;
+
+                    _func = null;
+
+                    SetStatus( TaskStatus.WaitingToRun );
+                }
             }
-            catch
+
+            if( f != null )
             {
-                SetStatus( TaskStatus.Faulted );
+                try
+                {
+                    SetStatus( TaskStatus.Running );
+
+                    _result = f( );
+                }
+                catch
+                {
+                    SetStatus( TaskStatus.Faulted );
+                }
+
+                SetStatus( TaskStatus.RanToCompletion );
+
+                SetCompleted( );
+            }
+            
+            //
+            // we want to execute _cont only once 
+            //
+            TaskWrapper cont = null;
+            lock(_syncRoot)
+            {
+                if(_cont != null)
+                {
+                    cont = (TaskWrapper)_cont;
+
+                    _cont = null; 
+                }
             }
 
-            SetStatus( TaskStatus.RanToCompletion );
-
-            SetCompleted();
-
-            if(_contTask != null)
+            if( cont != null )
             {
-                ((TaskWrapper)_contTask).Start();
+                WaitCompleted( );
+
+                ( (TaskWrapper)cont ).Start( );
             }
         }
     }

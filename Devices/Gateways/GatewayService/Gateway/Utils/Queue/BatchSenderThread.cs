@@ -22,7 +22,7 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-#define USE_TASKS
+//#define USE_TASKS
 
 namespace Microsoft.ConnectTheDots.Gateway
 {
