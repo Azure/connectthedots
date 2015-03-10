@@ -258,6 +258,7 @@ namespace ConnectTheDotsGadgeteer
                 if (0 == Interlocked.Exchange(ref IsSendingMessage, 1))
                 {
                     // Create the AMQP message
+                    byte[] dataBinary = Encoding.UTF8.GetBytes(payload);
                     var message = new Message(new Data() { Binary = Encoding.UTF8.GetBytes(payload) });
                     message.Properties = new Properties()
                     {
@@ -268,9 +269,9 @@ namespace ConnectTheDotsGadgeteer
                     message.MessageAnnotations = new MessageAnnotations();
                     message.MessageAnnotations[new Symbol("x-opt-partition-key")] = SensorGUID;
                     message.ApplicationProperties = new ApplicationProperties();
-                    message.ApplicationProperties["time"] = message.Properties.CreationTime;
-                    message.ApplicationProperties["from"] = SensorGUID;
-                    message.ApplicationProperties["dspl"] = SensorName;
+                    //message.ApplicationProperties["time"] = message.Properties.CreationTime;
+                    //message.ApplicationProperties["from"] = SensorGUID;
+                    //message.ApplicationProperties["dspl"] = SensorName;
 
                     sender.Send(message);
 
