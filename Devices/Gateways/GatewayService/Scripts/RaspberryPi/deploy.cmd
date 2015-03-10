@@ -23,9 +23,9 @@ REM //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS I
 REM //  THE SOFTWARE.
 REM //  ---------------------------------------------------------------------------------
 
-set puttydir="E:\tools\Raspeberry\"
+set puttydir="C:\tools\raspberry\putty\"
 set prjdir=..\..\
-set rpi_ip=10.121.204.248
+set rpi_ip=10.0.1.18
 set rpi_usr=pi
 set rpi_pw=raspberry
 set Configuration=Debug
