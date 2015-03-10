@@ -47,6 +47,8 @@ echo Copying Gateway files
 
 %PSCP_CMD% %prjdir%DeviceAdapters\SerialPort\bin\%Configuration%\Microsoft.ConnectTheDots.SerialPortAdapter.dll %rpi_usr%@%rpi_ip%:%Staging%/
 %PSCP_CMD% %prjdir%DeviceAdapters\Socket\bin\%Configuration%\Microsoft.ConnectTheDots.SocketAdapter.dll         %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %prjdir%Tests\SocketServiceDeviceMock\bin\%Configuration%\SocketDeviceMock.exe                       %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %prjdir%Tests\DeviceAdapterTestMock\bin\%Configuration%\DataAdapterTestMock.dll                      %rpi_usr%@%rpi_ip%:%Staging%/
 
 echo copying scripts
 %PSCP_CMD% %prjdir%Scripts\RaspberryPi\autorun_once.sh    %rpi_usr%@%rpi_ip%:%Staging%/

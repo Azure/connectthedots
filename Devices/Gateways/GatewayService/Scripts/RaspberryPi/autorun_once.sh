@@ -40,7 +40,7 @@ sudo rm -f /tmp/Microsoft.ConnectTheDots.GatewayService.exe.lock
 echo updating files
 rm -rf $LOGS/*
 mkdir $LOGS
-find $GW_HOME/ -type f -maxdepth 1 -delete
+find $GW_HOME/ -maxdepth 1 -type f -delete
 cp $STAGING/* $GW_HOME/
 rm $GW_HOME/autorun.sh
 mv $GW_HOME/autorun_install.sh $GW_HOME/autorun.sh
