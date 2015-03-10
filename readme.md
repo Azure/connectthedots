@@ -23,9 +23,14 @@ The current project is built on the premise that data from sensors is sent to an
 	"value" 		:	double/float/integer
 	}
 	
-This should all be sent as one string message to the Event Hub, for example as the following string: 
+This should all be sent as one string message to the Event Hub, for example as the following strings: 
 
     {"guid":"62X74059-A444-4797-8A7E-526C3EF9D64B","organization":"my org name","displayname":"sensor name","location":"sensor location","measurename":"Temperature","unitofmeasure":"F","value":74}
+
+or
+
+    {"guid":"62X74059-A444-4797-8A7E-526C3EF9D64B","organization":"my org name","displayname":"sensor name","location":"sensor location","measurename":"Temperature","unitofmeasure":"F","value":74.0001}
+
 
 Furthermore, the project is built upon the premise that the *sensors* create and format this JSON string. For example, if using a sensor attached to an Arduino, the code running on the Arduino would send successive JSON strings, CRLF ended, out the serial port to a gateway such as a Raspberry Pi or Windows Tablet. The gateway does nothing other than receive the JSON string, package that into an AMQP message, and send it to Azure.
 
