@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Xml;
 
 using Microsoft.ServiceBus;
@@ -37,6 +38,7 @@ using Microsoft.WindowsAzure.Management.ServiceBus;
 using Microsoft.WindowsAzure.Management.ServiceBus.Models;
 using System.Net;
 using System.IO;
+using Newtonsoft.Json;
 
 
 namespace ConnectTheDotsAzurePrep
@@ -56,18 +58,13 @@ namespace ConnectTheDotsAzurePrep
         X509Certificate2 ManagementCertificate;
         string SubscriptionId;
 
-        // location of other projects
-        bool Transform = false;
-
         //--//
 
         ServiceBusManagementClient sbMgmt;
         string nsConnectionString;
-        string ehDevicesWebSiteConnectionString;
-        string ehAlertsWebSiteConnectionString;
         string storageKey;
         EventHubDescription ehDevices;
-        string webConfigFile;
+        EventHubDescription ehAlerts;
 
 #if AZURESTREAMANALYTICS
         string StreamAnalyticsGroup;
@@ -80,23 +77,10 @@ namespace ConnectTheDotsAzurePrep
             // Obtain management via .publishsettings file from https://manage.windowsazure.com/publishsettings/index?schemaversion=2.0
             var creds = new CertificateCloudCredentials( SubscriptionId, ManagementCertificate );
 
-            #region Create event hub
-
             if(!CreateEventHub( creds ))
             {
                 return false;
             }
-
-            #endregion
-
-            #region Create web
-
-            if(!CreateWeb( creds ))
-            {
-                return false;
-            }
-
-            #endregion
 
             #region print results
 
@@ -119,8 +103,6 @@ namespace ConnectTheDotsAzurePrep
                 //    SharedAccessKey = deviceKey,
                 //}.ToString());
             }
-            Console.WriteLine( );
-            Console.WriteLine( "Web.Config saved to {0}", webConfigFile );
 
             #endregion
 
@@ -257,39 +239,6 @@ namespace ConnectTheDotsAzurePrep
             return true;
         }
 
-        private bool CreateWeb( CertificateCloudCredentials creds )
-        {
-            // Write a new web.config template file
-            var doc = new XmlDocument( );
-            doc.PreserveWhitespace = true;
-
-            var inputFileName = ( this.Transform ? "\\web.PublishTemplate.config" : "\\web.config" );
-            var outputFileName = ( this.Transform ? String.Format( "\\web.{0}.config", NamePrefix ) : "\\web.config" );
-
-            doc.Load( WebSiteDirectory + inputFileName );
-
-            doc.SelectSingleNode( "/configuration/appSettings/add[@key='Microsoft.ServiceBus.EventHubDevices']/@value" ).Value
-                = EventHubNameDevices;
-            doc.SelectSingleNode( "/configuration/appSettings/add[@key='Microsoft.ServiceBus.EventHubAlerts']/@value" ).Value
-                = EventHubNameAlerts;
-            doc.SelectSingleNode( "/configuration/appSettings/add[@key='Microsoft.ServiceBus.ConnectionString']/@value" ).Value
-                = nsConnectionString;
-            doc.SelectSingleNode( "/configuration/appSettings/add[@key='Microsoft.ServiceBus.ConnectionStringDevices']/@value" ).Value
-                = ehDevicesWebSiteConnectionString;
-            doc.SelectSingleNode( "/configuration/appSettings/add[@key='Microsoft.ServiceBus.ConnectionStringAlerts']/@value" ).Value
-                = ehAlertsWebSiteConnectionString;
-            doc.SelectSingleNode( "/configuration/appSettings/add[@key='Microsoft.Storage.ConnectionString']/@value" ).Value =
-                String.Format( "DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1}", StorageAccountName, storageKey );
-
-            var outputFile = System.IO.Path.GetFullPath( WebSiteDirectory + outputFileName );
-
-            doc.Save( outputFile );
-
-            webConfigFile = outputFile;
-
-            return true;
-        }
-
         private bool CreateEventHub( CertificateCloudCredentials creds )
         {
             // Create Namespace
@@ -372,7 +321,6 @@ namespace ConnectTheDotsAzurePrep
             ehDescriptionAlerts.Authorization.Add( new SharedAccessAuthorizationRule( "StreamingAnalytics", new List<AccessRights> { AccessRights.Manage, AccessRights.Listen, AccessRights.Send } ) );
 
             Console.WriteLine( "Creating Event Hub {0}", EventHubNameAlerts );
-            var ehAlerts = nsManager.CreateEventHubIfNotExists( ehDescriptionAlerts );
 
             // Create Storage Account for Event Hub Processor
             var stgMgmt = new StorageManagementClient( creds );
@@ -399,27 +347,6 @@ namespace ConnectTheDotsAzurePrep
                     throw;
                 }
             }
-            var keyResponse = stgMgmt.StorageAccounts.GetKeys( StorageAccountName.ToLowerInvariant( ) );
-            if( keyResponse.StatusCode != System.Net.HttpStatusCode.OK )
-            {
-                Console.WriteLine( "Error retrieving access keys for storage account {0} in Location {1}: {2}", StorageAccountName, Location, keyResponse.StatusCode );
-                return false;
-            }
-
-            storageKey = keyResponse.PrimaryKey;
-            ehDevicesWebSiteConnectionString = new ServiceBusConnectionStringBuilder( nsConnectionString )
-            {
-                SharedAccessKeyName = "WebSite",
-                SharedAccessKey = ( ehDevices.Authorization.First( ( d )
-                    => String.Equals( d.KeyName, "WebSite", StringComparison.InvariantCultureIgnoreCase ) ) as SharedAccessAuthorizationRule ).PrimaryKey,
-            }.ToString( );
-
-            ehAlertsWebSiteConnectionString = new ServiceBusConnectionStringBuilder( nsConnectionString )
-            {
-                SharedAccessKeyName = "WebSite",
-                SharedAccessKey = ( ehAlerts.Authorization.First( ( d )
-                    => String.Equals( d.KeyName, "WebSite", StringComparison.InvariantCultureIgnoreCase ) ) as SharedAccessAuthorizationRule ).PrimaryKey,
-            }.ToString( );
 
             return true;
         }
@@ -531,9 +458,6 @@ namespace ConnectTheDotsAzurePrep
                             Console.WriteLine( "Error: invalid publishsettings file - {0}", exception.Message );
                             bParseError = true;
                         }
-                        break;
-                    case "-transform":
-                        Transform = true;
                         break;
                     default:
                         Console.WriteLine( "Error: unrecognized argument: {0}", args[ i ] );
