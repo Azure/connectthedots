@@ -69,7 +69,6 @@ namespace Microsoft.ConnectTheDots.Test
             _totalMessagesSent = 0;
             _totalMessagesToSend = 0;
             _gatewayQueue = new GatewayQueue<QueuedItem>( );            
-            _batchSenderThread = new BatchSenderThread<QueuedItem, QueuedItem>( _gatewayQueue, _sender, m => m, null, _logger );
 
             _sender = new MockSender<QueuedItem>( this );
             //
@@ -77,6 +76,8 @@ namespace Microsoft.ConnectTheDots.Test
             //  _sender = new AMQPSender<SensorDataContract>(Constants.AMQPSAddress, Constants.EventHubName, Constants.EventHubMessageSubject, Constants.EventHubDeviceId, Constants.EventHubDeviceDisplayName);
             //  ((AMQPSender<QueuedItem>)_Sender).Logger = new TestLogger();
             // 
+
+            _batchSenderThread = new BatchSenderThread<QueuedItem, QueuedItem>( _gatewayQueue, _sender, m => m, null, _logger );
         }
 
         public void Run( )

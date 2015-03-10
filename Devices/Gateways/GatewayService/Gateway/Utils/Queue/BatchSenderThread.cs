@@ -217,7 +217,7 @@ namespace Microsoft.ConnectTheDots.Gateway
                                 // adding, we should never incur a negative count 
                                 Debug.Assert( _outstandingTasks >= 0 );
 
-                                if( popped.Result != null && popped.Result.IsSuccess )
+                                if ( popped != null && popped.Result != null && popped.Result.IsSuccess )
                                 {
                                     if( _dataTransform != null )
                                     {
