@@ -22,256 +22,186 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Xml;
-
-using Microsoft.ServiceBus;
-using Microsoft.ServiceBus.Messaging;
-using Microsoft.WindowsAzure;
-using Microsoft.WindowsAzure.Management.ServiceBus;
-
-namespace ConnectTheDotsCreateWebConfig
+namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
 {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Xml;
+    using Microsoft.ConnectTheDots.CloudDeploy.Common;
+    using Microsoft.ServiceBus;
+    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.WindowsAzure;
+    using Microsoft.WindowsAzure.Management.ServiceBus;
+    using Microsoft.WindowsAzure.Management.Storage;
+    using Microsoft.WindowsAzure.Subscriptions.Models;
+
+    //--//
+
     class Program
     {
-        // from cmd line
-        string NamePrefix;
-        string SBNamespace;
-        string Location;
-        string EventHubNameDevices;
-        string EventHubNameAlerts;
-        string StorageAccountName;
-        string WebSiteDirectory;
-
-        // from publish settings
-        X509Certificate2 ManagementCertificate;
-        string SubscriptionId;
-
+        internal class CloudWebDeployInputs
+        {
+            public string NamePrefix;
+            public string SBNamespace;
+            public string Location;
+            public string EventHubNameDevices;
+            public string EventHubNameAlerts;
+            public string StorageAccountName;
+            public string WebSiteDirectory;
+            public SubscriptionCloudCredentials Credentials;
+        }
+        
         // location of other projects
         bool Transform = false;
 
         //--//
 
-        ServiceBusManagementClient sbMgmt;
-        string nsConnectionString;
-        string ehDevicesWebSiteConnectionString;
-        string ehAlertsWebSiteConnectionString;
-        string storageKey;
-        EventHubDescription ehDevices;
-        EventHubDescription ehAlerts;
-        string webConfigFile;
-
-        public bool Run()
+        public bool GetInputs( out CloudWebDeployInputs result )
         {
-            // Obtain management via .publishsettings file from https://manage.windowsazure.com/publishsettings/index?schemaversion=2.0
-            var creds = new CertificateCloudCredentials(SubscriptionId, ManagementCertificate);
+            result = new CloudWebDeployInputs( );
 
-            if (!CreateWeb(creds))
+            result.Credentials = AzureCredentialsProvider.GetUserSubscriptionCredentials( );
+            if( result.Credentials == null )
+            {
+                result = null;
+                return false;
+            }
+
+            Console.WriteLine( "Enter suggested namespace prefix: " );
+            result.NamePrefix = Console.ReadLine( );
+            if( string.IsNullOrEmpty( result.NamePrefix ) )
+            {
+                result = null;
+                return false;
+            }
+
+            Console.WriteLine( "Enter suggested location: " );
+            result.Location = Console.ReadLine( );
+            if( string.IsNullOrEmpty( result.Location ) )
+            {
+                result.Location = "Central US";
+            }
+
+            result.SBNamespace = result.NamePrefix + "-ns";
+            result.StorageAccountName = result.NamePrefix.ToLowerInvariant() + "storage";
+
+            result.EventHubNameDevices = "ehdevices";
+            result.EventHubNameAlerts = "ehalerts";
+
+            result.WebSiteDirectory = "..\\..\\..\\..\\WebSite\\ConnectTheDotsWebSite"; // Default for running the tool from the bin/debug or bin/release directory (i.e within VS)
+            return true;
+        }
+
+        public bool Run( )
+        {
+            CloudWebDeployInputs inputs = null;
+            if( !GetInputs( out inputs ) )
             {
                 return false;
             }
 
-            #region print results
+            if( !CreateWeb( inputs ) )
+            {
+                return false;
+            }
 
-            Console.WriteLine();
-            Console.WriteLine("Web.Config saved to {0}", webConfigFile);
-
-            #endregion
+            Console.ReadLine( );
             return true;
         }
 
-        private bool CreateWeb(CertificateCloudCredentials creds)
+        private bool CreateWeb( CloudWebDeployInputs inputs )
         {
             // Create Namespace
-            sbMgmt = new ServiceBusManagementClient(creds);
+            ServiceBusManagementClient sbMgmt = new ServiceBusManagementClient( inputs.Credentials );
 
-            var nsDescription = sbMgmt.Namespaces.GetNamespaceDescription(SBNamespace);
-            nsConnectionString = nsDescription.NamespaceDescriptions.First(
-                (d) => String.Equals(d.AuthorizationType, "SharedAccessAuthorization")
+            var nsDescription = sbMgmt.Namespaces.GetNamespaceDescription( inputs.SBNamespace );
+            string nsConnectionString = nsDescription.NamespaceDescriptions.First(
+                ( d ) => String.Equals( d.AuthorizationType, "SharedAccessAuthorization" )
                 ).ConnectionString;
 
-            NamespaceManager nsManager = NamespaceManager.CreateFromConnectionString(nsConnectionString);
-            ehDevices = nsManager.GetEventHub(EventHubNameDevices);
-            ehAlerts = nsManager.GetEventHub(EventHubNameAlerts);
+            NamespaceManager nsManager = NamespaceManager.CreateFromConnectionString( nsConnectionString );
 
-            var ehDevicesWebSiteConnectionString = new ServiceBusConnectionStringBuilder(nsConnectionString)
+            EventHubDescription ehDevices = nsManager.GetEventHub( inputs.EventHubNameDevices );
+            EventHubDescription ehAlerts = nsManager.GetEventHub( inputs.EventHubNameAlerts );
+
+            StorageManagementClient stgMgmt = new StorageManagementClient( inputs.Credentials );
+            var keyResponse = stgMgmt.StorageAccounts.GetKeys( inputs.StorageAccountName.ToLowerInvariant( ) );
+            if ( keyResponse.StatusCode != System.Net.HttpStatusCode.OK )
             {
-                SharedAccessKeyName = "WebSite",
-                SharedAccessKey = (ehDevices.Authorization.First((d)
-                    => String.Equals(d.KeyName, "WebSite", StringComparison.InvariantCultureIgnoreCase)) as SharedAccessAuthorizationRule).PrimaryKey,
-            }.ToString();
-
-            ehAlertsWebSiteConnectionString = new ServiceBusConnectionStringBuilder(nsConnectionString)
-            {
-                SharedAccessKeyName = "WebSite",
-                SharedAccessKey = (ehAlerts.Authorization.First((d)
-                    => String.Equals(d.KeyName, "WebSite", StringComparison.InvariantCultureIgnoreCase)) as SharedAccessAuthorizationRule).PrimaryKey,
-            }.ToString();
-            //sbMgmt.Namespaces.Get("").Namespace.
-
-            // Write a new web.config template file
-            var doc = new XmlDocument();
-            doc.PreserveWhitespace = true;
-
-            var inputFileName = (this.Transform ? "\\web.PublishTemplate.config" : "\\web.config");
-            var outputFileName = (this.Transform ? String.Format("\\web.{0}.config", NamePrefix) : "\\web.config");
-
-            doc.Load(WebSiteDirectory + inputFileName);
-
-            doc.SelectSingleNode("/configuration/appSettings/add[@key='Microsoft.ServiceBus.EventHubDevices']/@value").Value
-                = EventHubNameDevices;
-            doc.SelectSingleNode("/configuration/appSettings/add[@key='Microsoft.ServiceBus.EventHubAlerts']/@value").Value
-                = EventHubNameAlerts;
-            doc.SelectSingleNode("/configuration/appSettings/add[@key='Microsoft.ServiceBus.ConnectionString']/@value").Value
-                = nsConnectionString;
-            doc.SelectSingleNode("/configuration/appSettings/add[@key='Microsoft.ServiceBus.ConnectionStringDevices']/@value").Value
-                = ehDevicesWebSiteConnectionString;
-            doc.SelectSingleNode("/configuration/appSettings/add[@key='Microsoft.ServiceBus.ConnectionStringAlerts']/@value").Value
-                = ehAlertsWebSiteConnectionString;
-            doc.SelectSingleNode("/configuration/appSettings/add[@key='Microsoft.Storage.ConnectionString']/@value").Value =
-                String.Format("DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1}", StorageAccountName, storageKey);
-
-            var outputFile = System.IO.Path.GetFullPath(WebSiteDirectory + outputFileName);
-
-            doc.Save(outputFile);
-
-            webConfigFile = outputFile;
-
-            return true;
-        }
-
-        static int Main(string[] args)
-        {
-            var p = new Program();
-
-            bool result = p.Parse(args);
-
-            if (result)
-            {
-                try
-                {
-                    result = p.Run();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Exception {0} while creating Azure resources at {1}", e.Message, e.StackTrace);
-                }
-            }
-
-            return result ? 0 : 1;
-        }
-
-        private bool Parse(string[] args)
-        {
-            bool bParseError = false;
-            for (int i = 0; i < args.Length; i++)
-            {
-                switch (args[i].Substring(0, 1).Replace("/", "-") + args[i].Substring(1).ToLowerInvariant())
-                {
-                    case "-nameprefix":
-                    case "-n":
-                        i++;
-                        if (i < args.Length)
-                        {
-                            NamePrefix = args[i];
-                        }
-                        else
-                        {
-                            Console.WriteLine("Error: missing NamePrefix argument");
-                            bParseError = true;
-                        }
-                        break;
-                    case "-publishsettingsfile":
-                    case "-ps":
-                        try
-                        {
-                            i++;
-                            if (i >= args.Length)
-                            {
-                                Console.WriteLine("Error: missing NamePrefix argument");
-                                bParseError = true;
-                            }
-                            else
-                            {
-
-                                var doc = new XmlDocument();
-                                doc.Load(args[i]);
-                                var certNode =
-                                    doc.SelectSingleNode(
-                                        "/PublishData/PublishProfile/@ManagementCertificate");
-                                // Some publishsettings files (with multiple subscriptions?) have the management publisherCertificate under the Subscription
-                                if (certNode == null)
-                                {
-                                    certNode =
-                                    doc.SelectSingleNode(
-                                        "/PublishData/PublishProfile/Subscription/@ManagementCertificate");
-                                }
-                                ManagementCertificate = new X509Certificate2(Convert.FromBase64String(certNode.Value));
-                                var subNode =
-                                    doc.SelectSingleNode("/PublishData/PublishProfile/Subscription/@Id");
-                                SubscriptionId = subNode.Value;
-                            }
-                        }
-                        catch (Exception exception)
-                        {
-                            Console.WriteLine("Error: invalid publishsettings file - {0}", exception.Message);
-                            bParseError = true;
-                        }
-                        break;
-                    case "-transform":
-                        Transform = true;
-                        break;
-                    default:
-                        Console.WriteLine("Error: unrecognized argument: {0}", args[i]);
-                        bParseError = true;
-                        break;
-                }
-                if (bParseError)
-                {
-                    break;
-                }
-            }
-
-            if (bParseError)
-            {
-                Console.WriteLine("Usage: ConnectTheDotsAzurePrep -PublishSettingsFile <settingsfile> [-NamePrefix <prefix>] [-Location <location>] [-website <websitedir>]");
+                Console.WriteLine( "Error retrieving access keys for storage account {0} in Location {1}: {2}",
+                    inputs.StorageAccountName, inputs.Location, keyResponse.StatusCode );
                 return false;
             }
 
-            if (NamePrefix == null)
-            {
-                NamePrefix = "IoTDemo" + Guid.NewGuid().ToString("N").GetHashCode().ToString("x");
-            }
-            if (Location == null)
-            {
-                Location = "Central US";
-            }
-            if (SBNamespace == null)
-            {
-                SBNamespace = NamePrefix + "-ns";
-            }
-            if (StorageAccountName == null)
-            {
-                StorageAccountName = NamePrefix.ToLowerInvariant() + "storage";
-            }
-            if (EventHubNameDevices == null)
-            {
-                EventHubNameDevices = "ehdevices";
-            }
-            if (EventHubNameAlerts == null)
-            {
-                EventHubNameAlerts = "ehalerts";
-            }
-            if (WebSiteDirectory == null)
-            {
-                WebSiteDirectory = "..\\..\\..\\..\\WebSite\\ConnectTheDotsWebSite"; // Default for running the tool from the bin/debug or bin/release directory (i.e within VS)
-            }
+            var storageKey = keyResponse.PrimaryKey;
 
+            string ehDevicesWebSiteConnectionString = new ServiceBusConnectionStringBuilder( nsConnectionString )
+            {
+                SharedAccessKeyName = "WebSite",
+                SharedAccessKey = ( ehDevices.Authorization.First( ( d )
+                    => String.Equals( d.KeyName, "WebSite", StringComparison.InvariantCultureIgnoreCase) ) as SharedAccessAuthorizationRule ).PrimaryKey,
+            }.ToString( );
+
+            string ehAlertsWebSiteConnectionString = new ServiceBusConnectionStringBuilder( nsConnectionString )
+            {
+                SharedAccessKeyName = "WebSite",
+                SharedAccessKey = ( ehAlerts.Authorization.First( ( d )
+                    => String.Equals( d.KeyName, "WebSite", StringComparison.InvariantCultureIgnoreCase) ) as SharedAccessAuthorizationRule ).PrimaryKey,
+            }.ToString( );
+
+            // Write a new web.config template file
+            var doc = new XmlDocument { PreserveWhitespace = true };
+
+            var inputFileName = ( Transform ? "\\web.PublishTemplate.config" : "\\web.config" );
+            var outputFileName = ( Transform ? String.Format("\\web.{0}.config", inputs.NamePrefix) : "\\web.config" );
+
+
+            doc.Load( inputs.WebSiteDirectory + inputFileName );
+
+            doc.SelectSingleNode(
+                "/configuration/appSettings/add[@key='Microsoft.ServiceBus.EventHubDevices']/@value" ).Value
+                = inputs.EventHubNameDevices;
+            doc.SelectSingleNode( "/configuration/appSettings/add[@key='Microsoft.ServiceBus.EventHubAlerts']/@value" )
+                .Value
+                = inputs.EventHubNameAlerts;
+            doc.SelectSingleNode(
+                "/configuration/appSettings/add[@key='Microsoft.ServiceBus.ConnectionString']/@value" ).Value
+                = nsConnectionString;
+            doc.SelectSingleNode(
+                "/configuration/appSettings/add[@key='Microsoft.ServiceBus.ConnectionStringDevices']/@value" ).Value
+                = ehDevicesWebSiteConnectionString;
+            doc.SelectSingleNode(
+                "/configuration/appSettings/add[@key='Microsoft.ServiceBus.ConnectionStringAlerts']/@value" ).Value
+                = ehAlertsWebSiteConnectionString;
+            doc.SelectSingleNode( "/configuration/appSettings/add[@key='Microsoft.Storage.ConnectionString']/@value" )
+                .Value =
+                String.Format( "DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1}", inputs.StorageAccountName,
+                    storageKey );
+
+            var outputFile = System.IO.Path.GetFullPath( inputs.WebSiteDirectory + outputFileName );
+
+            doc.Save( outputFile );
+
+            Console.WriteLine( "Web.Config saved to {0}", outputFile );
             return true;
         }
 
+        static int Main( string[] args )
+        {
+            var p = new Program( );
+
+            try
+            {
+                bool result = p.Run( );
+                return result ? 0 : 1;
+            }
+            catch ( Exception e )
+            {
+                Console.WriteLine( "Exception {0} while creating Azure resources at {1}", e.Message, e.StackTrace );
+                return 0;
+            }
+        }
     }
 }

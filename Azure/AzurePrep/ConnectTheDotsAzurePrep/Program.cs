@@ -22,37 +22,52 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Xml;
-
-using Microsoft.ServiceBus;
-using Microsoft.ServiceBus.Messaging;
-using Microsoft.WindowsAzure;
-using Microsoft.WindowsAzure.Management.Storage;
-using Microsoft.WindowsAzure.Management.Storage.Models;
-using Microsoft.WindowsAzure.Management.ServiceBus;
-using Microsoft.WindowsAzure.Management.ServiceBus.Models;
-using System.Net;
-using System.IO;
-using Newtonsoft.Json;
 
 
-namespace ConnectTheDotsAzurePrep
+
+namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Security.Cryptography.X509Certificates;
+    using System.Text;
+    using System.Xml;
+    using System.Net;
+    using System.IO;
+    using Newtonsoft.Json;
+    using Microsoft.ConnectTheDots.CloudDeploy.Common;
+    using Microsoft.ServiceBus;
+    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.WindowsAzure;
+    using Microsoft.WindowsAzure.Management.Storage;
+    using Microsoft.WindowsAzure.Management.Storage.Models;
+    using Microsoft.WindowsAzure.Management.ServiceBus;
+    using Microsoft.WindowsAzure.Management.ServiceBus.Models;
+
+    //--//
+
     class Program
     {
-        // from cmd line
-        string NamePrefix;
-        string SBNamespace;
-        string Location;
-        string EventHubNameDevices;
-        string EventHubNameAlerts;
-        string StorageAccountName;
-        string WebSiteDirectory;
+        internal class AzurePrepInputs
+        {
+            public string NamePrefix;
+            public string SBNamespace;
+            public string Location;
+            public string EventHubNameDevices;
+            public string EventHubNameAlerts;
+            public string StorageAccountName;
+            public string WebSiteDirectory;
+            public SubscriptionCloudCredentials Credentials;
+        }
+
+        internal class AzurePrepOutputs
+        {
+            public string SBNamespace;
+            public string nsConnectionString;
+            public EventHubDescription ehDevices = null;
+            public EventHubDescription ehAlerts = null;
+        }
 
         // from publish settings
         X509Certificate2 ManagementCertificate;
@@ -60,24 +75,64 @@ namespace ConnectTheDotsAzurePrep
 
         //--//
 
-        ServiceBusManagementClient sbMgmt;
-        string nsConnectionString;
-        string storageKey;
-        EventHubDescription ehDevices;
-        EventHubDescription ehAlerts;
-
 #if AZURESTREAMANALYTICS
         string StreamAnalyticsGroup;
         string JobAggregates;
         string JobAlerts;
 #endif
 
+        public bool GetInputs( out AzurePrepInputs result )
+        {
+            result = new AzurePrepInputs( );
+
+            result.Credentials = AzureCredentialsProvider.GetUserSubscriptionCredentials( );
+            if( result.Credentials == null )
+            {
+                result = null;
+                return false;
+            }
+
+            Console.WriteLine( "Enter suggested namespace prefix: " );
+            result.NamePrefix = Console.ReadLine( );
+            if( string.IsNullOrEmpty( result.NamePrefix ) )
+            {
+                result = null;
+                return false;
+            }
+
+            Console.WriteLine( "Enter suggested location: " );
+            result.Location = Console.ReadLine( );
+            if( string.IsNullOrEmpty( result.Location ) )
+            {
+                result.Location = "Central US";
+            }
+
+            result.SBNamespace = result.NamePrefix + "-ns";
+            result.StorageAccountName = result.NamePrefix.ToLowerInvariant( ) + "storage";
+
+            result.EventHubNameDevices = "ehdevices";
+            result.EventHubNameAlerts = "ehalerts";
+
+            result.WebSiteDirectory = "..\\..\\..\\..\\WebSite\\ConnectTheDotsWebSite"; // Default for running the tool from the bin/debug or bin/release directory (i.e within VS)
+
+#if AZURESTREAMANALYTICS
+            StreamAnalyticsGroup = NamePrefix + "-StreamAnalytics";
+            JobAggregates = NamePrefix + "-aggregates";
+            JobAlerts = NamePrefix + "-alerts";
+#endif
+            return true;
+        }
+
         public bool Run( )
         {
-            // Obtain management via .publishsettings file from https://manage.windowsazure.com/publishsettings/index?schemaversion=2.0
-            var creds = new CertificateCloudCredentials( SubscriptionId, ManagementCertificate );
+            AzurePrepInputs inputs;
+            if( !GetInputs( out inputs ) )
+            {
+                return false;
+            }
 
-            if(!CreateEventHub( creds ))
+            AzurePrepOutputs createResults = CreateEventHub( inputs );
+            if( createResults == null )
             {
                 return false;
             }
@@ -86,22 +141,16 @@ namespace ConnectTheDotsAzurePrep
 
             Console.WriteLine( );
             Console.WriteLine( "Service Bus management connection string (i.e. for use in Service Bus Explorer):" );
-            Console.WriteLine( nsConnectionString );
+            Console.WriteLine( createResults.nsConnectionString );
             Console.WriteLine( );
             Console.WriteLine( "Device AMQP address strings (for Raspberry PI/devices):" );
             for ( int i = 1; i <= 4; i++ )
             {
                 var deviceKeyName = String.Format( "D{0}", i );
-                var deviceKey = ( ehDevices.Authorization.First( ( d )
+                var deviceKey = ( createResults.ehDevices.Authorization.First( ( d )
                         => String.Equals( d.KeyName, deviceKeyName, StringComparison.InvariantCultureIgnoreCase ) ) as SharedAccessAuthorizationRule ).PrimaryKey;
 
-                Console.WriteLine( "amqps://{0}:{1}@{2}.servicebus.windows.net", deviceKeyName, Uri.EscapeDataString( deviceKey ), SBNamespace );
-
-                //Console.WriteLine(new ServiceBusConnectionStringBuilder(nsConnectionString)
-                //{
-                //    SharedAccessKeyName = deviceKeyName,
-                //    SharedAccessKey = deviceKey,
-                //}.ToString());
+                Console.WriteLine( "amqps://{0}:{1}@{2}.servicebus.windows.net", deviceKeyName, Uri.EscapeDataString( deviceKey ), createResults.SBNamespace );
             }
 
             #endregion
@@ -239,50 +288,54 @@ namespace ConnectTheDotsAzurePrep
             return true;
         }
 
-        private bool CreateEventHub( CertificateCloudCredentials creds )
+        private AzurePrepOutputs CreateEventHub( AzurePrepInputs inputs )
         {
+            AzurePrepOutputs result = new AzurePrepOutputs
+            {
+                SBNamespace = inputs.SBNamespace
+            };
             // Create Namespace
-            sbMgmt = new ServiceBusManagementClient( creds );
+            var sbMgmt = new ServiceBusManagementClient( inputs.Credentials );
 
             ServiceBusNamespaceResponse nsResponse = null;
 
-            Console.WriteLine( "Creating Service Bus namespace {0} in location {1}", SBNamespace, Location );
+            Console.WriteLine( "Creating Service Bus namespace {0} in location {1}", inputs.SBNamespace, inputs.Location );
 
             try
             {
                 // There is (currently) no clean error code returned when the namespace already exists
                 // Check if it does
-                nsResponse = sbMgmt.Namespaces.Create( SBNamespace, Location );
-                Console.WriteLine("Service Bus namespace {0} created.", SBNamespace);
+                nsResponse = sbMgmt.Namespaces.Create(inputs.SBNamespace, inputs.Location);
+                Console.WriteLine( "Service Bus namespace {0} created.", inputs.SBNamespace );
             }
             catch ( Exception )
             {
                 nsResponse = null;
-                Console.WriteLine("Service Bus namespace {0} already existed.", SBNamespace);
+                Console.WriteLine( "Service Bus namespace {0} already existed.", inputs.SBNamespace );
             }
 
             // Wait until the namespace is active
             while( nsResponse == null || nsResponse.Namespace.Status != "Active" )
             {
-                nsResponse = sbMgmt.Namespaces.Get( SBNamespace );
+                nsResponse = sbMgmt.Namespaces.Get( inputs.SBNamespace );
                 if( nsResponse.Namespace.Status == "Active" )
                 {
                     break;
                 }
-                Console.WriteLine( "Namespace {0} in state {1}. Waiting...", SBNamespace, nsResponse.Namespace.Status );
+                Console.WriteLine( "Namespace {0} in state {1}. Waiting...", inputs.SBNamespace, nsResponse.Namespace.Status );
                 System.Threading.Thread.Sleep( 5000 );
             }
 
             // Get the namespace connection string 
-            var nsDescription = sbMgmt.Namespaces.GetNamespaceDescription( SBNamespace );
-            nsConnectionString = nsDescription.NamespaceDescriptions.First(
+            var nsDescription = sbMgmt.Namespaces.GetNamespaceDescription( inputs.SBNamespace );
+            result.nsConnectionString = nsDescription.NamespaceDescriptions.First(
                 ( d ) => String.Equals( d.AuthorizationType, "SharedAccessAuthorization" )
                 ).ConnectionString;
 
             // Create EHs + device keys + consumer keys (WebSite*)
-            var nsManager = NamespaceManager.CreateFromConnectionString( nsConnectionString );
+            var nsManager = NamespaceManager.CreateFromConnectionString( result.nsConnectionString );
 
-            var ehDescriptionDevices = new EventHubDescription( EventHubNameDevices )
+            var ehDescriptionDevices = new EventHubDescription( inputs.EventHubNameDevices )
             {
                 PartitionCount = 8,
             };
@@ -295,52 +348,66 @@ namespace ConnectTheDotsAzurePrep
 
             ehDescriptionDevices.Authorization.Add( new SharedAccessAuthorizationRule( "StreamingAnalytics", new List<AccessRights> { AccessRights.Manage, AccessRights.Listen, AccessRights.Send } ) );
 
-            Console.WriteLine( "Creating Event Hub {0}", EventHubNameDevices );
+            Console.WriteLine( "Creating Event Hub {0}", inputs.EventHubNameDevices );
 
-            EventHubDescription hub = null;
+            result.ehDevices = null;
+            result.ehAlerts = null;
+
             do
             {
                 try
                 {
-                    hub = nsManager.CreateEventHubIfNotExists( ehDescriptionDevices );
+                    result.ehDevices = nsManager.CreateEventHubIfNotExists( ehDescriptionDevices );
                 }
-                catch ( System.UnauthorizedAccessException )
+                catch ( UnauthorizedAccessException )
                 {
                     Console.WriteLine( "Service Bus connection string not valid yet. Waiting..." );
                     System.Threading.Thread.Sleep( 5000 );
                 }
-            } while( hub == null );
+            } while ( result.ehDevices == null );
 
-            ehDevices = hub;
 
-            var ehDescriptionAlerts = new EventHubDescription( EventHubNameAlerts )
+            var ehDescriptionAlerts = new EventHubDescription( inputs.EventHubNameAlerts )
             {
                 PartitionCount = 8,
             };
             ehDescriptionAlerts.Authorization.Add( new SharedAccessAuthorizationRule( "WebSite", new List<AccessRights> { AccessRights.Manage, AccessRights.Listen, AccessRights.Send } ) );
             ehDescriptionAlerts.Authorization.Add( new SharedAccessAuthorizationRule( "StreamingAnalytics", new List<AccessRights> { AccessRights.Manage, AccessRights.Listen, AccessRights.Send } ) );
 
-            Console.WriteLine( "Creating Event Hub {0}", EventHubNameAlerts );
+            Console.WriteLine( "Creating Event Hub {0}", inputs.EventHubNameAlerts );
+
+            do
+            {
+                try
+                {
+                    result.ehAlerts = nsManager.CreateEventHubIfNotExists( ehDescriptionAlerts );
+                }
+                catch ( UnauthorizedAccessException )
+                {
+                    Console.WriteLine( "Service Bus connection string not valid yet. Waiting..." );
+                    System.Threading.Thread.Sleep( 5000 );
+                }
+            } while ( result.ehAlerts == null );
 
             // Create Storage Account for Event Hub Processor
-            var stgMgmt = new StorageManagementClient( creds );
+            var stgMgmt = new StorageManagementClient( inputs.Credentials );
             try
             {
-                Console.WriteLine( "Creating Storage Account {0} in location {1}", StorageAccountName, Location );
+                Console.WriteLine( "Creating Storage Account {0} in location {1}", inputs.StorageAccountName, inputs.Location );
                 var resultStg = stgMgmt.StorageAccounts.Create(
-                    new StorageAccountCreateParameters { Name = StorageAccountName.ToLowerInvariant( ), Location = Location, AccountType = "Standard_LRS" } );
+                    new StorageAccountCreateParameters { Name = inputs.StorageAccountName.ToLowerInvariant(), Location = inputs.Location, AccountType = "Standard_LRS" } );
 
                 if( resultStg.StatusCode != System.Net.HttpStatusCode.OK )
                 {
-                    Console.WriteLine( "Error creating storage account {0} in Location {1}: {2}", StorageAccountName, Location, resultStg.StatusCode );
-                    return false;
+                    Console.WriteLine( "Error creating storage account {0} in Location {1}: {2}", inputs.StorageAccountName, inputs.Location, resultStg.StatusCode );
+                    return null;
                 }
             }
             catch ( CloudException ce )
             {
                 if( String.Equals( ce.ErrorCode, "ConflictError", StringComparison.InvariantCultureIgnoreCase ) )
                 {
-                    Console.WriteLine( "Storage account {0} already existed.", StorageAccountName );
+                    Console.WriteLine( "Storage account {0} already existed.", inputs.StorageAccountName );
                 }
                 else
                 {
@@ -348,7 +415,7 @@ namespace ConnectTheDotsAzurePrep
                 }
             }
 
-            return true;
+            return result;
         }
 
 #if AZURESTREAMANALYTICS
@@ -372,148 +439,16 @@ namespace ConnectTheDotsAzurePrep
         {
             var p = new Program( );
 
-            bool result = p.Parse( args ); 
-
-            if( result )
+            try
             {
-                try
-                {
-                    result = p.Run( );
-                }
-                catch ( Exception e )
-                {
-                    Console.WriteLine( "Exception {0} while creating Azure resources at {1}", e.Message, e.StackTrace );
-                }
+                bool result = p.Run( );
+                return result ? 0 : 1;
             }
-
-            return result ? 0 : 1;
+            catch ( Exception e )
+            {
+                Console.WriteLine("Exception {0} while creating Azure resources at {1}", e.Message, e.StackTrace);
+                return 0;
+            }
         }
-
-        private bool Parse( string[] args )
-        {
-            bool bParseError = false;
-            for ( int i = 0; i < args.Length; i++ )
-            {
-                switch ( args[ i ].Substring( 0, 1 ).Replace( "/", "-" ) + args[ i ].Substring( 1 ).ToLowerInvariant( ) )
-                {
-                    case "-nameprefix":
-                    case "-n":
-                        i++;
-                        if( i < args.Length )
-                        {
-                            NamePrefix = args[ i ];
-                        }
-                        else
-                        {
-                            Console.WriteLine( "Error: missing NamePrefix argument" );
-                            bParseError = true;
-                        }
-                        break;
-                    case "-location":
-                    case "-l":
-                        i++;
-                        if( i < args.Length )
-                        {
-                            Location = args[ i ];
-                        }
-                        else
-                        {
-                            Console.WriteLine( "Error: missing Location argument" );
-                            bParseError = true;
-                        }
-                        break;
-                    case "-publishsettingsfile":
-                    case "-ps":
-                        try
-                        {
-                            i++;
-                            if( i >= args.Length )
-                            {
-                                Console.WriteLine( "Error: missing NamePrefix argument" );
-                                bParseError = true;
-                            }
-                            else
-                            {
-
-                                var doc = new XmlDocument( );
-                                doc.Load( args[ i ] );
-                                var certNode =
-                                    doc.SelectSingleNode(
-                                        "/PublishData/PublishProfile/@ManagementCertificate" );
-                                // Some publishsettings files (with multiple subscriptions?) have the management publisherCertificate under the Subscription
-                                if( certNode == null )
-                                {
-                                    certNode =
-                                    doc.SelectSingleNode(
-                                        "/PublishData/PublishProfile/Subscription/@ManagementCertificate" );
-                                }
-                                ManagementCertificate = new X509Certificate2( Convert.FromBase64String( certNode.Value ) );
-                                var subNode =
-                                    doc.SelectSingleNode( "/PublishData/PublishProfile/Subscription/@Id" );
-                                SubscriptionId = subNode.Value;
-                            }
-                        }
-                        catch ( Exception exception )
-                        {
-                            Console.WriteLine( "Error: invalid publishsettings file - {0}", exception.Message );
-                            bParseError = true;
-                        }
-                        break;
-                    default:
-                        Console.WriteLine( "Error: unrecognized argument: {0}", args[ i ] );
-                        bParseError = true;
-                        break;
-                }
-                if( bParseError )
-                {
-                    break;
-                }
-            }
-
-            if( bParseError )
-            {
-                Console.WriteLine( "Usage: ConnectTheDotsAzurePrep -PublishSettingsFile <settingsfile> [-NamePrefix <prefix>] [-Location <location>] [-website <websitedir>]" );
-                return false;
-            }
-
-            if( NamePrefix == null )
-            {
-                NamePrefix = "IoTDemo" + Guid.NewGuid( ).ToString( "N" ).GetHashCode( ).ToString( "x" );
-            }
-            if( Location == null )
-            {
-                Location = "Central US";
-            }
-            if( SBNamespace == null )
-            {
-                SBNamespace = NamePrefix + "-ns";
-            }
-            if( StorageAccountName == null )
-            {
-                StorageAccountName = NamePrefix.ToLowerInvariant( ) + "storage";
-            }
-            if( EventHubNameDevices == null )
-            {
-                EventHubNameDevices = "ehdevices";
-            }
-            if( EventHubNameAlerts == null )
-            {
-                EventHubNameAlerts = "ehalerts";
-            }
-            if( WebSiteDirectory == null )
-            {
-                WebSiteDirectory = "..\\..\\..\\..\\WebSite\\ConnectTheDotsWebSite"; // Default for running the tool from the bin/debug or bin/release directory (i.e within VS)
-            }
-
-#if AZURESTREAMANALYTICS
-            StreamAnalyticsGroup = NamePrefix + "-StreamAnalytics";
-            JobAggregates = NamePrefix + "-aggregates";
-            JobAlerts = NamePrefix + "-alerts";
-#endif
-
-
-            return true;
-        }
-
     }
 }
