@@ -10,6 +10,44 @@ A good first task, which we are calling the "Connect The Dots starter solution" 
 
 Sample code for this is included in the project, as well as for many other more elaborate scenarios.
 
+## Device basics ##
+The current project is built on the premise that data from sensors is sent to an Azure Event Hub over AMQP in a prescribed JSON format. The minimum structure, with required attribute names, is 
+
+    {
+	"guid" 			:	"string",
+	"organization"	:	"string",
+	"displayname"	:	"string",
+	"location"		:	"string",
+	"measurename"	:	"string",
+	"unitofmeasure"	:	"string",
+	"value" 		:	double/float/integer
+	}
+	
+This should all be sent as one string message to the Event Hub, for example as the following strings: 
+
+    {"guid":"62X74059-A444-4797-8A7E-526C3EF9D64B","organization":"my org name","displayname":"sensor name","location":"sensor location","measurename":"Temperature","unitofmeasure":"F","value":74}
+
+or
+
+    {"guid":"62X74059-A444-4797-8A7E-526C3EF9D64B","organization":"my org name","displayname":"sensor name","location":"sensor location","measurename":"Temperature","unitofmeasure":"F","value":74.0001}
+
+
+Furthermore, the project is built upon the premise that the *sensors* create and format this JSON string. For example, if using a sensor attached to an Arduino, the code running on the Arduino would send successive JSON strings, CRLF ended, out the serial port to a gateway such as a Raspberry Pi or Windows Tablet. The gateway does nothing other than receive the JSON string, package that into an AMQP message, and send it to Azure.
+
+Finally, the JSON string needs to be encoded, i.e. the quotation marks need to be escaped as in the following:
+
+	GUID="62X74059-A444-4797-8A7E-526C3EF9D64B";
+	Org="my org name";
+	Disp="sensor name";
+	Units="F";
+	Measure="Temperature";
+	Locn="sensor location";
+	Reading=74;
+	JSONstr="{\"value\":"+str(Reading)+",\"guid\":\""+GUID+"\",\"organization\":\""+Org+"\",\"displayname\":\""+Disp +"\",\"unitofmeasure\":\""+Units+"\",\"measurename\":\""+Measure+"\",\"location\":\""+Locn+"\"}"
+
+All the device code included in this project, or submitted for inclusion, must conform to the JSON format requirement above. 
+
+
 ## Software prerequisites ##
 In order to reproduce one of the ConnectTheDots.io scenarios, you will need the following:
 
