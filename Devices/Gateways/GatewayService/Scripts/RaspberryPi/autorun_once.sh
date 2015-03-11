@@ -22,31 +22,41 @@
 #  THE SOFTWARE.
 #  ---------------------------------------------------------------------------------
 #!/bin/bash
+echo "$(date) => autorun_once.sh: started" >> /home/pi/GatewayService/Staging/boot_times.txt
 
 #
 # the standard account for a Raspberry pi board is 'pi'
 # please change as needed across code base
 #
 export GW_ACCOUNT_HOME=/home/pi
-export GW_HOME=$GW_ACCOUNT_HOME//GatewayService
+export GW_HOME=$GW_ACCOUNT_HOME/GatewayService
 export LOGS=$GW_HOME/logs
 export STAGING=$GW_HOME/Staging
 
-# Kill all mono processes and GatewayService as well, kill the monitoring process that is performing a sleep
-echo "Trying to kill all mono processes..."
-for KILLPID in `ps axo pid,ppid,cmd | grep -i 'mono'           | awk '{ print $1;}'`; do sudo kill -9 $KILLPID; done
-for KILLPID in `ps axo pid,ppid,cmd | grep -i 'gatewayservice' | awk '{ print $1;}'`; do sudo kill -9 $KILLPID; done
-for KILLPID in `ps axo pid,ppid,cmd | grep -i 'sleep'          | awk '{ print $2;}'`; do sudo kill -9 $KILLPID; done
+if [ ! -f /home/pi/GatewayService/Staging/booting.txt ];
+then
+    # autorun_once.sh run from command prompt, need to kill any pre-running services
+	# Kill all mono processes and GatewayService as well, kill the monitoring process that is performing a sleep
+	echo "Trying to kill all mono processes..."
+	for KILLPID in `ps axo pid,ppid,cmd | grep -i 'mono'           | awk '{ print $1;}'`; do sudo kill -9 $KILLPID; done
+	for KILLPID in `ps axo pid,ppid,cmd | grep -i 'gatewayservice' | awk '{ print $1;}'`; do sudo kill -9 $KILLPID; done
+	for KILLPID in `ps axo pid,ppid,cmd | grep -i 'sleep'          | awk '{ print $2;}'`; do sudo kill -9 $KILLPID; done
+else
+        # autorun_once run from rc.local in boot sequence, nothing should need to be killed
+        # need to delete file so subsequent runs from prompt ok.
+        rm -f /home/pi/GatewayService/Staging/booting.txt
+fi
 
 echo "Trying to delete lock file if there is any..."
 sudo rm -f /tmp/Microsoft.ConnectTheDots.GatewayService.exe.lock
 
-# move all files from Staging GW_HOME to runtime folder, delete logs
 echo updating files
-rm -rf $LOGS/*
-mkdir $LOGS
+sudo rm -rf $LOGS/*
+sudo rm -rf $LOGS
+sudo mkdir $LOGS
 find $GW_HOME/ -maxdepth 1 -type f -delete
 cp $STAGING/* $GW_HOME/
+echo "$(date) => autorun_once: creating autorun.sh in /GatewayService" >> /home/pi/GatewayService/Staging/boot_times.txt
 rm $GW_HOME/autorun.sh
 mv $GW_HOME/autorun_install.sh $GW_HOME/autorun.sh
 
@@ -57,14 +67,16 @@ echo "Starting host processes..."
 echo "Setting MONO_EVENTLOG_TYPE to local"
 export MONO_EVENTLOG_TYPE=local
 #
+echo "$(date) => autorun_once: calling autorun.sh" >> /home/pi/GatewayService/Staging/boot_times.txt
 echo "Starting Gateway"
 cd $GW_HOME
 #MONO_LOG_LEVEL=debug /usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.exe --debug > monoOutput.txt &
 #/usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.exe
 $GW_HOME/autorun.sh &
+echo "$(date) => autorun_once: back from calling autorun.sh" >> /home/pi/GatewayService/Staging/boot_times.txt
 
-echo "Starting supplementary sensor script if present"
-$GW_HOME/autorun2.sh &
+
+echo "$(date) => autorun_once.sh: finished" >> /home/pi/GatewayService/Staging/boot_times.txt
 
 #
 # Add the below line to /etc/rc.local

@@ -22,6 +22,7 @@
 #  THE SOFTWARE.
 #  ---------------------------------------------------------------------------------
 #!/bin/bash
+echo "$(date) => autorun.sh: started" >> /home/pi/GatewayService/Staging/boot_times.txt
 
 #
 # the standard account for a Raspberry pi board is 'pi'
@@ -37,6 +38,13 @@ export LOGS=$GW_HOME/logs
 echo "Setting MONO_EVENTLOG_TYPE to local"
 export MONO_EVENTLOG_TYPE=local
 #
+
+echo "$(date) => autorun.sh: calling autorun2 if needed" >> /home/pi/GatewayService/Staging/boot_times.txt
+echo "Starting supplementary sensor script if present"
+$GW_HOME/autorun2.sh &
+echo "$(date) => autorun.sh back from calling autorun2" >> /home/pi/GatewayService/Staging/boot_times.txt
+
+echo "$(date) => autorun.sh: about to start monitoring" >> /home/pi/GatewayService/Staging/boot_times.txt
 # Start monitoring gateway process
 #
 echo "Monitoring Gateway"
@@ -45,7 +53,8 @@ MONITORED="GatewayService"
 PERIOD=5
 DELETE_LOCK="sudo rm -f /tmp/Microsoft.ConnectTheDots.GatewayService.exe.lock"
 RESTART="/usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.exe"
-
+touch $LOGS/$LOG 
+chmod 666 $LOGS/$LOG 
 cd $GW_HOME
 
 while :
@@ -54,3 +63,6 @@ do
 	 test $RUNNING -eq 0 && echo "Restarting..." && $DELETE_LOCK && $RESTART || echo "$MONITORED is running..." >> $LOGS/$LOG
 	 sleep $PERIOD
 done
+
+# should never get here
+echo "$(date) => autorun.sh: finished" >> /home/pi/GatewayService/Staging/boot_times.txt
