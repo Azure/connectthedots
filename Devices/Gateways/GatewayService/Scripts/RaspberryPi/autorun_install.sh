@@ -23,7 +23,12 @@
 #  ---------------------------------------------------------------------------------
 #!/bin/bash
 
-export GW_HOME=~/GatewayService
+#
+# the standard account for a Raspberry pi board is 'pi'
+# please change as needed across code base
+#
+export GW_ACCOUNT_HOME=/home/pi
+export GW_HOME=$GW_ACCOUNT_HOME/GatewayService
 export LOGS=$GW_HOME/logs
 
 #
