@@ -58,6 +58,9 @@ cd $GW_HOME
 #/usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.exe
 $GW_HOME/autorun.sh &
 
+echo "Starting supplementary sensor script if present"
+$GW_HOME/autorun2.sh &
+
 #
 # Add the below line to /etc/rc.local
 #
