@@ -28,6 +28,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RaspberryPi", "RaspberryPi"
 		Scripts\RaspberryPi\autorun_install.sh = Scripts\RaspberryPi\autorun_install.sh
 		Scripts\RaspberryPi\autorun_once.sh = Scripts\RaspberryPi\autorun_once.sh
 		Scripts\RaspberryPi\deploy.cmd = Scripts\RaspberryPi\deploy.cmd
+		Scripts\RaspberryPi\killall.sh = Scripts\RaspberryPi\killall.sh
 		Scripts\RaspberryPi\runonce.sh = Scripts\RaspberryPi\runonce.sh
 	EndProjectSection
 EndProject
