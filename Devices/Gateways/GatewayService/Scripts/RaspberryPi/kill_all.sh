@@ -24,8 +24,7 @@
 #!/bin/bash
 
 #
-# to kill the monitor we need to kill the proces that is sleeping, try it twice!
+# to kill the monitor we need to kill the proces that is sleeping, and mono as well
 #
 for KILLPID in `ps axo pid,ppid,cmd | grep -i 'sleep' | awk '{ print $2;}'`; do sudo kill -9 $KILLPID; done
-sleep 2
-for KILLPID in `ps axo pid,ppid,cmd | grep -i 'sleep' | awk '{ print $2;}'`; do sudo kill -9 $KILLPID; done
+for KILLPID in `ps axo pid,ppid,cmd | grep -i 'mono'  | awk '{ print $1;}'`; do sudo kill -9 $KILLPID; done
