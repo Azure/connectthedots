@@ -153,6 +153,8 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
                 Console.WriteLine( "amqps://{0}:{1}@{2}.servicebus.windows.net", deviceKeyName, Uri.EscapeDataString( deviceKey ), createResults.SBNamespace );
             }
 
+            Console.ReadLine();
+
             #endregion
 
 #if AZURESTREAMANALYTICS

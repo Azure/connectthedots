@@ -51,21 +51,21 @@ echo Copying Gateway files
 %PSCP_CMD% %prjdir%Tests\CoreTest\bin\%Configuration%\CoreTest.exe                                              %rpi_usr%@%rpi_ip%:%Staging%/
 
 echo copying scripts
-%PSCP_CMD% %prjdir%Scripts\RaspberryPi\deploy_and_start_ctd_on_boot.sh	%rpi_usr%@%rpi_ip%:%Staging%/
 %PSCP_CMD% %prjdir%Scripts\RaspberryPi\autorun_install.sh				%rpi_usr%@%rpi_ip%:%Staging%/
 %PSCP_CMD% %prjdir%Scripts\RaspberryPi\certificate_update.sh			%rpi_usr%@%rpi_ip%:%Staging%/
 %PSCP_CMD% %prjdir%Scripts\RaspberryPi\kill_all.sh					    %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %prjdir%Scripts\RaspberryPi\deploy_and_start_ctd_on_boot.sh	%rpi_usr%@%rpi_ip%:%GW_Home%/
 
 echo Marking autorun_once.sh and autorun_install.sh as executable
 del /f %temp%\rpigatewayautorunx.tmp
 echo chmod 755 %Staging%/certificate_update.sh					>> %temp%\rpigatewayautorunx.tmp
-echo chmod 755 %Staging%/deploy_and_start_ctd_on_boot.sh		>> %temp%\rpigatewayautorunx.tmp
 echo chmod 755 %Staging%/autorun_install.sh						>> %temp%\rpigatewayautorunx.tmp
 echo chmod 755 %Staging%/kill_all.sh							>> %temp%\rpigatewayautorunx.tmp
+echo chmod 755 %GW_Home%/deploy_and_start_ctd_on_boot.sh		>> %temp%\rpigatewayautorunx.tmp
 echo dos2unix  %Staging%/certificate_update.sh					>> %temp%\rpigatewayautorunx.tmp
-echo dos2unix  %Staging%/deploy_and_start_ctd_on_boot.sh		>> %temp%\rpigatewayautorunx.tmp
 echo dos2unix  %Staging%/autorun_install.sh						>> %temp%\rpigatewayautorunx.tmp
 echo dos2unix  %Staging%/kill_all.sh							>> %temp%\rpigatewayautorunx.tmp
+echo dos2unix  %GW_Home%/deploy_and_start_ctd_on_boot.sh		>> %temp%\rpigatewayautorunx.tmp
 %PUTTY_CMD% -m													   %temp%\rpigatewayautorunx.tmp
 
 echo Run deploy_next.sh for any supplementary sensor files
