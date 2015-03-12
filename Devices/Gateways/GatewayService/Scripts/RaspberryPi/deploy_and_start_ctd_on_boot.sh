@@ -33,22 +33,22 @@ export LOGS=$GW_HOME/logs
 export STAGING=$GW_HOME/staging
 
 echo "$(date) => deploy_and_start_ctd_on_boot.sh: started" >> $GW_HOME/boot_sequence.log
-
-if [ -f $GW_HOME/booting.log ];
-then
-	echo "$(date) => deploy_and_start_ctd_on_boot.sh: called from rc.local in boot sequence" >> $GW_HOME/boot_sequence.log
-    # deploy_and_start_ctd_on_boot.sh run from rc.local in boot sequence, nothing should need to be killed
-    # need to delete file so subsequent runs from prompt ok.
-    rm -f $GW_HOME/booting.log
-else
-	echo "$(date) => deploy_and_start_ctd_on_boot.sh: called from command line, not boot sequence" >> $GW_HOME/boot_sequence.log
+#
+#if [ -f $GW_HOME/booting.log ];
+#then
+#	echo "$(date) => deploy_and_start_ctd_on_boot.sh: called from rc.local in boot sequence" >> $GW_HOME/boot_sequence.log
+#    # deploy_and_start_ctd_on_boot.sh run from rc.local in boot sequence, nothing should need to be killed
+#    # need to delete file so subsequent runs from prompt ok.
+#    rm -f $GW_HOME/booting.log
+#else
+#	echo "$(date) => deploy_and_start_ctd_on_boot.sh: called from command line, not boot sequence" >> $GW_HOME/boot_sequence.log
     # autorun_once.sh run from command prompt, need to kill any pre-running services
 	# Kill all mono processes and GatewayService as well, kill the monitoring process that is performing a sleep
 	echo "Trying to kill all mono processes..."
 	for KILLPID in `ps axo pid,ppid,cmd | grep -i 'mono'           | awk '{ print $1;}'`; do sudo kill -9 $KILLPID; done
 	for KILLPID in `ps axo pid,ppid,cmd | grep -i 'gatewayservice' | awk '{ print $1;}'`; do sudo kill -9 $KILLPID; done
 	for KILLPID in `ps axo pid,ppid,cmd | grep -i 'sleep'          | awk '{ print $2;}'`; do sudo kill -9 $KILLPID; done
-fi
+#fi
 
 echo "Trying to delete lock file if there is any..."
 sudo rm -f /tmp/Microsoft.ConnectTheDots.GatewayService.exe.lock

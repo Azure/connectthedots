@@ -34,6 +34,7 @@ export LOGS=$GW_HOME/logs
 
 echo "$(date) => autorun.sh: starting autorun.sh" >> $GW_HOME/boot_sequence.log
 #
+
 echo "Starting supplementary sensor script if present"
 echo "$(date) => autorun.sh: calling supplementary startup script autorun2.sh if necessary" >> $GW_HOME/boot_sequence.log
 $GW_HOME/autorun2.sh &
