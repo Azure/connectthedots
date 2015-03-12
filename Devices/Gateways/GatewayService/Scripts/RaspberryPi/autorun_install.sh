@@ -32,8 +32,8 @@ export GW_HOME=$GW_ACCOUNT_HOME/ctdgtwy
 export LOGS=$GW_HOME/logs
 
 #
-#		echo "Starting supplementary sensor script if present"
-#		$GW_HOME/autorun2.sh &
+echo "Starting supplementary sensor script if present"
+$GW_HOME/autorun2.sh &
 #
 
 #
