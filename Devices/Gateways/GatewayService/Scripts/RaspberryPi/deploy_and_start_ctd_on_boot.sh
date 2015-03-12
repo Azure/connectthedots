@@ -54,14 +54,15 @@ sudo rm -f /tmp/Microsoft.ConnectTheDots.GatewayService.exe.lock
 echo updating files...
 rm -rf $LOGS
 mkdir $LOGS
-find $GW_HOME/ -maxdepth 1 -type f -delete
+find $GW_HOME/ -maxdepth 1 \! -name 'deploy_and_start_ctd_on_boot.sh' -type f -delete
+
 cp $STAGING/* $GW_HOME/
 echo "$(date) => autorun_once: creating autorun.sh in /GatewayService" >> $GW_HOME/boot_sequence.log
 rm $GW_HOME/autorun.sh
 mv $GW_HOME/autorun_install.sh $GW_HOME/autorun.sh
 
 echo "Starting host processes..."
-sudo -u pi $GW_HOME/autorun.sh &
+sudo $GW_HOME/autorun.sh
 
 #
 # Add the below line to /etc/rc.local
@@ -71,7 +72,7 @@ sudo -u pi $GW_HOME/autorun.sh &
 #
 #   export GW_ACCOUNT_HOME=/home/pi
 #   export GW_HOME=$GW_ACCOUNT_HOME/ctdgtwy
-#   sudo -u pi touch $GW_HOME/logs/booting.log 
-#   sudo -u pi       $GW_HOME/deploy_and_start_ctd_on_boot.sh &
+#   sudo echo "1" >> $GW_HOME/logs/booting.log 
+#   sudo $GW_HOME/deploy_and_start_ctd_on_boot.sh &
 #
 # and don't forget to make autorun.sh executable (sudo chmod 755 autorun.sh)
