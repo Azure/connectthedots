@@ -29,8 +29,8 @@ set rpi_ip=10.121.205.13
 set rpi_usr=pi
 set rpi_pw=raspberry
 set Configuration=Release
-set GW_Home=GatewayService
-set Staging=%GW_Home%/Staging
+set GW_Home=ctdgtwy
+set Staging=%GW_Home%/staging
 set PUTTY_CMD=%puttydir%putty %rpi_usr%@%rpi_ip% -pw %rpi_pw% 
 set PSCP_CMD=%puttydir%pscp -pw %rpi_pw% 
 
