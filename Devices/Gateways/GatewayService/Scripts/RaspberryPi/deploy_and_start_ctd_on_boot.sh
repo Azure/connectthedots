@@ -54,8 +54,6 @@ echo "Trying to delete lock file if there is any..."
 sudo rm -f /tmp/Microsoft.ConnectTheDots.GatewayService.exe.lock
 
 echo updating files...
-rm -rf $LOGS
-mkdir $LOGS
 find $GW_HOME/ -maxdepth 1 \! -name 'deploy_and_start_ctd_on_boot.sh' -type f -delete
 
 cp $STAGING/* $GW_HOME/
