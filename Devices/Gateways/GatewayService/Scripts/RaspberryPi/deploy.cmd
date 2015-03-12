@@ -23,7 +23,7 @@ REM //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS I
 REM //  THE SOFTWARE.
 REM //  ---------------------------------------------------------------------------------
 
-set puttydir="T:\tools\r-pi\putty\"
+set puttydir="C:\tools\raspberry\putty\"
 set prjdir=..\..\
 set rpi_ip=10.0.1.18
 set rpi_usr=pi

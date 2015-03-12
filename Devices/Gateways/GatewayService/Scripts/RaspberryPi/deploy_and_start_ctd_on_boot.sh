@@ -72,7 +72,10 @@ sudo $GW_HOME/autorun.sh
 #
 #   export GW_ACCOUNT_HOME=/home/pi
 #   export GW_HOME=$GW_ACCOUNT_HOME/ctdgtwy
-#   sudo mkdir $GW_HOME/logs 
+#   if [ ! -d $GW_HOME/logs ] 
+#     then
+#       sudo mkdir $GW_HOME/logs 
+#   fi
 #   sudo echo "$(date) booting..." >> $GW_HOME/logs/booting.log 
 #   sudo $GW_HOME/deploy_and_start_ctd_on_boot.sh &
 #
