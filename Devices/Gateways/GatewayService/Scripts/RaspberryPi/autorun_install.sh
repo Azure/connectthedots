@@ -22,47 +22,47 @@
 #  THE SOFTWARE.
 #  ---------------------------------------------------------------------------------
 #!/bin/bash
-echo "$(date) => autorun.sh: started" >> /home/pi/GatewayService/Staging/boot_times.txt
 
 #
 # the standard account for a Raspberry pi board is 'pi'
 # please change as needed across code base
 #
 export GW_ACCOUNT_HOME=/home/pi
-export GW_HOME=$GW_ACCOUNT_HOME/GatewayService
+export GW_HOME=$GW_ACCOUNT_HOME/ctdgtwy
 export LOGS=$GW_HOME/logs
 
 #
-# event log entries will be written to /var/lib/mono/EventLog/Application
+#		echo "Starting supplementary sensor script if present"
+#		$GW_HOME/autorun2.sh &
+#
+
+#
+# Start monitoring gateway process
+# Event log entries will be written to /var/lib/mono/EventLog/Application
 #
 echo "Setting MONO_EVENTLOG_TYPE to local"
 export MONO_EVENTLOG_TYPE=local
-#
-
-echo "$(date) => autorun.sh: calling autorun2 if needed" >> /home/pi/GatewayService/Staging/boot_times.txt
-echo "Starting supplementary sensor script if present"
-$GW_HOME/autorun2.sh &
-echo "$(date) => autorun.sh back from calling autorun2" >> /home/pi/GatewayService/Staging/boot_times.txt
-
-echo "$(date) => autorun.sh: about to start monitoring" >> /home/pi/GatewayService/Staging/boot_times.txt
-# Start monitoring gateway process
-#
 echo "Monitoring Gateway"
 LOG=monitor_$(date +"%m-%d-%Y-%T").log
 MONITORED="GatewayService"
 PERIOD=5
 DELETE_LOCK="sudo rm -f /tmp/Microsoft.ConnectTheDots.GatewayService.exe.lock"
 RESTART="/usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.exe"
-touch $LOGS/$LOG 
-chmod 666 $LOGS/$LOG 
+
+
+#
+# Consider using debug mode for mono 
+#
+#		export MONO_LOG_LEVEL=debug 
+#		/usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.exe --debug > monoOutput.txt &
+#
+
 cd $GW_HOME
 
 while :
 do
 	 test `ps ax | grep $MONITORED | awk '{ print $1;}' | wc | awk '{ print $1;}'` -gt 1 && RUNNING=1 || RUNNING=0
-	 test $RUNNING -eq 0 && echo "Restarting..." && $DELETE_LOCK && $RESTART || echo "$MONITORED is running..." >> $LOGS/$LOG
+	 test $RUNNING -eq 0 && echo "$(date) => Restarting $MONITORED..." >> $LOGS/$LOG && $DELETE_LOCK && $RESTART || echo "$(date) => $MONITORED is running..." >> $LOGS/$LOG
 	 sleep $PERIOD
 done
 
-# should never get here
-echo "$(date) => autorun.sh: finished" >> /home/pi/GatewayService/Staging/boot_times.txt
