@@ -51,21 +51,21 @@ echo Copying Gateway files
 %PSCP_CMD% %prjdir%Tests\DeviceAdapterTestMock\bin\%Configuration%\DataAdapterTestMock.dll                      %rpi_usr%@%rpi_ip%:%Staging%/
 
 echo copying scripts
-%PSCP_CMD% %prjdir%Scripts\RaspberryPi\autorun_once.sh    %rpi_usr%@%rpi_ip%:%Staging%/
-%PSCP_CMD% %prjdir%Scripts\RaspberryPi\autorun_install.sh %rpi_usr%@%rpi_ip%:%Staging%/
-%PSCP_CMD% %prjdir%Scripts\RaspberryPi\runonce.sh         %rpi_usr%@%rpi_ip%:%Staging%/
-%PSCP_CMD% %prjdir%Scripts\RaspberryPi\killall.sh         %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %prjdir%Scripts\RaspberryPi\deploy_and_start_ctd_on_boot.sh	%rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %prjdir%Scripts\RaspberryPi\autorun_install.sh				%rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %prjdir%Scripts\RaspberryPi\certificate_update.sh			%rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %prjdir%Scripts\RaspberryPi\kill_all.sh					    %rpi_usr%@%rpi_ip%:%Staging%/
 
 echo Marking autorun_once.sh and autorun_install.sh as executable
 del /f %temp%\rpigatewayautorunx.tmp
-echo chmod 755 %Staging%/runonce.sh            >> %temp%\rpigatewayautorunx.tmp
-echo chmod 755 %Staging%/autorun_once.sh       >> %temp%\rpigatewayautorunx.tmp
-echo chmod 755 %Staging%/autorun_install.sh    >> %temp%\rpigatewayautorunx.tmp
-echo chmod 755 %Staging%/killall.sh		       >> %temp%\rpigatewayautorunx.tmp
-echo dos2unix  %Staging%/runonce.sh            >> %temp%\rpigatewayautorunx.tmp
-echo dos2unix  %Staging%/autorun_once.sh       >> %temp%\rpigatewayautorunx.tmp
-echo dos2unix  %Staging%/autorun_install.sh    >> %temp%\rpigatewayautorunx.tmp
-echo dos2unix  %Staging%/killall.sh            >> %temp%\rpigatewayautorunx.tmp
-%PUTTY_CMD% -m                                    %temp%\rpigatewayautorunx.tmp
+echo chmod 755 %Staging%/certificate_update.sh					>> %temp%\rpigatewayautorunx.tmp
+echo chmod 755 %Staging%/deploy_and_start_ctd_on_boot.sh		>> %temp%\rpigatewayautorunx.tmp
+echo chmod 755 %Staging%/autorun_install.sh						>> %temp%\rpigatewayautorunx.tmp
+echo chmod 755 %Staging%/kill_all.sh							>> %temp%\rpigatewayautorunx.tmp
+echo dos2unix  %Staging%/certificate_update.sh					>> %temp%\rpigatewayautorunx.tmp
+echo dos2unix  %Staging%/deploy_and_start_ctd_on_boot.sh		>> %temp%\rpigatewayautorunx.tmp
+echo dos2unix  %Staging%/autorun_install.sh						>> %temp%\rpigatewayautorunx.tmp
+echo dos2unix  %Staging%/kill_all.sh							>> %temp%\rpigatewayautorunx.tmp
+%PUTTY_CMD% -m													   %temp%\rpigatewayautorunx.tmp
 
 echo Run deploy_next.sh for any supplementary sensor files
