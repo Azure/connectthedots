@@ -32,14 +32,16 @@ export GW_HOME=$GW_ACCOUNT_HOME/ctdgtwy
 export LOGS=$GW_HOME/logs
 export STAGING=$GW_HOME/staging
 
-echo "$(date) => autorun_once.sh: started" >> $GW_HOME/boot_sequence.log
+echo "$(date) => deploy_and_start_ctd_on_boot.sh: started" >> $GW_HOME/boot_sequence.log
 
 if [ -f $GW_HOME/booting.log ];
 then
-    # autorun_once run from rc.local in boot sequence, nothing should need to be killed
+	echo "$(date) => deploy_and_start_ctd_on_boot.sh: called from rc.local in boot sequence" >> $GW_HOME/boot_sequence.log
+    # deploy_and_start_ctd_on_boot.sh run from rc.local in boot sequence, nothing should need to be killed
     # need to delete file so subsequent runs from prompt ok.
     rm -f $GW_HOME/booting.log
 else
+	echo "$(date) => deploy_and_start_ctd_on_boot.sh: called from command line, not boot sequence" >> $GW_HOME/boot_sequence.log
     # autorun_once.sh run from command prompt, need to kill any pre-running services
 	# Kill all mono processes and GatewayService as well, kill the monitoring process that is performing a sleep
 	echo "Trying to kill all mono processes..."
@@ -57,13 +59,15 @@ mkdir $LOGS
 find $GW_HOME/ -maxdepth 1 \! -name 'deploy_and_start_ctd_on_boot.sh' -type f -delete
 
 cp $STAGING/* $GW_HOME/
-echo "$(date) => autorun_once: creating autorun.sh in /GatewayService" >> $GW_HOME/boot_sequence.log
+echo "$(date) => deploy_and_start_ctd_on_boot: creating autorun.sh from template" >> $GW_HOME/boot_sequence.log
 rm $GW_HOME/autorun.sh
 mv $GW_HOME/autorun_install.sh $GW_HOME/autorun.sh
 
+echo "$(date) => deploy_and_start_ctd_on_boot: calling autorun.sh" >> $GW_HOME/boot_sequence.log
 echo "Starting host processes..."
 sudo $GW_HOME/autorun.sh
 
+echo "$(date) => deploy_and_start_ctd_on_boot: finished" >> $GW_HOME/boot_sequence.log
 #
 # Add the below line to /etc/rc.local
 #

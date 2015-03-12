@@ -23,6 +23,7 @@
 #  ---------------------------------------------------------------------------------
 #!/bin/bash
 
+
 #
 # the standard account for a Raspberry pi board is 'pi'
 # please change as needed across code base
@@ -31,8 +32,10 @@ export GW_ACCOUNT_HOME=/home/pi
 export GW_HOME=$GW_ACCOUNT_HOME/ctdgtwy
 export LOGS=$GW_HOME/logs
 
+echo "$(date) => autorun.sh: starting autorun.sh" >> $GW_HOME/boot_sequence.log
 #
 echo "Starting supplementary sensor script if present"
+echo "$(date) => autorun.sh: calling supplementary startup script autorun2.sh if necessary" >> $GW_HOME/boot_sequence.log
 $GW_HOME/autorun2.sh &
 #
 
@@ -61,6 +64,7 @@ echo Starting gateway from directory $(pwd)
 export MONO_PATH=$GW_HOME
 echo MONO_PATH is $MONO_PATH
 
+echo "$(date) => autorun.sh: starting permanent while loop" >> $GW_HOME/boot_sequence.log
 while :
 do
 	 test `ps ax | grep $MONITORED | awk '{ print $1;}' | wc | awk '{ print $1;}'` -gt 1 && RUNNING=1 || RUNNING=0
@@ -68,3 +72,4 @@ do
 	 sleep $PERIOD
 done
 
+echo "$(date) => autorun.sh: finished autorun.sh" >> $GW_HOME/boot_sequence.log

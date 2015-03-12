@@ -24,11 +24,9 @@
 #!/bin/bash
 #
 export GW_HOME=/home/pi/ctdgtwy
-export LOGS=$GW_HOME/logs
-export STAGING=$GW_HOME/staging
-echo "$(date) => autorun2.sh: starting" >> /home/pi/ctdgtwy/staging/boot_times.txt
+echo "$(date) => autorun2.sh: started" >> $GW_HOME/boot_sequence.log
 echo "Starting secondary script"
 cd $GW_HOME
 sudo python $GW_HOME/WensnPiVS01.py &
-echo "$(date) => autorun2.sh: finished" >> /home/pi/ctdgtwy/staging/boot_times.txt
+echo "$(date) => autorun2.sh: finished" >> $GW_HOME/boot_sequence.log
 
