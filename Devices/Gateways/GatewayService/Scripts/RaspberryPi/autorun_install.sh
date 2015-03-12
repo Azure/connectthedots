@@ -46,7 +46,7 @@ echo "Monitoring Gateway"
 LOG=monitor_$(date +"%m-%d-%Y-%T").log
 MONITORED="GatewayService"
 PERIOD=5
-DELETE_LOCK="sudo rm -f /tmp/Microsoft.ConnectTheDots.GatewayService.exe.lock"
+DELETE_LOCK="sudo rm -f /tmp/Microsoft.ConnectTheDots.GatewayService.exe.lock"	
 RESTART="/usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.exe"
 
 
@@ -57,7 +57,9 @@ RESTART="/usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.
 #		/usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.exe --debug > monoOutput.txt &
 #
 
-cd $GW_HOME
+echo Starting gateway from directory $(pwd)
+export MONO_PATH=$GW_HOME
+echo MONO_PATH is $MONO_PATH
 
 while :
 do

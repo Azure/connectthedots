@@ -71,6 +71,7 @@ sudo -u pi $GW_HOME/autorun.sh &
 #
 #   export GW_ACCOUNT_HOME=/home/pi
 #   export GW_HOME=$GW_ACCOUNT_HOME/ctdgtwy
-#   sudo -u pi $GW_HOME/deploy_and_start_ctd_on_boot.sh &
+#   sudo -u pi touch $GW_HOME/logs/booting.log 
+#   sudo -u pi       $GW_HOME/deploy_and_start_ctd_on_boot.sh &
 #
 # and don't forget to make autorun.sh executable (sudo chmod 755 autorun.sh)
