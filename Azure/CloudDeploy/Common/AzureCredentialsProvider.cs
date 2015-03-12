@@ -140,7 +140,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
                 resource: "https://management.core.windows.net/",
                 clientId: clientId,
                 redirectUri: new Uri( redirectUri ),
-                parameters: new AuthorizationParameters( PromptBehavior.Auto, null )
+                parameters: new AuthorizationParameters( PromptBehavior.Always, null )
             ).Result;
 
             return result.CreateAuthorizationHeader( ).Substring( "Bearer ".Length );
