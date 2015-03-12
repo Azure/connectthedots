@@ -7,8 +7,8 @@
     <ProjectGuid>{5A2497C7-09B1-4C66-9D45-7F68F4D7628F}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ConnectTheDotsAzurePrep</RootNamespace>
-    <AssemblyName>ConnectTheDotsAzurePrep</AssemblyName>
+    <RootNamespace>Microsoft.ConnectTheDots.CloudDeploy.AzurePrep</RootNamespace>
+    <AssemblyName>AzurePrep</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>

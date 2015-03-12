@@ -7,8 +7,8 @@
     <ProjectGuid>{AAAAA552-F973-4683-8CF9-8B719A69E49C}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ConnectTheDotsCreateWebConfig</RootNamespace>
-    <AssemblyName>ConnectTheDotsCreateWebConfig</AssemblyName>
+    <RootNamespace>Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig</RootNamespace>
+    <AssemblyName>CreateWebConfig</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
