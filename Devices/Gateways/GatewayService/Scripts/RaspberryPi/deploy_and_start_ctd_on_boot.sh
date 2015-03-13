@@ -79,6 +79,6 @@ echo "$(date) => deploy_and_start_ctd_on_boot: finished" >> $GW_HOME/boot_sequen
 #       sudo mkdir $GW_HOME/logs 
 #   fi
 #   sudo echo "$(date) booting..." >> $GW_HOME/logs/booting.log 
-#   sudo $GW_HOME/deploy_and_start_ctd_on_boot.sh &
+#   $(cd $GW_HOME/ ; deploy_and_start_ctd_on_boot.sh) &
 #
 # and don't forget to make autorun.sh executable (sudo chmod 755 autorun.sh)
