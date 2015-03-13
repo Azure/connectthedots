@@ -34,7 +34,7 @@ SELECT
     MAX(value) AS tempMax,
     MAX(value) AS value
 FROM 
-    Devices TIMESTAMP BY timecreated
+    DevicesInput TIMESTAMP BY timecreated
 WHERE
     measurename = 'Temperature'
 GROUP BY 
