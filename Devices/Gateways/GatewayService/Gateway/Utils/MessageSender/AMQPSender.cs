@@ -1,4 +1,4 @@
-﻿//  ---------------------------------------------------------------------------------
+//  ---------------------------------------------------------------------------------
 //  Copyright (c) Microsoft Open Technologies, Inc.  All rights reserved.
 // 
 //  The MIT License (MIT)
@@ -165,7 +165,7 @@ namespace Microsoft.ConnectTheDots.Gateway
             //--//
 
             private readonly object _sync = new object( );
-            
+
             //--//
 
             private readonly ILogger          _logger;
@@ -234,7 +234,11 @@ namespace Microsoft.ConnectTheDots.Gateway
         private readonly string         _defaultDeviceDisplayName;
         private          SendersPool    _senders;
 
-        public ILogger Logger { private get; set; }
+        public ILogger Logger
+        {
+            private get;
+            set;
+        }
 
         public AMQPSender( string amqpsAddress, string eventHubName, string defaultSubject, string defaultDeviceId, string defaultDeviceDisplayName, ILogger logger )
         {
@@ -262,7 +266,7 @@ namespace Microsoft.ConnectTheDots.Gateway
             {
                 if( data == null )
                 {
-                    return default(TaskWrapper);
+                    return default( TaskWrapper );
                 }
 
                 string jsonData = JsonConvert.SerializeObject( data );
@@ -285,7 +289,7 @@ namespace Microsoft.ConnectTheDots.Gateway
             {
                 if( String.IsNullOrEmpty( jsonData ) )
                 {
-                    return default(TaskWrapper);
+                    return default( TaskWrapper );
                 }
 
                 result = PrepareAndSend( jsonData );
@@ -361,54 +365,50 @@ namespace Microsoft.ConnectTheDots.Gateway
 
             var creationTime = DateTime.UtcNow;
 
-            bool setMessageData = false;
+            //bool setMessageData = false;
 
             Message message = null;
 
             //// Event Hub partition key: device id - ensures that all messages from this device go to the same partition and thus preserve order/co-location at processing time
             //message.MessageAnnotations[new Symbol("x-opt-partition-key")] = deviceId;
 
-            Dictionary<string, object> outDictionary = null;
-            if( serializedData != null )
+            //Dictionary<string, object> outDictionary = null;
+            //if( serializedData != null )
+            //{
+            //    //string serializedData = JsonConvert.SerializeObject( messageData );
+            //    outDictionary =
+            //        JsonConvert.DeserializeObject<Dictionary<string, object>>( serializedData );
+
+            //    outDictionary[ "Subject" ] = subject; // Message Type
+            //    outDictionary[ "from" ] = deviceId; // Originating device
+            //    outDictionary[ "dspl" ] = deviceDisplayName; // Display name for originating device
+
+            //    setMessageData = true;
+            //}
+
+            if( !String.IsNullOrEmpty( serializedData ) )
             {
-                //string serializedData = JsonConvert.SerializeObject( messageData );
-                outDictionary =
-                    JsonConvert.DeserializeObject<Dictionary<string, object>>( serializedData );
-
-                outDictionary[ "Subject" ] = subject; // Message Type
-                outDictionary[ "from" ] = deviceId; // Originating device
-                outDictionary[ "dspl" ] = deviceDisplayName; // Display name for originating device
-
-                setMessageData = true;
-            }
-
-            if( setMessageData )
-            {
-                message = new Message( new Data
-                {
-                    Binary = Encoding.UTF8.GetBytes( JsonConvert.SerializeObject( outDictionary ) )
-                } )
-                {
-                    Properties = new Properties
-                    {
-                        Subject = subject, // Message type
+                message = new Message( new Data {
+                    //Binary = Encoding.UTF8.GetBytes( JsonConvert.SerializeObject( outDictionary ) )
+                    Binary = Encoding.UTF8.GetBytes( serializedData )
+                } ) {
+                    Properties = new Properties {
+                        Subject      = subject,      // Message type
                         CreationTime = creationTime, // Time of data sampling
                     },
-                    MessageAnnotations = new MessageAnnotations( ),
+                    MessageAnnotations    = new MessageAnnotations( ),
                     ApplicationProperties = new ApplicationProperties( )
                 };
                 message.Properties.ContentType = "text/json";
             }
             else
             {
-                message = new Message
-                {
-                    Properties = new Properties
-                    {
-                        Subject = subject, // Message type
+                message = new Message {
+                    Properties = new Properties {
+                        Subject      = subject,      // Message type
                         CreationTime = creationTime, // Time of data sampling
                     },
-                    MessageAnnotations = new MessageAnnotations( ),
+                    MessageAnnotations    = new MessageAnnotations( ),
                     ApplicationProperties = new ApplicationProperties( )
                 };
                 // No data: send an empty message with message type "weather error" to help diagnose problems "from the cloud"
