@@ -22,6 +22,9 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
+//#define DEBUG_LOG
+
+
 namespace Microsoft.ConnectTheDots.Gateway
 {
     using System;
@@ -244,7 +247,9 @@ namespace Microsoft.ConnectTheDots.Gateway
         {
             Logger = SafeLogger.FromLogger( logger );
 
+#if DEBUG_LOG
             Logger.LogInfo( "Connecting to Event hub" );
+#endif
 
             if( defaultSubject == null || defaultDeviceId == null || defaultDeviceDisplayName == null || eventHubName == null )
             {
@@ -304,8 +309,6 @@ namespace Microsoft.ConnectTheDots.Gateway
 
         public void Close( )
         {
-            Logger.LogInfo( "Close signal to AMQP recieved" );
-
             _senders.Close( );
         }
 
@@ -440,15 +443,16 @@ namespace Microsoft.ConnectTheDots.Gateway
 
             if( outcome is Accepted )
             {
+#if DEBUG_LOG
                 Logger.LogInfo( "Message is accepted" );
+#endif
 
                 if( sent == 1 )
                 {
                     _start = DateTime.Now;
                 }
 
-                if( Interlocked.CompareExchange( ref _sentMessages, 0, Constants.MessagesLoggingThreshold ) ==
-                    Constants.MessagesLoggingThreshold )
+                if( Interlocked.CompareExchange( ref _sentMessages, 0, Constants.MessagesLoggingThreshold ) == Constants.MessagesLoggingThreshold )
                 {
                     DateTime now = DateTime.Now;
 
@@ -465,7 +469,9 @@ namespace Microsoft.ConnectTheDots.Gateway
             }
             else
             {
+#if DEBUG_LOG
                 Logger.LogInfo( "Message is rejected: " + messageToLog );
+#endif
             }
         }
     }
