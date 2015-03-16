@@ -117,10 +117,10 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
         public static TokenCloudCredentials GetCredentialsByUserADAuth( string subscriptionId = null )
         {
             //ClientId and RedirectURI of this app
-            const string AUTH_CLIENT_ID = "08d635ff-dbfc-40af-874b-9c04831b2b38";
-            const string AUTH_REDIRECT_URI = "htttp://localhost/ctd";
+            const string AUTH_CLIENT_ID = "54b26534-1dd6-470a-a947-a0a557e22974";
+            const string AUTH_REDIRECT_URI = "http://localhost";
             //TenantId
-            const string AUTH_TENANT = "72f988bf-86f1-41af-91ab-2d7cd011db47";
+            const string AUTH_TENANT = "2616d166-c35d-4b6d-881a-ad37e1b1c765";
 
             string token = GetAuthHeader( AUTH_CLIENT_ID, AUTH_REDIRECT_URI, AUTH_TENANT );
 
