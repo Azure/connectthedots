@@ -22,7 +22,7 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-//#define DEBUG_LOG
+#define DEBUG_LOG
 
 
 namespace Microsoft.ConnectTheDots.Gateway
@@ -368,54 +368,27 @@ namespace Microsoft.ConnectTheDots.Gateway
 
             var creationTime = DateTime.UtcNow;
 
-            //bool setMessageData = false;
-
             Message message = null;
 
-            //// Event Hub partition key: device id - ensures that all messages from this device go to the same partition and thus preserve order/co-location at processing time
-            //message.MessageAnnotations[new Symbol("x-opt-partition-key")] = deviceId;
-
-            //Dictionary<string, object> outDictionary = null;
-            //if( serializedData != null )
-            //{
-            //    //string serializedData = JsonConvert.SerializeObject( messageData );
-            //    outDictionary =
-            //        JsonConvert.DeserializeObject<Dictionary<string, object>>( serializedData );
-
-            //    outDictionary[ "Subject" ] = subject; // Message Type
-            //    outDictionary[ "from" ] = deviceId; // Originating device
-            //    outDictionary[ "dspl" ] = deviceDisplayName; // Display name for originating device
-
-            //    setMessageData = true;
-            //}
 
             if( !String.IsNullOrEmpty( serializedData ) )
             {
-                message = new Message( new Data {
-                    //Binary = Encoding.UTF8.GetBytes( JsonConvert.SerializeObject( outDictionary ) )
-                    Binary = Encoding.UTF8.GetBytes( serializedData )
-                } ) {
-                    Properties = new Properties {
+                message = new Message( )
+                {
+                    BodySection = new Data( )
+                    {
+                        Binary = Encoding.UTF8.GetBytes( serializedData )
+                    },
+                    Properties = new Properties
+                    {
                         Subject      = subject,      // Message type
                         CreationTime = creationTime, // Time of data sampling
                     },
                     MessageAnnotations    = new MessageAnnotations( ),
                     ApplicationProperties = new ApplicationProperties( )
                 };
+
                 message.Properties.ContentType = "text/json";
-            }
-            else
-            {
-                message = new Message {
-                    Properties = new Properties {
-                        Subject      = subject,      // Message type
-                        CreationTime = creationTime, // Time of data sampling
-                    },
-                    MessageAnnotations    = new MessageAnnotations( ),
-                    ApplicationProperties = new ApplicationProperties( )
-                };
-                // No data: send an empty message with message type "weather error" to help diagnose problems "from the cloud"
-                message.Properties.Subject = subject + "err";
             }
 
             return message;
