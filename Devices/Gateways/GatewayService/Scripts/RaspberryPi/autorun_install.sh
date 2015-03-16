@@ -51,7 +51,7 @@ LOG=monitor_$(date +"%m-%d-%Y-%T").log
 MONITORED="GatewayService"
 PERIOD=5
 DELETE_LOCK="sudo rm -f /tmp/Microsoft.ConnectTheDots.GatewayService.exe.lock"	
-RESTART="/usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.exe"
+RESTART="sudo /usr/bin/mono-service $GW_HOME/Microsoft.ConnectTheDots.GatewayService.exe"
 
 
 #
