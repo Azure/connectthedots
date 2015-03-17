@@ -10,6 +10,8 @@ Make sure you have all software installed and necessary subscriptions as indicat
 
 ## Create Azure resources for IoT infrastructure ##
 
+###Create Event Hubs###
+
 * Open the ConnectTheDots\Azure\AzurePrep\AzurePrep.sln solution in Visual Studio and build the project from the BUILD menu (Select Release, not Debug).
 * Run the application (hitting F5 in Visual Studio or double clicking on the connectthedots\Azure\AzurePrep\AzurePrep\bin\Release\azureprep.exe file)
 * Login to Azure and if you have several subscriptions, select the one you want to deploy your services on from the choice provided in the next prompt.
@@ -27,8 +29,6 @@ Make sure you have all software installed and necessary subscriptions as indicat
 			amqps://D3:xxxxxxxx@yyyyyyyy.servicebus.windows.net
 			amqps://D4:xxxxxxxx@yyyyyyyy.servicebus.windows.net
 
-			Web.Config saved to C:\MyProjectLocation\connectthedots\Azure\Website\ConnectTheDotsWebSite\web.config
-
 The AzurePrep.exe command created two Event Hubs, EHDevices and EHAlerts. It also created four endpoints for AMQP connections from your remote devices such as Raspberry Pi devices. If you did not copy the output above to the a file and closed the window, you can retrieve the endpoint strings by 
 
 1. launching http://manage.windowsazure.com
@@ -38,4 +38,8 @@ The AzurePrep.exe command created two Event Hubs, EHDevices and EHAlerts. It als
 5. select ehdevices
 6. select Connection Information tab at the bottom
 
-
+###Create Website config info###
+* Run the application ConnecttheDots\Azure\AzurePrep\CreateWebConfig\bin\Release\CreateWebConfig.exe
+*  Login using your Azure subscription credentials
+* Enter the namespace prefix and location you chose when creating the Event Hubs
+* The application has now created a web.config file and put it in the Website project folder
