@@ -128,12 +128,18 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             AzurePrepInputs inputs;
             if( !GetInputs( out inputs ) )
             {
+                Console.WriteLine("Error while getting inputs.");
+                Console.WriteLine("Press Enter to continue...");
+                Console.ReadLine();
                 return false;
             }
 
             AzurePrepOutputs createResults = CreateEventHub( inputs );
             if( createResults == null )
             {
+                Console.WriteLine("Error while creating Event Hubs.");
+                Console.WriteLine("Press Enter to continue...");
+                Console.ReadLine();
                 return false;
             }
 

@@ -25,7 +25,7 @@ REM //  ------------------------------------------------------------------------
 
 set puttydir="C:\software\putty\"
 set prjdir=..\..\
-set rpi_ip=10.121.205.13
+set rpi_ip=xxx.xxx.xxx.xxx
 set rpi_usr=pi
 set rpi_pw=raspberry
 set Configuration=Release
