@@ -100,11 +100,22 @@
     <Content Include="..\..\..\license.txt">
       <Link>Docs\license.txt</Link>
     </Content>
+    <Content Include="css\connectthedots.css" />
     <Content Include="img\ajax-loader.gif" />
+    <Content Include="js\d3Chart.js" />
+    <Content Include="js\d3ChartControl.js" />
+    <Content Include="js\d3CTD.js" />
+    <Content Include="js\d3CTDDataSourceSocket.js" />
+    <Content Include="js\d3DataFlow.js" />
+    <Content Include="js\d3CTDDataSourceFilter.js" />
+    <Content Include="js\d3DataSourceSocket.js" />
+    <Content Include="js\d3utils.js" />
     <Content Include="packages.config">
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Docs\Temp and Humidity Website setup.md" />
+    <None Include="Properties\PublishProfiles\lt72.pubxml" />
+    <None Include="Properties\PublishProfiles\mar03iot.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -116,7 +127,6 @@
     <Content Include="Default.aspx" />
     <Content Include="Global.asax" />
     <Content Include="img\ConnectTheDotsLogo.png" />
-    <Content Include="js\connectthedots.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

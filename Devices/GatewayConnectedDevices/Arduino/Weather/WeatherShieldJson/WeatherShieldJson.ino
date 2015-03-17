@@ -1,7 +1,6 @@
 /* 
  Weather Shield code for http://connectthedots.msopentech.com end-to-end example of sending data to Microsoft Azure
  By: Microsoft Open Technologies, Inc.
- Date: January 27, 2015
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
  Copyright (c) Microsoft Open Technologies, Inc.  All rights reserved.
@@ -24,13 +23,7 @@
  Based upon Nathan Seidle's Weather Shield Example, itself based upon MIke Grusin's USB Weather Board code, as stated below.
 
  Modifications by Microsoft Open Technologies, Inc include adding self-describing fields in each output string, and changing 
- output format to JSON string. Based upon the variables below, the JSON string would be something like the following, depending upon the values retrieved
- from the Weather Shield:
-
- {"dspl":"Weather Shield 01","Subject":"wthr","DeviceGUID":"81E79059-A393-4797-8A7E-526C3EF9D64B","millis":80176,"seqno":79,"winddir":-1,"windspeedmph":0.0,"windgustmph":0.0,"windgustdir":0,"windspdmph_avg2m":0.0,"winddir_avg2m":0,"windgustmph_10m":0.0,"windgustdir_10m":0,"hmdt":42.9,"temp":67.4,"tempH":21.0,"rainin":0.00,"dailyrainin":0.00,"prss":100531.75,"batt":4.23,"lght":0.37}
-
- The dspl, Subject, deviceGUID data may be used by the Azure website and services to identify the device sending the data. The subsequent field names may be used to generate the labels on charts in the Azure website.
-
+ output format to JSON string as expected by the CTD website.
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
  Original header follows.
@@ -65,16 +58,27 @@ MPL3115A2 myPressure; //Create an instance of the pressure sensor
 HTU21D myHumidity; //Create an instance of the humidity sensor
 
 // Constants used for the ConnectTheDots project
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-// SensorSubject value determines how Azure website will chart the data
-// DeviceDisplayName value will be the label for the curve on the chart
-// DeviceGUID ensures all the data from this sensor appears on the same chart
+// Disp value will be the label for the curve on the chart
+// GUID ensures all the data from this sensor appears on the same chart
 // You can use Visual Studio to create DeviceGUID and copy it here. In VS, On the Tools menu, click Create GUID. The Create GUID
 // tool appears with a GUID in the Result box. Click Copy, and paste below.
 //
-char SensorSubject[] = "wthr";
-char DeviceDisplayName[] = "Weather Shield 01";
-char DeviceGUID[] = "81E79059-A393-4797-8A7E-526C3EF9D64B";
+char GUID1[] = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx";
+char GUID2[] = "yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy";
+char GUID3[] = "zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz";
+char Org[] = "My organization";
+char Disp[] = "Arduino + WS dev 01";
+char Locn[] = "here";
+char Measure1[] = "temperature";
+char Units1[] = "F";
+char Measure2[] = "humidity";
+char Units2[] = "%";
+char Measure3[] = "light";
+char Units3[] = "lumen";
+char buffer[300];
+char dtostrfbuffer[15];
+
+
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 //Hardware pin definitions
@@ -431,58 +435,161 @@ void printWeather()
 {
   calcWeather(); //Go calc all the various sensors
 
-  //MYSERIAL.println();
+  // print string for temperature, separated by line for ease of reading
+  // sent as one Serial.Print to reduce risk of serial errors
+  
+  memset(buffer,'\0',sizeof(buffer));
+  strcat(buffer,"{");
+  strcat(buffer,"\"guid\":\"");
+  strcat(buffer,GUID1);
+  strcat(buffer,"\",\"organization\":\"");
+  strcat(buffer,Org);
+  strcat(buffer,"\",\"displayname\":\"");
+  strcat(buffer,Disp);
+  strcat(buffer,"\",\"location\":\"");
+  strcat(buffer,Locn);  
+  strcat(buffer,"\",\"measurename\":\"");
+  strcat(buffer,Measure1);
+  strcat(buffer,"\",\"unitofmeasure\":\"");
+  strcat(buffer,Units1);
+  strcat(buffer,"\",\"value\":");
+  strcat(buffer,dtostrf(tempf,8,2,dtostrfbuffer));
+  strcat(buffer,"}");
+  MYSERIAL.println(buffer);
+
+  // print string for humidity, separated by line for ease of reading
+  memset(buffer,'\0',sizeof(buffer));
+  strcat(buffer,"{");
+  strcat(buffer,"\"guid\":\"");
+  strcat(buffer,GUID2);
+  strcat(buffer,"\",\"organization\":\"");
+  strcat(buffer,Org);
+  strcat(buffer,"\",\"displayname\":\"");
+  strcat(buffer,Disp);
+  strcat(buffer,"\",\"location\":\"");
+  strcat(buffer,Locn);  
+  strcat(buffer,"\",\"measurename\":\"");
+  strcat(buffer,Measure2);
+  strcat(buffer,"\",\"unitofmeasure\":\"");
+  strcat(buffer,Units2);
+  strcat(buffer,"\",\"value\":");
+  strcat(buffer,dtostrf(humidity,6,2,dtostrfbuffer));
+  strcat(buffer,"}");
+  MYSERIAL.println(buffer);
+
+  // print string for light, separated by line for ease of reading
+  memset(buffer,'\0',sizeof(buffer));
+  strcat(buffer,"{");
+  strcat(buffer,"\"guid\":\"");
+  strcat(buffer,GUID3);
+  strcat(buffer,"\",\"organization\":\"");
+  strcat(buffer,Org);
+  strcat(buffer,"\",\"displayname\":\"");
+  strcat(buffer,Disp);
+  strcat(buffer,"\",\"location\":\"");
+  strcat(buffer,Locn);  
+  strcat(buffer,"\",\"measurename\":\"");
+  strcat(buffer,Measure3);
+  strcat(buffer,"\",\"unitofmeasure\":\"");
+  strcat(buffer,Units3);
+  strcat(buffer,"\",\"value\":");
+  strcat(buffer,dtostrf(light_lvl,6,2,dtostrfbuffer));
+  strcat(buffer,"}");
+  MYSERIAL.println(buffer);
+
+
+ /* 
+
   MYSERIAL.print("{");
-  MYSERIAL.print("\"dspl\":");
+  MYSERIAL.print("\"guid\":");
+   MYSERIAL.print("\"");
+   MYSERIAL.print(GUID1);
   MYSERIAL.print("\"");
-  MYSERIAL.print(DeviceDisplayName);
+  MYSERIAL.print(",\"organization\":");
   MYSERIAL.print("\"");
-  MYSERIAL.print(",\"Subject\":");
+  MYSERIAL.print(Org);
   MYSERIAL.print("\"");
-  MYSERIAL.print(SensorSubject);
+  MYSERIAL.print(",\"displayname\":");
   MYSERIAL.print("\"");
-  MYSERIAL.print(",\"DeviceGUID\":");
+  MYSERIAL.print(Disp);
   MYSERIAL.print("\"");
-  MYSERIAL.print(DeviceGUID);
+  MYSERIAL.print(",\"location\":");
   MYSERIAL.print("\"");
-  MYSERIAL.print(",\"millis\":");
-  MYSERIAL.print(millis());
-  MYSERIAL.print(",\"seqno\":");
-  MYSERIAL.print(sequenceNumber++);
-  MYSERIAL.print(",\"winddir\":");
-  MYSERIAL.print(winddir);
-  MYSERIAL.print(",\"windspeedmph\":");
-  MYSERIAL.print(( windspeedmph!=windspeedmph ? -1 : windspeedmph), 1); // windpspeedmph can be NAN: this comparison checks for that and sends -1 instead
-  MYSERIAL.print(",\"windgustmph\":");
-  MYSERIAL.print(windgustmph, 1);
-  MYSERIAL.print(",\"windgustdir\":");
-  MYSERIAL.print(windgustdir);
-  MYSERIAL.print(",\"windspdmph_avg2m\":");
-  MYSERIAL.print(windspdmph_avg2m, 1);
-  MYSERIAL.print(",\"winddir_avg2m\":");
-  MYSERIAL.print(winddir_avg2m);
-  MYSERIAL.print(",\"windgustmph_10m\":");
-  MYSERIAL.print(windgustmph_10m, 1);
-  MYSERIAL.print(",\"windgustdir_10m\":");
-  MYSERIAL.print(windgustdir_10m);
-  MYSERIAL.print(",\"hmdt\":");
-  MYSERIAL.print(humidity, 1);
-  MYSERIAL.print(",\"temp\":");
+  MYSERIAL.print(Locn);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"measurename\":");
+  MYSERIAL.print("\"");
+  MYSERIAL.print(Measure1);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"unitofmeasure\":");
+  MYSERIAL.print("\"");
+  MYSERIAL.print(Units1);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"value\":");
   MYSERIAL.print(tempf, 1);
-  MYSERIAL.print(",\"tempH\":");
-  MYSERIAL.print(temp_h, 1);
-  MYSERIAL.print(",\"rainin\":");
-  MYSERIAL.print(rainin, 2);
-  MYSERIAL.print(",\"dailyrainin\":");
-  MYSERIAL.print(dailyrainin, 2);
-  MYSERIAL.print(",\"prss\":");
-  MYSERIAL.print(pressure, 2);
-  MYSERIAL.print(",\"batt\":");
-  MYSERIAL.print(batt_lvl, 2);
-  MYSERIAL.print(",\"lght\":");
-  MYSERIAL.print(light_lvl, 2);
+  MYSERIAL.println("}");
+  
+  
+  // print string for humidity
+  MYSERIAL.print("{");
+  MYSERIAL.print("\"guid\":");
+  MYSERIAL.print("\"");
+  MYSERIAL.print(GUID2);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"organization\":");
+  MYSERIAL.print("\"");
+  MYSERIAL.print(Org);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"displayname\":");
+  MYSERIAL.print("\"");
+  MYSERIAL.print(Disp);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"location\":");
+  MYSERIAL.print("\"");
+  MYSERIAL.print(Locn);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"measurename\":");
+  MYSERIAL.print("\"");
+  MYSERIAL.print(Measure2);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"unitofmeasure\":");
+  MYSERIAL.print("\"");
+  MYSERIAL.print(Units2);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"value\":");
+  MYSERIAL.print(humidity, 1);
   MYSERIAL.println("}");
 
+  // print string for light
+  MYSERIAL.print("{");
+  MYSERIAL.print("\"guid\":");
+  MYSERIAL.print("\"");
+  MYSERIAL.print(GUID3);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"organization\":");
+  MYSERIAL.print("\"");
+  MYSERIAL.print(Org);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"displayname\":");
+  MYSERIAL.print("\"");
+  MYSERIAL.print(Disp);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"location\":");
+  MYSERIAL.print("\"");
+  MYSERIAL.print(Locn);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"measurename\":");
+  MYSERIAL.print("\"");
+  MYSERIAL.print(Measure3);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"unitofmeasure\":");
+  MYSERIAL.print("\"");
+  MYSERIAL.print(Units3);
+  MYSERIAL.print("\"");
+  MYSERIAL.print(",\"value\":");
+  MYSERIAL.print(light_lvl, 2);
+  MYSERIAL.println("}");
+*/
 }
 
 

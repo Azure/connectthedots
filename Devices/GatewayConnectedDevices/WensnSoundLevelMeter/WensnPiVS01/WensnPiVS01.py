@@ -23,10 +23,15 @@ import sys
 import usb.core
 import socket
 import time
+import datetime
 
-SensorSubject = "sound"                                 # determines how Azure website will chart the data
-DeviceDisplayName = "Wensn SLM 01"                      # will be the label for the curve on the chart
-DeviceGUID = "92B6F1F2-EA6B-4A72-8B8A-3720AF242D13"     # ensures all the data from this sensor appears on the same chart. You can use the Tools/Create GUID in Visual Studio to create
+#SensorSubject = "sound"                                 # determines how Azure website will chart the data
+Org = "My organization";
+Disp = "Wensn SLM 01"                      # will be the label for the curve on the chart
+GUID = "nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn"     # ensures all the data from this sensor appears on the same chart. You can use the Tools/Create GUID in Visual Studio to create
+Locn = "here";
+Measure = "sound";
+Units = "decibels";
 Vendor = 0x16c0                                         # Vendor ID for Wensn
 Product=0x5dc                                           # Product ID for Wensn 1361
 
@@ -55,10 +60,15 @@ print(hex(dev.idVendor) + ", " + hex(dev.idProduct))
  
 conn, addr = s.accept()
 while 1:
-	ret = dev.ctrl_transfer(0xC0, 4, 0, 0, 200)
-	dB = (ret[0] + ((ret[1] & 3) * 256)) * 0.1 + 30
-	JSONdB="{\"dspl\":\"" +DeviceDisplayName +"\",\"Subject\":\"" + SensorSubject +"\",\"DeviceGUID\":\"" + DeviceGUID + "\",\"soundLvl\":" +str(dB) + "}"
-	conn.send("<" + JSONdB + ">");                  # sends to gateway over socket interface
-	print(JSONdB)                                   # print only for debugging purposes
-	time.sleep(1)
+        ret = dev.ctrl_transfer(0xC0, 4, 0, 0, 200)
+        dB = (ret[0] + ((ret[1] & 3) * 256)) * 0.1 + 30
+        timeStr = datetime.datetime.utcnow().isoformat()
+        try:
+                JSONdB="{\"value\":"+str(dB)+",\"guid\":\""+GUID+"\",\"organization\":\""+Org+"\",\"displayname\":\""+Disp +"\",\"unitofmeasure\":\""+Units+"\",\"measurename\":\""+Measure+"\",\"location\":\""+Locn+"\",\"timecreated\":\""+timeStr+"\"}"
+                conn.send("<" + JSONdB + ">");                  # sends to gateway over socket interface
+                print(JSONdB)                                   # print only for debugging purposes
+        except Exception as msg:
+                print(msg[1])
+                
+        time.sleep(1)
 s.close()

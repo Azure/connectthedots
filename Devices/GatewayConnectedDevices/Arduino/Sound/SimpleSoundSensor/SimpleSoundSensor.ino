@@ -21,23 +21,23 @@
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= 
  Arduino code to read data from a simple sound sensor, then augment and format as JSON to send via serial connection.
  Example of sending sound level data to Microsoft Azure and analyzing with Azure Stream Analytics or Azure Machine Learning.
- Real time output viewable at http://connectthedots.msopentech.com .
 */
 // Constants used for the ConnectTheDots project
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-// SensorSubject value determines how Azure website will chart the data
-// DeviceDisplayName value will be the label for the curve on the chart
-// DeviceGUID ensures all the data from this sensor appears on the same chart
+// Constants used to add self-describing fields to the data before sending to Azure
+// Disp value will be the label for the curve on the chart
+// GUID ensures all the data from this sensor appears on the same chart
 // You can use Visual Studio to create DeviceGUID and copy it here. In VS, On the Tools menu, click Create GUID. The Create GUID
 // tool appears with a GUID in the Result box. Click Copy, and paste below.
-
-// Constants used to add self-describing fields to the data before sending to Azure
-char SensorSubject[] = "sound";    // determines how Azure website will chart the data
-char DeviceDisplayName[] = "Hex Sound Sensor 01";   // will be the label for the curve on the chart
-char DeviceGUID[] = "898A4B4F-80B7-4BA0-B4B1-186655336472";   // ensures all the data from this sensor appears on the same chart. You can use the Tools/Create GUID in Visual Studio to create.
-char SensorDataType[]="soundLvl";   // describes what is being sent to the gateway. Interpreted by the website.
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
+//
+char GUID[] = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx";
+char Org[] = "My organization";
+char Disp[] = "Arduino + Sound sensor";
+char Locn[] = "here";
+char Measure[] = "Sound level";
+char Units[] = "units";
+char buffer[300];
+char dtostrfbuffer[15];
 
 const int SOUND_PIN = A2;
 const int SAMPLE_FREQUENCY = 250;
@@ -57,26 +57,32 @@ void loop() {
     high = value;
   }
   if (millis() - hightime >= SAMPLE_FREQUENCY) {
-    Serial.print("{");
-    Serial.print("\"dspl\":");
-    Serial.print("\"");
-    Serial.print(DeviceDisplayName);
-    Serial.print("\"");
-    Serial.print(",\"Subject\":");
-    Serial.print("\"");
-    Serial.print(SensorSubject);
-    Serial.print("\"");
-    Serial.print(",\"DeviceGUID\":");
-    Serial.print("\"");
-    Serial.print(DeviceGUID);
-    Serial.print("\"");
-    Serial.print(",\"");
-    Serial.print(SensorDataType);
-    Serial.print("\":");
-    Serial.print(high);
-    Serial.println("}");
+   
+      // print string for temperature, separated by line for ease of reading
+  // sent as one Serial.Print to reduce risk of serial errors
+  
+  memset(buffer,'\0',sizeof(buffer));
+  strcat(buffer,"{");
+  strcat(buffer,"\"guid\":\"");
+  strcat(buffer,GUID);
+  strcat(buffer,"\",\"organization\":\"");
+  strcat(buffer,Org);
+  strcat(buffer,"\",\"displayname\":\"");
+  strcat(buffer,Disp);
+  strcat(buffer,"\",\"location\":\"");
+  strcat(buffer,Locn);  
+  strcat(buffer,"\",\"measurename\":\"");
+  strcat(buffer,Measure);
+  strcat(buffer,"\",\"unitofmeasure\":\"");
+  strcat(buffer,Units);
+  strcat(buffer,"\",\"value\":");
+  strcat(buffer,dtostrf(high,8,2,dtostrfbuffer));
+  strcat(buffer,"}");
+  Serial.println(buffer);
+  delay(100); //just here to slow down the output so it is easier to read
     
-    high = 0;
-    hightime = millis();
+  high = 0;
+  hightime = millis();
+  
   }
 }

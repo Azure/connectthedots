@@ -51,28 +51,49 @@ int tempPin = -1; // The on-board thermal sensor for Galileo V1 boards
 // structure used to store application settings read from XML file
 typedef struct tAppSettings
 {
-	char deviceDisplayName[128];
-	char deviceID[128];
 	char sbnamespace[128];  //i.e. ConnectTheDots-ns
 	char entity[128];       //EventHub Name
 	char issuerName[128];   //Key Issuer
 	char issuerKey[128];    //i.e. "44CHARACTERKEYFOLLOWEDBYEQUALSSIGN=" //****URL DECODED*****
 	char* sbDomain = "servicebus.windows.net";
 	char* subject = "wthr";
+	char name[128];
+	char guid[128];
+	char location[128];
+	char organization[128];
 };
-
 tAppSettings appSettings;
 
-// Utility function to retreive and store specific app settings
-void StoreConfigurationAttribute(char* key, char* value)
+typedef struct tSensorSettings
 {
-	if (!strcmp(key, "DeviceName")) strncpy(appSettings.deviceDisplayName,value, strlen(value));
-	else if (!strcmp(key, "DeviceID")) strncpy(appSettings.deviceID, value, strlen(value));
-	else if (!strcmp(key, "NameSpace")) strncpy(appSettings.sbnamespace, value, strlen(value));
-	else if (!strcmp(key, "KeyName")) strncpy(appSettings.issuerName, value, strlen(value));
-	else if (!strcmp(key, "Key")) strncpy(appSettings.issuerKey, value, strlen(value));
-	else if (!strcmp(key, "EventHubName")) strncpy(appSettings.entity, value, strlen(value));
+	char measurename[128];
+	char unitofmeasure[128];
+	double value;
+};
+
+tSensorSettings* sensorSettings;
+int sensorCount = 0;
+
+
+// Utility function to retreive and store specific app settings
+void StoreAppConfigurationAttribute(char* key, char* value)
+{
+	if (!strcmp(key, "namespace")) strncpy(appSettings.sbnamespace, value, strlen(value)+1);
+	else if (!strcmp(key, "keyname")) strncpy(appSettings.issuerName, value, strlen(value) + 1);
+	else if (!strcmp(key, "key")) strncpy(appSettings.issuerKey, value, strlen(value) + 1);
+	else if (!strcmp(key, "eventhubname")) strncpy(appSettings.entity, value, strlen(value) + 1);
+	else if (!strcmp(key, "name")) strncpy(appSettings.name, value, strlen(value) + 1);
+	else if (!strcmp(key, "guid")) strncpy(appSettings.guid, value, strlen(value) + 1);
+	else if (!strcmp(key, "location")) strncpy(appSettings.location, value, strlen(value) + 1);
+	else if (!strcmp(key, "organization")) strncpy(appSettings.organization, value, strlen(value) + 1);
 }
+
+void StoreSensorConfigurationAttribute(char* key, char* value, int sensorIndex)
+{
+	if (!strcmp(key, "measurename")) strncpy(sensorSettings[sensorIndex].measurename, value, strlen(value) + 1);
+	else if (!strcmp(key, "unitofmeasure")) strncpy(sensorSettings[sensorIndex].unitofmeasure, value, strlen(value) + 1);
+}
+
 
 // Read configuration file which is an XML file
 void ReadConfiguration(char* filePath)
@@ -84,13 +105,45 @@ void ReadConfiguration(char* filePath)
 	xml_document<> doc;
 	doc.parse<0>(xmlFile.data());
 	
-	// parse for settings
+	// parse for app settings
 	xml_node<> *node = doc.first_node("configuration")->first_node("appSettings")->first_node("add");
 	while (node)
 	{
-		StoreConfigurationAttribute(node->first_attribute("key")->value(), node->first_attribute("value")->value());
+		StoreAppConfigurationAttribute(node->first_attribute("key")->value(), node->first_attribute("value")->value());
 		node = node->next_sibling("add");
 	}
+
+	// Count number of sensors listed in the settings file
+	node = doc.first_node("configuration")->first_node("sensorSettings");
+	while (node)
+	{
+		sensorCount++;
+		node = node->next_sibling("sensorSettings");
+	}
+
+	if (sensorCount > 0)
+	{
+		// Allocate table for sensors settings
+		sensorSettings = new tSensorSettings[sensorCount];
+		ZeroMemory(sensorSettings, sensorCount * sizeof(tSensorSettings));
+
+		// parse for sensors settings
+		int sensorIndex = 0;
+		node = doc.first_node("configuration")->first_node("sensorSettings");
+		while (node)
+		{
+			xml_node<> *sensorNode = node->first_node("add");
+			while (sensorNode)
+			{
+				StoreSensorConfigurationAttribute(sensorNode->first_attribute("key")->value(), sensorNode->first_attribute("value")->value(), sensorIndex);
+				sensorNode = sensorNode->next_sibling("add");
+			}
+
+			node = node->next_sibling("sensorSettings");
+			sensorIndex++;
+		}
+	}
+
 }
 
 int _tmain(int argc, _TCHAR* argv[])
@@ -144,7 +197,8 @@ typedef struct SensorData
 	float hmdt;
 };
 
-SensorData ReadSensorData()
+//SensorData ReadSensorData()
+void ReadSensorData()
 {
 	SensorData data;
 
@@ -163,7 +217,12 @@ SensorData ReadSensorData()
 	data.tempF = (data.tempC *9.0) / 5.0 + 32.0;
 	data.hmdt = myHumidity.readHumidity();
 #endif
-	return data;
+
+	for (int i = 0; i < sensorCount; i++)
+	{
+		if (!strcmp(sensorSettings[i].measurename, "Temperature")) sensorSettings[i].value = data.tempF;
+		else if (!strcmp(sensorSettings[i].measurename, "Humidity")) sensorSettings[i].value = data.hmdt;
+	}
 }
 
 void GetTimeNow(pn_timestamp_t* pUtcTime, char* pTimeNow)
@@ -178,25 +237,51 @@ void GetTimeNow(pn_timestamp_t* pUtcTime, char* pTimeNow)
 	puts(pTimeNow);
 }
 
+WCHAR* char2WCHAR(char* text)
+{
+	WCHAR* output = (WCHAR*) calloc(strlen(text) + 1, sizeof(WCHAR));
+	mbstowcs(output, text, strlen(text));
+	return output;
+}
+
 void SendAMQPMessage(char* message, pn_timestamp_t utcTime)
 {
-	sender(	appSettings.sbnamespace,
+	sender(appSettings.sbnamespace,
 			appSettings.entity,
 			appSettings.issuerName,
 			appSettings.issuerKey,
 			appSettings.sbDomain,
-			appSettings.deviceDisplayName,
+		appSettings.name,
 			appSettings.subject,
 			message,
 			utcTime);
 }
 
-WCHAR* char2WCHAR(char* text)
+void SendSensorData(tSensorSettings sensorSettings, pn_timestamp_t utcTime, char* timeNow)
 {
-	WCHAR* output = (WCHAR*) calloc(strlen(text), sizeof(WCHAR)+1);
-	mbstowcs(output, text, strlen(text));
-	return output;
+	// Create JSON packet
+	JSONObject jsonData;
+
+	jsonData[L"unitofmeasure"] = new JSONValue(char2WCHAR(sensorSettings.unitofmeasure));
+	jsonData[L"measurename"] = new JSONValue(char2WCHAR(sensorSettings.measurename));
+	jsonData[L"location"] = new JSONValue(char2WCHAR(appSettings.location));
+	jsonData[L"organization"] = new JSONValue(char2WCHAR(appSettings.organization));
+	jsonData[L"guid"] = new JSONValue(char2WCHAR(appSettings.guid));
+	jsonData[L"displayname"] = new JSONValue(char2WCHAR(appSettings.name));
+	jsonData[L"value"] = new JSONValue((double) sensorSettings.value);
+	jsonData[L"subject"] = new JSONValue(char2WCHAR(appSettings.subject));
+	jsonData[L"timecreated"] = new JSONValue(char2WCHAR(timeNow));
+
+	JSONValue *value = new JSONValue(jsonData);
+	std::wstring serializedData = value->Stringify();
+	char* msgText = (char*) calloc(serializedData.length() + 1, sizeof(char));
+	wcstombs(msgText, serializedData.c_str(), serializedData.length() * sizeof(char));
+
+	// Send AMQP message
+	SendAMQPMessage(msgText, utcTime);
 }
+
+
 
 // the loop routine runs over and over again forever:
 void loop()
@@ -207,26 +292,12 @@ void loop()
 	GetTimeNow(&utcTime, timeNow);
 
 	// Read data from sensors
-	SensorData data = ReadSensorData();
-	
+	ReadSensorData();
 
-	// Create JSON packet
-	JSONObject jsonData;
-
-	jsonData[L"temp"] = new JSONValue((double)data.tempF);
-	jsonData[L"hmdt"] = new JSONValue((double) data.hmdt);
-	jsonData[L"subject"] = new JSONValue(char2WCHAR(appSettings.subject));
-	jsonData[L"time"] = new JSONValue(char2WCHAR(timeNow));
-	jsonData[L"from"] = new JSONValue(char2WCHAR(appSettings.deviceID));
-	jsonData[L"dspl"] = new JSONValue(char2WCHAR(appSettings.deviceDisplayName));
-
-	JSONValue *value = new JSONValue(jsonData);
-	std::wstring serializedData = value->Stringify();
-	char* msgText = (char*) calloc(serializedData.length() + 1, sizeof(char));
-	wcstombs(msgText, serializedData.c_str(), serializedData.length() * sizeof(char));
-
-	// Send AMQP message
-	SendAMQPMessage(msgText, utcTime);
-
-	Sleep(1000);
+	// Send data for each sensor
+	for (int sensorIndex = 0; sensorIndex < sensorCount; sensorIndex++)
+	{
+		SendSensorData(sensorSettings[sensorIndex], utcTime, timeNow);
+		Sleep(500);
+	}
 }

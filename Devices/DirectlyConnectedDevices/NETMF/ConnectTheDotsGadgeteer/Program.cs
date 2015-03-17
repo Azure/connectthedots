@@ -56,10 +56,12 @@ namespace ConnectTheDotsGadgeteer
     public partial class Program
     {
         // Azure Event Hub connection information
-        const string AMQPAddress = "amqps://{key-name}:{shared-key}@{namespace}.servicebus.windows.net";
-        const string EventHub = "{EventHub-name}";
-        const string DeviceName = "{device-name}";
-        const string DeviceID = "d011897e0976423ba65d07bc21bef6b9";
+        const string AMQPAddress = "amqps://{key-name}:{key}@{namespace-name}.servicebus.windows.net"; // Azure event hub connection string
+        const string EventHub = "{eventhub-name}"; // Azure event hub name
+        const string SensorName = "Gadgeteer"; // Name of the device you want to display
+        const string SensorGUID = "{GUID}"; // unique GUID per device. Use GUIDGEN to generate new one
+        const string Organization = "MSOpenTech"; // Your organization name
+        const string Location = "My Room"; // Location of the device
 
         // Define the frequency at which we want the device to send its sensor data (in milliseconds)
         const int SendFrequency = 1000;
@@ -221,22 +223,30 @@ namespace ConnectTheDotsGadgeteer
             Debug.Print("Temperature=" + FahrenheitTemp.ToString());
             Debug.Print("Humidity=" + e.RelativeHumidity.ToString());
 
-            // Create hashtable for data
-            Hashtable hashtable = new Hashtable();
-            hashtable.Add("hmdt", e.RelativeHumidity);
-            hashtable.Add("temp", FahrenheitTemp);
-            hashtable.Add("Subject", "wthr");
-            hashtable.Add("time", DateTime.UtcNow);
-            hashtable.Add("from", DeviceID);
-            hashtable.Add("dspl", DeviceName);
-
-            // Serialize hashtable into JSON
-            JsonSerializer serializer = new JsonSerializer(DateTimeFormat.Default);
-            string payload = serializer.Serialize(hashtable);
-
             // send to Event Hub
-            SendAMQPMessage(payload);
+            SendAMQPMessage(FormatMessage("Temperature", "F", FahrenheitTemp));
+            SendAMQPMessage(FormatMessage("Humidity", "%", e.RelativeHumidity));
         }
+
+		string FormatMessage(string measureName, string unitOfMeasure, double value)
+		{
+			// Create hashtable for data
+			Hashtable hashtable = new Hashtable();
+			hashtable.Add("organization", Organization);
+			hashtable.Add("location", Location);
+			hashtable.Add("guid", SensorGUID);
+			hashtable.Add("displayname", SensorName);
+			hashtable.Add("unitofmeasure", unitOfMeasure);
+			hashtable.Add("measurename", measureName);
+			hashtable.Add("value", value);
+			hashtable.Add("timecreated", DateTime.UtcNow);
+
+			// Serialize hashtable into JSON
+			JsonSerializer serializer = new JsonSerializer(DateTimeFormat.Default);
+			string payload = serializer.Serialize(hashtable);
+
+			return payload;
+		}
 
         // Send a message to Azure Event Hubs using AMQP protocol
         // we are using the sender resource created in the intialization
@@ -245,30 +255,32 @@ namespace ConnectTheDotsGadgeteer
             try
             {
                 // 0 indicates the method is not in use
-                if (0 == Interlocked.Exchange(ref IsSendingMessage, 1))
-                {
-                    // Create the AMQP message
-                    var message = new Message(new Data() { Binary = Encoding.UTF8.GetBytes(payload) });
-                    message.Properties = new Properties()
-                    {
-                        Subject = "wthr",
-                        CreationTime = DateTime.UtcNow,
-                        ContentType = "text/json",
-                    };
+				if (0 == Interlocked.Exchange(ref IsSendingMessage, 1))
+				{
+					// Create the AMQP message
+					var encodedTextData = Encoding.UTF8.GetBytes(payload);
+					var message = new Message()
+					{
+						BodySection = new Data()
+						{
+							Binary = encodedTextData
+						},
+						Properties = new Properties()
+						{
+							CreationTime = DateTime.UtcNow,
+							ContentType = "text/json",
+						}
+					};
 
-                    message.MessageAnnotations = new MessageAnnotations();
-                    message.MessageAnnotations[new Symbol("x-opt-partition-key")] = DeviceID;
-                    message.ApplicationProperties = new ApplicationProperties();
-                    message.ApplicationProperties["time"] = message.Properties.CreationTime;
-                    message.ApplicationProperties["from"] = DeviceID;
-                    message.ApplicationProperties["dspl"] = DeviceName;
-                    //message.Properties.ContentType = "text/json";
+					message.MessageAnnotations = new MessageAnnotations();
+					message.MessageAnnotations[new Symbol("x-opt-partition-key")] = SensorGUID;
+					message.ApplicationProperties = new ApplicationProperties();
 
-                    sender.Send(message);
+					sender.Send(message);
 
-                    // release lock
-                    Interlocked.Exchange(ref IsSendingMessage, 0);
-                }
+					// release lock
+					Interlocked.Exchange(ref IsSendingMessage, 0);
+				}
             }
             catch (Exception e)
             {
