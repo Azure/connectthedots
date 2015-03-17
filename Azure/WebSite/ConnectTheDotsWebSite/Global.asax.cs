@@ -80,6 +80,7 @@ namespace ConnectTheDotsWebSite
 
             var options = new EventProcessorOptions();
             options.ExceptionReceived += WebSocketEventProcessor.ExceptionReceived;
+            options.InitialOffsetProvider = (partitionId) => DateTime.UtcNow;
 
             Trace.TraceInformation("Registering EventProcessor for Devices");
             processorHostDevices.RegisterEventProcessorAsync<WebSocketEventProcessor>(options).Wait();

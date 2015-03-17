@@ -705,7 +705,7 @@ $(document).ready(function () {
             }
 
             // If the message is an alert, we need to display it in the datatable
-            if (eventObject.alerttype != null && isBulking == false) {
+            if (eventObject.alerttype != null) { // && isBulking == false) {
                 var table = $('#alertTable').DataTable();
                 var time = new Date(eventObject.timestart);
 
