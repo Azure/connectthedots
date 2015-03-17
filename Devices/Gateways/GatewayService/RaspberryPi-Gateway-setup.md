@@ -81,7 +81,7 @@ name that you assigned to your gateway. It is important that the key is being ur
 
 ## Wifi ##
 
-If you want to use Wifi instead of Ethernet in your configuration, you can follow [these instructions](Wifi-Configuration.md)
+If you want to use Wifi instead of Ethernet in your configuration, you can follow [these instructions](WiFi-Configuration.md)
 
 ## Log file ##
 
