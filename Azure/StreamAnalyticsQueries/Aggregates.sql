@@ -34,7 +34,7 @@ Select
 From
     DevicesInput TIMESTAMP BY timecreated
 where
-    measurename = 'Temperature'
+    measurename = 'temperature' OR measurename='Temperature'
 Group by
     measurename, unitofmeasure,
     TumblingWindow(Second, 10)

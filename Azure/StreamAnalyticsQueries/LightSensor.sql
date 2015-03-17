@@ -28,5 +28,5 @@ SELECT 'LightSensor' as alerttype,
     max(time) as timestart
 FROM DevicesInput timestamp by time
 Group by TumblingWindow(s, 5), dspl
-having avg(lght) < 0.02 
+having avg(light) < 0.02 
     and count(*) > 3

@@ -36,7 +36,7 @@ SELECT
 FROM 
     DevicesInput TIMESTAMP BY timecreated
 WHERE
-    measurename = 'Temperature'
+    measurename = 'temperature' OR measurename = 'Temperature'
 GROUP BY 
     displayname, guid, measurename, unitofmeasure, location, organization,
     TumblingWindow(Second, 5)
