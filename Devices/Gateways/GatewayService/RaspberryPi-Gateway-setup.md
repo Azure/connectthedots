@@ -59,17 +59,29 @@ name that you assigned to your gateway. It is important that the key is being ur
 		sudo chmod 755 /home/pi/RaspberryPiGateway/autorun.sh
    
 
-* On the Raspberry Pi, modify /etc/rc.local by adding one line to start the gateway program on every boot (OK to skip this if you prefer to run manually after every reboot via /autorun.sh from a shell/SSH session):
+* On the Raspberry Pi, modify /etc/rc.local with nano:
     
 		Sudo nano /etc/rc.local
  
-
-* When you are in the nano editor, insert or change the reference to autorun.sh to be the following:
+* When you are in the nano editor, edit rc.local to the following:
     
 		/home/pi/RaspberryPiGateway/autorun.sh &
- 
+		#!/bin/sh -e
+		#
+		# rc.local
+		#
+		export GW_ACCOUNT_HOME=/home/pi
+		export GW_HOME=$GW_ACCOUNT_HOME/ctdgtwy
+		if [ ! -d $GW_HOME/logs ]
+		  then
+		   sudo mkdir $GW_HOME/logs
+		fi
+		sudo echo "$(date) booting..." >> $GW_HOME/logs/booting.log
+		$(cd $GW_HOME/ ; sh deploy_and_start_ctd_on_boot.sh) &
+		exit 0
 
-* To exit the nano editor use Ctrl-x. To have the new settings take effect, reboot the Raspberry Pi by cycling the power or by issuing the command 
+
+* To exit the nano editor use Ctrl-x, and press Y to save the changes. To have the new settings take effect, reboot the Raspberry Pi by cycling the power or by issuing the command 
     
 		Sudo reboot
 
