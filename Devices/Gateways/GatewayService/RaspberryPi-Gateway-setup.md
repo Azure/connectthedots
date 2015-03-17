@@ -81,7 +81,7 @@ name that you assigned to your gateway. It is important that the key is being ur
 
 ## Wifi ##
 
-If you want to use Wifi instead of Ethernet in your configuration, you can follow online instructions such as [this one](http://www.raspberrypi.org/forums/viewtopic.php?f=26&t=26795)
+If you want to use Wifi instead of Ethernet in your configuration, you can follow [these instructions](Wifi-Configuration.md)
 
 ## Log file ##
 
