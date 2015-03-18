@@ -17,34 +17,37 @@
       <UniqueIdentifier>{b0912147-3b8c-46a4-bf07-f1ec27d12591}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\amqp">
-      <UniqueIdentifier>{4e252325-736e-4120-8986-b2022fd09764}</UniqueIdentifier>
+      <UniqueIdentifier>{3e27e97d-e9c8-4f4f-8603-f2374afe726f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\grove">
+      <UniqueIdentifier>{92ad0d70-7a37-4ff6-a993-a05b0c836e9e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\amqp">
-      <UniqueIdentifier>{81266893-39df-453d-9977-f3bd27076761}</UniqueIdentifier>
+      <UniqueIdentifier>{cd924e6d-1f69-4324-ab76-f03f3988d67f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\sensors">
-      <UniqueIdentifier>{7d9058b3-aaf2-4b74-9438-ba514acf8410}</UniqueIdentifier>
+    <Filter Include="Header Files\grove">
+      <UniqueIdentifier>{1fb1d768-abef-4f28-b8c1-3802c759090e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\sensors\grove">
-      <UniqueIdentifier>{5a659956-c050-499e-8d6b-26bad6f87529}</UniqueIdentifier>
+    <Filter Include="Header Files\xml">
+      <UniqueIdentifier>{2b32385d-2c88-467b-8560-d1c890b95f97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\weatherShield">
+      <UniqueIdentifier>{70c04909-625c-48e6-9409-13e6f8557ffe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\json">
+      <UniqueIdentifier>{0527e247-7397-4120-a0da-ee0f83b59719}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\weatherShield">
+      <UniqueIdentifier>{552e2321-0194-43e2-8a8e-52518609ce25}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\json">
-      <UniqueIdentifier>{531eea3b-043f-4a56-8712-d7645509a033}</UniqueIdentifier>
+      <UniqueIdentifier>{2f05e74f-2bea-40d3-a5f2-ff7bf92d965b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sensors">
+      <UniqueIdentifier>{9e3df378-7277-44fe-b6ed-f1a82ac00496}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\sensors">
-      <UniqueIdentifier>{d8671c8c-05da-4e09-9e4f-09bf2f99af21}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\sensors\grove">
-      <UniqueIdentifier>{2015c597-ee4e-4773-a680-43c906fc0ffb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\data">
-      <UniqueIdentifier>{4ccd1f07-8a90-4242-a94a-b078e2781e4e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\data\json">
-      <UniqueIdentifier>{fa5b3df6-bcba-4fd4-b6fc-9c0e2e30d5a1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\data\xml">
-      <UniqueIdentifier>{09349ecf-5a01-426b-9f09-6e368f5fd0ec}</UniqueIdentifier>
+      <UniqueIdentifier>{cca0dd09-de6a-4fdb-bdd5-8e97582bebba}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -72,47 +75,80 @@
     <ClInclude Include="amqp\AMQPuuid.h">
       <Filter>Header Files\amqp</Filter>
     </ClInclude>
-    <ClInclude Include="amqp\IAMQPData.h">
-      <Filter>Header Files\amqp</Filter>
+    <ClInclude Include="grove\GroveLight.h">
+      <Filter>Header Files\grove</Filter>
+    </ClInclude>
+    <ClInclude Include="grove\grove.h">
+      <Filter>Header Files\grove</Filter>
+    </ClInclude>
+    <ClInclude Include="grove\GroveTemperature.h">
+      <Filter>Header Files\grove</Filter>
     </ClInclude>
     <ClInclude Include="amqp\IMessage.h">
+      <Filter>Header Files\amqp</Filter>
+    </ClInclude>
+    <ClInclude Include="amqp\IAMQPData.h">
       <Filter>Header Files\amqp</Filter>
     </ClInclude>
     <ClInclude Include="amqp\Sender.h">
       <Filter>Header Files\amqp</Filter>
     </ClInclude>
-    <ClInclude Include="amqp\TextMessage.h">
-      <Filter>Header Files\amqp</Filter>
+    <ClInclude Include="rapidxml.hpp">
+      <Filter>Header Files\xml</Filter>
     </ClInclude>
-    <ClInclude Include="grove\grove.h">
-      <Filter>Header Files\sensors\grove</Filter>
-    </ClInclude>
-    <ClInclude Include="grove\GroveLight.h">
-      <Filter>Header Files\sensors\grove</Filter>
-    </ClInclude>
-    <ClInclude Include="grove\GroveTemperature.h">
-      <Filter>Header Files\sensors\grove</Filter>
-    </ClInclude>
-    <ClInclude Include="HTU21D.h">
-      <Filter>Header Files\sensors</Filter>
+    <ClInclude Include="rapidxml_utils.hpp">
+      <Filter>Header Files\xml</Filter>
     </ClInclude>
     <ClInclude Include="MPL3115A2.h">
-      <Filter>Header Files\sensors</Filter>
+      <Filter>Header Files\weatherShield</Filter>
     </ClInclude>
-    <ClInclude Include="JSONValue.h">
-      <Filter>Header Files\data\json</Filter>
-    </ClInclude>
-    <ClInclude Include="JSON.h">
-      <Filter>Header Files\data\json</Filter>
+    <ClInclude Include="HTU21D.h">
+      <Filter>Header Files\weatherShield</Filter>
     </ClInclude>
     <ClInclude Include="amqp\JsonMessage.h">
       <Filter>Header Files\amqp</Filter>
     </ClInclude>
-    <ClInclude Include="rapidxml.hpp">
-      <Filter>Header Files\data\xml</Filter>
+    <ClInclude Include="JSON.h">
+      <Filter>Header Files\json</Filter>
     </ClInclude>
-    <ClInclude Include="rapidxml_utils.hpp">
-      <Filter>Header Files\data\xml</Filter>
+    <ClInclude Include="JSONValue.h">
+      <Filter>Header Files\json</Filter>
+    </ClInclude>
+    <ClInclude Include="amqp\TextMessage.h">
+      <Filter>Header Files\amqp</Filter>
+    </ClInclude>
+    <ClInclude Include="Configuration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sensors\WeatherShield.h">
+      <Filter>Header Files\sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="sensors\ISensor.h">
+      <Filter>Header Files\sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="sensors\Sensors.h">
+      <Filter>Header Files\sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="sensors\FakeSensor.h">
+      <Filter>Header Files\sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="sensors\GroveTemperatureSensor.h">
+      <Filter>Header Files\sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="sensors\GroveLightSensor.h">
+      <Filter>Header Files\sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="sensors\WeatherShieldHumiditySensor.h">
+      <Filter>Header Files\sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="sensors\WeatherShieldTemperatureSensor.h">
+      <Filter>Header Files\sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="sensors\WeatherShieldPressureSensor.h">
+      <Filter>Header Files\sensors</Filter>
+    </ClInclude>
+    <ClInclude Include="sensors\OnBoardTemperatureSensor.h">
+      <Filter>Header Files\sensors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -134,17 +170,23 @@
     <ClCompile Include="amqp\AMQPuuid.cpp">
       <Filter>Source Files\amqp</Filter>
     </ClCompile>
+    <ClCompile Include="grove\GroveLight.cpp">
+      <Filter>Source Files\grove</Filter>
+    </ClCompile>
+    <ClCompile Include="grove\GroveTemperature.cpp">
+      <Filter>Source Files\grove</Filter>
+    </ClCompile>
     <ClCompile Include="amqp\Sender.cpp">
       <Filter>Source Files\amqp</Filter>
     </ClCompile>
     <ClCompile Include="amqp\TextMessage.cpp">
       <Filter>Source Files\amqp</Filter>
     </ClCompile>
-    <ClCompile Include="grove\GroveLight.cpp">
-      <Filter>Source Files\sensors\grove</Filter>
+    <ClCompile Include="amqp\JsonMessage.cpp">
+      <Filter>Source Files\amqp</Filter>
     </ClCompile>
-    <ClCompile Include="grove\GroveTemperature.cpp">
-      <Filter>Source Files\sensors\grove</Filter>
+    <ClCompile Include="HTU21D.cpp">
+      <Filter>Source Files\weatherShield</Filter>
     </ClCompile>
     <ClCompile Include="JSON.cpp">
       <Filter>Source Files\json</Filter>
@@ -152,14 +194,14 @@
     <ClCompile Include="JSONValue.cpp">
       <Filter>Source Files\json</Filter>
     </ClCompile>
-    <ClCompile Include="HTU21D.cpp">
-      <Filter>Source Files\sensors</Filter>
-    </ClCompile>
     <ClCompile Include="MPL3115A2.cpp">
-      <Filter>Source Files\sensors</Filter>
+      <Filter>Source Files\weatherShield</Filter>
     </ClCompile>
-    <ClCompile Include="amqp\JsonMessage.cpp">
-      <Filter>Source Files\amqp</Filter>
+    <ClCompile Include="Configuration.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sensors\Sensors.cpp">
+      <Filter>Source Files\sensors</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)\Source\LiquidCrystal.cpp">
       <Filter>Source Files</Filter>
@@ -224,14 +266,20 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)\Source\arduino.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sensors\WheaterShield.cpp">
+      <Filter>Source Files\sensors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="ConnectTheDotsGalileo.exe.config" />
-    <None Include="Docs\Intel Galileo setup.md">
+    <None Include="..\Hardware.md">
       <Filter>Docs</Filter>
     </None>
-    <None Include="Docs\Build Libraries.md">
+    <None Include="..\Intel-Galileo-setup.md">
+      <Filter>Docs</Filter>
+    </None>
+    <None Include="..\Libraries.md">
       <Filter>Docs</Filter>
     </None>
   </ItemGroup>

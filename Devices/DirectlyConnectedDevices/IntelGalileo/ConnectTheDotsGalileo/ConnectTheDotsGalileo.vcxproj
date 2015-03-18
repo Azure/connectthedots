@@ -112,6 +112,7 @@
     <ClInclude Include="amqp\JsonMessage.h" />
     <ClInclude Include="amqp\Sender.h" />
     <ClInclude Include="amqp\TextMessage.h" />
+    <ClInclude Include="Configuration.h" />
     <ClInclude Include="grove\grove.h" />
     <ClInclude Include="grove\GroveLight.h" />
     <ClInclude Include="grove\GroveTemperature.h" />
@@ -121,6 +122,16 @@
     <ClInclude Include="MPL3115A2.h" />
     <ClInclude Include="rapidxml.hpp" />
     <ClInclude Include="rapidxml_utils.hpp" />
+    <ClInclude Include="sensors\FakeSensor.h" />
+    <ClInclude Include="sensors\GroveLightSensor.h" />
+    <ClInclude Include="sensors\GroveTemperatureSensor.h" />
+    <ClInclude Include="sensors\ISensor.h" />
+    <ClInclude Include="sensors\OnBoardTemperatureSensor.h" />
+    <ClInclude Include="sensors\Sensors.h" />
+    <ClInclude Include="sensors\WeatherShield.h" />
+    <ClInclude Include="sensors\WeatherShieldHumiditySensor.h" />
+    <ClInclude Include="sensors\WeatherShieldPressureSensor.h" />
+    <ClInclude Include="sensors\WeatherShieldTemperatureSensor.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -132,6 +143,7 @@
     <ClCompile Include="amqp\JsonMessage.cpp" />
     <ClCompile Include="amqp\Sender.cpp" />
     <ClCompile Include="amqp\TextMessage.cpp" />
+    <ClCompile Include="Configuration.cpp" />
     <ClCompile Include="grove\GroveLight.cpp" />
     <ClCompile Include="grove\GroveTemperature.cpp" />
     <ClCompile Include="HTU21D.cpp" />
@@ -139,14 +151,17 @@
     <ClCompile Include="JSONValue.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MPL3115A2.cpp" />
+    <ClCompile Include="sensors\Sensors.cpp" />
+    <ClCompile Include="sensors\WheaterShield.cpp" />
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Hardware.md" />
+    <None Include="..\Intel-Galileo-setup.md" />
+    <None Include="..\Libraries.md" />
     <None Include="ConnectTheDotsGalileo.exe.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Docs\Build Libraries.md" />
-    <None Include="Docs\Intel Galileo setup.md" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
