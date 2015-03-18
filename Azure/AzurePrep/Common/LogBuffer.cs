@@ -26,26 +26,58 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using Microsoft.WindowsAzure;
-    using Microsoft.WindowsAzure.Management.ServiceBus;
+    using System.IO;
 
-    public static class AzureHelper
+    public class LogBuffer
     {
-        public static string[] GetRegions( SubscriptionCloudCredentials creds )
-        {
-            var sbMgmt = new ServiceBusManagementClient( creds );
-            var regionsResponse = sbMgmt.GetServiceBusRegionsAsync( ).Result;
+        private readonly List<string>         _Buffer;
+        private readonly Action<string>       _OnMessageAdd;
 
-            int currentRegion = 0, regionsCount = regionsResponse.Count( );
-            string[] regions = new string[ regionsCount ];
-            foreach( var region in regionsResponse )
+        //--//
+
+        public LogBuffer( Action<string> onMessageAdd )
+        {
+            _Buffer = new List<string>( );
+            _OnMessageAdd = onMessageAdd;
+        }
+
+        public void Add( string messageLine )
+        {
+            lock( _Buffer )
             {
-                regions[ currentRegion++ ] = region.FullName;
+                _Buffer.Add( messageLine );
+
+                if ( _OnMessageAdd != null )
+                {
+                    _OnMessageAdd.Invoke( messageLine );
+                }
+            }
+        }
+
+        public bool FlushToFile( string fileName )
+        {
+            try
+            {
+                lock( _Buffer )
+                {
+                    using( StreamWriter file = new StreamWriter( fileName ) )
+                    {
+                        foreach( var messageLine in _Buffer )
+                        {
+                            file.WriteLine( messageLine );
+                        }
+                        file.Flush( );
+                        file.Close( );
+                    }
+                    _Buffer.Clear( );
+                }
+            }
+            catch ( Exception )
+            {
+                return false;
             }
 
-            return regions;
+            return true;
         }
     }
 }

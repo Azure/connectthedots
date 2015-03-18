@@ -22,9 +22,6 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-
-
-
 namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
 {
     using System;
@@ -68,6 +65,16 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             public EventHubDescription ehDevices = null;
             public EventHubDescription ehAlerts = null;
         }
+
+        //--//
+
+        private static readonly LogBuffer _ConsoleBuffer = new LogBuffer(
+            ( m ) => {
+                Console.WriteLine( m );
+            }
+        );
+
+        //--//
 
         // from publish settings
         X509Certificate2 ManagementCertificate;
@@ -126,38 +133,50 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             AzurePrepInputs inputs;
             if( !GetInputs( out inputs ) )
             {
-                Console.WriteLine("Error while getting inputs.");
-                Console.WriteLine("Press Enter to continue...");
-                Console.ReadLine();
+                Console.WriteLine( "Error while getting inputs." );
+                Console.WriteLine( "Press Enter to continue..." );
+                Console.ReadLine( );
                 return false;
             }
 
             AzurePrepOutputs createResults = CreateEventHub( inputs );
             if( createResults == null )
             {
-                Console.WriteLine("Error while creating Event Hubs.");
-                Console.WriteLine("Press Enter to continue...");
+                Console.WriteLine( "Error while creating Event Hubs." );
+                Console.WriteLine( "Press Enter to continue..." );
                 Console.ReadLine();
                 return false;
             }
 
             #region print results
 
-            Console.WriteLine( );
-            Console.WriteLine( "Service Bus management connection string (i.e. for use in Service Bus Explorer):" );
-            Console.WriteLine( createResults.nsConnectionString );
-            Console.WriteLine( );
-            Console.WriteLine( "Device AMQP address strings (for Raspberry PI/devices):" );
+            _ConsoleBuffer.Add( "" );
+            _ConsoleBuffer.Add( "Service Bus management connection string (i.e. for use in Service Bus Explorer):" );
+            _ConsoleBuffer.Add( createResults.nsConnectionString );
+            _ConsoleBuffer.Add( "" );
+            _ConsoleBuffer.Add( "Device AMQP address strings (for Raspberry PI/devices):" );
+
             for ( int i = 1; i <= 4; i++ )
             {
                 var deviceKeyName = String.Format( "D{0}", i );
                 var deviceKey = ( createResults.ehDevices.Authorization.First( ( d )
                         => String.Equals( d.KeyName, deviceKeyName, StringComparison.InvariantCultureIgnoreCase ) ) as SharedAccessAuthorizationRule ).PrimaryKey;
 
-                Console.WriteLine( "amqps://{0}:{1}@{2}.servicebus.windows.net", deviceKeyName, Uri.EscapeDataString( deviceKey ), createResults.SBNamespace );
+                _ConsoleBuffer.Add( string.Format( "amqps://{0}:{1}@{2}.servicebus.windows.net",
+                    deviceKeyName, Uri.EscapeDataString(deviceKey), createResults.SBNamespace ) );
             }
 
-            Console.ReadLine();
+            Console.WriteLine( "" );
+            Console.WriteLine( "" );
+
+            string fileName = createResults.SBNamespace + DateTime.UtcNow.ToString( "_d_MMM_h_mm" ) + ".log";
+            if( _ConsoleBuffer.FlushToFile( fileName ) )
+            {
+                Console.WriteLine( "Output was saved to " + fileName + " file." );
+            }
+
+            Console.WriteLine( "Please hit enter to close." );
+            Console.ReadLine( );
 
             #endregion
 
@@ -327,19 +346,19 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
 
             ServiceBusNamespaceResponse nsResponse = null;
 
-            Console.WriteLine( "Creating Service Bus namespace {0} in location {1}", inputs.SBNamespace, inputs.Location );
+            _ConsoleBuffer.Add( string.Format( "Creating Service Bus namespace {0} in location {1}", inputs.SBNamespace, inputs.Location ) );
 
             try
             {
                 // There is (currently) no clean error code returned when the namespace already exists
                 // Check if it does
                 nsResponse = sbMgmt.Namespaces.Create(inputs.SBNamespace, inputs.Location);
-                Console.WriteLine( "Service Bus namespace {0} created.", inputs.SBNamespace );
+                _ConsoleBuffer.Add( string.Format( "Service Bus namespace {0} created.", inputs.SBNamespace ) );
             }
             catch ( Exception )
             {
                 nsResponse = null;
-                Console.WriteLine( "Service Bus namespace {0} already existed.", inputs.SBNamespace );
+                _ConsoleBuffer.Add( string.Format( "Service Bus namespace {0} already existed.", inputs.SBNamespace ) );
             }
 
             // Wait until the namespace is active
@@ -350,7 +369,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
                 {
                     break;
                 }
-                Console.WriteLine( "Namespace {0} in state {1}. Waiting...", inputs.SBNamespace, nsResponse.Namespace.Status );
+                _ConsoleBuffer.Add( string.Format( "Namespace {0} in state {1}. Waiting...", inputs.SBNamespace, nsResponse.Namespace.Status ) );
                 System.Threading.Thread.Sleep( 5000 );
             }
 
@@ -376,7 +395,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
 
             ehDescriptionDevices.Authorization.Add( new SharedAccessAuthorizationRule( "StreamingAnalytics", new List<AccessRights> { AccessRights.Manage, AccessRights.Listen, AccessRights.Send } ) );
 
-            Console.WriteLine( "Creating Event Hub {0}", inputs.EventHubNameDevices );
+            _ConsoleBuffer.Add(string.Format("Creating Event Hub {0}", inputs.EventHubNameDevices));
 
             result.ehDevices = null;
             result.ehAlerts = null;
@@ -389,7 +408,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
                 }
                 catch ( UnauthorizedAccessException )
                 {
-                    Console.WriteLine( "Service Bus connection string not valid yet. Waiting..." );
+                    _ConsoleBuffer.Add( "Service Bus connection string not valid yet. Waiting..." );
                     System.Threading.Thread.Sleep( 5000 );
                 }
             } while ( result.ehDevices == null );
@@ -402,7 +421,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             ehDescriptionAlerts.Authorization.Add( new SharedAccessAuthorizationRule( "WebSite", new List<AccessRights> { AccessRights.Manage, AccessRights.Listen, AccessRights.Send } ) );
             ehDescriptionAlerts.Authorization.Add( new SharedAccessAuthorizationRule( "StreamingAnalytics", new List<AccessRights> { AccessRights.Manage, AccessRights.Listen, AccessRights.Send } ) );
 
-            Console.WriteLine( "Creating Event Hub {0}", inputs.EventHubNameAlerts );
+            _ConsoleBuffer.Add( string.Format( "Creating Event Hub {0}", inputs.EventHubNameAlerts ) );
 
             do
             {
@@ -412,7 +431,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
                 }
                 catch ( UnauthorizedAccessException )
                 {
-                    Console.WriteLine( "Service Bus connection string not valid yet. Waiting..." );
+                    _ConsoleBuffer.Add( "Service Bus connection string not valid yet. Waiting..." );
                     System.Threading.Thread.Sleep( 5000 );
                 }
             } while ( result.ehAlerts == null );
@@ -421,13 +440,16 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             var stgMgmt = new StorageManagementClient( inputs.Credentials );
             try
             {
-                Console.WriteLine( "Creating Storage Account {0} in location {1}", inputs.StorageAccountName, inputs.Location );
+                _ConsoleBuffer.Add( string.Format( "Creating Storage Account {0} in location {1}",
+                    inputs.StorageAccountName, inputs.Location ) );
+
                 var resultStg = stgMgmt.StorageAccounts.Create(
                     new StorageAccountCreateParameters { Name = inputs.StorageAccountName.ToLowerInvariant(), Location = inputs.Location, AccountType = "Standard_LRS" } );
 
                 if( resultStg.StatusCode != System.Net.HttpStatusCode.OK )
                 {
-                    Console.WriteLine( "Error creating storage account {0} in Location {1}: {2}", inputs.StorageAccountName, inputs.Location, resultStg.StatusCode );
+                    _ConsoleBuffer.Add( string.Format( "Error creating storage account {0} in Location {1}: {2}",
+                        inputs.StorageAccountName, inputs.Location, resultStg.StatusCode ) );
                     return null;
                 }
             }
@@ -435,7 +457,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             {
                 if( String.Equals( ce.ErrorCode, "ConflictError", StringComparison.InvariantCultureIgnoreCase ) )
                 {
-                    Console.WriteLine( "Storage account {0} already existed.", inputs.StorageAccountName );
+                    _ConsoleBuffer.Add( string.Format( "Storage account {0} already existed.", inputs.StorageAccountName ) );
                 }
                 else
                 {
@@ -474,7 +496,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             }
             catch ( Exception e )
             {
-                Console.WriteLine("Exception {0} while creating Azure resources at {1}", e.Message, e.StackTrace);
+                Console.WriteLine( "Exception {0} while creating Azure resources at {1}", e.Message, e.StackTrace );
                 return 0;
             }
         }

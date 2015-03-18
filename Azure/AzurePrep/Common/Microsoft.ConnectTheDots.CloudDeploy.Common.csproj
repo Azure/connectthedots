@@ -83,6 +83,7 @@
   <ItemGroup>
     <Compile Include="AzureCredentialsProvider.cs" />
     <Compile Include="AzureHelper.cs" />
+    <Compile Include="LogBuffer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
