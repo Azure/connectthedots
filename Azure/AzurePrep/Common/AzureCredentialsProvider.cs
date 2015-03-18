@@ -45,7 +45,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
             Console.WriteLine( "Waiting for authentication result..." );
             TokenCloudCredentials toFoundSubscriptions = AzureCredentialsProvider.GetCredentialsByUserADAuth( );
 
-            Console.WriteLine( "Retrieval a list of subscriptions..." );
+            Console.WriteLine( "Retrieving a list of subscriptions..." );
 
             IList<SubscriptionListOperationResponse.Subscription> subscriptions =
                 AzureCredentialsProvider.GetSubscriptionList( toFoundSubscriptions ).Result;

@@ -99,7 +99,8 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
 
             for( ;; )
             {
-                Console.WriteLine( "Enter suggested namespace prefix: " );
+                Console.WriteLine("Enter a name for Service Bus Namespace (only letters and digits, less than 17 chars long)." );
+                Console.WriteLine("(Note that fully qualified path may also be subject to further length restrictions.)");
                 result.NamePrefix = Console.ReadLine( );
                 if( string.IsNullOrEmpty(result.NamePrefix) || !CheckNamePrefix( result.NamePrefix ) )
                 {
@@ -176,9 +177,11 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             Console.WriteLine( "" );
 
             string fileName = createResults.SBNamespace + DateTime.UtcNow.ToString( "_d_MMM_h_mm" ) + ".log";
-            if( _ConsoleBuffer.FlushToFile( fileName ) )
+            string filePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            string fileFullName = filePath + @"\" + fileName;
+            if( _ConsoleBuffer.FlushToFile( fileFullName ) )
             {
-                Console.WriteLine( "Output was saved to " + fileName + " file." );
+                Console.WriteLine( "Output was saved to your desktop, at " + fileFullName + " file." );
             }
 
             Console.WriteLine( "Please hit enter to close." );
@@ -338,7 +341,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
 
         private string SelectRegion( AzurePrepInputs inputs )
         {
-            Console.WriteLine( "Retrieval a list of Locations..." );
+            Console.WriteLine( "Retrieving a list of Locations..." );
             string[] regions = AzureHelper.GetRegions( inputs.Credentials );
             int regionsCount = regions.Length;
 
@@ -351,7 +354,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
 
             for( ;; )
             {
-                Console.WriteLine( "Please select suggested Location number: " );
+                Console.WriteLine( "Please select Location from list: " );
 
                 string answer = Console.ReadLine( );
                 int selection = 0;

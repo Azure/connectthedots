@@ -51,10 +51,10 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
             public string EventHubNameDevices;
             public string EventHubNameAlerts;
             public string StorageAccountName;
-            public string WebSiteDirectory;
+            //public string WebSiteDirectory;
             public SubscriptionCloudCredentials Credentials;
 
-            public bool Transform = false;
+//            public bool Transform = false;
         }
 
         //--//
@@ -76,7 +76,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
                 Console.WriteLine( "Quiting..." );
                 return false;
             }
-
+/*
             Console.WriteLine( "Need to select or not Transform flag." );
             Console.WriteLine( "If selected, the input and output file name will be \"web.config\" placed in Web project location." );
             Console.WriteLine( "Otherwise, input file name will be \"web.PublishTemplate.config\" and output - \"" +
@@ -99,14 +99,14 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
                     break;
                 }
             }
-
+*/
             result.SBNamespace = result.NamePrefix + "-ns";
             result.StorageAccountName = result.NamePrefix.ToLowerInvariant() + "storage";
 
             result.EventHubNameDevices = "ehdevices";
             result.EventHubNameAlerts = "ehalerts";
 
-            result.WebSiteDirectory = "..\\..\\..\\..\\WebSite\\ConnectTheDotsWebSite"; // Default for running the tool from the bin/debug or bin/release directory (i.e within VS)
+            //result.WebSiteDirectory = "..\\..\\..\\..\\WebSite\\ConnectTheDotsWebSite"; // Default for running the tool from the bin/debug or bin/release directory (i.e within VS)
             return true;
         }
 
@@ -130,7 +130,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
 
         private bool SelectNamespace( ref CloudWebDeployInputs inputs )
         {
-            Console.WriteLine( "Retrieval a list of created namespaces..." );
+            Console.WriteLine( "Retrieving a list of created namespaces..." );
             ServiceBusNamespace[] namespaces = AzureHelper.GetNamespaces( inputs.Credentials );
             int namespaceCount = namespaces.Length;
 
@@ -177,7 +177,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
 
         private bool CreateWeb( CloudWebDeployInputs inputs )
         {
-            Console.WriteLine( "Retrieval namespace metadata..." );
+            Console.WriteLine( "Retrieving namespace metadata..." );
             // Create Namespace
             ServiceBusManagementClient sbMgmt = new ServiceBusManagementClient( inputs.Credentials );
 
@@ -220,10 +220,17 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
             // Write a new web.config template file
             var doc = new XmlDocument { PreserveWhitespace = true };
             
-            var inputFileName = ( inputs.Transform ? "\\web.PublishTemplate.config" : "\\web.config" );
-            var outputFileName = ( inputs.Transform ? String.Format("\\web.{0}.config", inputs.NamePrefix) : "\\web.config" );
+            //var inputFileName = ( inputs.Transform ? "\\web.PublishTemplate.config" : "\\web.config" );
+            string inputFileName = "web.PublishTemplate.config";
+            //var outputFileName = ( inputs.Transform ? String.Format("\\web.{0}.config", inputs.NamePrefix) : "\\web.config" );
+            string outputFileName = "web.config";
 
-            doc.Load( inputs.WebSiteDirectory + inputFileName );
+            //doc.Load( inputs.WebSiteDirectory + inputFileName );
+
+            string inputFilePath = Environment.CurrentDirectory +@"\";
+            Console.WriteLine("Opening and updating " + inputFilePath + inputFileName);
+
+            doc.Load( inputFilePath + inputFileName );
 
             doc.SelectSingleNode(
                 "/configuration/appSettings/add[@key='Microsoft.ServiceBus.EventHubDevices']/@value" ).Value
@@ -245,11 +252,17 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
                 String.Format( "DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1}", inputs.StorageAccountName,
                     storageKey );
 
-            var outputFile = System.IO.Path.GetFullPath( inputs.WebSiteDirectory + outputFileName );
+            //var outputFile = System.IO.Path.GetFullPath( inputs.WebSiteDirectory + outputFileName );
+            string outputFilePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            //Console.WriteLine(outputFilePath);
+
+            var outputFile = outputFilePath + @"\" + outputFileName;
+            Console.WriteLine("Writing updates to " + outputFile);
 
             doc.Save( outputFile );
-
-            Console.WriteLine( "Web config saved to {0}", outputFile );
+            Console.WriteLine(" ");
+            Console.WriteLine("Web config saved to {0}", outputFile); 
+            Console.WriteLine(" ");
             return true;
         }
 
