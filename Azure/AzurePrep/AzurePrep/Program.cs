@@ -97,10 +97,15 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
                 return false;
             }
 
-            for (;;)
+            for( ;; )
             {
                 Console.WriteLine( "Enter suggested namespace prefix: " );
                 result.NamePrefix = Console.ReadLine( );
+                if( string.IsNullOrEmpty(result.NamePrefix) || !CheckNamePrefix( result.NamePrefix ) )
+                {
+                    Console.WriteLine( "Namespace prefix should contain only letters and digits and have length less than 17." );
+                    continue;
+                }
                 if (ConsoleHelper.Confirm("Are you sure you want to create a namespace called " + result.NamePrefix + "?"))
                 {
                     break;
@@ -314,7 +319,22 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             return true;
         }
 
-        
+        private bool CheckNamePrefix( string namePrefix )
+        {
+            //namePrefix length should be less than 17 characters (storage account names must be < 24 characters and we add "storage" to the end)
+            if( namePrefix.Length >= 17 )
+            {
+                return false;
+            }
+            foreach( char c in namePrefix )
+            {
+                if( !char.IsLetterOrDigit( c ) )
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
 
         private string SelectRegion( AzurePrepInputs inputs )
         {
