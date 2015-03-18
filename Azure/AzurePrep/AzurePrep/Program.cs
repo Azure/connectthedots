@@ -90,7 +90,6 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
         public bool GetInputs( out AzurePrepInputs result )
         {
             result = new AzurePrepInputs( );
-            Console.WriteLine( "Waiting for authentication result..." );
             result.Credentials = AzureCredentialsProvider.GetUserSubscriptionCredentials( );
             if( result.Credentials == null )
             {

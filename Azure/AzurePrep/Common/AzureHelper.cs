@@ -22,6 +22,8 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
+using Microsoft.WindowsAzure.Management.ServiceBus.Models;
+
 namespace Microsoft.ConnectTheDots.CloudDeploy.Common
 {
     using System;
@@ -48,6 +50,21 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
             }
 
             return regions;
+        }
+
+        public static ServiceBusNamespace[] GetNamespaces( SubscriptionCloudCredentials creds )
+        {
+            var sbMgmt = new ServiceBusManagementClient( creds );
+            var regionsResponse = sbMgmt.Namespaces.ListAsync( ).Result;
+
+            int currentNamespace = 0, namespaceCount = regionsResponse.Count( );
+            ServiceBusNamespace[] namespaces = new ServiceBusNamespace[ namespaceCount ];
+            foreach( var region in regionsResponse )
+            {
+                namespaces[ currentNamespace++ ] = region;
+            }
+
+            return namespaces;
         }
     }
 }

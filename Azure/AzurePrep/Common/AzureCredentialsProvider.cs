@@ -42,6 +42,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
     {
         public static SubscriptionCloudCredentials GetUserSubscriptionCredentials( )
         {
+            Console.WriteLine( "Waiting for authentication result..." );
             TokenCloudCredentials toFoundSubscriptions = AzureCredentialsProvider.GetCredentialsByUserADAuth( );
 
             Console.WriteLine( "Retrieval a list of subscriptions..." );

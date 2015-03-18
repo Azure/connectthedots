@@ -22,6 +22,8 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
+using Microsoft.WindowsAzure.Management.ServiceBus.Models;
+
 namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
 {
     using System;
@@ -51,10 +53,9 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
             public string StorageAccountName;
             public string WebSiteDirectory;
             public SubscriptionCloudCredentials Credentials;
+
+            public bool Transform = false;
         }
-        
-        // location of other projects
-        bool Transform = false;
 
         //--//
 
@@ -69,19 +70,34 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
                 return false;
             }
 
-            Console.WriteLine( "Enter suggested namespace prefix: " );
-            result.NamePrefix = Console.ReadLine( );
-            if( string.IsNullOrEmpty( result.NamePrefix ) )
+            if( !SelectNamespace( ref result ) )
             {
                 result = null;
+                Console.WriteLine( "Quiting..." );
                 return false;
             }
 
-            Console.WriteLine( "Enter suggested location: " );
-            result.Location = Console.ReadLine( );
-            if( string.IsNullOrEmpty( result.Location ) )
+            Console.WriteLine( "Need to select or not Transform flag." );
+            Console.WriteLine( "If selected, the input and output file name will be \"web.config\" placed in Web project location." );
+            Console.WriteLine( "Otherwise, input file name will be \"web.PublishTemplate.config\" and output - \"" +
+                String.Format("web.{0}.config", result.NamePrefix) + "\".");
+
+            for( ;; )
             {
-                result.Location = "Central US";
+                Console.WriteLine( "Do you want to use Transform flag? (y/n)" );
+
+                string answer = Console.ReadLine( );
+                string request = "not use";
+                result.Transform = false;
+                if( !string.IsNullOrEmpty( answer ) && answer.ToLower( ).StartsWith( "y" ) )
+                {
+                    result.Transform = true;
+                    request = "use";
+                }
+                if( ConsoleHelper.Confirm( "Are you sure you want to " + request + " Transform flag?" ) )
+                {
+                    break;
+                }
             }
 
             result.SBNamespace = result.NamePrefix + "-ns";
@@ -107,12 +123,61 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
                 return false;
             }
 
+            Console.WriteLine( "Please hit enter to close." );
             Console.ReadLine( );
             return true;
         }
 
+        private bool SelectNamespace( ref CloudWebDeployInputs inputs )
+        {
+            Console.WriteLine( "Retrieval a list of created namespaces..." );
+            ServiceBusNamespace[] namespaces = AzureHelper.GetNamespaces( inputs.Credentials );
+            int namespaceCount = namespaces.Length;
+
+            Console.WriteLine( "Created namespaces: " );
+
+            for( int currentNamespace = 1; currentNamespace <= namespaceCount; ++currentNamespace )
+            {
+                Console.WriteLine( currentNamespace + ": " + 
+                    namespaces[ currentNamespace - 1 ].Name + " (" + namespaces[currentNamespace - 1].Region+ ")" );
+            }
+
+            Console.WriteLine( "0: Exit without processing" );
+
+            for( ;; )
+            {
+                Console.WriteLine( "Please select namespace you want to use: " );
+
+                string answer = Console.ReadLine( );
+                int selection = 0;
+                if( !int.TryParse( answer, out selection ) || selection > namespaceCount || selection < 0 )
+                {
+                    Console.WriteLine( "Incorrect namespace number." );
+                    continue;
+                }
+
+                if( selection == 0 )
+                {
+                    return false;
+                }
+
+                if( ConsoleHelper.Confirm( "Are you sure you want to select " + namespaces[ selection - 1 ].Name + " namespace?" ) )
+                {
+                    if( namespaces[ selection - 1 ].Name.EndsWith( "-ns" ) )
+                    {
+                        namespaces[ selection - 1 ].Name = namespaces[ selection - 1 ].Name.Substring( 0,
+                            namespaces[ selection - 1 ].Name.Length - 3 );
+                    }
+                    inputs.NamePrefix = namespaces[ selection - 1 ].Name;
+                    inputs.Location = namespaces[ selection - 1 ].Region;
+                    return true;
+                }
+            }
+        }
+
         private bool CreateWeb( CloudWebDeployInputs inputs )
         {
+            Console.WriteLine( "Retrieval namespace metadata..." );
             // Create Namespace
             ServiceBusManagementClient sbMgmt = new ServiceBusManagementClient( inputs.Credentials );
 
@@ -128,7 +193,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
 
             StorageManagementClient stgMgmt = new StorageManagementClient( inputs.Credentials );
             var keyResponse = stgMgmt.StorageAccounts.GetKeys( inputs.StorageAccountName.ToLowerInvariant( ) );
-            if ( keyResponse.StatusCode != System.Net.HttpStatusCode.OK )
+            if( keyResponse.StatusCode != System.Net.HttpStatusCode.OK )
             {
                 Console.WriteLine( "Error retrieving access keys for storage account {0} in Location {1}: {2}",
                     inputs.StorageAccountName, inputs.Location, keyResponse.StatusCode );
@@ -151,12 +216,12 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
                     => String.Equals( d.KeyName, "WebSite", StringComparison.InvariantCultureIgnoreCase) ) as SharedAccessAuthorizationRule ).PrimaryKey,
             }.ToString( );
 
+            Console.WriteLine( "Started processing..." );
             // Write a new web.config template file
             var doc = new XmlDocument { PreserveWhitespace = true };
-
-            var inputFileName = ( Transform ? "\\web.PublishTemplate.config" : "\\web.config" );
-            var outputFileName = ( Transform ? String.Format("\\web.{0}.config", inputs.NamePrefix) : "\\web.config" );
-
+            
+            var inputFileName = ( inputs.Transform ? "\\web.PublishTemplate.config" : "\\web.config" );
+            var outputFileName = ( inputs.Transform ? String.Format("\\web.{0}.config", inputs.NamePrefix) : "\\web.config" );
 
             doc.Load( inputs.WebSiteDirectory + inputFileName );
 
@@ -184,7 +249,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
 
             doc.Save( outputFile );
 
-            Console.WriteLine( "Web.Config saved to {0}", outputFile );
+            Console.WriteLine( "Web config saved to {0}", outputFile );
             return true;
         }
 
