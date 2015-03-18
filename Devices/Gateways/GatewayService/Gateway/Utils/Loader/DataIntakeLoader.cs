@@ -22,7 +22,7 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-#define DEBUG_LOG
+//#define DEBUG_LOG
 
 namespace Microsoft.ConnectTheDots.Gateway
 {
