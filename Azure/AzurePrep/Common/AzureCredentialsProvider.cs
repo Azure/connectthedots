@@ -62,13 +62,13 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
             
             string answer = Console.ReadLine( );
             int selection = 0;
-            if( !int.TryParse( answer, out selection ) || selection >= listSize )
+            if( !int.TryParse( answer, out selection ) || selection >= listSize || selection < 1)
             {
                 return null;
             }
             
             TokenCloudCredentials result =
-                AzureCredentialsProvider.GetCredentialsByUserADAuth(subscriptions[selection - 1].SubscriptionId, subscriptions[selection - 1].ActiveDirectoryTenantId);
+                AzureCredentialsProvider.GetCredentialsByUserADAuth(subscriptions[ selection - 1 ].SubscriptionId, subscriptions[selection - 1].ActiveDirectoryTenantId);
 
             return result;
         }
@@ -122,14 +122,14 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
             //TenantId
             string authTenant = String.IsNullOrEmpty( tenantId ) ? AUTH_TENANT_ID : tenantId;
 
-            string token = GetAuthHeader( AUTH_CLIENT_ID, AUTH_REDIRECT_URI, authTenant );
+            string token = GetAuthHeader( AUTH_CLIENT_ID, AUTH_REDIRECT_URI, authTenant, subscriptionId == null );
 
             var cred = ( subscriptionId == null )
                 ? new TokenCloudCredentials( token ) : new TokenCloudCredentials( subscriptionId, token );
             return cred;
         }
 
-        private static string GetAuthHeader( string clientId, string redirectUri, string tenant )
+        private static string GetAuthHeader( string clientId, string redirectUri, string tenant, bool requireLogin )
         {
             AuthenticationResult result = null;
             AuthenticationContext context = new AuthenticationContext(
@@ -140,7 +140,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
                 resource: "https://management.core.windows.net/",
                 clientId: clientId,
                 redirectUri: new Uri( redirectUri ),
-                parameters: new AuthorizationParameters( PromptBehavior.Always, null )
+                parameters: new AuthorizationParameters( requireLogin ? PromptBehavior.Always : PromptBehavior.Auto, null )
             ).Result;
 
             return result.AccessToken;

@@ -100,12 +100,10 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
                 return false;
             }
 
-            Console.WriteLine( "Enter suggested location: " );
-            result.Location = Console.ReadLine( );
-            if( string.IsNullOrEmpty( result.Location ) )
+            do
             {
-                result.Location = "Central US";
-            }
+                result.Location = SelectRegion( result );
+            } while ( string.IsNullOrEmpty( result.Location ) );
 
             result.SBNamespace = result.NamePrefix + "-ns";
             result.StorageAccountName = result.NamePrefix.ToLowerInvariant( ) + "storage";
@@ -294,6 +292,28 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             //var jobCreateResponse = jobCreateTask.Result;
 #endif
             return true;
+        }
+
+        private string SelectRegion( AzurePrepInputs inputs )
+        {
+            string[] regions = AzureHelper.GetRegions( inputs.Credentials );
+            int regionsCount = regions.Length;
+
+            Console.WriteLine( "Please select suggested location: " );
+
+            for( int currentRegion = 1; currentRegion <= regionsCount; ++currentRegion )
+            {
+                Console.WriteLine( currentRegion + ": " + regions[ currentRegion - 1 ] );
+            }
+
+            string answer = Console.ReadLine();
+            int selection = 0;
+            if( !int.TryParse( answer, out selection ) || selection > regionsCount || selection < 1 )
+            {
+                return null;
+            }
+
+            return regions[ selection - 1 ];
         }
 
         private AzurePrepOutputs CreateEventHub( AzurePrepInputs inputs )
