@@ -44,6 +44,8 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
         {
             TokenCloudCredentials toFoundSubscriptions = AzureCredentialsProvider.GetCredentialsByUserADAuth( );
 
+            Console.WriteLine( "Retrieval a list of subscriptions..." );
+
             IList<SubscriptionListOperationResponse.Subscription> subscriptions =
                 AzureCredentialsProvider.GetSubscriptionList( toFoundSubscriptions ).Result;
 
@@ -52,25 +54,37 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
                 Console.WriteLine( "No available subscriptions." );
                 return null;
             }
-            Console.WriteLine( "Please select one of available subscriptions: " );
+            Console.WriteLine( "List of available subscriptions: " );
             int listSize = 1;
             foreach( var subscription in subscriptions )
             {
                 Console.WriteLine( listSize + ": " + subscription.SubscriptionName );
                 listSize++;
             }
-            
-            string answer = Console.ReadLine( );
-            int selection = 0;
-            if( !int.TryParse( answer, out selection ) || selection >= listSize || selection < 1)
-            {
-                return null;
-            }
-            
-            TokenCloudCredentials result =
-                AzureCredentialsProvider.GetCredentialsByUserADAuth(subscriptions[ selection - 1 ].SubscriptionId, subscriptions[selection - 1].ActiveDirectoryTenantId);
 
-            return result;
+            for( ;; )
+            {
+                Console.WriteLine( "Please select subscription number: " );
+
+                string answer = Console.ReadLine( );
+                int selection = 0;
+                if( !int.TryParse( answer, out selection ) || selection >= listSize || selection < 1 )
+                {
+                    Console.WriteLine( "Incorrect subscription number." );
+                    continue;
+                }
+
+                if( ConsoleHelper.Confirm( "Are you sure you want to use " + subscriptions[ selection - 1 ].SubscriptionName + " subscription?" ) )
+                {
+                    Console.WriteLine( "Requesting access to subscription..." );
+                    TokenCloudCredentials result = AzureCredentialsProvider.GetCredentialsByUserADAuth(
+                        subscriptions[ selection - 1 ].SubscriptionId,
+                        subscriptions[ selection - 1 ].ActiveDirectoryTenantId
+                    );
+
+                    return result;
+                }
+            }
         }
 
         public async static Task<IList<SubscriptionListOperationResponse.Subscription>>

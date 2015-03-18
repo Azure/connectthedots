@@ -54,7 +54,6 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             public string EventHubNameDevices;
             public string EventHubNameAlerts;
             public string StorageAccountName;
-            public string WebSiteDirectory;
             public SubscriptionCloudCredentials Credentials;
         }
 
@@ -91,7 +90,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
         public bool GetInputs( out AzurePrepInputs result )
         {
             result = new AzurePrepInputs( );
-
+            Console.WriteLine( "Waiting for authentication result..." );
             result.Credentials = AzureCredentialsProvider.GetUserSubscriptionCredentials( );
             if( result.Credentials == null )
             {
@@ -99,26 +98,29 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
                 return false;
             }
 
-            Console.WriteLine( "Enter suggested namespace prefix: " );
-            result.NamePrefix = Console.ReadLine( );
+            for (;;)
+            {
+                Console.WriteLine( "Enter suggested namespace prefix: " );
+                result.NamePrefix = Console.ReadLine( );
+                if (ConsoleHelper.Confirm("Are you sure you want to create a namespace called " + result.NamePrefix + "?"))
+                {
+                    break;
+                }
+            }
+            
             if( string.IsNullOrEmpty( result.NamePrefix ) )
             {
                 result = null;
                 return false;
             }
 
-            do
-            {
-                result.Location = SelectRegion( result );
-            } while ( string.IsNullOrEmpty( result.Location ) );
+            result.Location = SelectRegion( result );
 
             result.SBNamespace = result.NamePrefix + "-ns";
             result.StorageAccountName = result.NamePrefix.ToLowerInvariant( ) + "storage";
 
             result.EventHubNameDevices = "ehdevices";
             result.EventHubNameAlerts = "ehalerts";
-
-            result.WebSiteDirectory = "..\\..\\..\\..\\WebSite\\ConnectTheDotsWebSite"; // Default for running the tool from the bin/debug or bin/release directory (i.e within VS)
 
 #if AZURESTREAMANALYTICS
             StreamAnalyticsGroup = NamePrefix + "-StreamAnalytics";
@@ -313,26 +315,38 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             return true;
         }
 
+        
+
         private string SelectRegion( AzurePrepInputs inputs )
         {
+            Console.WriteLine( "Retrieval a list of Locations..." );
             string[] regions = AzureHelper.GetRegions( inputs.Credentials );
             int regionsCount = regions.Length;
 
-            Console.WriteLine( "Please select suggested location: " );
+            Console.WriteLine( "Available locations: " );
 
             for( int currentRegion = 1; currentRegion <= regionsCount; ++currentRegion )
             {
                 Console.WriteLine( currentRegion + ": " + regions[ currentRegion - 1 ] );
             }
 
-            string answer = Console.ReadLine();
-            int selection = 0;
-            if( !int.TryParse( answer, out selection ) || selection > regionsCount || selection < 1 )
+            for( ;; )
             {
-                return null;
-            }
+                Console.WriteLine( "Please select suggested Location number: " );
 
-            return regions[ selection - 1 ];
+                string answer = Console.ReadLine( );
+                int selection = 0;
+                if( !int.TryParse( answer, out selection ) || selection > regionsCount || selection < 1 )
+                {
+                    Console.WriteLine( "Incorrect Location number." );
+                    continue;
+                }
+
+                if( ConsoleHelper.Confirm( "Are you sure you want to select location " + regions[selection - 1] + "?" ) )
+                {
+                    return regions[ selection - 1 ];
+                }
+            }
         }
 
         private AzurePrepOutputs CreateEventHub( AzurePrepInputs inputs )
@@ -352,7 +366,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             {
                 // There is (currently) no clean error code returned when the namespace already exists
                 // Check if it does
-                nsResponse = sbMgmt.Namespaces.Create(inputs.SBNamespace, inputs.Location);
+                nsResponse = sbMgmt.Namespaces.Create( inputs.SBNamespace, inputs.Location );
                 _ConsoleBuffer.Add( string.Format( "Service Bus namespace {0} created.", inputs.SBNamespace ) );
             }
             catch ( Exception )
@@ -395,7 +409,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
 
             ehDescriptionDevices.Authorization.Add( new SharedAccessAuthorizationRule( "StreamingAnalytics", new List<AccessRights> { AccessRights.Manage, AccessRights.Listen, AccessRights.Send } ) );
 
-            _ConsoleBuffer.Add(string.Format("Creating Event Hub {0}", inputs.EventHubNameDevices));
+            _ConsoleBuffer.Add( string.Format( "Creating Event Hub {0}", inputs.EventHubNameDevices ) );
 
             result.ehDevices = null;
             result.ehAlerts = null;

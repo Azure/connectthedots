@@ -31,6 +31,8 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
     using Microsoft.WindowsAzure;
     using Microsoft.WindowsAzure.Management.ServiceBus;
 
+    //--//
+
     public static class AzureHelper
     {
         public static string[] GetRegions( SubscriptionCloudCredentials creds )

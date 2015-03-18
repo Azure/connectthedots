@@ -25,61 +25,20 @@
 namespace Microsoft.ConnectTheDots.CloudDeploy.Common
 {
     using System;
-    using System.Collections.Generic;
-    using System.IO;
 
     //--//
 
-    public class LogBuffer
+    public static class ConsoleHelper
     {
-        private readonly List<string>         _Buffer;
-        private readonly Action<string>       _OnMessageAdd;
-
-        //--//
-
-        public LogBuffer( Action<string> onMessageAdd )
+        public static bool Confirm( string message )
         {
-            _Buffer = new List<string>( );
-            _OnMessageAdd = onMessageAdd;
-        }
-
-        public void Add( string messageLine )
-        {
-            lock( _Buffer )
+            Console.WriteLine( message + "(y)" );
+            string yn = Console.ReadLine( );
+            if( !string.IsNullOrEmpty( yn ) && yn.ToLower( ).StartsWith( "y" ) )
             {
-                _Buffer.Add( messageLine );
-
-                if ( _OnMessageAdd != null )
-                {
-                    _OnMessageAdd.Invoke( messageLine );
-                }
+                return true;
             }
-        }
-
-        public bool FlushToFile( string fileName )
-        {
-            try
-            {
-                lock( _Buffer )
-                {
-                    using( StreamWriter file = new StreamWriter( fileName ) )
-                    {
-                        foreach( var messageLine in _Buffer )
-                        {
-                            file.WriteLine( messageLine );
-                        }
-                        file.Flush( );
-                        file.Close( );
-                    }
-                    _Buffer.Clear( );
-                }
-            }
-            catch ( Exception )
-            {
-                return false;
-            }
-
-            return true;
+            return false;
         }
     }
 }
