@@ -42,7 +42,10 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
     {
         public static SubscriptionCloudCredentials GetUserSubscriptionCredentials( )
         {
+            Console.WriteLine( "Waiting for authentication result..." );
             TokenCloudCredentials toFoundSubscriptions = AzureCredentialsProvider.GetCredentialsByUserADAuth( );
+
+            Console.WriteLine( "Retrieving a list of subscriptions..." );
 
             IList<SubscriptionListOperationResponse.Subscription> subscriptions =
                 AzureCredentialsProvider.GetSubscriptionList( toFoundSubscriptions ).Result;
@@ -52,25 +55,37 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
                 Console.WriteLine( "No available subscriptions." );
                 return null;
             }
-            Console.WriteLine( "Please select one of available subscriptions: " );
+            Console.WriteLine( "List of available subscriptions: " );
             int listSize = 1;
             foreach( var subscription in subscriptions )
             {
                 Console.WriteLine( listSize + ": " + subscription.SubscriptionName );
                 listSize++;
             }
-            
-            string answer = Console.ReadLine( );
-            int selection = 0;
-            if( !int.TryParse( answer, out selection ) || selection >= listSize )
-            {
-                return null;
-            }
-            
-            TokenCloudCredentials result =
-                AzureCredentialsProvider.GetCredentialsByUserADAuth(subscriptions[selection - 1].SubscriptionId, subscriptions[selection - 1].ActiveDirectoryTenantId);
 
-            return result;
+            for( ;; )
+            {
+                Console.WriteLine( "Please select subscription number: " );
+
+                string answer = Console.ReadLine( );
+                int selection = 0;
+                if( !int.TryParse( answer, out selection ) || selection >= listSize || selection < 1 )
+                {
+                    Console.WriteLine( "Incorrect subscription number." );
+                    continue;
+                }
+
+                if( ConsoleHelper.Confirm( "Are you sure you want to use " + subscriptions[ selection - 1 ].SubscriptionName + " subscription?" ) )
+                {
+                    Console.WriteLine( "Requesting access to subscription..." );
+                    TokenCloudCredentials result = AzureCredentialsProvider.GetCredentialsByUserADAuth(
+                        subscriptions[ selection - 1 ].SubscriptionId,
+                        subscriptions[ selection - 1 ].ActiveDirectoryTenantId
+                    );
+
+                    return result;
+                }
+            }
         }
 
         public async static Task<IList<SubscriptionListOperationResponse.Subscription>>
@@ -122,14 +137,14 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
             //TenantId
             string authTenant = String.IsNullOrEmpty( tenantId ) ? AUTH_TENANT_ID : tenantId;
 
-            string token = GetAuthHeader( AUTH_CLIENT_ID, AUTH_REDIRECT_URI, authTenant );
+            string token = GetAuthHeader( AUTH_CLIENT_ID, AUTH_REDIRECT_URI, authTenant, subscriptionId == null );
 
             var cred = ( subscriptionId == null )
                 ? new TokenCloudCredentials( token ) : new TokenCloudCredentials( subscriptionId, token );
             return cred;
         }
 
-        private static string GetAuthHeader( string clientId, string redirectUri, string tenant )
+        private static string GetAuthHeader( string clientId, string redirectUri, string tenant, bool requireLogin )
         {
             AuthenticationResult result = null;
             AuthenticationContext context = new AuthenticationContext(
@@ -140,7 +155,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
                 resource: "https://management.core.windows.net/",
                 clientId: clientId,
                 redirectUri: new Uri( redirectUri ),
-                parameters: new AuthorizationParameters( PromptBehavior.Always, null )
+                parameters: new AuthorizationParameters( requireLogin ? PromptBehavior.Always : PromptBehavior.Auto, null )
             ).Result;
 
             return result.AccessToken;
