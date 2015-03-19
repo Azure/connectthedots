@@ -27,12 +27,14 @@ To build the project you will need Visual Studio 2013 [Community Edition](http:/
                   echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list 
                   sudo apt-get update && sudo apt-get upgrade 
                   sudo apt-get install mono-complete
-                  mozroots --import --ask-remove
+                  sudo mozroots --import --ask-remove
 
 
 * Open the Devices\Gateways\GatewayService\GatewayService.sln solution in Visual Studio
 * In Visual Studio, update \GatewayService\WindowsService\App.config with any one of the four amqp address strings returned by ConnectTheDotsCloudDeploy.exe, i.e. amqps://D1:xxxxxxxx@yyyyyyyy.servicebus.windows.net, and the 
-name that you assigned to your gateway. It is important that the key is being url-encoded, meaning all special characters should be replaced by their ASCII code (e.g. "=" should be replaced by "%3D". You can use tools like [http://meyerweb.com/eric/tools/dencoder/](http://meyerweb.com/eric/tools/dencoder/) to url-encode the key
+name that you assigned to your gateway. It is important that the key is being url-encoded, meaning all special characters should be replaced by their ASCII code (e.g. "=" should be replaced by "%3D". You can use tools like [http://meyerweb.com/eric/tools/dencoder/](http://meyerweb.com/eric/tools/dencoder/) to url-encode the key. Four strings you can use are in the file created on your desktop by the AzurePrep.exe utility used earlier. Copy one of those strings and replace the relevant line in App.config:
+
+	Before:
     
  
 		<AMQPServiceConfig
@@ -42,6 +44,16 @@ name that you assigned to your gateway. It is important that the key is being ur
 		EventHubDeviceId="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 		EventHubDeviceDisplayName="SensorGatewayService"/>
 
+	After:
+ 
+		<AMQPServiceConfig
+		AMQPSAddress="amqps://D1:iKwblb9AwHD2GPzu1TRF5Jz76QiSynsjbuWbdxsIi98%3D@sstest20-ns.servicebus.windows.net"
+		EventHubName="ehdevices"
+		EventHubMessageSubject="gtsv"
+		EventHubDeviceId="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+		EventHubDeviceDisplayName="SensorGatewayService"/>
+
+	You can also replace the EventHubDeviceId with an ID of your choice.
 
 * Use  the file \Scripts\RaspberryPi\deploy.cmd to copy all requisite files from your computer to the Pi. To use the .CMD file, you will need to 
         
