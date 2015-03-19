@@ -51,7 +51,7 @@ In order to reproduce one of the ConnectTheDots.io scenarios, you will need the 
 If you are going to deploy the starter solution, you need to procure an Arduino UNO and Raspberry Pi, as shown in the documentation for those devices in the appropriate folders:
 
 - [Arduino UNO R3 and weather shield](Devices/GatewayConnectedDevices/Arduino/Weather/WeatherShieldJson/Hardware.md)
-- [Raspberry Pi](Devices/Gateways/RaspberryPi/Hardware.md)
+- [Raspberry Pi](Devices/Gateways/GatewayService/Hardware.md)
 
 If you decide to connect another device, you can check out the samples provided in the devices sub folder containing .NET and C++ examples. Other languages examples are coming soon!
 
