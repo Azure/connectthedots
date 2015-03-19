@@ -28,6 +28,9 @@ To build the project you will need Visual Studio 2013 [Community Edition](http:/
                   sudo apt-get update && sudo apt-get upgrade 
                   sudo apt-get install mono-complete
                   sudo mozroots --import --ask-remove
+				  sudo apt-get -y install python libusb-1.0
+				  sudo apt-get -y install python-pip
+				  sudo pip cd install --upgrade pyusb
 
 
 * Open the Devices\Gateways\GatewayService\GatewayService.sln solution in Visual Studio
