@@ -24,8 +24,9 @@ REM //  THE SOFTWARE.
 REM //  ---------------------------------------------------------------------------------
 
 set puttydir="C:\software\putty\"
-set prjdir=..\..\
-set rpi_ip=10.121.205.13
+set prjdir=..\..\..\Gateways\GatewayService\
+set scdir=%prjdir%Scripts\ScriptConverter\bin\
+set rpi_ip=xxx.xxx.xxx.xxx
 set rpi_usr=pi
 set rpi_pw=raspberry
 set Configuration=Release
@@ -34,13 +35,14 @@ set Staging=%GW_Home%/staging
 set PUTTY_CMD=%puttydir%putty %rpi_usr%@%rpi_ip% -pw %rpi_pw% 
 set PSCP_CMD=%puttydir%pscp -pw %rpi_pw% 
 
+echo editing line endings for Pi
+%scdir%%Configuration%\ScriptConverter.exe "autorun2.sh" 
 
 echo Copying file that starts up python script to read USB port connected to Wensn and format as JSON
 %PSCP_CMD% WensnPiVS01.py  %rpi_usr%@%rpi_ip%:%Staging%/
-%PSCP_CMD% autorun2.sh  %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% Modified\autorun2.sh  %rpi_usr%@%rpi_ip%:%Staging%/
 
 echo Marking autorun2.sh as executable
 del /f %temp%\rpigatewayautorunx.tmp
 echo chmod 755 %Staging%/autorun2.sh    	>> %temp%\rpigatewayautorunx.tmp
-echo dos2unix  %Staging%/autorun2.sh           	>> %temp%\rpigatewayautorunx.tmp
 %PUTTY_CMD% -m                                    %temp%\rpigatewayautorunx.tmp
