@@ -1,0 +1,106 @@
+From 3542df4a36ce83086ab86ff0132bbaf5678babcb Mon Sep 17 00:00:00 2001
+From: ivanignatiev <ignatiev.ivan@gmail.com>
+Date: Tue, 20 Jan 2015 18:02:58 +0100
+Subject: [PATCH] Enable Windows for IoT build
+
+---
+ apps/apps.c            |  9 ++++++++-
+ crypto/cryptlib.c      |  4 ++--
+ crypto/rand/rand_win.c |  2 +-
+ ms/ntdll.mak           | 10 +++++-----
+ 4 files changed, 16 insertions(+), 9 deletions(-)
+
+diff --git a/apps/apps.c b/apps/apps.c
+index 235ede4..71ae318 100644
+--- a/apps/apps.c
++++ b/apps/apps.c
+@@ -3084,12 +3084,19 @@ static int WIN32_rename(const char *from, const char *to)
+ #endif
+ 			for (i=0;i<tlen;i++)	tto[i]  =(TCHAR)to[i];
+ 		}
+-
++#if !defined(_WIN32_WCE) || _WIN32_WCE>=101
++	if (MoveFileExW((WCHAR *)tfrom,(WCHAR *)tto,MOVEFILE_REPLACE_EXISTING))	goto ok;
++#else
+ 	if (MoveFile(tfrom,tto))	goto ok;
++#endif
+ 	err=GetLastError();
+ 	if (err==ERROR_ALREADY_EXISTS || err==ERROR_FILE_EXISTS)
+ 		{
++#if !defined(_WIN32_WCE) || _WIN32_WCE>=101
++		if (DeleteFile(tto) && MoveFileExW((WCHAR *)tfrom,(WCHAR *)tto,MOVEFILE_REPLACE_EXISTING))
++#else
+ 		if (DeleteFile(tto) && MoveFile(tfrom,tto))
++#endif
+ 			goto ok;
+ 		err=GetLastError();
+ 		}
+diff --git a/crypto/cryptlib.c b/crypto/cryptlib.c
+index be61a9d..98575ab 100644
+--- a/crypto/cryptlib.c
++++ b/crypto/cryptlib.c
+@@ -784,7 +784,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason,
+ 	}
+ #endif
+ 
+-#if defined(_WIN32) && !defined(__CYGWIN__)
++#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(BUILD_FOR_WINIOT)
+ #include <tchar.h>
+ #include <signal.h>
+ #ifdef __WATCOMC__
+@@ -935,7 +935,7 @@ void OpenSSLDie(const char *file,int line,const char *assertion)
+ 	OPENSSL_showfatal(
+ 		"%s(%d): OpenSSL internal error, assertion failed: %s\n",
+ 		file,line,assertion);
+-#if !defined(_WIN32) || defined(__CYGWIN__)
++#if !defined(_WIN32) || defined(__CYGWIN__) || defined(BUILD_FOR_WINIOT)
+ 	abort();
+ #else
+ 	/* Win32 abort() customarily shows a dialog, but we just did that... */
+diff --git a/crypto/rand/rand_win.c b/crypto/rand/rand_win.c
+index 324e395..c64f162 100644
+--- a/crypto/rand/rand_win.c
++++ b/crypto/rand/rand_win.c
+@@ -737,7 +737,7 @@ static void readtimer(void)
+ 
+ static void readscreen(void)
+ {
+-#if !defined(OPENSSL_SYS_WINCE) && !defined(OPENSSL_SYS_WIN32_CYGWIN)
++#if !defined(OPENSSL_SYS_WINCE) && !defined(OPENSSL_SYS_WIN32_CYGWIN) && !defined(BUILD_FOR_WINIOT)
+   HDC		hScrDC;		/* screen DC */
+   HBITMAP	hBitmap;	/* handle for our bitmap */
+   BITMAP	bm;		/* bitmap properties */
+diff --git a/ms/ntdll.mak b/ms/ntdll.mak
+index 853060f..8fd3925 100644
+--- a/ms/ntdll.mak
++++ b/ms/ntdll.mak
+@@ -18,21 +18,21 @@ OPENSSLDIR=C:\Source\openssl\builds\ssl
+ # Set your compiler options
+ PLATFORM=VC-WIN32
+ CC=cl
+-CFLAG= /MD /Ox /O2 /Ob2 -DOPENSSL_THREADS  -DDSO_WIN32 -W3 -Gs0 -GF -Gy -nologo -DOPENSSL_SYSNAME_WIN32 -DWIN32_LEAN_AND_MEAN -DL_ENDIAN -D_CRT_SECURE_NO_DEPRECATE -DOPENSSL_USE_APPLINK -I. -DOPENSSL_NO_RC5 -DOPENSSL_NO_MD2 -DOPENSSL_NO_KRB5 -DOPENSSL_NO_JPAKE -DOPENSSL_NO_STATIC_ENGINE    
+-APP_CFLAG= /Zi /Fd$(TMP_D)/app
+-LIB_CFLAG= /Zi /Fd$(TMP_D)/lib -D_WINDLL
++CFLAG= /arch:IA32 /MD /Ox /O2 /Ob2 -DOPENSSL_THREADS -DBUILD_FOR_WINIOT -DOPENSSL_NO_CAPIENG -DDSO_WIN32 -W3 -Gs0 -GF -Gy -nologo -DOPENSSL_SYSNAME_WIN32 -DWIN32_LEAN_AND_MEAN -DL_ENDIAN -D_CRT_SECURE_NO_DEPRECATE -DOPENSSL_USE_APPLINK -I. -DOPENSSL_NO_RC5 -DOPENSSL_NO_MD2 -DOPENSSL_NO_KRB5 -DOPENSSL_NO_JPAKE -DOPENSSL_NO_STATIC_ENGINE    
++APP_CFLAG= /arch:IA32 /Zi /Fd$(TMP_D)/app
++LIB_CFLAG= /arch:IA32 /Zi /Fd$(TMP_D)/lib -D_WINDLL
+ SHLIB_CFLAG=
+ APP_EX_OBJ=setargv.obj $(OBJ_D)\applink.obj /implib:$(TMP_D)\junk.lib
+ SHLIB_EX_OBJ=
+ # add extra libraries to this define, for solaris -lsocket -lnsl would
+ # be added
+-EX_LIBS=ws2_32.lib gdi32.lib advapi32.lib crypt32.lib user32.lib
++EX_LIBS=mincore.lib
+ 
+ # The OpenSSL directory
+ SRC_D=.
+ 
+ LINK=link
+-LFLAGS=/nologo /subsystem:console /opt:ref /debug
++LFLAGS= /NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:ws2_32.lib /NODEFAULTLIB:gdi32.lib /NODEFAULTLIB:advapi32.lib /NODEFAULTLIB:crypt32.lib /NODEFAULTLIB:user32.lib /nologo /subsystem:console /opt:ref /debug
+ RSC=rc
+ 
+ # The output directory for everything interesting
+-- 
+1.9.5.msysgit.0
+

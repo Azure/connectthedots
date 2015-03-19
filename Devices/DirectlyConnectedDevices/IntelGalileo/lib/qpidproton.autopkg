@@ -1,0 +1,47 @@
+nuget {
+	nuspec {
+		id = Apache.Qpid.Proton.Unoff.IA32;
+		version : 0.8.0.0;
+		title : Apache Qpid Proton C with OpenSSL;
+		authors: {Apache, OpenSSL};
+		owners: {ConnectTheDots};
+		licenseUrl: "https://github.com/apache/qpid-proton/blob/0.8/LICENSE";
+		projectUrl: "http://qpid.apache.org/proton/";
+		iconUrl: "https://github.com/MSOpenTech/connectthedots/raw/master/Wiki/Images/CTD-logo-v5-02.png";
+		requireLicenseAcceptance: false;
+		summary: Apache Qpid makes messaging tools that speak AMQP and support many languages and platforms.; 
+		description: @"Qpid Proton is a high-performance, lightweight messaging library. It can be used in the widest range of messaging applications, including brokers, client libraries, routers, bridges, proxies, and more. Proton makes it trivial to integrate with the AMQP 1.0 ecosystem from any platform, environment, or language.
+		
+		AMQP is the first open standard wire protocol for messaging. AMQP is foremost about the choices it gives you. You can choose any AMQP solution you prefer, and if the one you chose doesn't work out, you can switch. Your application will still work.
+
+		";
+		releaseNotes: "Release of Apache Qpid Proton C 0.8 with OpenSSL 1.0.2beta3 for Windows for IoT. Unofficial build.";
+		copyright: Copyright 2015;
+		tags: {AMQP, OpenSSL, Qpid, Proton, IoT, Native, IA32};
+	}
+	
+	files {
+		nestedInclude: {
+			#destination = ${d_include}proton;
+			"proton\builds\include\**\*" 
+		};
+		
+		docs: {"proton\LICENSE"};
+		
+		[Win32] {
+			lib: "proton\builds\lib\qpid-proton.lib";
+			
+			symbols: {
+				"proton\proton-c\Release\qpid-proton.pdb",
+				"openssl\out32dll\libeay32.pdb",
+				"openssl\out32dll\ssleay32.pdb"
+			};
+			
+			bin: {
+				"proton\builds\bin\qpid-proton.dll",
+				"openssl\builds\bin\libeay32.dll",
+				"openssl\builds\bin\ssleay32.dll"
+			};
+		}
+	}
+}
