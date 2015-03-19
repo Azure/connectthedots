@@ -1,4 +1,8 @@
+![](CTD-logo-v5-02.png)
+
 [ConnectTheDots.io](http://connectthedots.io) is an open source project created by <a href="http://msopentech.com">Microsoft Open Technologies</a> to help you get tiny devices connected to Microsoft Azure, and to implement great IoT solutions taking advantage of Microsoft Azure advanced analytic services such as Azure Stream Analytics and Azure Machine Learning. 
+
+![](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/ConnectTheDots%20architecture.png)
 
 In this project there are code samples, configuration scripts and guides that will help you set up devices and sensors, and configure Microsoft Azure services to view and analyze the data produced by those devices. Some of these samples have been provided by MS Open Tech, others by third parties; we encourage everyone to submit code samples or configuration documentation to grow this project.
 
@@ -47,7 +51,7 @@ In order to reproduce one of the ConnectTheDots.io scenarios, you will need the 
 If you are going to deploy the starter solution, you need to procure an Arduino UNO and Raspberry Pi, as shown in the documentation for those devices in the appropriate folders:
 
 - [Arduino UNO R3 and weather shield](Devices/GatewayConnectedDevices/Arduino/Weather/WeatherShieldJson/Hardware.md)
-- [Raspberry Pi](Devices/Gateways/RaspberryPi/Hardware.md)
+- [Raspberry Pi](Devices/Gateways/GatewayService/Hardware.md)
 
 If you decide to connect another device, you can check out the samples provided in the devices sub folder containing .NET and C++ examples. Other languages examples are coming soon!
 
@@ -55,10 +59,11 @@ If you decide to connect another device, you can check out the samples provided 
 Setting up your IoT solution involves several distinct steps, each of which is fully described in this project:
 
 
+1. Clone or copy the project to your machine (NOTE: place the project in a folder as close to the root of your file system as possible. Some paths in the project are very long and you might encounter issues with long path names when restoring NuGet packages)
 1. [Azure prep](Azure/AzurePrep/AzurePrep.md) - Creating basic Azure resources
-2. [Device setup](Devices/DeviceSetup.md) - Configuring your device(s)
-3. [Sample website deployment](Azure/WebSite/WebsitePublish.md) - Publishing a generic sample website for viewing the data
-4. [Analysis services setup](Azure/StreamAnalyticsQueries/SA_setup.md) - Configuring Azure Stream Analytics services (for starter solution)
+1. [Device setup](Devices/DeviceSetup.md) - Configuring your device(s)
+1. [Sample website deployment](Azure/WebSite/WebsitePublish.md) - Publishing a generic sample website for viewing the data
+1. [Analysis services setup](Azure/StreamAnalyticsQueries/SA_setup.md) - Configuring Azure Stream Analytics services (for starter solution)
   
 To get started with a simple example, complete the "Connect The Dots starter solution" tasks identified in each of the above steps.
 
