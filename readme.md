@@ -59,10 +59,11 @@ If you decide to connect another device, you can check out the samples provided 
 Setting up your IoT solution involves several distinct steps, each of which is fully described in this project:
 
 
+1. Clone or copy the project to your machine (NOTE: place the project in a folder as close to the root of your file system as possible. Some paths in the project are very long and you might encounter issues with long path names when restoring NuGet packages)
 1. [Azure prep](Azure/AzurePrep/AzurePrep.md) - Creating basic Azure resources
-2. [Device setup](Devices/DeviceSetup.md) - Configuring your device(s)
-3. [Sample website deployment](Azure/WebSite/WebsitePublish.md) - Publishing a generic sample website for viewing the data
-4. [Analysis services setup](Azure/StreamAnalyticsQueries/SA_setup.md) - Configuring Azure Stream Analytics services (for starter solution)
+1. [Device setup](Devices/DeviceSetup.md) - Configuring your device(s)
+1. [Sample website deployment](Azure/WebSite/WebsitePublish.md) - Publishing a generic sample website for viewing the data
+1. [Analysis services setup](Azure/StreamAnalyticsQueries/SA_setup.md) - Configuring Azure Stream Analytics services (for starter solution)
   
 To get started with a simple example, complete the "Connect The Dots starter solution" tasks identified in each of the above steps.
 
