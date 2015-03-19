@@ -1,5 +1,7 @@
 [ConnectTheDots.io](http://connectthedots.io) is an open source project created by <a href="http://msopentech.com">Microsoft Open Technologies</a> to help you get tiny devices connected to Microsoft Azure, and to implement great IoT solutions taking advantage of Microsoft Azure advanced analytic services such as Azure Stream Analytics and Azure Machine Learning. 
 
+![](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/ConnectTheDots%20architecture.png)
+
 In this project there are code samples, configuration scripts and guides that will help you set up devices and sensors, and configure Microsoft Azure services to view and analyze the data produced by those devices. Some of these samples have been provided by MS Open Tech, others by third parties; we encourage everyone to submit code samples or configuration documentation to grow this project.
 
 A good first task, which we are calling the "Connect The Dots starter solution" is to build a simple temperature sensing network. It can be built quickly and easily with minimal knowledge of programming or Microsoft Azure, using commodity devices available locally or online - for example an Arduino UNO board with a weather shield, connected to a Raspberry Pi sending data to an Azure website. 

@@ -27,7 +27,7 @@ To build the project you will need Visual Studio 2013 [Community Edition](http:/
                   echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list 
                   sudo apt-get update && sudo apt-get upgrade 
                   sudo apt-get install mono-complete
-                  mozroots --import --ask-remove
+                  sudo mozroots --import --ask-remove
 
 
 * Open the Devices\Gateways\GatewayService\GatewayService.sln solution in Visual Studio
