@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CoreTest.cs" />
+    <Compile Include="Devices\SocketClientTestDevice.cs" />
     <Compile Include="Devices\SocketServiceTestDevice.cs" />
     <Compile Include="ITest.cs" />
     <Compile Include="SocketTest.cs" />
