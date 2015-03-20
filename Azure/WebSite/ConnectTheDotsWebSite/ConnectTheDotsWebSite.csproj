@@ -102,6 +102,7 @@
     </Content>
     <Content Include="css\connectthedots.css" />
     <Content Include="img\ajax-loader.gif" />
+    <Content Include="img\forkme_CTD.png" />
     <Content Include="js\d3Chart.js" />
     <Content Include="js\d3ChartControl.js" />
     <Content Include="js\d3CTD.js" />
@@ -113,9 +114,6 @@
     <Content Include="packages.config">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Docs\Temp and Humidity Website setup.md" />
-    <None Include="Properties\PublishProfiles\lt72.pubxml" />
-    <None Include="Properties\PublishProfiles\mar03iot.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

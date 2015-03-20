@@ -67,6 +67,7 @@
     </div>
 
     <form id="form2" runat="server">
+        <a target="_blank" href="http://connectthedots.io"><img style="position: absolute; top: 0; right: 0; border: 0;" src="img/forkme_CTD.png" alt="Fork me on GitHub" ></a>
 
         <div class="big-block">
             <h3>Live Sensor Data</h3>
