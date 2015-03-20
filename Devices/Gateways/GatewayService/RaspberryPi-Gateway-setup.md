@@ -30,7 +30,7 @@ To build the project you will need Visual Studio 2013 [Community Edition](http:/
                   sudo mozroots --import --ask-remove
 				  sudo apt-get -y install python libusb-1.0
 				  sudo apt-get -y install python-pip
-				  sudo pip cd install --upgrade pyusb
+				  sudo pip install pyusb
 
 
 * Open the Devices\Gateways\GatewayService\GatewayService.sln solution in Visual Studio
