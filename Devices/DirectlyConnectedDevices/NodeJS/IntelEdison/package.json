@@ -1,0 +1,43 @@
+{
+    "name": "ConnectTheDotsIntelEdison",
+    "version": "1.0.0",
+    "description": "Simple Node app sending data from Arduino Weather Shield to Azure Event Hubs",
+    "main": "ConnectTheDotsEdison.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+    "buffer-builder": "^0.2.0",
+    "butils": "^0.1.0",
+    "cbarrick-circular-buffer": "^1.2.2",
+    "debug": "^2.0.0",
+    "node-amqp-encoder": "^0.0.2",
+    "node-int64": "^0.3.2",
+    "readable-stream": "^1.0.32",
+    "stately.js": "^1.2.0",
+        "cylon": "^0.22.1",
+        "cylon-gpio": "^0.22.1",
+        "cylon-i2c": "^0.20.0",
+        "cylon-intel-iot": "^0.5.0",
+        "cylon-firmata": "^0.19.0",
+        "debug": "^2.0.0",
+        "moment": "^2.9.0",
+        "node-amqp-1-0": "0.0.14"
+    },
+  "devDependencies": {
+    "bluebird": "^2.8.2",
+    "grunt": "^0.4.5",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-env": "^0.4.2",
+    "grunt-istanbul": "^0.3.0",
+    "grunt-jsdoc-to-markdown": "^0.4.2",
+    "grunt-simple-mocha": "^0.4.0",
+    "mocha": "^1.21.4",
+    "should": "^4.0.4",
+    "xml2js": "^0.4.4"
+  }
+
+}
