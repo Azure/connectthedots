@@ -35,22 +35,19 @@ Units = "decibels";
 Vendor = 0x16c0                                         # Vendor ID for Wensn
 Product=0x5dc                                           # Product ID for Wensn 1361
 
-HOST = ''   
+HOST = '127.0.0.1'   
 PORT = 5000
  
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print("Socket created")
 
 try:
-    s.bind((HOST, PORT))
+    s.connect((HOST, PORT));
 except socket.error as msg:
-    print("Bind failed. Error Code : " + str(msg[0]) + " Message " + msg[1])
+    print("Socket connection failed. Error Code : " + str(msg[0]) + " Message " + msg[1])
     sys.exit()
      
-print ("Socket bind complete")
- 
-s.listen(10)
-# print("Socket now listening")
+print ("Socket connection complete")
 
 # dev = usb.core.find(idVendor=0x16c0, idProduct=0x5dc)
 dev = usb.core.find(idVendor=Vendor, idProduct=Product)
@@ -58,17 +55,16 @@ assert dev is not None
 print(dev)
 print(hex(dev.idVendor) + ", " + hex(dev.idProduct))
  
-conn, addr = s.accept()
 while 1:
         ret = dev.ctrl_transfer(0xC0, 4, 0, 0, 200)
         dB = (ret[0] + ((ret[1] & 3) * 256)) * 0.1 + 30
         timeStr = datetime.datetime.utcnow().isoformat()
         try:
                 JSONdB="{\"value\":"+str(dB)+",\"guid\":\""+GUID+"\",\"organization\":\""+Org+"\",\"displayname\":\""+Disp +"\",\"unitofmeasure\":\""+Units+"\",\"measurename\":\""+Measure+"\",\"location\":\""+Locn+"\",\"timecreated\":\""+timeStr+"\"}"
-                conn.send("<" + JSONdB + ">");                  # sends to gateway over socket interface
+                s.send("<" + JSONdB + ">");                  # sends to gateway over socket interface
                 print(JSONdB)                                   # print only for debugging purposes
         except Exception as msg:
-                print(msg[1])
+                print(msg[0])
                 
         time.sleep(1)
 s.close()

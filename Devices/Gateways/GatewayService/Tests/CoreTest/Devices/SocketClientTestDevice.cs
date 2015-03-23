@@ -40,8 +40,8 @@ namespace Microsoft.ConnectTheDots.Test
     public class SocketClientTestDevice
     {
         private const int CONNECTION_RETRIES           = 20000;
-        private const int SLEEP_TIME_BETWEEN_RETRIES   = 1000; // 1 sec
-        private const int TIME_BETWEEN_DATA_MS         = 1000; // 1 sec
+        private const int SLEEP_TIME_BETWEEN_RETRIES   = 1000;  // 1 sec
+        private const int TIME_BETWEEN_DATA_MS         = 500;   // 0.5 sec
         
 
         //--//
@@ -58,6 +58,7 @@ namespace Microsoft.ConnectTheDots.Test
         private bool                   _doWorkSwitch;
         private Thread                 _listeningThread;
         private SensorEndpoint         _endpoint;
+        private int                    _messagesToSend;
 
         //--//
 
@@ -75,8 +76,9 @@ namespace Microsoft.ConnectTheDots.Test
         {
             _doWorkSwitch = false;
         }
-        public void Start( SensorEndpoint endpoint )
+        public void Start( SensorEndpoint endpoint, int messagesToSend )
         {
+            _messagesToSend = messagesToSend;
             _endpoint = endpoint;
             _doWorkSwitch = true;
 
@@ -127,7 +129,7 @@ namespace Microsoft.ConnectTheDots.Test
 
         private void StartDataFlow( Socket client )
         {
-            while( _doWorkSwitch )
+            for (; _messagesToSend != 0 && _doWorkSwitch; --_messagesToSend)
             {
                 try
                 {

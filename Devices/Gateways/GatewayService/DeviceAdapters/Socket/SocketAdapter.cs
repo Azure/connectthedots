@@ -142,7 +142,7 @@ namespace Microsoft.ConnectTheDots.Adapters
                 Regex dataExtractor = new Regex( "<([\\w\\s\\d:\",-{}.]+)>" );
                 NetworkStream networkStream = clientSocket.GetStream( );
 
-                byte[ ] buffer = new Byte[1024];
+                byte[ ] buffer = new Byte[ clientSocket.ReceiveBufferSize + 1 ];
                 string data = string.Empty;
 
                 for( ;; )
@@ -156,6 +156,7 @@ namespace Microsoft.ConnectTheDots.Adapters
                     {
                         // Parse string into angle bracket surrounded JSON strings
                         var matches = dataExtractor.Matches( data );
+                        
                         if( matches.Count >= 1 )
                         {
                             foreach( Match m in matches )
@@ -166,6 +167,8 @@ namespace Microsoft.ConnectTheDots.Adapters
                                 string jsonString = jsonBuilder.ToString( );
                                 _enqueue(jsonString);
                             }
+                            //remove matched substrings from buffer
+                            data = dataExtractor.Replace( data, "" );
                         }
                     }
                 }
