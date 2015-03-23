@@ -90,7 +90,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
         public bool GetInputs( out AzurePrepInputs result )
         {
             result = new AzurePrepInputs( );
-            result.Credentials = AzureCredentialsProvider.GetUserSubscriptionCredentials( );
+            result.Credentials = AzureConsoleHelper.GetUserSubscriptionCredentials( );
             if( result.Credentials == null )
             {
                 result = null;
@@ -342,7 +342,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
         private string SelectRegion( AzurePrepInputs inputs )
         {
             Console.WriteLine( "Retrieving a list of Locations..." );
-            string[] regions = AzureHelper.GetRegions( inputs.Credentials );
+            string[] regions = AzureProvider.GetRegions( inputs.Credentials );
             int regionsCount = regions.Length;
 
             Console.WriteLine( "Available locations: " );

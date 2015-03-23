@@ -22,7 +22,6 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-using Microsoft.WindowsAzure.Management.ServiceBus.Models;
 
 namespace Microsoft.ConnectTheDots.CloudDeploy.Common
 {
@@ -32,10 +31,11 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
     using System.Text;
     using Microsoft.WindowsAzure;
     using Microsoft.WindowsAzure.Management.ServiceBus;
+    using Microsoft.WindowsAzure.Management.ServiceBus.Models;
 
     //--//
 
-    public static class AzureHelper
+    public static class AzureProvider
     {
         public static string[] GetRegions( SubscriptionCloudCredentials creds )
         {
@@ -55,7 +55,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
         public static ServiceBusNamespace[] GetNamespaces( SubscriptionCloudCredentials creds )
         {
             var sbMgmt = new ServiceBusManagementClient( creds );
-            var regionsResponse = sbMgmt.Namespaces.ListAsync( ).Result;
+            var regionsResponse = sbMgmt.Namespaces.List( );
 
             int currentNamespace = 0, namespaceCount = regionsResponse.Count( );
             ServiceBusNamespace[] namespaces = new ServiceBusNamespace[ namespaceCount ];
