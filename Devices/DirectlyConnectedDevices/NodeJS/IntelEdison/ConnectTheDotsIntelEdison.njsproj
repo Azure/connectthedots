@@ -18,6 +18,8 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
   <ItemGroup>
+    <Content Include="Hardware.md" />
+    <Content Include="Intel_Edison_setup.md" />
     <Content Include="package.json" />
     <Compile Include="ConnectTheDotsEdison.js" />
     <Content Include="scripts\deploy.cmd" />
