@@ -1,10 +1,10 @@
 ﻿{
-    "namespace": "olivier-ns",
-    "keyname": "D3",
-    "key": "1Ye56eBH0pFdnMC2dl69Eo9dMPH4ci0NnXv6OjlQbUY=",
-    "eventhubname": "olivierdevices",
-    "guid": "32e504e2-2ac3-4c29-8cca-9301af3486fb",
+    "namespace": "{namespace}",
+    "keyname": "{key-name}",
+    "key": "{key}",
+    "eventhubname": "ehdevices",
+    "guid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "displayname": "Edison",
-    "organization": "MS Open Tech",
-    "location":  "Olivier's Office"
+    "organization": "My Org",
+    "location":  "My location"
 }

@@ -24,35 +24,22 @@ REM THE SOFTWARE.
 REM ---------------------------------------------------------------------------------
 set puttydir="C:\program files (x86)\PuTTY\"
 set prjdir=..\
-set edison_ip=192.168.0.118
+set edison_ip=192.168.1.101
 set edison_usr=root
 set edison_pw=P@ssw0rd
-set CTD_Home=ConnectTheDots
+set CTD_Home=/node_app_slot
+set temp="C:\Users\obloch\Documents\temp"
 set PUTTY_CMD=%puttydir%putty %edison_usr%@%edison_ip% -pw %edison_pw% 
 set PSCP_CMD=%puttydir%pscp -pw %edison_pw% 
 
-echo Creating ConnectTheDots directory
-REM del /f %temp%\edisonconnectthedotsmacro.tmp
-REM echo rm -rf %CTD_Home%  >> %temp%\edisonconnectthedotsmacro.tmp
-REM echo mkdir  %CTD_Home%  >> %temp%\edisonconnectthedotsmacro.tmp
-REM %PUTTY_CMD% -m %temp%\edisonconnectthedotsmacro.tmp
-
 echo Copying Project files
-%PSCP_CMD% %prjdir%\amqp_client.js %edison_usr%@%edison_ip%:%CTD_Home%/
 %PSCP_CMD% %prjdir%\ConnectTheDotsEdison.js %edison_usr%@%edison_ip%:%CTD_Home%/
 %PSCP_CMD% %prjdir%\package.json %edison_usr%@%edison_ip%:%CTD_Home%/
 %PSCP_CMD% %prjdir%\settings.json %edison_usr%@%edison_ip%:%CTD_Home%/
-%PSCP_CMD% %prjdir%\scripts\autorun.sh %edison_usr%@%edison_ip%:%CTD_Home%/
-%PSCP_CMD% -r %prjdir%\lib %edison_usr%@%edison_ip%:%CTD_Home%/
 
-echo Making autorun executable
-REM del /f %temp%\edisonconnectthedotsmacro.tmp
-REM echo chmod 755 %CTD_Home%\autorun.sh  >> %temp%\edisonconnectthedotsmacro.tmp
-REM %PUTTY_CMD% -m %temp%\edisonconnectthedotsmacro.tmp
-
-REM echo Installing node modules
-REM del /f %temp%\edisonconnectthedotsmacro.tmp
-REM echo cd %CTD_Home%  >> %temp%\edisonconnectthedotsmacro.tmp
-REM echo npm update  >> %temp%\edisonconnectthedotsmacro.tmp
-REM %PUTTY_CMD% -m %temp%\edisonconnectthedotsmacro.tmp
+echo Installing/updating node modules
+del /f %temp%\edisonconnectthedotsmacro.tmp
+echo cd %CTD_Home%  >> %temp%\edisonconnectthedotsmacro.tmp
+echo npm update  >> %temp%\edisonconnectthedotsmacro.tmp
+%PUTTY_CMD% -m %temp%\edisonconnectthedotsmacro.tmp
 
