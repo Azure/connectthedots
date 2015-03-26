@@ -25,46 +25,73 @@ import socket
 import time
 import datetime
 
-#SensorSubject = "sound"                                 # determines how Azure website will chart the data
-Org = "My organization";
-Disp = "Wensn SLM 01"                      # will be the label for the curve on the chart
-GUID = "nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn"     # ensures all the data from this sensor appears on the same chart. You can use the Tools/Create GUID in Visual Studio to create
-Locn = "here";
-Measure = "sound";
-Units = "decibels";
-Vendor = 0x16c0                                         # Vendor ID for Wensn
-Product=0x5dc                                           # Product ID for Wensn 1361
+#SensorSubject = "sound"                           # determines how Azure website will chart the data
+Org      = "My organization";
+Disp     = "Wensn SLM 01"                          # will be the label for the curve on the chart
+GUID     = "nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn"  # ensures all the data from this sensor appears on the same chart. You can use the Tools/Create GUID in Visual Studio to create
+Locn     = "here";
+Measure  = "sound";
+Units    = "decibels";
 
-HOST = '127.0.0.1'   
-PORT = 5000
- 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print("Socket created")
+Vendor   = 0x16c0                                  # Vendor ID for Wensn
+Product  = 0x5dc                                   # Product ID for Wensn 1361
 
-try:
-    s.connect((HOST, PORT));
-except socket.error as msg:
-    print("Socket connection failed. Error Code : " + str(msg[0]) + " Message " + msg[1])
-    sys.exit()
-     
-print ("Socket connection complete")
+HOST     = '127.0.0.1'   
+PORT     = 5000
 
-# dev = usb.core.find(idVendor=0x16c0, idProduct=0x5dc)
-dev = usb.core.find(idVendor=Vendor, idProduct=Product)
-assert dev is not None
-print(dev)
-print(hex(dev.idVendor) + ", " + hex(dev.idProduct))
- 
+CONNECT_RETRY_INTERVAL = 2
+EXCEPTION_THRESHOLD    = 3
+SEND_INTERVAL          = 1
+
 while 1:
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    print("Socket created.")
+
+    while 1:
+        try:
+            s.connect((HOST, PORT));
+            break;
+        except socket.error as msg:
+            print("Socket connection failed. Error Code : " + str(msg[0]) + " Message " + msg[1])
+            time.sleep(CONNECT_RETRY_INTERVAL)
+     
+    print ("Socket connection succeeded.")
+
+    print ("Looking for an usb device...")
+    while 1:
+        dev = usb.core.find(idVendor=Vendor, idProduct=Product)
+        if dev is not None:
+            break;
+        print ("Please plug usb device in. Waiting...")
+        time.sleep(CONNECT_RETRY_INTERVAL)
+
+    print(dev)
+    print(hex(dev.idVendor) + ", " + hex(dev.idProduct))
+
+    exceptions_count = 0
+    while 1:
         ret = dev.ctrl_transfer(0xC0, 4, 0, 0, 200)
         dB = (ret[0] + ((ret[1] & 3) * 256)) * 0.1 + 30
         timeStr = datetime.datetime.utcnow().isoformat()
         try:
-                JSONdB="{\"value\":"+str(dB)+",\"guid\":\""+GUID+"\",\"organization\":\""+Org+"\",\"displayname\":\""+Disp +"\",\"unitofmeasure\":\""+Units+"\",\"measurename\":\""+Measure+"\",\"location\":\""+Locn+"\",\"timecreated\":\""+timeStr+"\"}"
-                s.send("<" + JSONdB + ">");                  # sends to gateway over socket interface
-                print(JSONdB)                                   # print only for debugging purposes
+            JSONdB="{\"value\":"+str(dB)+",\"guid\":\""+GUID+"\",\"organization\":\""+Org+"\",\"displayname\":\""+Disp +"\",\"unitofmeasure\":\""+Units+"\",\"measurename\":\""+Measure+"\",\"location\":\""+Locn+"\",\"timecreated\":\""+timeStr+"\"}"
+            s.send("<" + JSONdB + ">");                  # sends to gateway over socket interface
+            print(JSONdB)                                # print only for debugging purposes
         except Exception as msg:
-                print(msg[0])
-                
-        time.sleep(1)
-s.close()
+            exceptions_count += 1
+            print(msg[0])
+            # if we get too many exceptions, we assume the server is dead
+            # we will ignore the casual exception
+            if exceptions_count > EXCEPTION_THRESHOLD:
+                break 
+            else:
+                continue
+
+        time.sleep(SEND_INTERVAL)
+    
+    # will never get here, unless server dies         
+    try: 
+        s.close()
+    except Exception as msg:
+        # eat all exception and go back to connect loop 
+        print(msg[0])
