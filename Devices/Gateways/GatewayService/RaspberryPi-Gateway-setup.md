@@ -21,16 +21,22 @@ To build the project you will need Visual Studio 2013 [Community Edition](http:/
     * For Windows, download PuTTY and PSCP from [here](http://www.putty.org/).
     * Connect to the Pi using the IP address of the Pi.
 * Once you have connected to the Pi, install on it the Mono runtime and root certs required for a secure SSL connection to Azure:
-    * Run the following from a shell (i.e. via SSH). Note: Especially steps 1 and 2 can take a long time to download/un-compress
+    * Run the following from a shell (i.e. via SSH)
     
-                  sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF 
-                  echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list 
-                  sudo apt-get update && sudo apt-get upgrade 
+
+                  sudo apt-get update 
+				  sudo apt-get upgrade 
                   sudo apt-get install mono-complete
                   sudo mozroots --import --ask-remove
 				  sudo apt-get -y install python libusb-1.0
 				  sudo apt-get -y install python-pip
 				  sudo pip install pyusb
+
+    * This will install the regular build of mono on the Pi, which may have some limitations. If you want to run the latest build of mono instead, which may work better for you, run the following commands before running the above. Note that the latest build below may not work with all the functions in the Connect The Dots project for your specific model of Pi, so using it is for the advanced user only. 
+    
+                  sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF 
+                  echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list 
+
 
 
 * Open the Devices\Gateways\GatewayService\GatewayService.sln solution in Visual Studio
