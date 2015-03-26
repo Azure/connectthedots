@@ -32,7 +32,7 @@ SELECT
     location,
     organization,
     MIN(timecreated) AS timecreated,
-    max(time) as timestart
+    max(value) as timestart
 FROM 
     DevicesInput TIMESTAMP BY timecreated
 WHERE
