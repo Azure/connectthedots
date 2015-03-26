@@ -87,6 +87,7 @@ namespace Microsoft.ConnectTheDots.Test
 
         public void TestRecieveMessagesFromSocketDevice( )
         {
+            const int MESSAGES_TO_SEND_BY_SOCKET = 5;
             try
             {
                 IList<string> sources = Loader.GetSources( )
@@ -103,15 +104,15 @@ namespace Microsoft.ConnectTheDots.Test
                 GatewayService service = PrepareGatewayService( );
 
                 SensorEndpoint endpoint = endpoints.First( );
-                SocketServiceTestDevice device = new SocketServiceTestDevice( _logger );
-                device.Start( endpoint );
+                SocketClientTestDevice device = new SocketClientTestDevice( _logger );
+                device.Start( endpoint, MESSAGES_TO_SEND_BY_SOCKET );
 
                 DeviceAdapterLoader dataIntakeLoader = new DeviceAdapterLoader(
                     sources,
                     endpoints,
                     _logger );
 
-                _totalMessagesToSend += 5;
+                _totalMessagesToSend += MESSAGES_TO_SEND_BY_SOCKET;
 
                 dataIntakeLoader.StartAll( service.Enqueue, DataArrived );
 

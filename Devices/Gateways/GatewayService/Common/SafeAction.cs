@@ -54,4 +54,31 @@ namespace Microsoft.ConnectTheDots.Common
             }
         }
     }
+
+    public class SafeAction
+    {
+        private readonly Action         _action;
+        private readonly ILogger        _logger;
+
+        //--//
+
+        public SafeAction( Action action, ILogger logger )
+        {
+            _action = action;
+            _logger = SafeLogger.FromLogger( logger );
+        }
+
+        public void SafeInvoke( )
+        {
+            try
+            {
+                _action( );
+            }
+            catch( Exception ex )
+            {
+                _logger.LogError("Exception in task: " + ex.StackTrace);
+                _logger.LogError("Message in task: " + ex.Message);
+            }
+        }
+    }
 }

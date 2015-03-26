@@ -22,9 +22,12 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
+
 namespace Microsoft.ConnectTheDots.Adapters
 {
     using System;
+    using System.IO;
+    using System.Net;
     using System.Net.Sockets;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -39,6 +42,10 @@ namespace Microsoft.ConnectTheDots.Adapters
     {
         private const int CONNECTION_RETRIES         = 20000;
         private const int SLEEP_TIME_BETWEEN_RETRIES = 1000; // 1 sec
+
+        //--//
+
+        private static TcpListener  _serverSocket;
 
         //--//
 
@@ -60,9 +67,10 @@ namespace Microsoft.ConnectTheDots.Adapters
 
             _doWorkSwitch = true;
 
-            var sh = new SafeAction<int>( ( t ) => RunForSocket( t ), _logger );
+            //var sh = new SafeAction<int>( ( t ) => RunSocketAsClient( t ), _logger );
+            var sh = new SafeAction( ( ) => RunSocketServer( ), _logger );
 
-            TaskWrapper.Run( ( ) => sh.SafeInvoke( CONNECTION_RETRIES ) );
+            TaskWrapper.Run( ( ) => sh.SafeInvoke( ) );
 
             return true;
         }
@@ -70,6 +78,14 @@ namespace Microsoft.ConnectTheDots.Adapters
         public override bool Stop( )
         {
             _doWorkSwitch = false;
+            
+            try
+            {
+                _serverSocket.Stop( );
+            }
+            catch( Exception )
+            {
+            }
 
             return true;
         }
@@ -87,7 +103,100 @@ namespace Microsoft.ConnectTheDots.Adapters
             return true;
         }
 
-        private int RunForSocket( int retries )
+        
+        private void RunSocketServer( )
+        {
+            try
+            {
+                IPAddress ipAddress;
+                if( !IPAddress.TryParse( _endpoint.Host, out ipAddress ) )
+                    return;
+
+                _serverSocket = new TcpListener( ipAddress, _endpoint.Port );
+                _serverSocket.Start( );
+            }
+            catch( Exception ex )
+            {
+                _logger.LogError( "Exception on creating listener: " + ex.StackTrace + ex.Message );
+            }
+
+            for( ; _doWorkSwitch; )
+            {
+                try
+                {
+                    TcpClient clientSocket = _serverSocket.AcceptTcpClient( );
+                    TaskWrapper.Run( ( ) => ProcessClient( clientSocket ) );
+                }
+                catch ( Exception ex )
+                {
+                    _logger.LogError( "Exception on trying to accept connection: " + ex.StackTrace );
+                }
+            }
+        }
+
+        private void ProcessClient( TcpClient clientSocket )
+        {
+            try
+            {
+                StringBuilder jsonBuilder = new StringBuilder( );
+                Regex dataExtractor = new Regex( "<([\\w\\s\\d:\",-{}.]+)>" );
+                NetworkStream networkStream = clientSocket.GetStream( );
+
+                byte[ ] buffer = new Byte[ clientSocket.ReceiveBufferSize + 1 ];
+                string data = string.Empty;
+
+                for( ;; )
+                {
+                    int partSize = networkStream.Read( buffer, 0, clientSocket.ReceiveBufferSize );
+                    string dataPart = Encoding.ASCII.GetString( buffer, 0, partSize );
+                    data += dataPart;
+
+                    // Read string from buffer
+                    if( data.Length > 0 )
+                    {
+                        // Parse string into angle bracket surrounded JSON strings
+                        var matches = dataExtractor.Matches( data );
+                        
+                        if( matches.Count >= 1 )
+                        {
+                            foreach( Match m in matches )
+                            {
+                                jsonBuilder.Clear( );
+                                jsonBuilder.Append( m.Captures[0].Value.Trim( ).Substring( 1, m.Captures[ 0 ].Value.Trim( ).Length - 2 ) );
+
+                                string jsonString = jsonBuilder.ToString( );
+                                _enqueue(jsonString);
+                            }
+                            //remove matched substrings from buffer
+                            data = dataExtractor.Replace( data, "" );
+                        }
+                    }
+                }
+            }
+            catch( StackOverflowException ex )
+            {
+                _logger.LogError( "Stack Overflow while processing data from socket: " + ex.StackTrace );
+
+                throw;
+            }
+            catch( OutOfMemoryException ex )
+            {
+                _logger.LogError( "Out of memory while processing data from socket: " + ex.StackTrace );
+
+                throw;
+            }
+            catch( SocketException ex )
+            {
+                _logger.LogError( "Socket exception processing data from socket: " + ex.StackTrace + ex.Message );
+                _logger.LogError( "Continuing..." );
+            }
+            catch( Exception ex )
+            {
+                _logger.LogError( ex.ToString( ) );
+            }
+        }
+
+        private int RunSocketAsClient( int retries )
         {
             int step = retries;
 
@@ -129,7 +238,7 @@ namespace Microsoft.ConnectTheDots.Adapters
             return 0;
         }
 
-        public void SensorDataClient( Socket client )
+        private void SensorDataClient( Socket client )
         {
             try
             {
