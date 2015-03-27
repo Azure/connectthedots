@@ -28,6 +28,7 @@ To build the project you will need Visual Studio 2013 [Community Edition](http:/
 				  sudo apt-get upgrade 
                   sudo apt-get install mono-complete
                   sudo mozroots --import --ask-remove
+				  sudo mozroots --import --machine --ask-remove
 				  sudo apt-get -y install python libusb-1.0
 				  sudo apt-get -y install python-pip
 				  sudo pip install pyusb
