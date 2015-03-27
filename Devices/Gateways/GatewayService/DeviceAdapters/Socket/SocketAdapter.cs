@@ -139,7 +139,7 @@ namespace Microsoft.ConnectTheDots.Adapters
             try
             {
                 StringBuilder jsonBuilder = new StringBuilder( );
-                Regex dataExtractor = new Regex( "<([\\w\\s\\d:\",-{}.]+)>" );
+                Regex dataExtractor = new Regex( "<([\\w\\s\\d:\",-{}.][^<>]+)>" );
                 NetworkStream networkStream = clientSocket.GetStream( );
 
                 byte[ ] buffer = new Byte[ clientSocket.ReceiveBufferSize + 1 ];
