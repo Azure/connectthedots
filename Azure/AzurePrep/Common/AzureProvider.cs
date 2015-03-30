@@ -22,14 +22,13 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-
 namespace Microsoft.ConnectTheDots.CloudDeploy.Common
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using Microsoft.WindowsAzure;
+    using Microsoft.Azure;
     using Microsoft.WindowsAzure.Management.ServiceBus;
     using Microsoft.WindowsAzure.Management.ServiceBus.Models;
 

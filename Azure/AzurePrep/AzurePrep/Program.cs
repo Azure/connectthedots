@@ -22,8 +22,13 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
+
+
+
 namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
 {
+    using Hyak.Common;
+
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -32,15 +37,23 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
     using System.Xml;
     using System.Net;
     using System.IO;
-    using Newtonsoft.Json;
-    using Microsoft.ConnectTheDots.CloudDeploy.Common;
+
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
-    using Microsoft.WindowsAzure;
     using Microsoft.WindowsAzure.Management.Storage;
     using Microsoft.WindowsAzure.Management.Storage.Models;
     using Microsoft.WindowsAzure.Management.ServiceBus;
     using Microsoft.WindowsAzure.Management.ServiceBus.Models;
+
+    using Newtonsoft.Json;
+
+    //--//
+
+    using SubscriptionCloudCredentials = Microsoft.Azure.SubscriptionCloudCredentials;
+
+    //--//
+
+    using Microsoft.ConnectTheDots.CloudDeploy.Common;
 
     //--//
 
@@ -491,7 +504,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             }
             catch ( CloudException ce )
             {
-                if( String.Equals( ce.ErrorCode, "ConflictError", StringComparison.InvariantCultureIgnoreCase ) )
+                if( String.Equals( ce.Error.Code, "ConflictError", StringComparison.InvariantCultureIgnoreCase ) )
                 {
                     _ConsoleBuffer.Add( string.Format( "Storage account {0} already existed.", inputs.StorageAccountName ) );
                 }

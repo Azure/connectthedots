@@ -25,18 +25,20 @@
 namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
 {
     using System;
-    using System.Collections;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Xml;
-    using Microsoft.ConnectTheDots.CloudDeploy.Common;
+
+    using Microsoft.Azure;
     using Microsoft.WindowsAzure.Management.ServiceBus.Models;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
-    using Microsoft.WindowsAzure;
     using Microsoft.WindowsAzure.Management.ServiceBus;
     using Microsoft.WindowsAzure.Management.Storage;
     using Microsoft.WindowsAzure.Subscriptions.Models;
+
+    //--//
+
+    using Microsoft.ConnectTheDots.CloudDeploy.Common;
 
     //--//
 

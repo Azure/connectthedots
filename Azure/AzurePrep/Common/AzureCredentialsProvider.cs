@@ -31,8 +31,8 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
     using System.Threading;
     using System.Threading.Tasks;
     using System.Xml;
+    using Microsoft.Azure;
     using Microsoft.IdentityModel.Clients.ActiveDirectory;
-    using Microsoft.WindowsAzure;
     using Microsoft.WindowsAzure.Subscriptions;
     using Microsoft.WindowsAzure.Subscriptions.Models;
 

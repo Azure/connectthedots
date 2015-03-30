@@ -24,19 +24,24 @@
 
 namespace Microsoft.ConnectTheDots.EHConsole
 {
-    using Microsoft.ConnectTheDots.CloudDeploy.Common;
-    using Microsoft.ServiceBus;
-    using Microsoft.ServiceBus.Messaging;
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.WindowsAzure;
+    
+    using Microsoft.Azure;
+    using Microsoft.ServiceBus;
+    using Microsoft.ServiceBus.Messaging;
     using Microsoft.WindowsAzure.Management.ServiceBus;
     using Microsoft.WindowsAzure.Management.ServiceBus.Models;
     using Microsoft.WindowsAzure.Management.Storage;
+
+    //--//
+
+    using Microsoft.ConnectTheDots.CloudDeploy.Common;
+
+    //--//
 
     class Program
     {
