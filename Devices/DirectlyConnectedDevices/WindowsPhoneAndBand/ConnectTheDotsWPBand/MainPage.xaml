@@ -1,0 +1,54 @@
+﻿<!--
+  Copyright (c) Microsoft Open Technologies, Inc.  All rights reserved.
+ 
+  The MIT License (MIT)
+ 
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+ 
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+ 
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
+-->
+<Page
+    x:Class="ConnectTheDotsWPBand.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ConnectTheDotsWPBand"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <ScrollViewer x:Name="ScrollViewer">
+        <Grid>
+            <Popup x:Name="SettingsPopup" Closed="SettingsPopup_Closed" IsOpen="false" Width="Auto"/>
+            <Image HorizontalAlignment="Left" Height="142" Margin="36,10,0,0" VerticalAlignment="Top" Width="320" Source="Assets/CTD-logo-grey.png"/>
+            <Image HorizontalAlignment="Left" Height="205" Margin="-9,116,-9,0" VerticalAlignment="Top" Width="418" Source="Assets/Microsoft-Band.png"/>
+            <TextBox x:Name="txtBand" HorizontalAlignment="Left" Height="58" Margin="117,199,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="172" Background="Black" Foreground="White" BorderBrush="{x:Null}" FontSize="10" FontFamily="Global User Interface" IsReadOnly="True"/>
+            <StackPanel Margin="0,301,0,0">
+                <CheckBox x:Name="chkHeartRateSensor" Content="Heart Rate" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="txtHeartRateSensor" HorizontalAlignment="Right" Height="27" Margin="0,-46,10,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="17" IsReadOnly="True"/>
+                <CheckBox x:Name="chkSkinTempSensor" Content="Skin Temperature" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="txtSkinTempSensor" HorizontalAlignment="Right" Height="27" Margin="0,-46,10,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="17" IsReadOnly="True"/>
+                <CheckBox x:Name="chkAccelXSensor" Content="Acceleration X" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="txtAccelXSensor" HorizontalAlignment="Right" Height="27" Margin="0,-46,10,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="17" IsReadOnly="True"/>
+                <CheckBox x:Name="chkAccelYSensor" Content="Acceleration Y" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="txtAccelYSensor" HorizontalAlignment="Right" Height="27" Margin="0,-46,10,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="17" IsReadOnly="True"/>
+                <CheckBox x:Name="chkAccelZSensor" Content="Acceleration Z" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="txtAccelZSensor" HorizontalAlignment="Right" Height="27" Margin="0,-46,10,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="17" IsReadOnly="True"/>
+                <Button Content="Azure Connection Settings" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Click="Button_Click"/>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</Page>

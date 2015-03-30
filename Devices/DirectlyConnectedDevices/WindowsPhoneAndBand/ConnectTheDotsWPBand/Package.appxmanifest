@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest" xmlns:m3="http://schemas.microsoft.com/appx/2014/manifest" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest">
+  <Identity Name="1386OlivierBloch.ConnectTheDotsWPSensors" Publisher="CN=7921E0A9-74E7-4EA4-A7A3-455DF2A8D982" Version="1.1.0.4" />
+  <mp:PhoneIdentity PhoneProductId="408d7784-3574-45be-b728-a8c0c43ff002" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+  <Properties>
+    <DisplayName>Connect The Dots WP Sensors</DisplayName>
+    <PublisherDisplayName>Olivier Bloch</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+  <Prerequisites>
+    <OSMinVersion>6.3.1</OSMinVersion>
+    <OSMaxVersionTested>6.3.1</OSMaxVersionTested>
+  </Prerequisites>
+  <Resources>
+    <Resource Language="x-generate" />
+  </Resources>
+  <Applications>
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="ConnectTheDotsWPBand.App">
+      <m3:VisualElements DisplayName="Connect The Dots Band" Square150x150Logo="Assets\Logo.png" Square44x44Logo="Assets\SmallLogo.png" Description="Band Sensors for ConnectTheDots.io" ForegroundText="light" BackgroundColor="transparent">
+        <m3:DefaultTile Wide310x150Logo="Assets\WideLogo.png" Square71x71Logo="Assets\Square71x71Logo.png">
+        </m3:DefaultTile>
+        <m3:SplashScreen Image="Assets\SplashScreen.png" />
+        <m3:InitialRotationPreference>
+          <m3:Rotation Preference="portrait" />
+        </m3:InitialRotationPreference>
+      </m3:VisualElements>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <Capability Name="internetClientServer" />
+  <DeviceCapability Name="bluetooth.rfcomm" xmlns="http://schemas.microsoft.com/appx/2013/manifest">
+      <Device Id="any">
+        <!-- Used by the Microsoft Band SDK Preview -->
+        <Function Type="serviceId:A502CA9A-2BA5-413C-A4E0-13804E47B38F" />
+        <!-- Used by the Microsoft Band SDK Preview -->
+        <Function Type="serviceId:C742E1A2-6320-5ABC-9643-D206C677E580" />
+      </Device>
+    </DeviceCapability></Capabilities>
+</Package>
