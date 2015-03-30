@@ -142,12 +142,15 @@ namespace Microsoft.ConnectTheDots.Adapters
                 Regex dataExtractor = new Regex( "<([\\w\\s\\d:\",-{}.][^<>]+)>" );
                 NetworkStream networkStream = clientSocket.GetStream( );
 
-                byte[ ] buffer = new Byte[ clientSocket.ReceiveBufferSize + 1 ];
+                //ReceiveBufferSize could change during execution
+                int receiveBufferSize = clientSocket.ReceiveBufferSize;
+
+                byte[ ] buffer = new byte[ receiveBufferSize + 1 ];
                 string data = string.Empty;
 
                 for( ;; )
                 {
-                    int partSize = networkStream.Read( buffer, 0, clientSocket.ReceiveBufferSize );
+                    int partSize = networkStream.Read( buffer, 0, receiveBufferSize );
                     string dataPart = Encoding.ASCII.GetString( buffer, 0, partSize );
                     data += dataPart;
 
