@@ -147,6 +147,9 @@ namespace Microsoft.ConnectTheDots.EHConsole
 
             CancellationTokenSource cts = new CancellationTokenSource( );
 
+            int closedReceivers = 0;
+            AutoResetEvent receiversStopped = new AutoResetEvent( false );
+
             for( int i = 0; i < partitionCount; i++ )
             {
                 Task.Factory.StartNew( ( state ) =>
@@ -180,6 +183,10 @@ namespace Microsoft.ConnectTheDots.EHConsole
                             {
                                 Console.WriteLine( "Stopping: {0}", state );
                                 receiver.Close( );
+                                if (Interlocked.Increment(ref closedReceivers) >= partitionCount)
+                                {
+                                    receiversStopped.Set();
+                                }
                                 break;
                             }
                         }
@@ -192,6 +199,9 @@ namespace Microsoft.ConnectTheDots.EHConsole
 
             Console.ReadLine( );
             cts.Cancel( );
+
+            //waiting for all receivers to stop
+            receiversStopped.WaitOne( );
 
             bool saveToFile;
             for( ;; )
