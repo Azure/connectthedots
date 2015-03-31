@@ -1,5 +1,5 @@
 /* 
- Copyright (c) Neal Analytics, Inc.  All rights reserved.
+ Copyright (c) Microsoft Open Technologies, Inc.  All rights reserved.
  
  The MIT License (MIT)
 
@@ -15,14 +15,19 @@
  THE SOFTWARE.
  
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= 
-
- Based upon code from Bildr.org at http://bildr.org/2011/07/ds18b20-arduino/ , which is copyright (c) 2010 bildr community, and licensed under the MIT license.
+ NOTE: this is a modification specifically for the Arduino DUE.
  
+ Based upon code from https://github.com/MSOpenTech/connectthedots/tree/master/Devices/GatewayConnectedDevices/Arduino%20UNO/Temperature/DS18B20 which is 
+ copyright (c) Neal Analytics and licensed under the MIT license, itself based upon code from Bildr.org at http://bildr.org/2011/07/ds18b20-arduino/ , 
+ which is copyright (c) 2010 bildr community, and licensed under the MIT license.
+ 
+
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  Arduino code to read data from a DS18B20 temperature sensor, then augment and format as JSON to send via serial connection.
  Example of sending temperature data to Microsoft Azure and analyzing with Azure Stream Analytics or Azure Machine Learning.
 */
 #include <OneWire.h> 
+#include <avr/dtostrf.h>
 
 // Constants used to add self-describing fields to the data before sending to Azure
 // Disp value will be the label for the curve on the chart
@@ -30,10 +35,10 @@
 // You can use Visual Studio to create DeviceGUID and copy it here. In VS, On the Tools menu, click Create GUID. The Create GUID
 // tool appears with a GUID in the Result box. Click Copy, and paste below.
 //
-char GUID[] = "tttttttt-tttt-tttt-tttt-tttttttttttt";
+char GUID[] = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx";
 char Org[] = "Your organization";
 char Disp[] = "Arduino DUE + DS18B20";
-char Locn[] = "Here";
+char Locn[] = "whereever";
 char Measure[] = "Temperature";
 char Units[] = "F";
 char buffer[300];
