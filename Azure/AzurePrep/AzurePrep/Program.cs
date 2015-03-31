@@ -22,30 +22,26 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-
-
-
 namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
 {
-    using Hyak.Common;
-
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Security.Cryptography.X509Certificates;
-    using System.Text;
-    using System.Xml;
-    using System.Net;
-    using System.IO;
 
+    //--//
+
+    using Hyak.Common;
+    using Microsoft.Azure.Management.Resources.Models;
+    using Microsoft.Azure.Management.StreamAnalytics;
+    using Microsoft.Azure.Management.StreamAnalytics.Models;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
     using Microsoft.WindowsAzure.Management.Storage;
     using Microsoft.WindowsAzure.Management.Storage.Models;
     using Microsoft.WindowsAzure.Management.ServiceBus;
     using Microsoft.WindowsAzure.Management.ServiceBus.Models;
-
-    using Newtonsoft.Json;
 
     //--//
 
@@ -94,16 +90,11 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
 
         //--//
 
-#if AZURESTREAMANALYTICS
-        string StreamAnalyticsGroup;
-        string JobAggregates;
-        string JobAlerts;
-#endif
-
         public bool GetInputs( out AzurePrepInputs result )
         {
             result = new AzurePrepInputs( );
             result.Credentials = AzureConsoleHelper.GetUserSubscriptionCredentials( );
+
             if( result.Credentials == null )
             {
                 result = null;
@@ -112,15 +103,15 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
 
             for( ;; )
             {
-                Console.WriteLine("Enter a name for Service Bus Namespace (only letters and digits, less than 17 chars long)." );
-                Console.WriteLine("(Note that fully qualified path may also be subject to further length restrictions.)");
+                Console.WriteLine( "Enter a name for Service Bus Namespace (only letters and digits, less than 17 chars long)." );
+                Console.WriteLine( "(Note that fully qualified path may also be subject to further length restrictions.)" );
                 result.NamePrefix = Console.ReadLine( );
-                if( string.IsNullOrEmpty(result.NamePrefix) || !CheckNamePrefix( result.NamePrefix ) )
+                if( string.IsNullOrEmpty( result.NamePrefix ) || !CheckNamePrefix( result.NamePrefix ) )
                 {
                     Console.WriteLine( "Namespace prefix should contain only letters and digits and have length less than 17." );
                     continue;
                 }
-                if (ConsoleHelper.Confirm("Are you sure you want to create a namespace called " + result.NamePrefix + "?"))
+                if( ConsoleHelper.Confirm( "Are you sure you want to create a namespace called " + result.NamePrefix + "?" ) )
                 {
                     break;
                 }
@@ -140,17 +131,13 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             result.EventHubNameDevices = "ehdevices";
             result.EventHubNameAlerts = "ehalerts";
 
-#if AZURESTREAMANALYTICS
-            StreamAnalyticsGroup = NamePrefix + "-StreamAnalytics";
-            JobAggregates = NamePrefix + "-aggregates";
-            JobAlerts = NamePrefix + "-alerts";
-#endif
             return true;
         }
 
         public bool Run( )
         {
             AzurePrepInputs inputs;
+            
             if( !GetInputs( out inputs ) )
             {
                 Console.WriteLine( "Error while getting inputs." );
@@ -158,14 +145,32 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
                 Console.ReadLine( );
                 return false;
             }
-
+            
             AzurePrepOutputs createResults = CreateEventHub( inputs );
+
             if( createResults == null )
             {
                 Console.WriteLine( "Error while creating Event Hubs." );
                 Console.WriteLine( "Press Enter to continue..." );
-                Console.ReadLine();
+                Console.ReadLine( );
                 return false;
+            }
+
+            for( ;; )
+            {
+                Console.WriteLine( "Do you want to create Stream Analytics jobs? (y/n)" );
+
+                string answer = Console.ReadLine( );
+                string request = "";
+                if( !string.IsNullOrEmpty( answer ) && answer.ToLower( ).StartsWith( "y" ) )
+                {
+                    request = "do not";
+                }
+                if( ConsoleHelper.Confirm( "Are you sure you " + request + "want to create Stream Analytics jobs?" ) )
+                {
+                    CreateStreamAnalyticsJobs( inputs, createResults );
+                    break;
+                }
             }
 
             #region print results
@@ -201,137 +206,6 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             Console.ReadLine( );
 
             #endregion
-
-#if AZURESTREAMANALYTICS
-            // Create StreamAnalyticsJobs + inputs + outputs + enter keys
-
-            // Untested code. May require AAD authentication, no support for management cert?
-
-            // Create Resource Group for the Stream Analytics jobs
-            var groupCreateRequest = WebRequest.Create(String.Format("https://management.azure.com/subscriptions/{0}/resourcegroups/{1}?api-version=2014-04-01-preview",
-                SubscriptionId, StreamAnalyticsGroup)) as HttpWebRequest;
-
-            groupCreateRequest.ClientCertificates.Add(creds.ManagementCertificate);
-            groupCreateRequest.ContentType = "application/json";
-            groupCreateRequest.Method = "PUT";
-            groupCreateRequest.KeepAlive = true;
-
-            var bytesGroup = Encoding.UTF8.GetBytes("{\"location\":\"Central US\"}");
-            groupCreateRequest.ContentLength = bytesGroup.Length;
-            groupCreateRequest.GetRequestStream().Write(bytesGroup, 0, bytesGroup.Length);
-
-            var groupCreateResponse = groupCreateRequest.GetResponse();
-
-            //var streamMgmt = new ManagementClient(creds); //, new Uri("https://management.azure.com"));
-            //HttpClient client = streamMgmt.HttpClient;
-            
-            var createJob = new StreamAnalyticsJob()
-            {
-                location = Location,
-                inputs = new List<StreamAnalyticsEntity> 
-                {
-                    new StreamAnalyticsEntity 
-                    {
-                        name = "devicesInput",
-                        properties = new Dictionary<string,object>
-                        {
-                            { "type" , "stream" },
-                            { "serialization" , new Dictionary<string,object>
-                                {
-                                    { "type", "JSON"},
-                                    { "properties", new Dictionary<string, object>
-                                        {
-                                            { "encoding", "UTF8"},
-                                        }
-                                    }
-                                }
-                            },
-                            { "datasource", new Dictionary<string,object>
-                                {
-                                    { "type", "Microsoft.ServiceBus/EventHub" },
-                                    { "properties", new Dictionary<string,object>
-                                        {
-                                            { "eventHubNamespace", Namespace },
-                                            { "eventHubName", EventHubDevices },
-                                            { "sharedAccessPolicyName", "StreamingAnalytics" },
-                                            { "sharedAccessPolicyKey", 
-                                                (ehDevices.Authorization.First( (d) 
-                                                    => String.Equals(d.KeyName, "StreamingAnalytics", StringComparison.InvariantCultureIgnoreCase)) as SharedAccessAuthorizationRule).PrimaryKey },
-                                        }
-                                    }
-                                }
-                             }
-                        },
-                    },
-                },
-                transformation = new StreamAnalyticsEntity()
-                {
-                    name = "Aggregates",
-                    properties = new Dictionary<string,object>
-                    {
-                        { "streamingUnits", 1 },
-                        { "query" , "select * from devicesInput" },
-                    }
-                },
-                outputs = new List<StreamAnalyticsEntity> 
-                {
-                    new StreamAnalyticsEntity 
-                    {
-                        name = "output",
-                        properties = new Dictionary<string,object>
-                        {
-                            { "datasource", new Dictionary<string,object>
-                                {
-                                    { "type", "Microsoft.ServiceBus/EventHub" },
-                                    { "properties", new Dictionary<string,object>
-                                        {
-                                            { "eventHubNamespace", Namespace },
-                                            { "eventHubName", EventHubAlerts },
-                                            { "sharedAccessPolicyName", "StreamingAnalytics" },
-                                            { "sharedAccessPolicyKey", 
-                                                (ehAlerts.Authorization.First( (d) => String.Equals(d.KeyName, "StreamingAnalytics", StringComparison.InvariantCultureIgnoreCase)) as SharedAccessAuthorizationRule).PrimaryKey },
-                                        }
-                                    }
-                                }
-                            },
-                            { "serialization" , new Dictionary<string,object>
-                                {
-                                    { "type", "JSON"},
-                                    { "properties", new Dictionary<string, object>
-                                        {
-                                            { "encoding", "UTF8"},
-                                        }
-                                    }
-                                }
-                            },
-                        },
-                    },
-                }
-            };
-
-
-
-            var jobCreateRequest = WebRequest.Create(String.Format("https://management.azure.com/subscriptions/{0}/resourcegroups/{1}/Microsoft.StreamAnalytics/streamingjobs/{2}?api-version=2014-10-01",
-                SubscriptionId, StreamAnalyticsGroup, JobAggregates)) as HttpWebRequest;
-
-            jobCreateRequest.ClientCertificates.Add(creds.ManagementCertificate);
-            jobCreateRequest.ContentType = "application/json";
-            jobCreateRequest.Method = "PUT";
-            jobCreateRequest.KeepAlive = true;
-
-            var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(createJob));
-            jobCreateRequest.ContentLength = bytes.Length;
-            jobCreateRequest.GetRequestStream().Write(bytes, 0, bytes.Length);
-
-            var jobCreateResponse = jobCreateRequest.GetResponse();
-
-            //var jobCreateTask = streamMgmt.HttpClient.PutAsync(
-            //    String.Format("https://management.azure.com/subscriptions/{0}/resourcegroups/{1}/Microsoft.StreamAnalytics/streamingjobs/{2}?api-version=2014-10-01",
-            //    SubscriptionId, StreamAnalyticsGroup, JobAggregates),
-            //    new StringContent(JsonConvert.SerializeObject(createJob)));
-            //jobCreateTask.Wait();
-            //var jobCreateResponse = jobCreateTask.Result;
-#endif
             return true;
         }
 
@@ -502,7 +376,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
                     return null;
                 }
             }
-            catch ( CloudException ce )
+            catch( CloudException ce )
             {
                 if( String.Equals( ce.Error.Code, "ConflictError", StringComparison.InvariantCultureIgnoreCase ) )
                 {
@@ -517,22 +391,171 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             return result;
         }
 
-#if AZURESTREAMANALYTICS
-      
-        class StreamAnalyticsEntity
+        private string SelectResourceGroup( AzurePrepInputs inputs )
         {
-            public string name;
-            public Dictionary<string, object> properties;
+            Console.WriteLine( "Retrieving a list of Resource Groups..." );
+            ResourceGroupExtended[] groups = AzureProvider.GetResourceGroups( inputs.Credentials );
+            int count = groups.Length;
+
+            Console.WriteLine( "Available Resource Groups: " );
+
+            for( int current = 1; current <= count; ++current )
+            {
+                Console.WriteLine( current + ": " + groups[ current - 1 ].Name );
+            }
+
+            for( ;; )
+            {
+                Console.WriteLine( "Please select Resource Group from list: " );
+
+                string answer = Console.ReadLine( );
+                int selection = 0;
+                if( !int.TryParse( answer, out selection ) || selection > count || selection < 1 )
+                {
+                    Console.WriteLine( "Incorrect Resource Group number." );
+                    continue;
+                }
+
+                if( ConsoleHelper.Confirm( "Are you sure you want to select Resource Group " + groups[ selection - 1 ].Name + "?" ) )
+                {
+                    return groups[ selection - 1 ].Name;
+                }
+            }
         }
-        class StreamAnalyticsJob
+
+        private void CreateStreamAnalyticsJobs( AzurePrepInputs azurePrepIn, AzurePrepOutputs azurePrepOut )
         {
-            public string location;
-            public Dictionary<string, object> properties;
-            public List<StreamAnalyticsEntity> inputs;
-            public StreamAnalyticsEntity transformation;
-            public List<StreamAnalyticsEntity> outputs;
+            string resourceGroupName = SelectResourceGroup( azurePrepIn );
+
+            string path = Path.GetDirectoryName( System.Reflection.Assembly.GetEntryAssembly( ).Location );
+            path += "\\..\\..\\..\\..\\StreamAnalyticsQueries";
+            foreach( string filename in Directory.GetFiles( path ) )
+            {
+                string extension = Path.GetExtension( filename );
+                if( extension != null && extension.Contains( "sql" ) )
+                {
+                    string nameWithoutExtension = Path.GetFileNameWithoutExtension( filename );
+                    string query = File.ReadAllText( filename );
+
+                    _ConsoleBuffer.Add( string.Format( "Creating {0} Stream Analytics job...", nameWithoutExtension ) );
+
+                    CreateStreamAnalyticsJob( nameWithoutExtension, query, resourceGroupName, azurePrepIn, azurePrepOut );
+                }
+            }
         }
-#endif
+
+        private void CreateStreamAnalyticsJob( string nameSuffix, string query, string resourceGroupName, AzurePrepInputs azurePrepIn, AzurePrepOutputs azurePrepOut )
+        {
+            const string inputName = "DevicesInput";
+            const string outputName = "output";
+
+            string jobName = azurePrepIn.NamePrefix + nameSuffix;
+            string transformationName = jobName + "-tr";
+
+            var computeClient = new StreamAnalyticsManagementClient( azurePrepIn.Credentials );
+
+            var serialization = new JsonSerialization
+            {
+                Type = "JSON",
+                Properties = new JsonSerializationProperties
+                {
+                    Encoding = "UTF8"
+                }
+            };
+
+            List<Input> jobInputs = new List<Input>
+            {
+                new Input
+                {
+                    Name = inputName,
+                    Properties = new StreamInputProperties
+                    {
+                        DataSource = new EventHubStreamInputDataSource
+                        {
+                            Properties = new EventHubStreamInputDataSourceProperties
+                            {
+                                EventHubName = azurePrepIn.EventHubNameDevices,
+                                ServiceBusNamespace = azurePrepIn.SBNamespace,
+                                SharedAccessPolicyName = "StreamingAnalytics",
+                                SharedAccessPolicyKey = ( azurePrepOut.ehDevices.Authorization.First( ( d )
+                                    => String.Equals( d.KeyName, "StreamingAnalytics", StringComparison.InvariantCultureIgnoreCase) ) as SharedAccessAuthorizationRule ).PrimaryKey,
+                            }
+                        },
+                        Serialization = serialization
+                    }
+                }
+            };
+
+            List<Output> jobOutputs = new List<Output>
+            {
+                new Output
+                {
+                    Name = outputName,
+                    Properties = new OutputProperties
+                    {
+                        DataSource = new EventHubOutputDataSource
+                        {
+                            Properties = new EventHubOutputDataSourceProperties
+                            {
+                                EventHubName = azurePrepIn.EventHubNameAlerts,
+                                ServiceBusNamespace = azurePrepIn.SBNamespace,
+                                SharedAccessPolicyName = "StreamingAnalytics",
+                                SharedAccessPolicyKey = ( azurePrepOut.ehAlerts.Authorization.First( ( d )
+                                    => String.Equals( d.KeyName, "StreamingAnalytics", StringComparison.InvariantCultureIgnoreCase) ) as SharedAccessAuthorizationRule ).PrimaryKey,
+                            }
+                        },
+                        Serialization = serialization
+                    }
+                }
+            };
+
+            bool created = true;
+            try
+            {
+                var jobCreateResponse = computeClient.StreamingJobs.CreateOrUpdateAsync(
+                    resourceGroupName,
+                    new JobCreateOrUpdateParameters
+                    {
+                        Job = new Job
+                        {
+                            Name = jobName,
+                            Location = azurePrepIn.Location,
+                            Properties = new JobProperties
+                            {
+                                Sku = new Sku
+                                {
+                                    //should be "standart" according to https://msdn.microsoft.com/en-us/library/azure/dn834994.aspx
+                                    Name = "standard"
+                                },
+                                EventsOutOfOrderPolicy = "drop",
+                                EventsOutOfOrderMaxDelayInSeconds = 10,
+                                Inputs = jobInputs,
+                                Outputs = jobOutputs,
+                                Transformation = new Transformation
+                                {
+                                    Name = transformationName,
+                                    Properties = new TransformationProperties
+                                    {
+                                        Query = query,
+                                        StreamingUnits = 1
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                    ).Result;
+            }
+            catch( Exception ex )
+            {
+                _ConsoleBuffer.Add( "Exception on creation Stream Analytics Job " + jobName + ": " + ex.Message );
+                created = false;
+            }
+            if( created )
+            {
+                _ConsoleBuffer.Add( "Stream Analytics job " + jobName + " created." );
+            }
+        }
 
         static int Main( string[] args )
         {
@@ -546,6 +569,8 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             catch ( Exception e )
             {
                 Console.WriteLine( "Exception {0} while creating Azure resources at {1}", e.Message, e.StackTrace );
+                Console.WriteLine( "Please hit enter to close." );
+                Console.ReadLine( );
                 return 0;
             }
         }
