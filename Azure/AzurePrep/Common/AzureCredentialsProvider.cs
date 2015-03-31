@@ -26,11 +26,12 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Security.Cryptography.X509Certificates;
-    using System.Threading;
     using System.Threading.Tasks;
     using System.Xml;
+
+    //--//
+
     using Microsoft.Azure;
     using Microsoft.IdentityModel.Clients.ActiveDirectory;
     using Microsoft.WindowsAzure.Subscriptions;
@@ -57,7 +58,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
             return ret;
         }
 
-        public static SubscriptionCloudCredentials GetCredentialsByPublishSettingFile( string fileName )
+        public static CertificateCloudCredentials GetCredentialsByPublishSettingFile(string fileName)
         {
             var doc = new XmlDocument( );
             doc.Load( fileName );
