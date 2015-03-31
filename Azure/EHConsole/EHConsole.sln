@@ -5,7 +5,7 @@ VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConnectTheDots.EHConsole", "EHConsole\Microsoft.ConnectTheDots.EHConsole.csproj", "{AAAAA552-F973-4683-8CF9-8B719A69E49C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConnectTheDots.CloudDeploy.Common", "..\Azure\AzurePrep\Common\Microsoft.ConnectTheDots.CloudDeploy.Common.csproj", "{987E2AAB-AC91-4781-89B7-C1AD0AF01D8A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConnectTheDots.CloudDeploy.Common", "..\AzurePrep\Common\Microsoft.ConnectTheDots.CloudDeploy.Common.csproj", "{987E2AAB-AC91-4781-89B7-C1AD0AF01D8A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
