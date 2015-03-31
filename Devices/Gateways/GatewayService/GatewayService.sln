@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerialPortAdapter", "Device
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketAdapter", "DeviceAdapters\Socket\SocketAdapter.csproj", "{9D9DA1EB-90DA-4FC0-A97F-C650201DD994}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BluetoothAdapter", "DeviceAdapters\Bluetooth\BluetoothAdapter.csproj", "{A49E31A1-79DC-4B05-AE48-2B594E168EB9}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConnectTheDots.Common", "Common\Microsoft.ConnectTheDots.Common.csproj", "{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceAdapterTestMock", "Tests\DeviceAdapterTestMock\DeviceAdapterTestMock.csproj", "{756AB4B0-BC00-4297-A4F0-3DB40B7E2181}"
@@ -92,6 +94,10 @@ Global
 		{8D4BB859-6779-4D53-86C6-79712956A772}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D4BB859-6779-4D53-86C6-79712956A772}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D4BB859-6779-4D53-86C6-79712956A772}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A49E31A1-79DC-4B05-AE48-2B594E168EB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A49E31A1-79DC-4B05-AE48-2B594E168EB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A49E31A1-79DC-4B05-AE48-2B594E168EB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A49E31A1-79DC-4B05-AE48-2B594E168EB9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -109,5 +115,6 @@ Global
 		{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D} = {048641FD-5970-4D79-9DA2-07CDCD9FAC43}
 		{756AB4B0-BC00-4297-A4F0-3DB40B7E2181} = {74BF7EFF-11AD-4587-9C35-9419831D1116}
 		{8D4BB859-6779-4D53-86C6-79712956A772} = {A5D7B51F-689A-4BB1-AE4C-7C12F4B443FA}
+		{A49E31A1-79DC-4B05-AE48-2B594E168EB9} = {5094CC44-E8F8-4472-8042-BE7E78899225}
 	EndGlobalSection
 EndGlobal

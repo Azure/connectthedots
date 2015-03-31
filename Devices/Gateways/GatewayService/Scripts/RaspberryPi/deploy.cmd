@@ -49,6 +49,7 @@ echo Copying Gateway files
 %PSCP_CMD% %prjdir%WindowsService\bin\%Configuration%\*.*                                                       %rpi_usr%@%rpi_ip%:%Staging%/
 %PSCP_CMD% %prjdir%DeviceAdapters\SerialPort\bin\%Configuration%\Microsoft.ConnectTheDots.SerialPortAdapter.dll %rpi_usr%@%rpi_ip%:%Staging%/
 %PSCP_CMD% %prjdir%DeviceAdapters\Socket\bin\%Configuration%\Microsoft.ConnectTheDots.SocketAdapter.dll         %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %prjdir%DeviceAdapters\Bluetooth\bin\%Configuration%\Microsoft.ConnectTheDots.BluetoothAdapter.dll   %rpi_usr%@%rpi_ip%:%Staging%/
 REM %PSCP_CMD% %prjdir%Tests\SocketServiceDeviceMock\bin\%Configuration%\SocketDeviceMock.exe                       %rpi_usr%@%rpi_ip%:%Staging%/
 REM %PSCP_CMD% %prjdir%Tests\DeviceAdapterTestMock\bin\%Configuration%\DataAdapterTestMock.dll                      %rpi_usr%@%rpi_ip%:%Staging%/
 REM %PSCP_CMD% %prjdir%Tests\CoreTest\bin\%Configuration%\CoreTest.exe                                              %rpi_usr%@%rpi_ip%:%Staging%/

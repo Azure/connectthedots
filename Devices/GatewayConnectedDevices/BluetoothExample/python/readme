@@ -1,0 +1,14 @@
+Scripts need to be pySerial installed.
+sudo apt-get install python-pip
+sudo pip install pySerial
+
+First you need to setup baudrate
+Run 
+sudo python SetupSerialBaudRate.py <new_baud_rate>
+sudo reboot
+
+Then do wiring.
+
+To start sending data to gateway:
+python BluetoothExample.py 
+
