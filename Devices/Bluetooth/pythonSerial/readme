@@ -1,0 +1,15 @@
+Scripts need to be pySerial installed.
+sudo apt-get install python-pip
+sudo pip install pySerial
+
+First you need to setup baudrate
+Run 
+sudo python setupSerialBaudRate.py <new_baud_rate>
+sudo reboot
+
+Then do wiring.
+Now you can run screen, divide by two consoles and
+python serialToSocketSrv.py 
+python serialToSocketClnt.py 
+
+If everything is ok then you should see transmitted data on the server side.
