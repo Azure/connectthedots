@@ -83,7 +83,7 @@ void Configuration::_parseAppSettings(char* key, char* value)
 	else if (!strcmp(key, "Password")) { m_password.assign(value); }
 	else if (!strcmp(key, "EventHubName")) { m_event_hub_name.assign(value); }
 	else if (!strcmp(key, "DeviceName")) { m_device_name.assign(value); m_device_nameW = conv.from_bytes(m_device_name); }
-	else if (!strcmp(key, "Guid")) { m_conv_buffer.assign(value); m_guid = conv.from_bytes(m_conv_buffer); }
+	else if (!strcmp(key, "Guid")) { m_guid.assign(value); m_guidW = conv.from_bytes(m_guid); }
 	else if (!strcmp(key, "Location")) { m_conv_buffer.assign(value); m_location = conv.from_bytes(m_conv_buffer); }
 	else if (!strcmp(key, "Organization")) { m_conv_buffer.assign(value);  m_organization = conv.from_bytes(m_conv_buffer); }
 	else if (!strcmp(key, "Subject")) { m_subject.assign(value); m_subjectW = conv.from_bytes(m_subject); }
@@ -140,7 +140,12 @@ std::wstring const &Configuration::subjectW() const
 	return (m_subjectW);
 }
 
-std::wstring const &Configuration::guid() const
+std::wstring const &Configuration::guidW() const
+{
+	return (m_guidW);
+}
+
+std::string const &Configuration::guid() const
 {
 	return (m_guid);
 }
