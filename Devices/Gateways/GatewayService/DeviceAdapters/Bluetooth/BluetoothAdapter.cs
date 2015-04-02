@@ -41,7 +41,7 @@ namespace Microsoft.ConnectTheDots.Adapters
         //--//
 
         private const string         PORT           = "/dev/ttyAMA0";
-        private const int            BAUD_RATE      = 115200;
+        private const int            BAUD_RATE      = 9600;
 
         //--//
 

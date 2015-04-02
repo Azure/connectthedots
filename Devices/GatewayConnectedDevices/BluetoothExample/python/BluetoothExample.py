@@ -34,7 +34,7 @@ Measure  = "measure";
 Units    = "units";
 
 HOST = '127.0.0.1'   
-PORT = 5001
+PORT = 5000
 
 SERIAL_PORT  = '/dev/ttyAMA0'
 BAUD_RATE    = 9600
