@@ -125,7 +125,7 @@ namespace Microsoft.ConnectTheDots.Gateway
             {
                 result.Location = string.Empty;
             }
-            result.Location += "GatewayIP here";
+            result.Location += " Eth0";
 
             return result;
         }
