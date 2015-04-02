@@ -112,5 +112,22 @@ namespace Microsoft.ConnectTheDots.Gateway
 
             return result;
         }
+
+        public static SensorDataContract AddIPToLocation( SensorDataContract data )
+        {
+            if( data == null )
+            {
+                return null;
+            }
+
+            SensorDataContract result = data;
+            if( result.Location == null )
+            {
+                result.Location = string.Empty;
+            }
+            result.Location += "GatewayIP here";
+
+            return result;
+        }
     }
 }

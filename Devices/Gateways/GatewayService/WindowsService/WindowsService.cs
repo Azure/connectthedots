@@ -51,6 +51,8 @@ namespace Microsoft.ConnectTheDots.GatewayService
         private readonly EventProcessor                 _batchSenderThread;
         private readonly DeviceAdapterLoader            _dataIntakeLoader;
 
+        private readonly Func<string, QueuedItem>       _gatewayTransform = null;
+
         //--//
 
         public WindowsService( ILogger logger )
@@ -92,6 +94,7 @@ namespace Microsoft.ConnectTheDots.GatewayService
                                                     amqpConfig.EventHubDeviceDisplayName,
                                                     _logger
                                                     );
+                
                 _batchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>(
                                                     _gatewayQueue,
                                                     _AMPQSender,
@@ -100,6 +103,25 @@ namespace Microsoft.ConnectTheDots.GatewayService
                                                     _logger );
 
                 _dataIntakeLoader = new DeviceAdapterLoader( Loader.GetSources( ), Loader.GetEndpoints( ), _logger );
+                DataTransformsConfig dataTransformsConfig = Loader.GetDataTransformsConfig( );
+                if( dataTransformsConfig.AttachIP || dataTransformsConfig.AttachTime )
+                {
+                    Func<string, SensorDataContract> transform = ( m => DataTransforms.SensorDataContractFromString( m, _logger ) );
+
+                    if( dataTransformsConfig.AttachTime )
+                    {
+                        var transformPrev = transform;
+                        transform = ( m => DataTransforms.AddTimeCreated( transformPrev( m ) ) );
+                    }
+
+                    if( dataTransformsConfig.AttachTime )
+                    {
+                        var transformPrev = transform;
+                        transform = ( m => DataTransforms.AddIPToLocation( transformPrev( m ) ) );
+                    }
+
+                    _gatewayTransform = ( m => DataTransforms.QueuedItemFromSensorDataContract( transform( m ) ) );
+                }
             }
             catch( Exception ex )
             {
@@ -119,11 +141,11 @@ namespace Microsoft.ConnectTheDots.GatewayService
             _batchSenderThread.Start( );
 
             _webHost = new WebServiceHost( typeof( Microsoft.ConnectTheDots.Gateway.GatewayService ) );
+
             Gateway.GatewayService service = new Microsoft.ConnectTheDots.Gateway.GatewayService(
                 _gatewayQueue,
                 _batchSenderThread,
-                m => DataTransforms.QueuedItemFromSensorDataContract(
-                        DataTransforms.AddTimeCreated( DataTransforms.SensorDataContractFromString( m, _logger ) ), _logger )
+                _gatewayTransform
             );
             _webHost.Description.Behaviors.Add( new ServiceBehavior( ( ) => service ) );
 
