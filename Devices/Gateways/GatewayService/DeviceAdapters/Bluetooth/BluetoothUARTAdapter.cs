@@ -33,7 +33,7 @@ namespace Microsoft.ConnectTheDots.Adapters
 
     //--//
 
-    public class BluetoothAdapter : DeviceAdapterAbstract
+    public class BluetoothUARTAdapter : DeviceAdapterAbstract
     {
         private Func<string, int>    _enqueue;
         private bool                 _doWorkSwitch;
@@ -45,7 +45,7 @@ namespace Microsoft.ConnectTheDots.Adapters
 
         //--//
 
-        public BluetoothAdapter( ILogger logger )
+        public BluetoothUARTAdapter( ILogger logger )
             : base( logger )
         {
             _doWorkSwitch = true;

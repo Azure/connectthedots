@@ -23,12 +23,12 @@ REM //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS I
 REM //  THE SOFTWARE.
 REM //  ---------------------------------------------------------------------------------
 
-set puttydir="C:\software\putty\"
+set puttydir="C:\Program Files (x86)\PuTTY\"
 set prjdir=..\..\
-set rpi_ip=xxx.xxx.xxx.xxx
+set rpi_ip=192.168.1.213
 set rpi_usr=pi
 set rpi_pw=raspberry
-set Configuration=Release
+set Configuration=Debug
 set GW_Home=ctdgtwy
 set Staging=%GW_Home%/staging
 set PUTTY_CMD=%puttydir%putty %rpi_usr%@%rpi_ip% -pw %rpi_pw% 
@@ -49,7 +49,7 @@ echo Copying Gateway files
 %PSCP_CMD% %prjdir%WindowsService\bin\%Configuration%\*.*                                                       %rpi_usr%@%rpi_ip%:%Staging%/
 %PSCP_CMD% %prjdir%DeviceAdapters\SerialPort\bin\%Configuration%\Microsoft.ConnectTheDots.SerialPortAdapter.dll %rpi_usr%@%rpi_ip%:%Staging%/
 %PSCP_CMD% %prjdir%DeviceAdapters\Socket\bin\%Configuration%\Microsoft.ConnectTheDots.SocketAdapter.dll         %rpi_usr%@%rpi_ip%:%Staging%/
-%PSCP_CMD% %prjdir%DeviceAdapters\Bluetooth\bin\%Configuration%\Microsoft.ConnectTheDots.BluetoothAdapter.dll   %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %prjdir%DeviceAdapters\Bluetooth\bin\%Configuration%\Microsoft.ConnectTheDots.BluetoothUARTAdapter.dll   %rpi_usr%@%rpi_ip%:%Staging%/
 REM %PSCP_CMD% %prjdir%Tests\SocketServiceDeviceMock\bin\%Configuration%\SocketDeviceMock.exe                       %rpi_usr%@%rpi_ip%:%Staging%/
 REM %PSCP_CMD% %prjdir%Tests\DeviceAdapterTestMock\bin\%Configuration%\DataAdapterTestMock.dll                      %rpi_usr%@%rpi_ip%:%Staging%/
 REM %PSCP_CMD% %prjdir%Tests\CoreTest\bin\%Configuration%\CoreTest.exe                                              %rpi_usr%@%rpi_ip%:%Staging%/

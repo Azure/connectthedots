@@ -36,8 +36,10 @@ echo "$(date) => autorun.sh: starting autorun.sh" >> $GW_HOME/boot_sequence.log
 #
 
 echo "Starting supplementary sensor script if present"
-echo "$(date) => autorun.sh: calling supplementary startup script autorun2.sh if necessary" >> $GW_HOME/boot_sequence.log
-$GW_HOME/autorun2.sh &
+echo "$(date) => autorun.sh: calling supplementary startup script autorunWensnSoundSensor.sh if necessary" >> $GW_HOME/boot_sequence.log
+$GW_HOME/autorunWensnSoundSensor.sh &
+echo "$(date) => autorun.sh: calling supplementary startup script autorunUartBT.sh if necessary" >> $GW_HOME/boot_sequence.log
+$GW_HOME/autorunUartBT.sh &
 #
 
 #

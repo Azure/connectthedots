@@ -1,3 +1,11 @@
+1) Go to /etc/inittab
+comment string
+T0:23:respawn:/sbin/getty -L ttyAMA0 115200 vt100
+2) Go to /boot/cmdline.txt
+remove console=ttyAMA0,115200 kgdboc=ttyAMA0,115200
+3) reboot RPI
+4) Have fun.
+
 Scripts need to be pySerial installed.
 sudo apt-get install python-pip
 sudo pip install pySerial
