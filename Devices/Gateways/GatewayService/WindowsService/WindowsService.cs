@@ -25,12 +25,16 @@
 namespace Microsoft.ConnectTheDots.GatewayService
 {
     using System;
+    using System.Configuration;
+    using System.Net;
+    using System.Net.NetworkInformation;
     using System.ServiceModel.Web;
     using System.ServiceProcess;
-    using System.Configuration;
+    
     using _THREADING = System.Threading.Tasks;
     using Microsoft.ConnectTheDots.Gateway;
     using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Common.Threading;
 
 
     //--//
@@ -51,7 +55,11 @@ namespace Microsoft.ConnectTheDots.GatewayService
         private readonly EventProcessor                 _batchSenderThread;
         private readonly DeviceAdapterLoader            _dataIntakeLoader;
 
-        private readonly Func<string, QueuedItem>       _gatewayTransform = null;
+        private readonly Func<string, QueuedItem>       _gatewayTransform;
+
+        //--//
+
+        private          IPAddress                      _gatewayIPAddress;
 
         //--//
 
@@ -103,6 +111,9 @@ namespace Microsoft.ConnectTheDots.GatewayService
                                                     _logger );
 
                 _dataIntakeLoader = new DeviceAdapterLoader( Loader.GetSources( ), Loader.GetEndpoints( ), _logger );
+
+                TaskWrapper.Run( ( ) => GetIPAddress( "corp.microsoft.com" , ref _gatewayIPAddress ) );
+
                 DataTransformsConfig dataTransformsConfig = Loader.GetDataTransformsConfig( );
                 if( dataTransformsConfig.AttachIP || dataTransformsConfig.AttachTime )
                 {
@@ -117,7 +128,7 @@ namespace Microsoft.ConnectTheDots.GatewayService
                     if( dataTransformsConfig.AttachTime )
                     {
                         var transformPrev = transform;
-                        transform = ( m => DataTransforms.AddIPToLocation( transformPrev( m ) ) );
+                        transform = ( m => DataTransforms.AddIPToLocation( transformPrev( m ), _gatewayIPAddress ) );
                     }
 
                     _gatewayTransform = ( m => DataTransforms.QueuedItemFromSensorDataContract( transform( m ) ) );
@@ -188,6 +199,27 @@ namespace Microsoft.ConnectTheDots.GatewayService
         {
             // LORENZO: test behaviours such as accumulating data an processing in batch
             _batchSenderThread.Process( );
+        }
+
+        private void GetIPAddress( string hostName, ref IPAddress outputIPAdress )
+        {
+            const int PING_TIMEOUT = 3000;
+            const int PING_RETRIES_COUNT = 100;
+
+            for( int step = 0; step < PING_RETRIES_COUNT; ++step )
+            {
+                Ping ping = new Ping( );
+                var replay = ping.Send( hostName, PING_TIMEOUT );
+
+
+                if( replay != null && replay.Status == IPStatus.Success )
+                {
+                    outputIPAdress = replay.Address;
+                    return;
+                }
+            }
+
+            outputIPAdress = null;
         }
 
         static void Main( string[] args )
