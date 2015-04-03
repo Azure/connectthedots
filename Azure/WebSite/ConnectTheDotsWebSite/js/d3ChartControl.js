@@ -82,7 +82,7 @@ d3ChartControl.prototype = {
             });
             
             self._ulOptions[guid].li
-                .prepend('<div class="sensorTip">' + params.location + '</div>');
+                .append('<div class="sensorTip">' + params.location + '</div>');
 
             self._ulOptions[guid].li.each(function () {
                 $(this).data('sensorTip', $(this).find('.sensorTip'));
