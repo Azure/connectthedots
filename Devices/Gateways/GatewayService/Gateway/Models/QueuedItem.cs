@@ -25,7 +25,6 @@
 namespace Microsoft.ConnectTheDots.Gateway
 {
     using System;
-    using System.Net;
     using System.Runtime.Serialization;
     using Newtonsoft.Json;
     using Microsoft.ConnectTheDots.Common;
@@ -114,7 +113,7 @@ namespace Microsoft.ConnectTheDots.Gateway
             return result;
         }
 
-        public static SensorDataContract AddIPToLocation( SensorDataContract data, IPAddress gatewayIPAddress )
+        public static SensorDataContract AddIPToLocation( SensorDataContract data, string gatewayIPAddressString )
         {
             if( data == null )
             {
@@ -127,8 +126,10 @@ namespace Microsoft.ConnectTheDots.Gateway
                 result.Location = string.Empty;
             }
 
-            string appendIP = ( gatewayIPAddress !=null ) ? gatewayIPAddress.ToString( ) : "Unknown";
-            result.Location += string.Format( " Eth0: {0} ", appendIP );
+            if( gatewayIPAddressString != null )
+            {
+                result.Location += string.Format( " Eth0:{0}", gatewayIPAddressString );
+            }
 
             return result;
         }
