@@ -128,7 +128,7 @@ namespace Microsoft.ConnectTheDots.Gateway
             }
 
             string appendIP = ( gatewayIPAddress !=null ) ? gatewayIPAddress.ToString( ) : "Unknown";
-            result.Location += string.Format( " {0} Eth0", appendIP );
+            result.Location += string.Format( " Eth0: {0} ", appendIP );
 
             return result;
         }
