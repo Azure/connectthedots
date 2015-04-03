@@ -22,6 +22,9 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
+using System.Linq;
+using System.Net.Sockets;
+
 namespace Microsoft.ConnectTheDots.GatewayService
 {
     using System;
@@ -112,7 +115,7 @@ namespace Microsoft.ConnectTheDots.GatewayService
 
                 _dataIntakeLoader = new DeviceAdapterLoader( Loader.GetSources( ), Loader.GetEndpoints( ), _logger );
 
-                TaskWrapper.Run( ( ) => GetIPAddress( "corp.microsoft.com" , ref _gatewayIPAddress ) );
+                TaskWrapper.Run( ( ) => GetIPAddress( ref _gatewayIPAddress ) );
 
                 DataTransformsConfig dataTransformsConfig = Loader.GetDataTransformsConfig( );
                 if( dataTransformsConfig.AttachIP || dataTransformsConfig.AttachTime )
@@ -201,21 +204,50 @@ namespace Microsoft.ConnectTheDots.GatewayService
             _batchSenderThread.Process( );
         }
 
-        private void GetIPAddress( string hostName, ref IPAddress outputIPAdress )
+        private void GetIPAddress( ref IPAddress outputIPAdress )
         {
-            const int PING_TIMEOUT = 3000;
+            const int PING_TIMEOUT = 2000;
             const int PING_RETRIES_COUNT = 100;
 
             for( int step = 0; step < PING_RETRIES_COUNT; ++step )
             {
                 Ping ping = new Ping( );
-                var replay = ping.Send( hostName, PING_TIMEOUT );
+                PingReply replay;
 
-
-                if( replay != null && replay.Status == IPStatus.Success )
+                try
                 {
-                    outputIPAdress = replay.Address;
-                    return;
+                    replay = ping.Send( "corp.microsoft.com", PING_TIMEOUT );
+                    if( replay != null && replay.Status == IPStatus.Success )
+                    {
+                        outputIPAdress = replay.Address;
+                        return;
+                    }
+                }
+                catch( Exception )
+                {
+                }
+
+                try
+                {
+                    replay = ping.Send( "www.microsoft.com", PING_TIMEOUT );
+                    if( replay != null && replay.Status == IPStatus.Success )
+                    {
+                        outputIPAdress = replay.Address;
+                        return;
+                    }
+                }
+                catch( Exception )
+                {
+                }
+
+                IPHostEntry ipHostEntry = Dns.GetHostEntry( string.Empty );
+                if( ipHostEntry != null )
+                {
+                    outputIPAdress = ipHostEntry.AddressList.FirstOrDefault( a => a.AddressFamily == AddressFamily.InterNetwork );
+                    if( outputIPAdress != null )
+                    {
+                        return;
+                    }
                 }
             }
 
