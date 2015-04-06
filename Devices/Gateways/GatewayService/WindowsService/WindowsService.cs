@@ -26,10 +26,6 @@ namespace Microsoft.ConnectTheDots.GatewayService
 {
     using System;
     using System.Configuration;
-    using System.Linq;
-    using System.Net.Sockets;
-    using System.Net;
-    using System.Net.NetworkInformation;
     using System.ServiceModel.Web;
     using System.ServiceProcess;
     
@@ -114,7 +110,7 @@ namespace Microsoft.ConnectTheDots.GatewayService
 
                 _dataIntakeLoader = new DeviceAdapterLoader( Loader.GetSources( ), Loader.GetEndpoints( ), _logger );
 
-                TaskWrapper.Run( ( ) => GetIPAddressString( ref _gatewayIPAddressString ) );
+                TaskWrapper.Run( ( ) => IPAddressHelper.GetIPAddressString( ref _gatewayIPAddressString ) );
 
                 DataTransformsConfig dataTransformsConfig = Loader.GetDataTransformsConfig( );
                 if( dataTransformsConfig.AttachIP || dataTransformsConfig.AttachTime )
@@ -203,61 +199,7 @@ namespace Microsoft.ConnectTheDots.GatewayService
             _batchSenderThread.Process( );
         }
 
-        private void GetIPAddressString( ref string IPString )
-        {
-            const int PING_TIMEOUT = 2000;
-            const int PING_RETRIES_COUNT = 100;
-
-            IPString = string.Empty;
-            string result = string.Empty;
-
-            IPHostEntry ipHostEntry = Dns.GetHostEntry(string.Empty);
-            if (ipHostEntry != null)
-            {
-                var selected = ipHostEntry.AddressList.Where(a => a.AddressFamily == AddressFamily.InterNetwork);
-                if (selected.Any())
-                {
-                    result += "Gateway local IP: " + selected.First() + '\n';
-                }
-            }
-
-            for (int step = 0; step < PING_RETRIES_COUNT; ++step)
-            {
-                Ping ping = new Ping( );
-                PingReply replay;
-
-                try
-                {
-                    replay = ping.Send( "corp.microsoft.com", PING_TIMEOUT );
-                    if( replay != null && replay.Status == IPStatus.Success )
-                    {
-                        result += "Gateway public IP: " + replay.Address + '\n';
-                        break;
-                    }
-                }
-                catch( Exception )
-                {
-                }
-
-                try
-                {
-                    replay = ping.Send( "www.microsoft.com", PING_TIMEOUT );
-                    if( replay != null && replay.Status == IPStatus.Success )
-                    {
-                        result += "Gateway public IP: " + replay.Address + '\n';
-                        break;
-                    }
-                }
-                catch( Exception )
-                {
-                }
-            }
-
-            if( !string.IsNullOrEmpty( result ) )
-            {
-                IPString = result;
-            }
-        }
+        
 
         static void Main( string[] args )
         {
