@@ -208,8 +208,18 @@ namespace Microsoft.ConnectTheDots.GatewayService
             const int PING_TIMEOUT = 2000;
             const int PING_RETRIES_COUNT = 100;
 
-            IPString = " Unknown";
+            IPString = string.Empty;
             string result = string.Empty;
+
+            IPHostEntry ipHostEntry = Dns.GetHostEntry(string.Empty);
+            if (ipHostEntry != null)
+            {
+                var selected = ipHostEntry.AddressList.Where(a => a.AddressFamily == AddressFamily.InterNetwork);
+                if (selected.Any())
+                {
+                    result += "Gateway local IP: " + selected.First() + '\n';
+                }
+            }
 
             for (int step = 0; step < PING_RETRIES_COUNT; ++step)
             {
@@ -221,7 +231,7 @@ namespace Microsoft.ConnectTheDots.GatewayService
                     replay = ping.Send( "corp.microsoft.com", PING_TIMEOUT );
                     if( replay != null && replay.Status == IPStatus.Success )
                     {
-                        result += " " + replay.Address;
+                        result += "Gateway public IP: " + replay.Address + '\n';
                         break;
                     }
                 }
@@ -234,22 +244,12 @@ namespace Microsoft.ConnectTheDots.GatewayService
                     replay = ping.Send( "www.microsoft.com", PING_TIMEOUT );
                     if( replay != null && replay.Status == IPStatus.Success )
                     {
-                        result += " " + replay.Address;
+                        result += "Gateway public IP: " + replay.Address + '\n';
                         break;
                     }
                 }
                 catch( Exception )
                 {
-                }
-            }
-
-            IPHostEntry ipHostEntry = Dns.GetHostEntry( string.Empty );
-            if( ipHostEntry != null )
-            {
-                var selected = ipHostEntry.AddressList.Where( a => a.AddressFamily == AddressFamily.InterNetwork );
-                if( selected.Any( ) )
-                {
-                    result += " " + selected.First( );
                 }
             }
 

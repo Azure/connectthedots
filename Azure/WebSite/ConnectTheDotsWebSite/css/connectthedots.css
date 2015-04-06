@@ -229,7 +229,7 @@ path.line {
 .sensorTip {
     z-index: 10000;
     position: absolute;
-    white-space: nowrap;
+    white-space: pre;
     overflow: hidden;
     margin-top: -22px;
     float: right;

@@ -123,12 +123,16 @@ namespace Microsoft.ConnectTheDots.Gateway
             SensorDataContract result = data;
             if( result.Location == null )
             {
-                result.Location = string.Empty;
+                result.Location = "Location: Unknown" + '\n';
+            }
+            else
+            {
+                result.Location = "Location: " + result.Location + '\n';
             }
 
             if( gatewayIPAddressString != null )
             {
-                result.Location += string.Format( " Eth0:{0}", gatewayIPAddressString );
+                result.Location += gatewayIPAddressString;
             }
 
             return result;
