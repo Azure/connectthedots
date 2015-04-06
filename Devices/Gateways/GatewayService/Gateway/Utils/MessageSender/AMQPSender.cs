@@ -108,7 +108,10 @@ namespace Microsoft.ConnectTheDots.Gateway
 
             internal void Close( )
             {
-                _sender.Close( STOP_TIMEOUT_MS );
+                if( _sender!=null )
+                {
+                    _sender.Close( STOP_TIMEOUT_MS );
+                }
             }
 
             protected void EstablishSender( )

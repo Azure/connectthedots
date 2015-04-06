@@ -2,10 +2,10 @@
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <DebuggerFlavor>WindowsRemoteDebugger</DebuggerFlavor>
-    <RemoteDebuggerCommand>c:\test\$(TargetFileName)</RemoteDebuggerCommand>
-    <RemoteDebuggerWorkingDirectory>c:\test\</RemoteDebuggerWorkingDirectory>
-    <RemoteDebuggerServerName>mygalileo</RemoteDebuggerServerName>
-    <DeploymentDirectory>c:\test\</DeploymentDirectory>
+    <RemoteDebuggerCommand>c:\ConnectTheDots\$(TargetFileName)</RemoteDebuggerCommand>
+    <RemoteDebuggerWorkingDirectory>c:\ConnectTheDots\</RemoteDebuggerWorkingDirectory>
+    <RemoteDebuggerServerName>ctdgalileo1</RemoteDebuggerServerName>
+    <DeploymentDirectory>c:\ConnectTheDots\</DeploymentDirectory>
     <RemoteDebuggerDeployDebugCppRuntime>false</RemoteDebuggerDeployDebugCppRuntime>
     <AdditionalFiles>$(ProjectDir)\ConnectTheDotsGalileo.exe.config;$(SolutionDir)\Debug\libeay32.dll;$(SolutionDir)\Debug\ssleay32.dll;$(SolutionDir)\Debug\qpid-proton.dll;</AdditionalFiles>
   </PropertyGroup>

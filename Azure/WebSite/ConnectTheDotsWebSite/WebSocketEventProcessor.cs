@@ -132,13 +132,23 @@ namespace ConnectTheDotsWebSite
 										List<IDictionary<string, object>> dictList = sortedDataBuffer.Values[idx];
 										foreach (IDictionary<string, object> dict in dictList)
 										{
-											if ((dict.ContainsKey("guid") && messagePayload.ContainsKey("guid") && messagePayload["guid"].ToString() == dict["guid"].ToString()) ||
-												(dict.ContainsKey("value") && dict.ContainsKey("displayname") && alertType.IndexOf(dict["displayname"] as string) >= 0))
+											if (
+                                                (dict.ContainsKey("guid") && messagePayload.ContainsKey("guid") && messagePayload["guid"].ToString() == dict["guid"].ToString())
+                                                &&
+                                                (dict.ContainsKey("measurename") && messagePayload.ContainsKey("measurename") && messagePayload["measurename"].ToString() == dict["measurename"].ToString())
+                                                &&
+                                                (!messagePayload.ContainsKey("displayname") || dict.ContainsKey("displayname") && messagePayload["measurename"].ToString() == dict["measurename"].ToString())
+                                                )
 											{
 												// fill anomaly message
-												messagePayload["value"] = dict["value"];
-												messagePayload["guid"] = dict["guid"];
-												messagePayload["displayname"] = dict["displayname"];
+											    if (!messagePayload.ContainsKey("value"))
+											    {
+                                                    messagePayload["value"] = dict["value"];
+											    }
+                                                if (!messagePayload.ContainsKey("displayname") && dict.ContainsKey("displayname"))
+											    {
+                                                    messagePayload["displayname"] = dict["displayname"];
+											    }   
 												if (!messagePayload.ContainsKey("time"))
 												{
                                                     messagePayload["time"] = messagePayload["timecreated"];

@@ -39,6 +39,12 @@ namespace Microsoft.ConnectTheDots.Gateway
         public string EventHubDeviceDisplayName;
     };
 
+    internal class DataTransformsConfig
+    {
+        public bool AttachTime;
+        public bool AttachIP;
+    };
+
     internal static class Loader
     {
         internal static IList<String> GetSources( )
@@ -94,6 +100,31 @@ namespace Microsoft.ConnectTheDots.Gateway
                     EventHubMessageSubject = section.EventHubMessageSubject,
                     EventHubDeviceId = section.EventHubDeviceId,
                     EventHubDeviceDisplayName = section.EventHubDeviceDisplayName
+                };
+            }
+
+            return configData;
+        }
+
+        internal static DataTransformsConfig GetDataTransformsConfig( )
+        {
+            DataTransformsConfigSection section = ConfigurationManager.GetSection( "dataTransformsConfig" ) as DataTransformsConfigSection;
+            DataTransformsConfig configData;
+
+            if (section != null)
+            {
+                configData = new DataTransformsConfig
+                {
+                    AttachTime = section.AttachTime,
+                    AttachIP = section.AttachIP
+                };
+            }
+            else
+            {
+                configData = new DataTransformsConfig
+                {
+                    AttachTime = true,
+                    AttachIP = false
                 };
             }
 
@@ -165,6 +196,35 @@ namespace Microsoft.ConnectTheDots.Gateway
             set
             {
                 this[ "EventHubDeviceDisplayName" ] = value;
+            }
+        }
+    }
+
+    internal class DataTransformsConfigSection : ConfigurationSection
+    {
+        [ConfigurationProperty( "AttachTime", DefaultValue = "false", IsRequired = true )]
+        public bool AttachTime
+        {
+            get
+            {
+                return ( bool )this[ "AttachTime" ];
+            }
+            set
+            {
+                this[ "AttachTime" ] = value;
+            }
+        }
+
+        [ConfigurationProperty("AttachIP", DefaultValue = "false", IsRequired = true)]
+        public bool AttachIP
+        {
+            get
+            {
+                return ( bool )this[ "AttachIP" ];
+            }
+            set
+            {
+                this[ "AttachIP" ] = value;
             }
         }
     }

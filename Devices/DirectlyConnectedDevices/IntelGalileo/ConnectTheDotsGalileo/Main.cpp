@@ -86,15 +86,16 @@ void loop()
 			jsonData[L"measurename"] = new JSONValue(it->measure_name);
 			jsonData[L"location"] = new JSONValue(config.location());
 			jsonData[L"organization"] = new JSONValue(config.organization());
-			jsonData[L"guid"] = new JSONValue(config.guid());
+			jsonData[L"guid"] = new JSONValue(config.guidW());
 			jsonData[L"displayname"] = new JSONValue(config.deviceNameW());
 			jsonData[L"value"] = new JSONValue(sensors.value(it->sensor));
 			jsonData[L"subject"] = new JSONValue(config.subjectW());
 			jsonData[L"timecreated"] = new JSONValue(config.getTimeNow());
 
 			amqp::JsonMessage telemetryMessage(config.subject(), jsonData, amqp::IMessage::UTF8);
-			telemetryMessage.addAnnotation(amqp::AMQPSymbol("x-opt-partition-key"), amqp::AMQPuuid(config.deviceName()));
-			telemetryMessage.addProperty(amqp::AMQPString("Subject"), amqp::AMQPString(config.deviceName()));
+
+			// The AMQP Prton lib requires the partition-key to be 16 bytes max
+			telemetryMessage.addAnnotation(amqp::AMQPSymbol("x-opt-partition-key"), amqp::AMQPuuid(config.guid().substr(0, 16)));
 
 			// Send AMQP message to Azure Event Hub for each sensor
 			amqpSender.send(telemetryMessage, eventHubAddress);

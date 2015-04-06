@@ -1,0 +1,54 @@
+﻿<!--
+  Copyright (c) Microsoft Open Technologies, Inc.  All rights reserved.
+ 
+  The MIT License (MIT)
+ 
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+ 
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+ 
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
+-->
+<Page
+    x:Class="ConnectTheDotsWPSensors.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ConnectTheDotsWPSensors"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <ScrollViewer x:Name="ScrollViewer">
+    <Grid>
+        <Popup x:Name="SettingsPopup" Closed="SettingsPopup_Closed" IsOpen="false" Width="Auto"/>
+        <Slider x:Name="TemperatureSlider" HorizontalAlignment="Left" Margin="36,215,0,0" VerticalAlignment="Top" Width="283" Maximum="120" Value="72" Minimum="20"/>
+        <TextBox HorizontalAlignment="Left" Height="24" Margin="339,218,0,0" TextWrapping="Wrap" Text="{Binding Value, ElementName=TemperatureSlider, Mode=TwoWay}" VerticalAlignment="Top" Width="24" IsReadOnly="True"/>
+        <TextBlock HorizontalAlignment="Left" Margin="36,197,0,0" TextWrapping="Wrap" Text="Temperature" VerticalAlignment="Top" Height="27" Width="126" FontSize="20"/>
+        <Slider x:Name="HumiditySlider" HorizontalAlignment="Left" Margin="36,295,0,0" VerticalAlignment="Top" Width="283" Maximum="100" Value="20" FontFamily="Global User Interface"/>
+        <TextBox HorizontalAlignment="Left" Height="24" Margin="339,298,0,0" TextWrapping="Wrap" Text="{Binding Value, ElementName=HumiditySlider, Mode=TwoWay}" VerticalAlignment="Top" Width="24" IsReadOnly="True"/>
+        <TextBlock HorizontalAlignment="Left" Margin="36,277,0,0" TextWrapping="Wrap" Text="Humidity" VerticalAlignment="Top" Height="27" Width="126" FontSize="20"/>
+        <Image HorizontalAlignment="Left" Height="142" Margin="36,10,0,0" VerticalAlignment="Top" Width="320" Source="Assets/CTD-logo-grey.png"/>
+        <CheckBox x:Name="chkLightSensor" Content="Light" HorizontalAlignment="Left" Margin="36,375,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtLightSensor" HorizontalAlignment="Left" Height="27" Margin="339,391,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="17" IsReadOnly="True"/>
+        <CheckBox x:Name="chkAccelXSensor" Content="Acceleration X" HorizontalAlignment="Left" Margin="36,429,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtAccelXSensor" HorizontalAlignment="Left" Height="27" Margin="339,445,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="17" IsReadOnly="True"/>
+        <CheckBox x:Name="chkAccelYSensor" Content="Acceleration Y" HorizontalAlignment="Left" Margin="36,483,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtAccelYSensor" HorizontalAlignment="Left" Height="27" Margin="339,499,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="17" IsReadOnly="True"/>
+        <CheckBox x:Name="chkAccelZSensor" Content="Acceleration Z" HorizontalAlignment="Left" Margin="36,536,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtAccelZSensor" HorizontalAlignment="Left" Height="27" Margin="339,552,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="17" IsReadOnly="True"/>
+        <Button Content="Settings" HorizontalAlignment="Left" Margin="36,592,0,-9" VerticalAlignment="Top" Click="Button_Click"/>
+    </Grid>
+    </ScrollViewer>
+</Page>

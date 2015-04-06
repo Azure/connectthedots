@@ -10,7 +10,7 @@ To build your own end-to-end configuration you need to identify and configure th
 ## Connect The Dots starter solution ##
 For the starter solution, follow the instructions for configuring the following:
 
-1. [Arduino UNO with weather shield](GatewayConnectedDevices/Arduino/Weather/WeatherShieldJson/Arduino-and-Weather-Shield-setup.md) 
+1. [Arduino UNO with weather shield](GatewayConnectedDevices/Arduino UNO/Weather/WeatherShieldJson/Arduino-and-Weather-Shield-setup.md) 
 2. [Raspberry Pi](Gateways/GatewayService/RaspberryPi-Gateway-setup.md) 
 
 ## Build a sensor infrastructure ##

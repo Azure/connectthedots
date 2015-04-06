@@ -25,12 +25,14 @@
 namespace Microsoft.ConnectTheDots.GatewayService
 {
     using System;
+    using System.Configuration;
     using System.ServiceModel.Web;
     using System.ServiceProcess;
-    using System.Configuration;
+    
     using _THREADING = System.Threading.Tasks;
     using Microsoft.ConnectTheDots.Gateway;
     using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Common.Threading;
 
 
     //--//
@@ -50,6 +52,12 @@ namespace Microsoft.ConnectTheDots.GatewayService
         private readonly AMQPSender<SensorDataContract> _AMPQSender;
         private readonly EventProcessor                 _batchSenderThread;
         private readonly DeviceAdapterLoader            _dataIntakeLoader;
+
+        private readonly Func<string, QueuedItem>       _gatewayTransform;
+
+        //--//
+
+        private          string                         _gatewayIPAddressString = string.Empty;
 
         //--//
 
@@ -92,6 +100,7 @@ namespace Microsoft.ConnectTheDots.GatewayService
                                                     amqpConfig.EventHubDeviceDisplayName,
                                                     _logger
                                                     );
+                
                 _batchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>(
                                                     _gatewayQueue,
                                                     _AMPQSender,
@@ -100,6 +109,28 @@ namespace Microsoft.ConnectTheDots.GatewayService
                                                     _logger );
 
                 _dataIntakeLoader = new DeviceAdapterLoader( Loader.GetSources( ), Loader.GetEndpoints( ), _logger );
+
+                TaskWrapper.Run( ( ) => IPAddressHelper.GetIPAddressString( ref _gatewayIPAddressString ) );
+
+                DataTransformsConfig dataTransformsConfig = Loader.GetDataTransformsConfig( );
+                if( dataTransformsConfig.AttachIP || dataTransformsConfig.AttachTime )
+                {
+                    Func<string, SensorDataContract> transform = ( m => DataTransforms.SensorDataContractFromString( m, _logger ) );
+
+                    if( dataTransformsConfig.AttachTime )
+                    {
+                        var transformPrev = transform;
+                        transform = ( m => DataTransforms.AddTimeCreated( transformPrev( m ) ) );
+                    }
+
+                    if( dataTransformsConfig.AttachTime )
+                    {
+                        var transformPrev = transform;
+                        transform = ( m => DataTransforms.AddIPToLocation( transformPrev( m ), _gatewayIPAddressString ) );
+                    }
+
+                    _gatewayTransform = ( m => DataTransforms.QueuedItemFromSensorDataContract( transform( m ) ) );
+                }
             }
             catch( Exception ex )
             {
@@ -119,11 +150,11 @@ namespace Microsoft.ConnectTheDots.GatewayService
             _batchSenderThread.Start( );
 
             _webHost = new WebServiceHost( typeof( Microsoft.ConnectTheDots.Gateway.GatewayService ) );
+
             Gateway.GatewayService service = new Microsoft.ConnectTheDots.Gateway.GatewayService(
                 _gatewayQueue,
                 _batchSenderThread,
-                m => DataTransforms.QueuedItemFromSensorDataContract(
-                        DataTransforms.AddTimeCreated( DataTransforms.SensorDataContractFromString( m, _logger ) ), _logger )
+                _gatewayTransform
             );
             _webHost.Description.Behaviors.Add( new ServiceBehavior( ( ) => service ) );
 
@@ -167,6 +198,8 @@ namespace Microsoft.ConnectTheDots.GatewayService
             // LORENZO: test behaviours such as accumulating data an processing in batch
             _batchSenderThread.Process( );
         }
+
+        
 
         static void Main( string[] args )
         {

@@ -62,7 +62,8 @@ public:
 	std::wstring const &deviceNameW() const;
 	std::string const &subject() const;
 	std::wstring const &subjectW() const;
-	std::wstring const &guid() const;
+	std::string const &guid() const;
+	std::wstring const &guidW() const;
 	std::wstring const &location() const;
 	std::wstring const &organization() const;
 	bool amqpMessageTracking() const;
@@ -79,7 +80,8 @@ private:
 	std::wstring m_device_nameW;
 	std::string m_subject;
 	std::wstring m_subjectW;
-	std::wstring m_guid;
+	std::string m_guid;
+	std::wstring m_guidW;
 	std::wstring m_location;
 	std::wstring m_organization;
 	bool		m_amqp_message_tracking;

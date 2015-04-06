@@ -63,7 +63,7 @@ d3ChartControl.prototype = {
         // check if exists or create new
         if (!self._ulOptions.hasOwnProperty(params.guid)) {
             self._ulOptions[guid] = {};
-            self._ulOptions[guid].li = $("<li>" + params.title + "</li>").appendTo("#" + self._containerId);
+            self._ulOptions[guid].li = $('<li><div style="display:inline-block">' + params.title + "</div></li>").appendTo("#" + self._containerId);
             // set selected class
             if (!params.hasOwnProperty('selected') || params.selected == true) {
                 self._ulOptions[guid].li.addClass('selected');
@@ -80,7 +80,24 @@ d3ChartControl.prototype = {
                 }
                 self._ulOptions[guid].state = self._ulOptions[guid].li.hasClass('selected');
             });
+            
+            self._ulOptions[guid].li
+                .append('<div class="sensorTip">' + 'Location: ' + params.location + '</div>');
 
+            self._ulOptions[guid].li.each(function () {
+                $(this).data('sensorTip', $(this).find('.sensorTip'));
+                $(this).data('sensorTip').hide();
+            });
+            self._ulOptions[guid].li.each(function() {
+                $(this).on('mouseover', function () {
+                    $(this).data('sensorTip').show();
+                });
+            });
+            self._ulOptions[guid].li.each(function () {
+                $(this).on('mouseout', function () {
+                    $(this).data('sensorTip').hide();
+                });
+            });
         }
 
         return self;
@@ -106,7 +123,8 @@ d3ChartControl.prototype = {
         // add new option
         self.setOption({
             guid: evt.guid,
-            title: evt.displayname
+            title: evt.displayname,
+            location: evt.location ? evt.location : "Unknown"
         });
     },
     checkGUID : function(guid) {

@@ -34,6 +34,7 @@ set Staging=%GW_Home%/staging
 set PUTTY_CMD=%puttydir%putty %rpi_usr%@%rpi_ip% -pw %rpi_pw% 
 set PSCP_CMD=%puttydir%pscp -pw %rpi_pw% 
 
+echo editing line endings for Pi
 %prjdir%Scripts\ScriptConverter\bin\%Configuration%\ScriptConverter.exe "..\RaspberryPi\certificate_update.sh" "..\RaspberryPi\autorun_install.sh" "..\RaspberryPi\kill_all.sh" "..\RaspberryPi\deploy_and_start_ctd_on_boot.sh"
 
 echo Creating GatewayService directory
