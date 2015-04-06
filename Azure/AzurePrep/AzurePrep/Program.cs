@@ -161,14 +161,24 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
                 Console.WriteLine( "Do you want to create Stream Analytics jobs? (y/n)" );
 
                 string answer = Console.ReadLine( );
-                string request = "";
+                bool create;
+                string request;
                 if( !string.IsNullOrEmpty( answer ) && answer.ToLower( ).StartsWith( "y" ) )
                 {
-                    request = "do not";
+                    create = true;
+                    request = "";
+                }
+                else
+                {
+                    create = false;
+                    request = "do not ";
                 }
                 if( ConsoleHelper.Confirm( "Are you sure you " + request + "want to create Stream Analytics jobs?" ) )
                 {
-                    CreateStreamAnalyticsJobs( inputs, createResults );
+                    if( create )
+                    {
+                        CreateStreamAnalyticsJobs( inputs, createResults );    
+                    }
                     break;
                 }
             }
