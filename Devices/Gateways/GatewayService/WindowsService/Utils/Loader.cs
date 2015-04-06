@@ -123,7 +123,7 @@ namespace Microsoft.ConnectTheDots.Gateway
             {
                 configData = new DataTransformsConfig
                 {
-                    AttachTime = false,
+                    AttachTime = true,
                     AttachIP = false
                 };
             }
