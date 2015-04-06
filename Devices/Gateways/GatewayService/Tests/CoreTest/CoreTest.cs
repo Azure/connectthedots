@@ -58,6 +58,8 @@ namespace Microsoft.ConnectTheDots.Test
         private          int                                                _totalMessagesSent;
         private          int                                                _totalMessagesToSend;
 
+        private readonly Func<string, QueuedItem>                           _gatewayTransform;
+
         //--//
 
         public CoreTest( ILogger logger )
@@ -99,6 +101,29 @@ namespace Microsoft.ConnectTheDots.Test
                 serializedData: m => ( m == null ) ? null : m.JsonData,
                 logger        : _logger 
                 );
+
+            string gatewayIPAddressString = string.Empty;
+            IPAddressHelper.GetIPAddressString( ref gatewayIPAddressString );
+
+            DataTransformsConfig dataTransformsConfig = Loader.GetDataTransformsConfig( );
+            if( dataTransformsConfig.AttachIP || dataTransformsConfig.AttachTime )
+            {
+                Func<string, SensorDataContract> transform = ( m => DataTransforms.SensorDataContractFromString( m, _logger ) );
+
+                if( dataTransformsConfig.AttachTime )
+                {
+                    var transformPrev = transform;
+                    transform = ( m => DataTransforms.AddTimeCreated( transformPrev( m ) ) );
+                }
+
+                if( dataTransformsConfig.AttachTime )
+                {
+                    var transformPrev = transform;
+                    transform = ( m => DataTransforms.AddIPToLocation( transformPrev( m ), gatewayIPAddressString ) );
+                }
+
+                _gatewayTransform = ( m => DataTransforms.QueuedItemFromSensorDataContract( transform( m ) ) );
+            }
         }
 
         public void Run( )
@@ -239,10 +264,11 @@ namespace Microsoft.ConnectTheDots.Test
         {
             _batchSenderThread.Start( );
 
-            GatewayService service = new GatewayService( _gatewayQueue, _batchSenderThread,
-                m => DataTransforms.QueuedItemFromSensorDataContract(
-                        DataTransforms.AddTimeCreated( DataTransforms.SensorDataContractFromString( m, _logger ) ), _logger ) );
-
+            GatewayService service = new GatewayService(
+                _gatewayQueue,
+                _batchSenderThread,
+                _gatewayTransform
+            );
 
             service.Logger = _logger;
             service.OnDataInQueue += DataInQueue;

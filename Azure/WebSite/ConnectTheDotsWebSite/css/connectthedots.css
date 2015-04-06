@@ -225,3 +225,23 @@ path.line {
         top: 100%;
         left: 0;
     }
+
+.sensorTip {
+    z-index: 10000;
+    position: absolute;
+    white-space: pre;
+    overflow: hidden;
+    margin-top: -22px;
+    float: right;
+    margin-left: 200px;
+    background: #eee;
+    color: #000;
+    padding: 5px;
+    padding-right: 10px;
+    padding-left: 10px;
+    pointer-events:none;
+    border-style: solid;
+    border-width: thin;
+    border-color: #000;
+    background: rgba(243, 233, 6, 0.9);
+}
