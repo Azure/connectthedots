@@ -45,10 +45,16 @@ namespace ConnectTheDotsWebSite
         public string storageConnectionString { get; set; }
     }
 
+    public struct GlobalSettings
+    {
+        public bool ForceSocketCloseOnUserActionsTimeout { get; set; }
+    }
+
     public class Global : System.Web.HttpApplication
     {
         EventHubSettings eventHubDevicesSettings;
         EventHubSettings eventHubAlertsSettings;
+        public static GlobalSettings globalSettings;
 
         protected void Application_Start(Object sender, EventArgs e)
         {
@@ -124,6 +130,15 @@ namespace ConnectTheDotsWebSite
 
         private void GetAppSettings()
         {
+            try
+            {
+                globalSettings.ForceSocketCloseOnUserActionsTimeout =
+                    CloudConfigurationManager.GetSetting("ForceSocketCloseOnUserActionsTimeout") == "true";
+            }
+            catch (Exception)
+            {
+            }
+
             // Read settings for Devices Event Hub
             eventHubDevicesSettings.connectionString = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionStringDevices");
             eventHubDevicesSettings.name = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.EventHubDevices").ToLowerInvariant();

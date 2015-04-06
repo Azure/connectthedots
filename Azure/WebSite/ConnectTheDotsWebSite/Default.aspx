@@ -51,7 +51,10 @@
     <script type="text/javascript" src="js/d3CTD.js"></script>
 </head>
 <body>
-
+    <div class="globalSettings" style="display:none">
+        <div class="ForceSocketCloseOnUserActionsTimeout"><%= ForceSocketCloseOnUserActionsTimeout %></div>
+    </div>
+    
     <div id="loading" style="display: none;">
         <div id="loading-inner">
             <p id="loading-text">Loading last 10 minutes of data...</p>

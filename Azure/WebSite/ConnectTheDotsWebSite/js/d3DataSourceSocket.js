@@ -58,6 +58,9 @@ d3DataSourceSocket.prototype = {
     constructor: d3DataSourceSocket,
     sendMessage: function (message) {
         this._websocket.send(JSON.stringify(message));
+    },
+    closeSocket: function () {
+        this._websocket.close();
     }
 };
 
