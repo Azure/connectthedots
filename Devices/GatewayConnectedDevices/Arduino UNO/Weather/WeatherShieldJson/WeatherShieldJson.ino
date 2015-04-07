@@ -63,20 +63,21 @@ HTU21D myHumidity; //Create an instance of the humidity sensor
 // You can use Visual Studio to create DeviceGUID and copy it here. In VS, On the Tools menu, click Create GUID. The Create GUID
 // tool appears with a GUID in the Result box. Click Copy, and paste below.
 //
-char GUID1[] = "48697cf4-4e70-4d07-9244-564197b43312";
-char GUID2[] = "b8679c98-efe1-49d6-90b2-543b6c427042";
-char GUID3[] = "0fdc469a-6a4a-46e1-aaa6-34bf2f2b8284";
-char Org[] = "MS Open Tech  ";
-char Disp[] = "Arduino + WS";
-char Locn[] = "Olivier's office";
-char Measure1[] = "Temperature";
+char GUID1[] = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx";
+char GUID2[] = "yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy";
+char GUID3[] = "zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz";
+char Org[] = "My organization";
+char Disp[] = "Arduino + WS dev 01";
+char Locn[] = "here";
+char Measure1[] = "temperature";
 char Units1[] = "F";
-char Measure2[] = "Humidity";
+char Measure2[] = "humidity";
 char Units2[] = "%";
-char Measure3[] = "Light";
-char Units3[] = "Lumen";
+char Measure3[] = "light";
+char Units3[] = "lumen";
 char buffer[300];
 char dtostrfbuffer[15];
+
 
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
