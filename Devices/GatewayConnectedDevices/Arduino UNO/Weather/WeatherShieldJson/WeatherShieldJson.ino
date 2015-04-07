@@ -79,7 +79,6 @@ char buffer[300];
 char dtostrfbuffer[15];
 
 
-
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 //Hardware pin definitions
