@@ -40,5 +40,34 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
             }
             return false;
         }
+
+        public static bool AskAndPerformAction( string questionText, string sureDoText, string sureDoNotText, Action action, LogBuffer logBuffer = null )
+        {
+            for( ;; )
+            {
+                Console.WriteLine( questionText + " (y/n)" );
+                string answer = Console.ReadLine( );
+
+                bool doAction = !string.IsNullOrEmpty( answer ) && answer.ToLower( ).StartsWith( "y" );
+                if( ConsoleHelper.Confirm( doAction ? sureDoText : sureDoNotText ) )
+                {
+                    if( doAction )
+                    {
+                        try
+                        {
+                            action( );
+                        }
+                        catch( Exception ex )
+                        {
+                            if( logBuffer != null )
+                            {
+                                logBuffer.Add( ex.Message );
+                            }
+                        }
+                    }
+                    return doAction;
+                }
+            }
+        }
     }
 }

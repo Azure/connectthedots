@@ -170,6 +170,8 @@ namespace Microsoft.ConnectTheDots.EHConsole
                             .GetDefaultConsumerGroup( )
                             .CreateReceiver( state.ToString( ), DateTime.UtcNow );
 
+                        _ConsoleBuffer.Add( string.Format( "Waiting for start receiving messages: {0} ...", state ) );
+
                         while( true )
                         {
                             // Receive could fail, I would need a retry policy etc...
@@ -185,7 +187,7 @@ namespace Microsoft.ConnectTheDots.EHConsole
                             {
                                 Console.WriteLine( "Stopping: {0}", state );
                                 receiver.Close( );
-                                if (Interlocked.Increment(ref closedReceivers) >= partitionCount)
+                                if( Interlocked.Increment( ref closedReceivers ) >= partitionCount )
                                 {
                                     receiversStopped.Set();
                                 }
@@ -193,10 +195,11 @@ namespace Microsoft.ConnectTheDots.EHConsole
                             }
                         }
                     }
-                    catch( Exception )
+                    catch( Exception ex )
                     {
+                        _ConsoleBuffer.Add( ex.Message );
                     }
-                }, i);
+                }, i );
             }
 
             Console.ReadLine( );

@@ -86,7 +86,9 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
             }
         }
 
-        public static ServiceBusNamespace SelectNamespace( SubscriptionCloudCredentials credentials )
+        public static ServiceBusNamespace SelectNamespace( SubscriptionCloudCredentials credentials,
+            string requestMessageText = "Please select namespace you want to use: ",
+            string manualOption = null )
         {
             Console.WriteLine( "Retrieving a list of created namespaces..." );
             ServiceBusNamespace[] namespaces = AzureProvider.GetNamespaces( credentials );
@@ -100,15 +102,52 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
                     namespaces[ currentNamespace - 1 ].Name + " (" + namespaces[currentNamespace - 1].Region+ ")" );
             }
 
+            if( manualOption != null )
+            {
+                Console.WriteLine( "*: " + manualOption );
+            }
             Console.WriteLine( "0: Exit without processing" );
 
             for( ;; )
             {
-                Console.WriteLine( "Please select namespace you want to use: " );
+                Console.WriteLine( requestMessageText );
 
                 string answer = Console.ReadLine( );
-                int selection = 0;
-                if( !int.TryParse( answer, out selection ) || selection > namespaceCount || selection < 0 )
+
+                if( answer.StartsWith( "*" ) )
+                {
+                    if( manualOption == null )
+                    {
+                        Console.WriteLine( "Incorrect namespace number." );
+                        continue;    
+                    }
+                    
+                    if( !ConsoleHelper.Confirm( "Are you sure you want to enter name prefix manually?" ) )
+                    {
+                        continue;
+                    }
+
+                    for( ;; )
+                    {
+                        Console.WriteLine( "Enter a name prefix: " );
+                        string namePrefix = Console.ReadLine( );
+                        if( string.IsNullOrEmpty( namePrefix ) )
+                        {
+                            Console.WriteLine( "Incorrect namespace prefix." );
+                            continue;
+                        }
+                        if( ConsoleHelper.Confirm( "Are you sure you want to use namespace prefix " + namePrefix + "?" ) )
+                        {
+                            return new ServiceBusNamespace
+                            {
+                                Name = namePrefix
+                            };
+                        }
+                    }
+                }
+
+                int selection;
+                if( !int.TryParse( answer, out selection ) || selection > namespaceCount || selection < -1 )
                 {
                     Console.WriteLine( "Incorrect namespace number." );
                     continue;
