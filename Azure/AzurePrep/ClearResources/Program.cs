@@ -124,7 +124,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.ClearResources
                 ServiceBusManagementClient sbMgmt = new ServiceBusManagementClient( inputs.Credentials );
 
                 bool deleteNamespace = ConsoleHelper.AskAndPerformAction(
-                    "Do you want to delete whole namespace " + inputs.SBNamespace + "including all entities under it?",
+                    "Do you want to delete whole namespace " + inputs.SBNamespace + " including all entities under it?",
                     "Are you sure you want to delete namespace " + inputs.SBNamespace + "?",
                     "Are you sure you do not want to delete namespace " + inputs.SBNamespace + "?",
                     ( ) =>

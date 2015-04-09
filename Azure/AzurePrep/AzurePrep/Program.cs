@@ -328,10 +328,9 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
 
             ehDescriptionDevices.Authorization.Add( new SharedAccessAuthorizationRule( "StreamingAnalytics", new List<AccessRights> { AccessRights.Manage, AccessRights.Listen, AccessRights.Send } ) );
 
-            _ConsoleBuffer.Add( string.Format( "Creating Event Hub {0}", inputs.EventHubNameDevices ) );
+            _ConsoleBuffer.Add( string.Format( "Creating Event Hub {0}...", inputs.EventHubNameDevices ) );
 
             result.ehDevices = null;
-            result.ehAlerts = null;
 
             do
             {
@@ -347,33 +346,44 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             } while ( result.ehDevices == null );
 
 
-            var ehDescriptionAlerts = new EventHubDescription( inputs.EventHubNameAlerts )
-            {
-                PartitionCount = 8,
-            };
-            ehDescriptionAlerts.Authorization.Add( new SharedAccessAuthorizationRule( "WebSite", new List<AccessRights> { AccessRights.Manage, AccessRights.Listen, AccessRights.Send } ) );
-            ehDescriptionAlerts.Authorization.Add( new SharedAccessAuthorizationRule( "StreamingAnalytics", new List<AccessRights> { AccessRights.Manage, AccessRights.Listen, AccessRights.Send } ) );
-
-            _ConsoleBuffer.Add( string.Format( "Creating Event Hub {0}", inputs.EventHubNameAlerts ) );
-
-            do
-            {
-                try
+            
+            ConsoleHelper.AskAndPerformAction(
+                "Do you want to create " + inputs.EventHubNameAlerts + " Event Hub?",
+                "Are you sure you want to create " + inputs.EventHubNameAlerts + " Event Hub?",
+                "Are you sure you do not want to create " + inputs.EventHubNameAlerts + " Event Hub?",
+                ( ) =>
                 {
-                    result.ehAlerts = nsManager.CreateEventHubIfNotExists( ehDescriptionAlerts );
-                }
-                catch ( UnauthorizedAccessException )
-                {
-                    _ConsoleBuffer.Add( "Service Bus connection string not valid yet. Waiting..." );
-                    System.Threading.Thread.Sleep( 5000 );
-                }
-            } while ( result.ehAlerts == null );
+                    var ehDescriptionAlerts = new EventHubDescription( inputs.EventHubNameAlerts )
+                    {
+                        PartitionCount = 8,
+                    };
+                    ehDescriptionAlerts.Authorization.Add( new SharedAccessAuthorizationRule( "WebSite", new List<AccessRights> { AccessRights.Manage, AccessRights.Listen, AccessRights.Send } ) );
+                    ehDescriptionAlerts.Authorization.Add( new SharedAccessAuthorizationRule( "StreamingAnalytics", new List<AccessRights> { AccessRights.Manage, AccessRights.Listen, AccessRights.Send } ) );
+
+                    _ConsoleBuffer.Add( string.Format( "Creating Event Hub {0}...", inputs.EventHubNameAlerts ) );
+                    result.ehAlerts = null;
+
+                    do
+                    {
+                        try
+                        {
+                            result.ehAlerts = nsManager.CreateEventHubIfNotExists( ehDescriptionAlerts );
+                        }
+                        catch ( UnauthorizedAccessException )
+                        {
+                            _ConsoleBuffer.Add( "Service Bus connection string not valid yet. Waiting..." );
+                            System.Threading.Thread.Sleep( 5000 );
+                        }
+                    } while ( result.ehAlerts == null );
+                },
+                _ConsoleBuffer );
+            
 
             // Create Storage Account for Event Hub Processor
             var stgMgmt = new StorageManagementClient( inputs.Credentials );
             try
             {
-                _ConsoleBuffer.Add( string.Format( "Creating Storage Account {0} in location {1}",
+                _ConsoleBuffer.Add( string.Format( "Creating Storage Account {0} in location {1}...",
                     inputs.StorageAccountName, inputs.Location ) );
 
                 var resultStg = stgMgmt.StorageAccounts.Create(
@@ -445,16 +455,37 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
                 if( extension != null && extension.Contains( "sql" ) )
                 {
                     string nameWithoutExtension = Path.GetFileNameWithoutExtension( filename );
-                    string query = File.ReadAllText( filename );
+                    EventHubDescription ehOutput = ( filename.ToLower( ).Contains( "aggregates" ) || azurePrepOut.ehAlerts == null )
+                        ? azurePrepOut.ehDevices
+                        : azurePrepOut.ehAlerts;
 
-                    _ConsoleBuffer.Add( string.Format( "Creating {0} Stream Analytics job...", nameWithoutExtension ) );
+                    if( ehOutput == null )
+                    {
+                        _ConsoleBuffer.Add( string.Format( " Skip creating {0} Stream Analytics job because there is no output Event Hub...", nameWithoutExtension ) );
+                        continue;
+                    }
 
-                    CreateStreamAnalyticsJob( nameWithoutExtension, query, resourceGroupName, azurePrepIn, azurePrepOut );
+                    string queryFilename = filename;
+                    ConsoleHelper.AskAndPerformAction(
+                        "Do you want to create " + nameWithoutExtension + " job?",
+                        "Are you sure you want to create " + nameWithoutExtension + " job?",
+                        "Are you sure you do not want to create " + nameWithoutExtension + " job?",
+                        ( ) =>
+                        {
+                            string query = File.ReadAllText( queryFilename );
+
+                            _ConsoleBuffer.Add( string.Format( "Creating {0} Stream Analytics job...", nameWithoutExtension ) );
+
+                            CreateStreamAnalyticsJob( nameWithoutExtension, query, resourceGroupName,
+                                azurePrepIn, azurePrepOut.ehDevices, ehOutput );
+                        },
+                        _ConsoleBuffer );
                 }
             }
         }
 
-        private void CreateStreamAnalyticsJob( string nameSuffix, string query, string resourceGroupName, AzurePrepInputs azurePrepIn, AzurePrepOutputs azurePrepOut )
+        private void CreateStreamAnalyticsJob( string nameSuffix, string query, string resourceGroupName, AzurePrepInputs azurePrepIn, 
+            EventHubDescription ehInput, EventHubDescription ehOutput )
         {
             const string inputName = "DevicesInput";
             const string outputName = "output";
@@ -484,10 +515,10 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
                         {
                             Properties = new EventHubStreamInputDataSourceProperties
                             {
-                                EventHubName = azurePrepIn.EventHubNameDevices,
+                                EventHubName = ehInput.Path,
                                 ServiceBusNamespace = azurePrepIn.SBNamespace,
                                 SharedAccessPolicyName = "StreamingAnalytics",
-                                SharedAccessPolicyKey = ( azurePrepOut.ehDevices.Authorization.First( ( d )
+                                SharedAccessPolicyKey = ( ehInput.Authorization.First( ( d )
                                     => String.Equals( d.KeyName, "StreamingAnalytics", StringComparison.InvariantCultureIgnoreCase) ) as SharedAccessAuthorizationRule ).PrimaryKey,
                             }
                         },
@@ -507,10 +538,10 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
                         {
                             Properties = new EventHubOutputDataSourceProperties
                             {
-                                EventHubName = azurePrepIn.EventHubNameAlerts,
+                                EventHubName = ehOutput.Path,
                                 ServiceBusNamespace = azurePrepIn.SBNamespace,
                                 SharedAccessPolicyName = "StreamingAnalytics",
-                                SharedAccessPolicyKey = ( azurePrepOut.ehAlerts.Authorization.First( ( d )
+                                SharedAccessPolicyKey = ( ehOutput.Authorization.First( ( d )
                                     => String.Equals( d.KeyName, "StreamingAnalytics", StringComparison.InvariantCultureIgnoreCase) ) as SharedAccessAuthorizationRule ).PrimaryKey,
                             }
                         },

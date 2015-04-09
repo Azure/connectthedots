@@ -147,9 +147,6 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
 
             NamespaceManager nsManager = NamespaceManager.CreateFromConnectionString( nsConnectionString );
 
-            EventHubDescription ehDevices = nsManager.GetEventHub( inputs.EventHubNameDevices );
-            EventHubDescription ehAlerts = nsManager.GetEventHub( inputs.EventHubNameAlerts );
-
             StorageManagementClient stgMgmt = new StorageManagementClient( inputs.Credentials );
             var keyResponse = stgMgmt.StorageAccounts.GetKeys( inputs.StorageAccountName.ToLowerInvariant( ) );
             if( keyResponse.StatusCode != System.Net.HttpStatusCode.OK )
@@ -161,6 +158,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
 
             var storageKey = keyResponse.PrimaryKey;
 
+            EventHubDescription ehDevices = nsManager.GetEventHub( inputs.EventHubNameDevices );
             string ehDevicesWebSiteConnectionString = new ServiceBusConnectionStringBuilder( nsConnectionString )
             {
                 SharedAccessKeyName = "WebSite",
@@ -168,12 +166,21 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
                     => String.Equals( d.KeyName, "WebSite", StringComparison.InvariantCultureIgnoreCase) ) as SharedAccessAuthorizationRule ).PrimaryKey,
             }.ToString( );
 
-            string ehAlertsWebSiteConnectionString = new ServiceBusConnectionStringBuilder( nsConnectionString )
+            string ehAlertsWebSiteConnectionString = string.Empty;
+            try
             {
-                SharedAccessKeyName = "WebSite",
-                SharedAccessKey = ( ehAlerts.Authorization.First( ( d )
-                    => String.Equals( d.KeyName, "WebSite", StringComparison.InvariantCultureIgnoreCase) ) as SharedAccessAuthorizationRule ).PrimaryKey,
-            }.ToString( );
+                EventHubDescription ehAlerts = nsManager.GetEventHub( inputs.EventHubNameAlerts );
+                ehAlertsWebSiteConnectionString = new ServiceBusConnectionStringBuilder( nsConnectionString )
+                {
+                    SharedAccessKeyName = "WebSite",
+                    SharedAccessKey = ( ehAlerts.Authorization.First( ( d )
+                        => String.Equals( d.KeyName, "WebSite", StringComparison.InvariantCultureIgnoreCase ) ) as
+                        SharedAccessAuthorizationRule ).PrimaryKey,
+                }.ToString( );
+            }
+            catch
+            {
+            }
 
             Console.WriteLine( "Started processing..." );
             // Write a new web.config template file
