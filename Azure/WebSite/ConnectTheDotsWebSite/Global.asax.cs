@@ -83,13 +83,14 @@ namespace ConnectTheDotsWebSite
         private void CreateEventProcessorHostClient(ref EventHubSettings eventHubSettings)
         {
             Trace.TraceInformation("Creating EventProcessorHost: {0}, {1}, {2}", this.Server.MachineName, eventHubSettings.name, eventHubSettings.consumerGroup);
-            eventHubSettings.client = EventHubClient.CreateFromConnectionString(eventHubSettings.connectionString,
-                                                                                eventHubSettings.name);
-
-            // Delete and recreate the consumer group
-            // this allows to ensure we will start receiving only fresh messages when the site starts
             try
             {
+                eventHubSettings.client = EventHubClient.CreateFromConnectionString(eventHubSettings.connectionString,
+                                                                                eventHubSettings.name);
+
+                // Delete and recreate the consumer group
+                // this allows to ensure we will start receiving only fresh messages when the site starts
+            
                 foreach (ConsumerGroupDescription consumerGroupDesc in eventHubSettings.namespaceManager.GetConsumerGroups(eventHubSettings.client.Path))
                 {
                     // We remove any previously created consumergroups containing the word WebSite in the name
@@ -105,27 +106,44 @@ namespace ConnectTheDotsWebSite
             }
             finally
             {
-                // We create a new consumer group with a new mame each time to 
-                eventHubSettings.consumerGroup += DateTime.UtcNow.Ticks.ToString();
-                eventHubSettings.namespaceManager.CreateConsumerGroupIfNotExists(eventHubSettings.name, eventHubSettings.consumerGroup);
+                try
+                {
+                    // We create a new consumer group with a new mame each time to 
+                    eventHubSettings.consumerGroup += DateTime.UtcNow.Ticks.ToString();
+                    eventHubSettings.namespaceManager.CreateConsumerGroupIfNotExists(eventHubSettings.name,
+                        eventHubSettings.consumerGroup);
+                }
+                catch(Exception ex)
+                {
+                    Debug.Print("Error happened: " + ex.Message);
+                }
             }
 
-            eventHubSettings.processorHost = new EventProcessorHost(this.Server.MachineName,
-                                                          eventHubSettings.client.Path,
-                                                          eventHubSettings.consumerGroup.ToLowerInvariant(),
-                                                          eventHubSettings.connectionString,
-                                                          eventHubSettings.storageConnectionString);
+            try
+            {
+                eventHubSettings.processorHost = new EventProcessorHost(this.Server.MachineName,
+                    eventHubSettings.client.Path,
+                    eventHubSettings.consumerGroup.ToLowerInvariant(),
+                    eventHubSettings.connectionString,
+                    eventHubSettings.storageConnectionString);
 
-            eventHubSettings.processorHostOptions = new EventProcessorOptions();
-            eventHubSettings.processorHostOptions.ExceptionReceived += WebSocketEventProcessor.ExceptionReceived;
-            eventHubSettings.processorHostOptions.InitialOffsetProvider = (partitionId) => DateTime.UtcNow;
-            //eventHubSettings.processorHostOptions.InitialOffsetProvider = partitionId =>
-            //{
-            //    return eventHubSettings.namespaceManager.GetEventHubPartition(eventHubSettings.client.Path, partitionId).LastEnqueuedOffset;
-            //};
+                eventHubSettings.processorHostOptions = new EventProcessorOptions();
+                eventHubSettings.processorHostOptions.ExceptionReceived += WebSocketEventProcessor.ExceptionReceived;
+                eventHubSettings.processorHostOptions.InitialOffsetProvider = (partitionId) => DateTime.UtcNow;
+                //eventHubSettings.processorHostOptions.InitialOffsetProvider = partitionId =>
+                //{
+                //    return eventHubSettings.namespaceManager.GetEventHubPartition(eventHubSettings.client.Path, partitionId).LastEnqueuedOffset;
+                //};
 
-            Trace.TraceInformation("Registering EventProcessor for " + eventHubSettings.name);
-            eventHubSettings.processorHost.RegisterEventProcessorAsync<WebSocketEventProcessor>(eventHubSettings.processorHostOptions).Wait();
+                Trace.TraceInformation("Registering EventProcessor for " + eventHubSettings.name);
+                eventHubSettings.processorHost.RegisterEventProcessorAsync<WebSocketEventProcessor>(
+                    eventHubSettings.processorHostOptions).Wait();
+            }
+            catch
+            {
+                Debug.Print("Error happened while trying to connect Event Hub");
+            }
+
         }
 
         private void GetAppSettings()

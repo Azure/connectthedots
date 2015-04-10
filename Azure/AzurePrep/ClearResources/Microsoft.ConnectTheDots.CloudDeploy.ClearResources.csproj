@@ -4,18 +4,19 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{987E2AAB-AC91-4781-89B7-C1AD0AF01D8A}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{6F6B589D-C822-40F3-9D66-3E0535ABDDFC}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.ConnectTheDots.CloudDeploy.Common</RootNamespace>
-    <AssemblyName>Microsoft.ConnectTheDots.CloudDeploy.Common</AssemblyName>
+    <RootNamespace>Microsoft.ConnectTheDots.CloudDeploy.ClearResources</RootNamespace>
+    <AssemblyName>ClearResources</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <NuGetPackageImportStamp>fab9b69c</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>54253456</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -25,6 +26,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -41,6 +43,9 @@
     </Reference>
     <Reference Include="Microsoft.Azure.Common.NetFramework">
       <HintPath>..\packages\Microsoft.Azure.Common.2.0.4\lib\net45\Microsoft.Azure.Common.NetFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Azure.Management.StreamAnalytics">
+      <HintPath>..\packages\Microsoft.Azure.Management.StreamAnalytics.0.17.0-preview\lib\net40\Microsoft.Azure.Management.StreamAnalytics.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Azure.ResourceManager">
       <HintPath>..\packages\Microsoft.Azure.Management.Resources.2.17.0-preview\lib\net40\Microsoft.Azure.ResourceManager.dll</HintPath>
@@ -140,16 +145,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AzureConsoleHelper.cs" />
-    <Compile Include="AzureCredentialsProvider.cs" />
-    <Compile Include="AzureProvider.cs" />
-    <Compile Include="ConsoleHelper.cs" />
-    <Compile Include="LogBuffer.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
+    <None Include="App.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Microsoft.ConnectTheDots.CloudDeploy.Common.csproj">
+      <Project>{987E2AAB-AC91-4781-89B7-C1AD0AF01D8A}</Project>
+      <Name>Microsoft.ConnectTheDots.CloudDeploy.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\..\license.txt">
+      <Link>Docs\license.txt</Link>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

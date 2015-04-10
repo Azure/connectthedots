@@ -26,13 +26,14 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Security.Cryptography.X509Certificates;
-    using System.Threading;
     using System.Threading.Tasks;
     using System.Xml;
+
+    //--//
+
+    using Microsoft.Azure;
     using Microsoft.IdentityModel.Clients.ActiveDirectory;
-    using Microsoft.WindowsAzure;
     using Microsoft.WindowsAzure.Subscriptions;
     using Microsoft.WindowsAzure.Subscriptions.Models;
 
@@ -40,54 +41,6 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
 
     public static class AzureCredentialsProvider
     {
-        public static SubscriptionCloudCredentials GetUserSubscriptionCredentials( )
-        {
-            Console.WriteLine( "Waiting for authentication result..." );
-            TokenCloudCredentials toFoundSubscriptions = AzureCredentialsProvider.GetCredentialsByUserADAuth( );
-
-            Console.WriteLine( "Retrieving a list of subscriptions..." );
-
-            IList<SubscriptionListOperationResponse.Subscription> subscriptions =
-                AzureCredentialsProvider.GetSubscriptionList( toFoundSubscriptions ).Result;
-
-            if( !subscriptions.Any( ) )
-            {
-                Console.WriteLine( "No available subscriptions." );
-                return null;
-            }
-            Console.WriteLine( "List of available subscriptions: " );
-            int listSize = 1;
-            foreach( var subscription in subscriptions )
-            {
-                Console.WriteLine( listSize + ": " + subscription.SubscriptionName );
-                listSize++;
-            }
-
-            for( ;; )
-            {
-                Console.WriteLine( "Please select subscription number: " );
-
-                string answer = Console.ReadLine( );
-                int selection = 0;
-                if( !int.TryParse( answer, out selection ) || selection >= listSize || selection < 1 )
-                {
-                    Console.WriteLine( "Incorrect subscription number." );
-                    continue;
-                }
-
-                if( ConsoleHelper.Confirm( "Are you sure you want to use " + subscriptions[ selection - 1 ].SubscriptionName + " subscription?" ) )
-                {
-                    Console.WriteLine( "Requesting access to subscription..." );
-                    TokenCloudCredentials result = AzureCredentialsProvider.GetCredentialsByUserADAuth(
-                        subscriptions[ selection - 1 ].SubscriptionId,
-                        subscriptions[ selection - 1 ].ActiveDirectoryTenantId
-                    );
-
-                    return result;
-                }
-            }
-        }
-
         public async static Task<IList<SubscriptionListOperationResponse.Subscription>>
             GetSubscriptionList( SubscriptionCloudCredentials credentials )
         {
@@ -105,7 +58,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
             return ret;
         }
 
-        public static SubscriptionCloudCredentials GetCredentialsByPublishSettingFile( string fileName )
+        public static CertificateCloudCredentials GetCredentialsByPublishSettingFile(string fileName)
         {
             var doc = new XmlDocument( );
             doc.Load( fileName );

@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConnectTheDots.Cl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConnectTheDots.CloudDeploy.Common", "Common\Microsoft.ConnectTheDots.CloudDeploy.Common.csproj", "{987E2AAB-AC91-4781-89B7-C1AD0AF01D8A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConnectTheDots.CloudDeploy.ClearResources", "ClearResources\Microsoft.ConnectTheDots.CloudDeploy.ClearResources.csproj", "{6F6B589D-C822-40F3-9D66-3E0535ABDDFC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{987E2AAB-AC91-4781-89B7-C1AD0AF01D8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{987E2AAB-AC91-4781-89B7-C1AD0AF01D8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{987E2AAB-AC91-4781-89B7-C1AD0AF01D8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F6B589D-C822-40F3-9D66-3E0535ABDDFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F6B589D-C822-40F3-9D66-3E0535ABDDFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F6B589D-C822-40F3-9D66-3E0535ABDDFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F6B589D-C822-40F3-9D66-3E0535ABDDFC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -22,22 +22,23 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-using Microsoft.WindowsAzure.Management.ServiceBus.Models;
-
 namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
 {
     using System;
-    using System.Collections;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Xml;
-    using Microsoft.ConnectTheDots.CloudDeploy.Common;
+
+    using Microsoft.Azure;
+    using Microsoft.WindowsAzure.Management.ServiceBus.Models;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
-    using Microsoft.WindowsAzure;
     using Microsoft.WindowsAzure.Management.ServiceBus;
     using Microsoft.WindowsAzure.Management.Storage;
     using Microsoft.WindowsAzure.Subscriptions.Models;
+
+    //--//
+
+    using Microsoft.ConnectTheDots.CloudDeploy.Common;
 
     //--//
 
@@ -63,19 +64,22 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
         {
             result = new CloudWebDeployInputs( );
 
-            result.Credentials = AzureCredentialsProvider.GetUserSubscriptionCredentials( );
+            result.Credentials = AzureConsoleHelper.GetUserSubscriptionCredentials( );
             if( result.Credentials == null )
             {
                 result = null;
                 return false;
             }
 
-            if( !SelectNamespace( ref result ) )
+            ServiceBusNamespace selectedNamespace = AzureConsoleHelper.SelectNamespace( result.Credentials );
+            if( selectedNamespace == null )
             {
                 result = null;
                 Console.WriteLine( "Quiting..." );
                 return false;
             }
+            result.NamePrefix = selectedNamespace.Name;
+            result.Location = selectedNamespace.Region;
 /*
             Console.WriteLine( "Need to select or not Transform flag." );
             Console.WriteLine( "If selected, the input and output file name will be \"web.config\" placed in Web project location." );
@@ -101,7 +105,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
             }
 */
             result.SBNamespace = result.NamePrefix + "-ns";
-            result.StorageAccountName = result.NamePrefix.ToLowerInvariant() + "storage";
+            result.StorageAccountName = result.NamePrefix.ToLowerInvariant( ) + "storage";
 
             result.EventHubNameDevices = "ehdevices";
             result.EventHubNameAlerts = "ehalerts";
@@ -128,52 +132,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
             return true;
         }
 
-        private bool SelectNamespace( ref CloudWebDeployInputs inputs )
-        {
-            Console.WriteLine( "Retrieving a list of created namespaces..." );
-            ServiceBusNamespace[] namespaces = AzureHelper.GetNamespaces( inputs.Credentials );
-            int namespaceCount = namespaces.Length;
-
-            Console.WriteLine( "Created namespaces: " );
-
-            for( int currentNamespace = 1; currentNamespace <= namespaceCount; ++currentNamespace )
-            {
-                Console.WriteLine( currentNamespace + ": " + 
-                    namespaces[ currentNamespace - 1 ].Name + " (" + namespaces[currentNamespace - 1].Region+ ")" );
-            }
-
-            Console.WriteLine( "0: Exit without processing" );
-
-            for( ;; )
-            {
-                Console.WriteLine( "Please select namespace you want to use: " );
-
-                string answer = Console.ReadLine( );
-                int selection = 0;
-                if( !int.TryParse( answer, out selection ) || selection > namespaceCount || selection < 0 )
-                {
-                    Console.WriteLine( "Incorrect namespace number." );
-                    continue;
-                }
-
-                if( selection == 0 )
-                {
-                    return false;
-                }
-
-                if( ConsoleHelper.Confirm( "Are you sure you want to select " + namespaces[ selection - 1 ].Name + " namespace?" ) )
-                {
-                    if( namespaces[ selection - 1 ].Name.EndsWith( "-ns" ) )
-                    {
-                        namespaces[ selection - 1 ].Name = namespaces[ selection - 1 ].Name.Substring( 0,
-                            namespaces[ selection - 1 ].Name.Length - 3 );
-                    }
-                    inputs.NamePrefix = namespaces[ selection - 1 ].Name;
-                    inputs.Location = namespaces[ selection - 1 ].Region;
-                    return true;
-                }
-            }
-        }
+        
 
         private bool CreateWeb( CloudWebDeployInputs inputs )
         {
@@ -188,9 +147,6 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
 
             NamespaceManager nsManager = NamespaceManager.CreateFromConnectionString( nsConnectionString );
 
-            EventHubDescription ehDevices = nsManager.GetEventHub( inputs.EventHubNameDevices );
-            EventHubDescription ehAlerts = nsManager.GetEventHub( inputs.EventHubNameAlerts );
-
             StorageManagementClient stgMgmt = new StorageManagementClient( inputs.Credentials );
             var keyResponse = stgMgmt.StorageAccounts.GetKeys( inputs.StorageAccountName.ToLowerInvariant( ) );
             if( keyResponse.StatusCode != System.Net.HttpStatusCode.OK )
@@ -202,6 +158,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
 
             var storageKey = keyResponse.PrimaryKey;
 
+            EventHubDescription ehDevices = nsManager.GetEventHub( inputs.EventHubNameDevices );
             string ehDevicesWebSiteConnectionString = new ServiceBusConnectionStringBuilder( nsConnectionString )
             {
                 SharedAccessKeyName = "WebSite",
@@ -209,12 +166,21 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
                     => String.Equals( d.KeyName, "WebSite", StringComparison.InvariantCultureIgnoreCase) ) as SharedAccessAuthorizationRule ).PrimaryKey,
             }.ToString( );
 
-            string ehAlertsWebSiteConnectionString = new ServiceBusConnectionStringBuilder( nsConnectionString )
+            string ehAlertsWebSiteConnectionString = string.Empty;
+            try
             {
-                SharedAccessKeyName = "WebSite",
-                SharedAccessKey = ( ehAlerts.Authorization.First( ( d )
-                    => String.Equals( d.KeyName, "WebSite", StringComparison.InvariantCultureIgnoreCase) ) as SharedAccessAuthorizationRule ).PrimaryKey,
-            }.ToString( );
+                EventHubDescription ehAlerts = nsManager.GetEventHub( inputs.EventHubNameAlerts );
+                ehAlertsWebSiteConnectionString = new ServiceBusConnectionStringBuilder( nsConnectionString )
+                {
+                    SharedAccessKeyName = "WebSite",
+                    SharedAccessKey = ( ehAlerts.Authorization.First( ( d )
+                        => String.Equals( d.KeyName, "WebSite", StringComparison.InvariantCultureIgnoreCase ) ) as
+                        SharedAccessAuthorizationRule ).PrimaryKey,
+                }.ToString( );
+            }
+            catch
+            {
+            }
 
             Console.WriteLine( "Started processing..." );
             // Write a new web.config template file
@@ -253,16 +219,16 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.CreateWebConfig
                     storageKey );
 
             //var outputFile = System.IO.Path.GetFullPath( inputs.WebSiteDirectory + outputFileName );
-            string outputFilePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            string outputFilePath = Environment.GetFolderPath( Environment.SpecialFolder.Desktop );
             //Console.WriteLine(outputFilePath);
 
             var outputFile = outputFilePath + @"\" + outputFileName;
-            Console.WriteLine("Writing updates to " + outputFile);
+            Console.WriteLine( "Writing updates to " + outputFile );
 
             doc.Save( outputFile );
-            Console.WriteLine(" ");
-            Console.WriteLine("Web config saved to {0}", outputFile); 
-            Console.WriteLine(" ");
+            Console.WriteLine( " " );
+            Console.WriteLine( "Web config saved to {0}", outputFile ); 
+            Console.WriteLine( " " );
             return true;
         }
 

@@ -22,20 +22,23 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-using Microsoft.WindowsAzure.Management.ServiceBus.Models;
-
 namespace Microsoft.ConnectTheDots.CloudDeploy.Common
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using Microsoft.WindowsAzure;
-    using Microsoft.WindowsAzure.Management.ServiceBus;
 
     //--//
 
-    public static class AzureHelper
+    using Microsoft.Azure;
+    using Microsoft.Azure.Management.Resources;
+    using Microsoft.Azure.Management.Resources.Models;
+    using Microsoft.WindowsAzure.Management.ServiceBus;
+    using Microsoft.WindowsAzure.Management.ServiceBus.Models;
+
+    //--//
+
+    public static class AzureProvider
     {
         public static string[] GetRegions( SubscriptionCloudCredentials creds )
         {
@@ -52,10 +55,25 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
             return regions;
         }
 
+        public static ResourceGroupExtended[] GetResourceGroups( SubscriptionCloudCredentials creds )
+        {
+            var resourceMgmtClient = new ResourceManagementClient( creds );
+            var resourceGroupsResponse = resourceMgmtClient.ResourceGroups.ListAsync( new ResourceGroupListParameters( ) ).Result;
+
+            int currentGroup = 0, resourceGroupsCount = resourceGroupsResponse.ResourceGroups.Count;
+            ResourceGroupExtended[] resourceGroups = new ResourceGroupExtended[ resourceGroupsCount ];
+            foreach( var group in resourceGroupsResponse.ResourceGroups )
+            {
+                resourceGroups[ currentGroup++ ] = group;
+            }
+
+            return resourceGroups;
+        }
+
         public static ServiceBusNamespace[] GetNamespaces( SubscriptionCloudCredentials creds )
         {
             var sbMgmt = new ServiceBusManagementClient( creds );
-            var regionsResponse = sbMgmt.Namespaces.ListAsync( ).Result;
+            var regionsResponse = sbMgmt.Namespaces.List( );
 
             int currentNamespace = 0, namespaceCount = regionsResponse.Count( );
             ServiceBusNamespace[] namespaces = new ServiceBusNamespace[ namespaceCount ];
