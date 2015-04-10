@@ -33,9 +33,12 @@ namespace ConnectTheDotsWebSite
 {
     public partial class Default : System.Web.UI.Page
     {
+        protected string ForceSocketCloseOnUserActionsTimeout = "false";
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            ForceSocketCloseOnUserActionsTimeout =
+                Global.globalSettings.ForceSocketCloseOnUserActionsTimeout.ToString();
         }
+
     }
 }

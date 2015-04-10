@@ -234,8 +234,32 @@ function onNewEvent(evt) {
 // JQuery ready function
 //
 
-$(document).ready(function () {
+var idleTime = 0;
 
+function onUserAction(e) {
+    idleTime = 0;
+}
+
+function timerIncrement() {
+    idleTime += 1;
+    if (idleTime > 120) // 2 minutes
+    {
+        dataFlows.dataSource.closeSocket();
+        alert('Connection was closed due to user inactivity.');
+        location.reload();
+    }
+}
+
+$(document).ready(function () {
+    var globalSettings = $('.globalSettings');
+    var forceSocketCloseOnUserActionsTimeout = globalSettings.find('.ForceSocketCloseOnUserActionsTimeout').text().toLowerCase() == 'true';
+
+    if (forceSocketCloseOnUserActionsTimeout) {
+        var idleInterval = setInterval(timerIncrement, 1000); // 1 second
+        $(this).mousemove(onUserAction);
+        $(this).keypress(onUserAction);
+    }
+    
     // create datasource
     var sss = (window.location.protocol.indexOf('s') > 0 ? "s" : "");
     var uri = 'ws' + sss + '://' + window.location.host + '/api/websocketconnect?clientId=none';
