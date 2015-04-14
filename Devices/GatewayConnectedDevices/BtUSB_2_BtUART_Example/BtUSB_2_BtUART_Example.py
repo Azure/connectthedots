@@ -45,35 +45,40 @@ CONNECT_RETRY_INTERVAL = 2
 
 def connectSockets(bt, gatewaySock):
     # Connect BT first
-    
     while bt == None:
+        print "Connection RFCOMM"
         try:
             bt = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
             bt.connect((BT_DEV_ADDR, BT_PORT));
+            print ("BT connection succeded")
         except socket.error as msg:
+            bt = None
             print("Socket connection failed. Error Code : " + str(msg[0]) + " Message " + msg[1])
             time.sleep(CONNECT_RETRY_INTERVAL)
-        print ("BT connection succeeded.")
         
     while gatewaySock == None:
+        print "Connecting TCP"
         try:
             gatewaySock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             gatewaySock.connect((HOST, PORT));
+            print ("Connection to gateway succeded")
         except socket.error as msg:
+            gatewaySock = None
             print("Socket connection failed. Error Code : " + str(msg[0]) + " Message " + msg[1])
             time.sleep(CONNECT_RETRY_INTERVAL)
-        print ("Connection to gateway succeeded.")
     return bt, gatewaySock
 
 def recvDataFromBT(bt, packetLen):
-    btData = None
-    # recv int16
-    # TODO accumulate buffer here
-    btData = bt.recv(packetLen);
-    # deserialize data here
-    # assume data is int16
-    btData = (btData[0] << 8) + btData[1];
-    return btData
+    btData = 0
+    i = 0
+    while(i < packetLen):
+        byteAsStr = bt.recv(1)
+        if (byteAsStr == ''):
+            break
+        byte = ord(byteAsStr)
+        btData = (btData << 8) + byte
+        i = i + 1
+    return str(btData)
     
 bt = None
 s = None
@@ -83,7 +88,6 @@ while True:
     btData = None
     # btData != "" means remote host is down
     while btData == None:
-        bt.settimeout(BT_SOCK_TIMEOUT)
         wasExceptionOccured = 0
         try:
             btData = recvDataFromBT(bt, BT_PACKET_LEN);
@@ -94,16 +98,14 @@ while True:
             except Exception as msg:
                 print(msg[0])
             wasExceptionOccured = 1
-        if (wasExceptionOccured == 1 or btData == ""):
+        if (wasExceptionOccured == 1 or btData == ''):
             # something went wrong, reconnect bluetooth socket
             btData = None
             bt = None
             bt = connectSockets(bt,s)
-        print "Data received successfully"
-        print btData
-        
+
         timeStr = datetime.datetime.utcnow().isoformat()
-        JSONdata = "{\"value\":"+number+",\"guid\":\""+GUID+"\",\"organization\":\""+Org+"\",\"displayname\":\""+Disp +"\",\"unitofmeasure\":\""+Units+"\",\"measurename\":\""+Measure+"\",\"location\":\""+Locn+"\",\"timecreated\":\""+timeStr+"\"}"
+        JSONdata = "{\"value\":"+btData+",\"guid\":\""+GUID+"\",\"organization\":\""+Org+"\",\"displayname\":\""+Disp +"\",\"unitofmeasure\":\""+Units+"\",\"measurename\":\""+Measure+"\",\"location\":\""+Locn+"\",\"timecreated\":\""+timeStr+"\"}"
         print(JSONdata) 
         wasExceptionOccured = 0
         try:
@@ -111,6 +113,7 @@ while True:
             bytesSent = s.send("<" + JSONdata + ">");
             # TODO check if all bytes sent. Sent again if necessary.
         except Exception as msg:
+            print(msg[0])
             try: 
                 s.close()
             except Exception as msg:
@@ -120,18 +123,19 @@ while True:
         if (wasExceptionOccured == 1):
             # something went wrong, reconnect gateway socket
             s = None
+            print "gateway socket exception occured"
             bt,s = connectSockets(bt,s)
                     
         time.sleep(1)
         
-    # will never get here, unless server dies         
-    try: 
-        s.close()
-    except Exception as msg:
-        # eat all exception and go back to connect loop 
-        print(msg[0])
-    try: 
-        bt.close()
-    except Exception as msg:
-        # eat all exception and go back to connect loop 
-        print(msg[0])
+# will never get here, unless server dies         
+try: 
+    s.close()
+except Exception as msg:
+# eat all exception and go back to connect loop 
+    print(msg[0])
+try: 
+    bt.close()
+except Exception as msg:
+    # eat all exception and go back to connect loop 
+    print(msg[0])
