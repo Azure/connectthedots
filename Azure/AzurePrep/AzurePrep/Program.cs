@@ -294,6 +294,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
                 _ConsoleBuffer.Add( string.Format( "Service Bus namespace {0} already existed.", inputs.SBNamespace ) );
             }
 
+            int triesCount = 0;
             // Wait until the namespace is active
             while( nsResponse == null || nsResponse.Namespace.Status != "Active" )
             {
@@ -302,7 +303,16 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
                 {
                     break;
                 }
-                _ConsoleBuffer.Add( string.Format( "Namespace {0} in state {1}. Waiting...", inputs.SBNamespace, nsResponse.Namespace.Status ) );
+                triesCount += 1;
+                if( triesCount % 10 == 0 )
+                {
+                    _ConsoleBuffer.Add( "Please note that activation could last about an hour if namespace with the same name prefix was deleted recently..." );
+                }
+                else
+                {
+                    _ConsoleBuffer.Add( string.Format( "Namespace {0} in state {1}. Waiting...", inputs.SBNamespace, nsResponse.Namespace.Status ) );
+                }
+                
                 System.Threading.Thread.Sleep( 5000 );
             }
 
