@@ -15,8 +15,8 @@
  THE SOFTWARE.
   
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= 
- Code to read data from a Wensn 1361 Digital Sound Level Meter, then augment and format as JSON to send via socket connection to a gateway.
- Example of sending sound level data to Microsoft Azure and analyzing with Azure Stream Analytics or Azure Machine Learning.
+ Code to read data from a sensor which uses Bluetooth to transmit data, then augment and format as JSON to send via socket connection to a gateway.
+ Example of sending data to Microsoft Azure and analyzing with Azure Stream Analytics or Azure Machine Learning.
  Real time output viewable at http://connectthedots.msopentech.com .
 '''
 import bluetooth
@@ -110,7 +110,11 @@ while True:
         wasExceptionOccured = 0
         try:
             # send to gateway over socket interface
-            bytesSent = s.send("<" + JSONdata + ">");
+            bytesNeedToBeSent = len(JSONdata)
+            bytesSent = 0
+            while(bytesSent < bytesNeedToBeSent):
+                bytesSent = bytesSent + s.send("<" + JSONdata + ">")
+                
             # TODO check if all bytes sent. Sent again if necessary.
         except Exception as msg:
             print(msg[0])
