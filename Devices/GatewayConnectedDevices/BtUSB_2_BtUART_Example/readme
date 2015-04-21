@@ -1,0 +1,18 @@
+USB BT + Raspberry example setup instruction:
+
+0) Install raspbian wheezy on you raspberry, just follow instructions on raspbian official site.
+1) Please follow instructions from BluetoothSetup.pdf(same folder as readme)
+2) During executing instruction you will obtain other side Bluetooth module's MAC(sensor MAC, cellphone MAC)
+	Open the script and set BT_DEV_ADDR equal to obtained MAC.
+	Also you can set some meta information about your organization and etc
+3) Do the wiring. Construct/power up your bluetooth device on the other side.
+	We tested on Arduino + HC-06 UART module on other side and ACORP USB BT module + Raspberry.
+
+Notes:
+
+1) This method should work with USB Bluetooth modules from here http://elinux.org/RPi_USB_Bluetooth_adapters.
+	This list is not complete, code was tested on ACORP BT module, but if you use device from the list,
+	you most probably will succeed.
+2) Sensor mock is implemented on arduino, you can find it's sketch in ArduinoSensorMock folder.
+	Upload it to arduino, connect uart bluetooth to arduino, set MAC in python script and you are ready to go.
+	Sketch was tested on HC-06 UART bluetooth module, but should work on any UART BT module. Just set correct baudrate in the sketch.

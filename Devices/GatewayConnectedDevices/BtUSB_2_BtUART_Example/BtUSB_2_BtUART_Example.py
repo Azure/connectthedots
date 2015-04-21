@@ -25,7 +25,7 @@ import socket
 import time
 import datetime
 
-#SensorSubject = "sound"                           # determines how Azure website will chart the data
+#SensorSubject = "distanceMeasurer"                           # determines how Azure website will chart the data
 Org      = "My organization";
 Disp     = "Bluetooth example"                     # will be the label for the curve on the chart
 GUID     = "nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn"  # ensures all the data from this sensor appears on the same chart. You can use the Tools/Create GUID in Visual Studio to create
@@ -38,7 +38,7 @@ PORT = 5000
 
 BT_PORT = 1
 BT_PACKET_LEN = 2
-BT_DEV_ADDR = "20:14:10:10:14:17"
+BT_DEV_ADDR = "20:14:10:10:14:17"	# Please set needed MAC address
 BT_SOCK_TIMEOUT = 10
 
 CONNECT_RETRY_INTERVAL = 2
