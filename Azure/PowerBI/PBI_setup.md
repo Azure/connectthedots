@@ -24,9 +24,9 @@ To make sure you do not exceed the maximum number of readers on your Connect The
 * Create a job
 	* Open the Azure Management Portal, and create a new job “CTD2PBI”:
 	* Click "+” in lower left corner, and select Data Services -> Stream Analytics -> Quick Create -> Job name “CTD2PBI”.
-      ![](CreateNewSAJob.png)
+      ![](CreateNewSAJob.PNG)
 	* Select the job to bring up the job view:
-	* ![](CreateInputPBI.png)
+	* ![](CreateInputPBI.PNG)
 
 * Create an input
     * Select the INPUTS tab 
@@ -77,6 +77,7 @@ To make sure you do not exceed the maximum number of readers on your Connect The
 * Download the results of the query
 	* Open the Azure Management Portal, and select STORAGE
 	* Select the storage account name for your project
+	* ![](ViewSQLOutput.PNG)
 	* Select CONTAINERS from the top menu
 	* Select "ehresults" in the right pane
 	* Select the most recent result in the right pane, and click DOWNLOAD in the menu at the bottom:

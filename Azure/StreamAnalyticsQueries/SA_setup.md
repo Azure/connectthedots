@@ -16,11 +16,11 @@ Note also that these queries are hard-coded to the data streams defined in the "
 * Create the first job
     * Open the Azure Management Portal, and create a new job “Aggregates”:
         * "+” in lower left corner -> Data Services -> Stream Analytics -> Quick Create -> Job name “Aggregates”.
-        * ![](CreateNewSAJob.png)
+        * ![](CreateNewSAJob.PNG)
     * Create an input
         * Select the Inputs tab in the Aggregates job.
             * Inputs tab -> Add an Input -> Data Stream, Event Hub
-            * ![](CreateInput.png)
+            * ![](CreateInput.PNG)
         * Input Alias: “DevicesInput”
         * Subscription: “Use Event Hub from Current Subscription”
         * Choose the namespace `<name>`-ns, where `<name>` is the name you created when running AzurePrep.exe previously to create the Event Hubs
