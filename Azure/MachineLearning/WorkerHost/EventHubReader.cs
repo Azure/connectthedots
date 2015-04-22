@@ -15,8 +15,10 @@ namespace WorkerHost
 {
     class EventHubReader
     {
-        private const int bufferSize = 30;//100;
-        private const int minCountForAnalysis = 5;//
+        private const int DEFAULT_BUFFER_SIZE = 200;
+        private const int MIN_COUNT_FOR_ANALYSIS = 10;
+
+        private static int _bufferSize = 200;
 
         private EventHubReceiver[] _receivers = null;
         //DateTime[] _receiversLastUpdate = null;
@@ -26,6 +28,18 @@ namespace WorkerHost
         //object _lockNoData = new object();
 
         internal ManualResetEvent FailureEvent = new ManualResetEvent(false);
+
+        public EventHubReader(int messagesBufferSize)
+        {
+            if (messagesBufferSize == 0)
+            {
+                _bufferSize = DEFAULT_BUFFER_SIZE;
+            }
+            else
+            {
+                _bufferSize = messagesBufferSize;
+            }
+        }
 
         public void Close()
         {
@@ -117,7 +131,7 @@ namespace WorkerHost
                             CircularBuffer<SensorDataContract> buffer;
                             if (!_buffers.TryGetValue(from, out buffer))
                             {
-                                buffer = new CircularBuffer<SensorDataContract>(bufferSize);
+                                buffer = new CircularBuffer<SensorDataContract>(_bufferSize);
                                 _buffers.Add(from, buffer);
                             }
                     
@@ -146,7 +160,7 @@ namespace WorkerHost
         {
             lock (_lock)
             {
-                return _buffers.Where(kvp => kvp.Value.Count > minCountForAnalysis)
+                return _buffers.Where(kvp => kvp.Value.Count > MIN_COUNT_FOR_ANALYSIS)
                     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.GetAll());
             }
         }
@@ -161,8 +175,9 @@ namespace WorkerHost
 
                     if (batch != null && batch.Count() != 0)
                     {
+#if DEBUG_LOG
                         Debug.WriteLine("Partition {0}, {1} events", iPart, batch.Count());
-
+#endif
                         Process(iPart, false, batch);
                     }
                     else

@@ -118,6 +118,12 @@ namespace WorkerHost
             return avg + 5 * sd;
         }
 
+        private AnomalyRecord[] filterAnomaly(IEnumerable<AnomalyRecord> analyzedRecords)
+        {
+            return analyzedRecords.Where(ar => ar.Spike1 == 1 || ar.Spike2 == 1 || ar.LevelScore > 3).ToArray();
+        }
+
+
         public AnomalyRecord[] GetAlertsFromAnomalyDetectionAPI(string timeSeriesData)
         {
             var acitionUri = new Uri(_detectorUrl);
@@ -135,8 +141,12 @@ namespace WorkerHost
                             );
 
             var resultTable = query.FirstOrDefault();
-            var results = resultTable.GetADResults().ToArray();
-            return results;
+            var results = resultTable.GetADResults();
+
+            var presults = results.Skip(results.Count - 10);
+            return filterAnomaly(presults);
+
+            //return results.ToArray();
         }
 
         private Task<AnomalyRecord[]> GetAlertsFromRRS(string featureVector)
@@ -166,7 +176,7 @@ namespace WorkerHost
                         var results = ser.Deserialize<List<string[]>>(response);
 
                         var presults = results.Skip(results.Count - 5).Select(r => AnomalyRecord.Parse(r));
-                        return presults.Where(ar => ar.Spike1 == 1 || ar.Spike2 == 1 || ar.LevelScore > 3).ToArray();
+                        return filterAnomaly(presults);
 
                         //return results.Select(r => AnomalyRecord.Parse(r)).Where(ar => ar.Spike1 == 1 || ar.Spike2 == 1|| ar.LevelScore>4).ToArray();
                     }

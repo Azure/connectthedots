@@ -23,6 +23,7 @@ namespace WorkerHost
             public string AnomalyDetectionAuthKey;
             public string LiveId;
             public bool UseMarketApi;
+            public int MessagesBufferSize;
         }
 
         private static Analyzer        _analyzer;
@@ -45,9 +46,12 @@ namespace WorkerHost
 
             bool.TryParse(ConfigurationManager.AppSettings.Get("UseMarketApi"), out config.UseMarketApi);
 
+            int.TryParse(ConfigurationManager.AppSettings.Get("MessagesBufferSize"), out config.MessagesBufferSize);
+
             _analyzer = new Analyzer(config.AnomalyDetectionApiUrl, config.AnomalyDetectionAuthKey,
                 config.LiveId, config.UseMarketApi);
-            _eventHubReader = new EventHubReader();
+
+            _eventHubReader = new EventHubReader(config.MessagesBufferSize);
 
             Process(config);
         }
