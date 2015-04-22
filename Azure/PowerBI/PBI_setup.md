@@ -90,7 +90,7 @@ To make sure you do not exceed the maximum number of readers on your Connect The
 ###Create a dashboard###
 We are going to create a Power BI dashboard for a the data coming from the Connect The Dots starter solution, of a single Arduino UNO + Weather Shield sending data to an Azure Event Hub. The finished product will look something like this:
 
-![](CTDPBIDash.png)
+![](CTDPBIDash.PNG)
 
 To create this, first create a dashboard:
 
