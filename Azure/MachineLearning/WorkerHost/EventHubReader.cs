@@ -112,9 +112,7 @@ namespace WorkerHost
                     {
                         var payload = JsonConvert.DeserializeObject<IDictionary<string, object>>(line);
 
-                        var from = (string)payload["guid"];
-
-                        var sensorData = new SensorDataContract()
+                        var sensorData = new SensorDataContract
                         {
                             DisplayName      = (string)  payload["displayname"],
                             Guid             = (string)  payload["guid"],
@@ -125,6 +123,8 @@ namespace WorkerHost
                             UnitOfMeasure    = (string)  payload["unitofmeasure"],
                             Value            = (double)  payload["value"]
                         };
+
+                        var from = sensorData.UniqueId();
 
                         lock (_lock)
                         {

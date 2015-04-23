@@ -45,14 +45,17 @@ namespace WorkerHost
         private static string _detectorUrl;
         private static string _detectorAuthKey;
         private static string _liveId;
+        private static string _spikeDetectorParams;
         private static bool _useMarketApi;
 
-        public Analyzer(string anomalyDetectionApiUrl, string anomalyDetectionAuthKey, string liveId, bool useMarketApi)
+        public Analyzer(string anomalyDetectionApiUrl, string anomalyDetectionAuthKey, string liveId, bool useMarketApi, string tukeyThresh, string zscoreThresh)
         {
             _detectorUrl = anomalyDetectionApiUrl;
             _detectorAuthKey = anomalyDetectionAuthKey;
             _liveId = liveId;
             _useMarketApi = useMarketApi;
+
+            _spikeDetectorParams = string.Format("SpikeDetector.TukeyThresh={0}; SpikeDetector.ZscoreThresh={1}", tukeyThresh, zscoreThresh);
         }
 
 
@@ -63,15 +66,11 @@ namespace WorkerHost
             Trace.TraceInformation("AzureML request: {0}", timeSeriesData);
 #endif
 
-            var featureVector =
-                string.Format(
-                    "\"data\": \"{0}\",\"params\": \"SpikeDetector.TukeyThresh=7; SpikeDetector.ZscoreThresh=7\"",
-                    timeSeriesData);
             if (_useMarketApi)
             {
                 return Task.Run(() => GetAlertsFromAnomalyDetectionAPI(timeSeriesData));  
             }
-            return GetAlertsFromRRS(featureVector);
+            return GetAlertsFromRRS(timeSeriesData);
         }
 
         private static string GetTimeseriesData(SensorDataContract[] data)
@@ -88,7 +87,7 @@ namespace WorkerHost
                     for (; prevTime.AddSeconds(step) < d.TimeCreated; )
                     {
                         prevTime = prevTime.AddSeconds(step);
-                        newData.Add(new SensorDataContract() { TimeCreated = prevTime, Value = prevVal });
+                        newData.Add(new SensorDataContract { TimeCreated = prevTime, Value = prevVal });
                     }
                 }
                 newData.Add(d);
@@ -99,12 +98,7 @@ namespace WorkerHost
 
 
             var sb = new StringBuilder();
-            var history = 100;
-
-#if DEBUG_LOG
-            Trace.TraceInformation("series (sz = " + newData.Count + ") ");
-#endif
-            foreach (var d in newData.Skip(newData.Count - history))
+            foreach (var d in newData)
             {
                 sb.Append(string.Format("{0}={1};", d.TimeCreated.ToString("O"), d.Value));
             }
@@ -137,27 +131,27 @@ namespace WorkerHost
 
             var query = ctx.Execute<ADResult>(acitionUri, "POST", true,
                             new BodyOperationParameter("data", timeSeriesData),
-                            new BodyOperationParameter("params", "SpikeDetector.TukeyThresh=3; SpikeDetector.ZscoreThresh=3") // default configuration of spike detectors
-                            );
+                            new BodyOperationParameter("params", _spikeDetectorParams));
 
             var resultTable = query.FirstOrDefault();
             var results = resultTable.GetADResults();
 
-            var presults = results.Skip(results.Count - 10);
+            var presults = results;
             return filterAnomaly(presults);
-
-            //return results.ToArray();
         }
 
-        private Task<AnomalyRecord[]> GetAlertsFromRRS(string featureVector)
+        private Task<AnomalyRecord[]> GetAlertsFromRRS(string timeSeriesData)
         {
-            var rrs = _detectorUrl; // detector8;
-            var apikey = _detectorAuthKey; // detector8auth;
+            var rrs = _detectorUrl;
+            var apikey = _detectorAuthKey;
 
             using (var wb = new WebClient())
             {
                 wb.Headers[HttpRequestHeader.ContentType] = "application/json";
                 wb.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + apikey);
+
+                var featureVector =
+                    string.Format("\"data\": \"{0}\",\"params\": \"{1}\"", timeSeriesData, _spikeDetectorParams);
                 string jsonData = "{\"Id\":\"scoring0001\", \"Instance\": {\"FeatureVector\": {" + featureVector + "}, \"GlobalParameters\":{\"level_mhist\": 300, \"level_shist\": 100, \"trend_mhist\": 300, \"trend_shist\": 100 }}}";
                 var jsonBytes = Encoding.Default.GetBytes(jsonData);
 
@@ -171,14 +165,11 @@ namespace WorkerHost
                         Trace.TraceInformation("AzureML response: {0}...", response.Substring(0, Math.Min(100, response.Length)));
 #endif
 
-                        JavaScriptSerializer ser = new JavaScriptSerializer();
-                        ser.MaxJsonLength = int.MaxValue;
+                        JavaScriptSerializer ser = new JavaScriptSerializer { MaxJsonLength = int.MaxValue };
                         var results = ser.Deserialize<List<string[]>>(response);
 
-                        var presults = results.Skip(results.Count - 5).Select(r => AnomalyRecord.Parse(r));
+                        var presults = results.Select(AnomalyRecord.Parse);
                         return filterAnomaly(presults);
-
-                        //return results.Select(r => AnomalyRecord.Parse(r)).Where(ar => ar.Spike1 == 1 || ar.Spike2 == 1|| ar.LevelScore>4).ToArray();
                     }
                     );
             }

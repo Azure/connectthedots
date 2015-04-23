@@ -22,8 +22,13 @@ namespace WorkerHost
             public string AnomalyDetectionApiUrl;
             public string AnomalyDetectionAuthKey;
             public string LiveId;
+
+            public string TukeyThresh;
+            public string ZscoreThresh;
+
             public bool UseMarketApi;
             public int MessagesBufferSize;
+            public int AlertsIntervalSec;
         }
 
         private static Analyzer        _analyzer;
@@ -44,12 +49,17 @@ namespace WorkerHost
             config.AnomalyDetectionAuthKey = ConfigurationManager.AppSettings.Get("AnomalyDetectionAuthKey");
             config.LiveId = ConfigurationManager.AppSettings.Get("LiveId");
 
+            config.TukeyThresh = ConfigurationManager.AppSettings.Get("TukeyThresh");
+            config.ZscoreThresh = ConfigurationManager.AppSettings.Get("ZscoreThresh");
+
             bool.TryParse(ConfigurationManager.AppSettings.Get("UseMarketApi"), out config.UseMarketApi);
 
             int.TryParse(ConfigurationManager.AppSettings.Get("MessagesBufferSize"), out config.MessagesBufferSize);
+            int.TryParse(ConfigurationManager.AppSettings.Get("AlertsIntervalSec"), out config.AlertsIntervalSec);
+            
 
             _analyzer = new Analyzer(config.AnomalyDetectionApiUrl, config.AnomalyDetectionAuthKey,
-                config.LiveId, config.UseMarketApi);
+                config.LiveId, config.UseMarketApi, config.TukeyThresh, config.ZscoreThresh);
 
             _eventHubReader = new EventHubReader(config.MessagesBufferSize);
 
@@ -90,7 +100,7 @@ namespace WorkerHost
 
                         foreach (var alert in alerts)
                         {
-                            if ((alert.Time - alertLastTime).TotalSeconds > 30)
+                            if ((alert.Time - alertLastTime).TotalSeconds >= config.AlertsIntervalSec)
                             {
                                 Trace.TraceInformation("Alert - {0}", alert.ToString());
 
@@ -158,7 +168,7 @@ namespace WorkerHost
             return JsonConvert.SerializeObject(
                 new
                 {
-                    guid = @from,
+                    guid = sensorMeta.Guid,
                     displayname = sensorMeta.DisplayName,
                     measurename = sensorMeta.MeasureName,
                     unitofmeasure = sensorMeta.UnitOfMeasure,

@@ -28,5 +28,11 @@ namespace WorkerHost
 
         [DataMember(Name = "timecreated")]
         public DateTime TimeCreated { get; set; }
+
+        public string UniqueId()
+        {
+            //we could have devices with same DisplayName but different MeasureName etc..
+            return DisplayName + Guid + MeasureName;
+        }
     }
 }
