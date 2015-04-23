@@ -8,7 +8,9 @@ The hardware listed below is the one used to test the code. You can try with an 
  - [Gadgeteer FEZ Spider Mainboard][1]
  - [Gadgeteer USB DP Module][2]
  - [Gadgeteer Ethernet J11D Module][3]
- - [Gadgeteer Temp&Humidity Module][4] (note that this is no longer available new. The [TempHumid S170][13] may be substituted with minor code and design surface changes)
+ - [Gadgeteer WiFi RS21 Module][3] https://www.ghielectronics.com/catalog/product/282
+ - [Gadgeteer TempHumid S170 Module][4] 
+ - [Gadgeteer LightSense Module] [5] https://www.ghielectronics.com/catalog/product/336
 
 ##Software and tools requirements
 
@@ -19,8 +21,6 @@ You will need to install the below software in this order to implement this .NET
  - [.Net MF Visual Studio 2013 integration][7]
  - [.Net Gadgeteer Core][8]
  - [GHI NETMF and Gadgeteer package][9]
- - [GHI discontinued Gadgeteer Module Drivers][11]
- - [NETMF Toolbox][12]
 
 ##VS Solution
 
@@ -68,13 +68,12 @@ If you are hitting an exception when running the application on your board in th
   [1]: https://www.ghielectronics.com/catalog/product/269
   [2]: https://www.ghielectronics.com/catalog/product/280
   [3]: https://www.ghielectronics.com/catalog/product/284
-  [4]: https://www.ghielectronics.com/catalog/product/344
+  [4]: https://www.ghielectronics.com/catalog/product/528
   [5]: http://go.microsoft.com/?linkid=9863608
   [6]: http://netmf.codeplex.com/downloads/get/911182
   [7]: http://netmf.codeplex.com/downloads/get/911183
   [8]: http://gadgeteer.codeplex.com/downloads/get/918081
   [9]: https://www.ghielectronics.com/support/netmf/sdk/24/netmf-and-gadgeteer-package-2014-r5
   [10]: https://www.ghielectronics.com/docs/165/netmf-and-gadgeteer-troubleshooting
-  [11]: https://www.ghielectronics.com/docs/299/discontinued-gadgeteer-module-drivers
-  [12]: http://netmftoolbox.codeplex.com/
-  [13]: https://www.ghielectronics.com/catalog/product/528
+  [11]: 
+  [13]: 
