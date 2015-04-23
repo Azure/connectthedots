@@ -1,4 +1,4 @@
-The instructions below will help you setup a Power BI dashboard in the Connect The Dots starter solution, but they can be adapted as necessary for other scenarios. This document assumes you have already deployed the starter solution with at least one Raspberry Pi, one Arduino UNO + Weather Shield, and set up your Azure Event Hubs and website with the names and fields as indicated in the various setup pages.
+The instructions below will help you setup a Power BI dashboard in the Connect The Dots starter solution, but they can be adapted as necessary for other scenarios. This document assumes you have already deployed the starter solution with at least one device set up pushing data to an Azure Event Hub. The documentation below uses the names and fields you would have if you had set up the starter solution with an Arduino Weather Shield, but can be modified as needed if you have a different sensor or named your fields and hubs differently.
 
 ## Prerequisites ##
 
@@ -57,7 +57,7 @@ To make sure you do not exceed the maximum number of readers on your Connect The
 		* Filename prefix: "ctdtest"
 	* Under Serialization settings choose:
 		* Event Serialization format: CSV
-		* Delimiter: comman (,)
+		* Delimiter: comma (,)
 		* Encoding UTF8
 		* 
 * Create an output for Power BI
