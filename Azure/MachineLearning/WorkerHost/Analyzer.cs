@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
+using Microsoft.WindowsAzure.Diagnostics;
 
 namespace WorkerHost
 {

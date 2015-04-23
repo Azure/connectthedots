@@ -6,12 +6,15 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Azure;
 using Microsoft.ServiceBus.Messaging;
+using Microsoft.WindowsAzure.Diagnostics;
+using Microsoft.WindowsAzure.ServiceRuntime;
 using Newtonsoft.Json;
 
 namespace WorkerHost
 {
-    public class WorkerHost
+    public class WorkerHost : RoleEntryPoint
     {
         public class Configuration
         {
@@ -37,8 +40,21 @@ namespace WorkerHost
 
         static void Main()
         {
+            StartHost();
+        }
+
+        public override void Run()
+        {
+            StartHost();
+        }
+
+        private static void StartHost()
+        {
+            Trace.WriteLine("Starting Worker...");
+            RoleEnvironment.TraceSource.TraceInformation("Starting Worker...");
+
             var config = new Configuration();
-            
+
             config.AlertEHConnectionString = ConfigurationManager.AppSettings.Get("Microsoft.ServiceBus.ConnectionStringAlerts");
             config.AlertEHName = ConfigurationManager.AppSettings.Get("Microsoft.ServiceBus.EventHubAlerts");
 
@@ -56,7 +72,7 @@ namespace WorkerHost
 
             int.TryParse(ConfigurationManager.AppSettings.Get("MessagesBufferSize"), out config.MessagesBufferSize);
             int.TryParse(ConfigurationManager.AppSettings.Get("AlertsIntervalSec"), out config.AlertsIntervalSec);
-            
+
 
             _analyzer = new Analyzer(config.AnomalyDetectionApiUrl, config.AnomalyDetectionAuthKey,
                 config.LiveId, config.UseMarketApi, config.TukeyThresh, config.ZscoreThresh);

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
 using Newtonsoft.Json;
+using Microsoft.WindowsAzure.Diagnostics;
 
 namespace WorkerHost
 {
