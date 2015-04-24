@@ -19,9 +19,10 @@ namespace WorkerHost
         private const int DEFAULT_BUFFER_SIZE = 200;
         private const int MIN_COUNT_FOR_ANALYSIS = 10;
 
-        private static int _bufferSize = 200;
+        private static int _bufferSize;
 
         private EventHubReceiver[] _receivers = null;
+        private string _consumerGroupPrefix;
         //DateTime[] _receiversLastUpdate = null;
         private Task[] _tasks = null;
         private Dictionary<string, CircularBuffer<SensorDataContract>> _buffers;
@@ -30,7 +31,7 @@ namespace WorkerHost
 
         internal ManualResetEvent FailureEvent = new ManualResetEvent(false);
 
-        public EventHubReader(int messagesBufferSize)
+        public EventHubReader(int messagesBufferSize, string consumerGroupPrefix = "Local")
         {
             if (messagesBufferSize == 0)
             {
@@ -40,6 +41,8 @@ namespace WorkerHost
             {
                 _bufferSize = messagesBufferSize;
             }
+
+            _consumerGroupPrefix = consumerGroupPrefix;
         }
 
         public void Close()
@@ -53,11 +56,22 @@ namespace WorkerHost
             }
         }
 
+        public void Test(string connectionString, string hubName)
+        {
+            NamespaceManager nsmgr = NamespaceManager.CreateFromConnectionString(connectionString);
+            EventHubDescription desc = nsmgr.GetEventHub(hubName);
+
+            string consumerGroup = _consumerGroupPrefix + DateTime.UtcNow.Ticks.ToString();
+            var fdfgd = nsmgr.CreateConsumerGroupIfNotExists(new ConsumerGroupDescription(hubName, consumerGroup));
+        }
+
         public void Run(string connectionString, string hubName)
         {
             NamespaceManager nsmgr = NamespaceManager.CreateFromConnectionString(connectionString);
             EventHubDescription desc = nsmgr.GetEventHub(hubName);
 
+            string consumerGroupName = _consumerGroupPrefix + DateTime.UtcNow.Ticks.ToString();
+            ConsumerGroupDescription consumerGroupDesc = nsmgr.CreateConsumerGroupIfNotExists(new ConsumerGroupDescription(hubName, consumerGroupName));
 
             EventHubClient client = EventHubClient.CreateFromConnectionString(connectionString, hubName);
 
@@ -74,7 +88,7 @@ namespace WorkerHost
 
             for (int iPart = 0; iPart < desc.PartitionCount; iPart++)
             {
-                EventHubReceiver receiver = client.GetDefaultConsumerGroup().CreateReceiver(
+                EventHubReceiver receiver = client.GetConsumerGroup(consumerGroupName).CreateReceiver(
                     desc.PartitionIds[iPart], DateTime.UtcNow - TimeSpan.FromMinutes(2));
                 _receivers[iPart] = receiver;
 

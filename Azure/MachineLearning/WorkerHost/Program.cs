@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define DEBUG_LOG
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
@@ -40,19 +41,20 @@ namespace WorkerHost
 
         static void Main()
         {
-            StartHost();
+            StartHost("LocalWorker");
         }
 
         public override void Run()
         {
-            StartHost();
+            StartHost("WorkerRole");
         }
 
-        private static void StartHost()
+        private static void StartHost(string consumerGroupPrefix)
         {
             Trace.WriteLine("Starting Worker...");
+#if DEBUG_LOG
             RoleEnvironment.TraceSource.TraceInformation("Starting Worker...");
-
+#endif
             var config = new Configuration();
 
             config.AlertEHConnectionString = ConfigurationManager.AppSettings.Get("Microsoft.ServiceBus.ConnectionStringAlerts");
@@ -77,7 +79,7 @@ namespace WorkerHost
             _analyzer = new Analyzer(config.AnomalyDetectionApiUrl, config.AnomalyDetectionAuthKey,
                 config.LiveId, config.UseMarketApi, config.TukeyThresh, config.ZscoreThresh);
 
-            _eventHubReader = new EventHubReader(config.MessagesBufferSize);
+            _eventHubReader = new EventHubReader(config.MessagesBufferSize, consumerGroupPrefix);
 
             Process(config);
         }
