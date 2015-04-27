@@ -56,15 +56,6 @@ namespace WorkerHost
             }
         }
 
-        public void Test(string connectionString, string hubName)
-        {
-            NamespaceManager nsmgr = NamespaceManager.CreateFromConnectionString(connectionString);
-            EventHubDescription desc = nsmgr.GetEventHub(hubName);
-
-            string consumerGroup = _consumerGroupPrefix + DateTime.UtcNow.Ticks.ToString();
-            var fdfgd = nsmgr.CreateConsumerGroupIfNotExists(new ConsumerGroupDescription(hubName, consumerGroup));
-        }
-
         public void Run(string connectionString, string hubName)
         {
             NamespaceManager nsmgr = NamespaceManager.CreateFromConnectionString(connectionString);
