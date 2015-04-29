@@ -2,7 +2,7 @@ The instructions below will help you setup a Power BI dashboard in the Connect T
 
 ## Prerequisites ##
 
-Make sure you have a working starter solution, with data showing in your Azure website. In addition, you will need a Power BI account, for which you can sign up at [PowerBI.com](http://app.PowerBI.com).
+Make sure you have a working starter solution, with data showing in your Azure website. In addition, you will need a Power BI account, for which you can sign up for the Public Preview at [PowerBI.com](http://www.PowerBI.com).
 
 ## Create a Service Bus Consumer Group ##
 
