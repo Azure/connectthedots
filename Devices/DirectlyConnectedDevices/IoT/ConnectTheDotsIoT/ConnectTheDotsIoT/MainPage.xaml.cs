@@ -41,10 +41,10 @@ namespace ConnectTheDotsIoT
             ctdHelper = new ConnectTheDotsHelper(serviceBusNamespace: "YOURSERVICEBUS-ns",
                 eventHubName: "ehdevices",
                 keyName: "D1",
-                key: "YOUR_KEY_HERE",
+                key: "YOUR_KEY",
                 displayName: "YOUR_DEVICE_NAME",
                 organization: "YOUR_ORGANIZATION_OR_SELF",
-                location: "USA",
+                location: "YOUR_LOCATION",
                 sensorList: sensors);
 
             Button_Click(null, null);
