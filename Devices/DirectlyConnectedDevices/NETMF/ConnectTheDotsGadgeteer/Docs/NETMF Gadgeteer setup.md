@@ -37,9 +37,11 @@ const string Organization = "{organization}";
 const string Location = "{location}";
 ```
 
-* Once you have applied these changes to the code, connect the temperature & humidity sensor, the Ethernet adapter and the USB power extension to the Gadgeteer FEZ mainboard as shown in the picture below (temp sensor connected to slot 4, Ethernet adapter to slot 7, USB DP module to slot 1).
+* Once you have applied these changes to the code, connect the temperature & humidity sensor, the Ethernet adapter and the USB power extension to the Gadgeteer FEZ mainboard as shown in the picture below (Light Sensor slot 10, Temp Sensor slot 11, Ethernet Adapter slot 7, USB DP Module slot 1)
 
-* Connect the Ethernet Module to an Ethernet cable connected to a network with DHCP, connect the USB cable from your PC to the USB DP Module.
+![Gadgeteer Connections](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/GadgeteerConnection.png).
+
+* Connect the Ethernet Module to an Ethernet cable connected to a network with DHCP, connect the USB cable from your PC to the USB DP Module.  If the output windows shows a connection of 0.0.0.0 you may need to unplug and replug the Ethernet cable.
 
 * When hitting F5 in Visual Studio, the Gadgeteer board will be flashed with your program and will start sending its temperature and humidity data to Azure services.
 
