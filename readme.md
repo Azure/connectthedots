@@ -59,6 +59,7 @@ If you decide to connect another device, you can check out the samples provided 
     - Intel Galileo running a C++ application and sending data from an Arduino compatible Weather Shield over AMQP
     - Intel Edison running a node.js application sending data from a TI SensorTag BLEn sensor kit over HTTP/REST
     - Gadgeteer device running a C# .Net Micro Framework application sending Gadgeteer sensors data over AMQP
+    - Raspberry Pi 2 running Windows 10 IoT Core and a Universal Application sending dummy data over HTTP/REST
     - Windows Phone C# application sending the phone sensors (light and accelerometer) over HTTP/REST
     - Windows Phone C# application sending a data from a paired Microsoft Band (accelerometer, body temperature, heartbeat)over HTTP/REST
 - Gateways:
