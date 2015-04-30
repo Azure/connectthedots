@@ -1,0 +1,4 @@
+[submodule "Devices/DirectlyConnectedDevices/WindowsIoTCorePi2WeatherShield"]
+	path = Devices/DirectlyConnectedDevices/WindowsIoTCorePi2WeatherShield
+	url = https://github.com/ms-iot/iot-build-lab.git
+	branch = ConnectTheDotsSample
