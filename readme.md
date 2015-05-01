@@ -49,8 +49,7 @@ Please note that we have devices running in separate processes as a Python scrip
 In order to reproduce one of the ConnectTheDots.io scenarios, you will need the following:
 
 1. Microsoft Azure subscription ([free trial subscription](http://azure.microsoft.com/en-us/pricing/free-trial/) is sufficient)
-2. Access to the [Azure Streaming Analytics Preview](https://account.windowsazure.com/PreviewFeatures)
-3. Visual Studio 2013 – [Community Edition](http://www.visualstudio.com/downloads/download-visual-studio-vs) or above
+1. Visual Studio 2013 – [Community Edition](http://www.visualstudio.com/downloads/download-visual-studio-vs) or above
 
 ## Hardware prerequisites for Connect The Dots starter solution ##
 If you are going to deploy the starter solution, you need to procure an Arduino UNO and Raspberry Pi, as shown in the documentation for those devices in the appropriate folders:
@@ -89,7 +88,6 @@ Setting up your IoT solution involves several distinct steps, each of which is f
 1. [Azure prep](Azure/AzurePrep/AzurePrep.md) - Creating basic Azure resources
 1. [Device setup](Devices/DeviceSetup.md) - Configuring your device(s)
 1. [Sample website deployment](Azure/WebSite/WebsitePublish.md) - Publishing a generic sample website for viewing the data
-1. [Analysis services setup](Azure/StreamAnalyticsQueries/SA_setup.md) - Configuring Azure Stream Analytics services (for starter solution)
   
 To get started with a simple example, complete the "Connect The Dots starter solution" tasks identified in each of the above steps.
 
