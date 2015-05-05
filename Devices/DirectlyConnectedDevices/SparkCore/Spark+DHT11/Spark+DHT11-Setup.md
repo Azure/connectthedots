@@ -1,5 +1,5 @@
 ## Spark+DHT11 Setup ##
-This wiki will describe how to connect the DHT11 sensor to your Spark Core and upload the code to connect it to your ConnectTheDots Event Hub and .
+This wiki will describe how to connect the DHT11 sensor to your Spark Core and upload the code to connect it to your ConnectTheDots Event Hub.
 
 ## Prerequisites ##
 Ensure that you have completed  setting up the [AzureMobileServiceEventHub Proxy](https://github.com/MSOpenTech/connectthedots/blob/master/Devices/DirectlyConnectedDevices/SparkCore/AzureMobileServiceEventHubProxy/AzureMobileServiceEventHubProxy-Setup.md) and [ConnectTheDots EventHub Deployment](https://github.com/toolboc/connectthedots/blob/master/Azure/AzurePrep/AzurePrep.md)
