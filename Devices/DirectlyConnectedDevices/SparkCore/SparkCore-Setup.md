@@ -2,7 +2,7 @@
 This Wiki explains how to setup a [Spark Core](https://store.spark.io/?product=spark-core) to send temperature and optional humidity data to Microsoft Azure for analytics, real time data display, and alerts. It assumes that you have all the necessary hardware and preconditions satisfied (see below)
 
 ## Hardware Requirements ##
-[Spark Core Device]()
+[Spark Core Device](https://store.spark.io/?product=spark-core)
 
 AND
 
@@ -20,4 +20,4 @@ OR
 [Spark.io account](http://spark.io)
 
 ## Preconditions
-You will need an [AzureMobileServiceEventHub Proxy](https://github.com/MSOpenTech/connectthedots/blob/master/Devices/DirectlyConnectedDevices/SparkCore/AzureMobileServiceEventHubProxy-Setup.md) configured to relay data to your existing [ConnectTheDots EventHub Deployment](https://github.com/toolboc/connectthedots/blob/master/Azure/AzurePrep/AzurePrep.md)
+You will need an [AzureMobileServiceEventHub Proxy](https://github.com/MSOpenTech/connectthedots/blob/master/Devices/DirectlyConnectedDevices/SparkCore/AzureMobileServiceEventHubProxy/AzureMobileServiceEventHubProxy-Setup.md) configured to relay data to your existing [ConnectTheDots EventHub Deployment](https://github.com/toolboc/connectthedots/blob/master/Azure/AzurePrep/AzurePrep.md)
