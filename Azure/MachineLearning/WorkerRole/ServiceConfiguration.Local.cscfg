@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ServiceConfiguration serviceName="WorkerRole" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="4" osVersion="*" schemaVersion="2014-06.2.4">
+  <Role name="WorkerHost">
+    <Instances count="1" />
+    <ConfigurationSettings>
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.Enabled" value="true" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountUsername" value="dinarisio" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountEncryptedPassword" value="MIIBnQYJKoZIhvcNAQcDoIIBjjCCAYoCAQAxggFOMIIBSgIBADAyMB4xHDAaBgNVBAMME1dpbmRvd3MgQXp1cmUgVG9vbHMCEGnaXUXyxHu5TBpc4wgA+w8wDQYJKoZIhvcNAQEBBQAEggEAbiptdq42Rva6CvHhZSdiE3QJ69cY2S75tWG7YyE/7J+u9j/isNMAKvXV7sU4cp4GUsqXKIRhbhM1ZOn66xjFLb9MD4eZKJxQM35lgo0jpLxxDBAG6sBJsIsgZ3N+Y6xhuTVYaPXacPol/z1deoF8MqDqUjDR8LUrRqZn3I84ZDi5Yy2tq647/dRKiPwCNgtqenVrKjdvKHXEivOhaiWMk67YdkuyvY95amE9L8fpBE8EJnzoA1TgMzPpc9LOh3A1n5tymXv0F3FRlZnH8YXfeuIEWTUFKlIYx6GvAsfxp/+32FYjGrz2nPerjOO0esALEhtvSfrMRJJ+V9HRjukJRzAzBgkqhkiG9w0BBwEwFAYIKoZIhvcNAwcECO84qgpx32t7gBDFPmdYlNcm3vvXutm0jn3z" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountExpiration" value="2016-04-23T23:59:59.0000000+03:00" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteForwarder.Enabled" value="true" />
+    </ConfigurationSettings>
+    <Certificates>
+      <Certificate name="Microsoft.WindowsAzure.Plugins.RemoteAccess.PasswordEncryption" thumbprint="DF071A214916A8A039A12B4F4B9F93A9C2B49374" thumbprintAlgorithm="sha1" />
+    </Certificates>
+  </Role>
+</ServiceConfiguration>
