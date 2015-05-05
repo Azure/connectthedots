@@ -5,7 +5,6 @@ The Connect The Dots implementation requires a number of Azure resources and ser
 Make sure you have all software installed and necessary subscriptions as indicated in the Readme.md file for the project. To repeat them here, you need
 
 1. Microsoft Azure subscription ([free trial subscription](http://azure.microsoft.com/en-us/pricing/free-trial/) is sufficient)
-1. Access to the [Azure Streaming Analytics Preview](https://account.windowsazure.com/PreviewFeatures)
 1. Visual Studio 2013 – [Community Edition](http://www.visualstudio.com/downloads/download-visual-studio-vs)
 
 ## Create Azure resources for IoT infrastructure ##
@@ -29,7 +28,8 @@ Make sure you have all software installed and necessary subscriptions as indicat
 			amqps://D3:xxxxxxxx@yyyyyyyy.servicebus.windows.net
 			amqps://D4:xxxxxxxx@yyyyyyyy.servicebus.windows.net
 
-The AzurePrep.exe command created two Event Hubs, EHDevices and EHAlerts. It also created four endpoints for AMQP connections from your remote devices such as Raspberry Pi devices. If you deleted or can't find the file AzurePrep created on your desktop, you can retrieve the endpoint strings by 
+The AzurePrep.exe command created two Event Hubs, EHDevices and EHAlerts or a single EHDevices one depending on your choice during the execution.
+It also created four endpoints for AMQP connections from your remote devices such as Raspberry Pi devices. If you deleted or can't find the file AzurePrep created on your desktop, you can retrieve the endpoint strings by 
 
 1. launching http://manage.windowsazure.com
 2. selecting Service Bus in the left nav menu
@@ -37,6 +37,8 @@ The AzurePrep.exe command created two Event Hubs, EHDevices and EHAlerts. It als
 4. select Event Hubs from the top menu
 5. select ehdevices
 6. select Connection Information tab at the bottom
+
+Finally, and depending on your choice during the execution the tool created the Azure Stream Analytics jobs that will compute average and trigger alerts on your data.
 
 ###Create Website config info###
 * Run the application ConnecttheDots\Azure\AzurePrep\CreateWebConfig\bin\Release\CreateWebConfig.exe
