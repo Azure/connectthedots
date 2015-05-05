@@ -2,7 +2,7 @@
 This wiki will describe how to connect the DHT11 sensor to your Spark Core and upload the code to connect it to your ConnectTheDots Event Hub and .
 
 ## Prerequisites ##
-Ensure that you have completed  setting up the [AzureMobileServiceEventHub Proxy](https://github.com/MSOpenTech/connectthedots/blob/master/Devices/DirectlyConnectedDevices/SparkCore/AzureMobileServiceEventHubProxy-Setup.md) and [ConnectTheDots EventHub Deployment](https://github.com/toolboc/connectthedots/blob/master/Azure/AzurePrep/AzurePrep.md)
+Ensure that you have completed  setting up the [AzureMobileServiceEventHub Proxy](https://github.com/MSOpenTech/connectthedots/blob/master/Devices/DirectlyConnectedDevices/SparkCore/AzureMobileServiceEventHubProxy/AzureMobileServiceEventHubProxy-Setup.md) and [ConnectTheDots EventHub Deployment](https://github.com/toolboc/connectthedots/blob/master/Azure/AzurePrep/AzurePrep.md)
 
 ## Hardware Requirements ##
 [Spark Core Device](https://store.spark.io/?product=spark-core)
@@ -14,7 +14,7 @@ Ensure that you have completed  setting up the [AzureMobileServiceEventHub Proxy
 ## Wiring Instructions ##
 Using your solderless breadboard jumpers, connect GNG to GND, VCC to 3v3, and DAT to D2 on your Spark Core as shown below:
 
-![Spark+DHT11 Wiring Instructions](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/Spark+DHT11.png)
+![Spark+DHT11 Wiring Instructions](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/Spark+DHT11.jpg)
 
 ## Code Deployment ##
 Ensure your Spark Core is configured for deployment by following this [Instructable](http://www.instructables.com/id/Getting-a-Spark-Core-running-without-using-Sparks-/).
