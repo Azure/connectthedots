@@ -19,7 +19,7 @@ With the DS18B20 sensor in hand, solder VDD (Red Wire) to 3v3, GND (Black Wire) 
 
 ![Spark+DHT11 Wiring Instructions](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/Spark+DS18B20-1.jpg)
 
-![Spark+DHT11 Wiring Instructions](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/Spark+DS18B20-1.jpg)
+![Spark+DHT11 Wiring Instructions](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/Spark+DS18B20-2.jpg)
 
 ## Code Deployment ##
 Ensure your Spark Core is configured for deployment by following this [Instructable](http://www.instructables.com/id/Getting-a-Spark-Core-running-without-using-Sparks-/).
