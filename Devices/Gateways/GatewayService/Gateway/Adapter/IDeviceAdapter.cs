@@ -25,6 +25,7 @@
 namespace Microsoft.ConnectTheDots.Gateway
 {
     using System;
+    using Microsoft.ConnectTheDots.Common;
 
     //--//
 
