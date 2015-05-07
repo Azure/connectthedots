@@ -41,7 +41,7 @@ To build the project you will need Visual Studio 2013 [Community Edition](http:/
 
 
 * Open the Devices\Gateways\GatewayService\GatewayService.sln solution in Visual Studio
-* In Visual Studio, update \GatewayService\WindowsService\App.config with any one of the four amqp address strings returned by AzurePrep.exe, i.e. amqps://D1:xxxxxxxx@yyyyyyyy.servicebus.windows.net, and the 
+* In Visual Studio, update \GatewayService\Gateway\Microsoft.ConnectTheDots.GatewayService\App.config with any one of the four amqp address strings returned by AzurePrep.exe, i.e. amqps://D1:xxxxxxxx@yyyyyyyy.servicebus.windows.net, and the 
 name that you assigned to your gateway. It is important that the key is being url-encoded, meaning all special characters should be replaced by their ASCII code (e.g. "=" should be replaced by "%3D". You can use tools like [http://meyerweb.com/eric/tools/dencoder/](http://meyerweb.com/eric/tools/dencoder/) to url-encode the key. Four strings you can use are in the file created on your desktop by the AzurePrep.exe utility used earlier. Copy one of those strings and replace the relevant line in App.config:
 
 	Before:
