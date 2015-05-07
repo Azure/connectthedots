@@ -260,6 +260,8 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.ClearResources
             catch ( Exception e )
             {
                 Console.WriteLine( "Exception {0} while creating Azure resources at {1}", e.Message, e.StackTrace );
+                Console.WriteLine( "Please hit enter to close." );
+                Console.ReadLine( );
                 return 0;
             }
         }
