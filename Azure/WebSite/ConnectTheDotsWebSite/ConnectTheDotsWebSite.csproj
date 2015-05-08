@@ -101,6 +101,7 @@
       <Link>Docs\license.txt</Link>
     </Content>
     <Content Include="css\connectthedots.css" />
+    <Content Include="css\jquery.dataTables.css" />
     <Content Include="img\ajax-loader.gif" />
     <Content Include="img\forkme_CTD.png" />
     <Content Include="js\d3Chart.js" />
@@ -111,6 +112,10 @@
     <Content Include="js\d3CTDDataSourceFilter.js" />
     <Content Include="js\d3DataSourceSocket.js" />
     <Content Include="js\d3utils.js" />
+    <Content Include="lib\d3.tip.v0.6.3.js" />
+    <Content Include="lib\d3.v3.min.js" />
+    <Content Include="lib\jquery-1.11.1.min.js" />
+    <Content Include="lib\jquery.dataTables.min.js" />
     <Content Include="packages.config">
       <SubType>Designer</SubType>
     </Content>
