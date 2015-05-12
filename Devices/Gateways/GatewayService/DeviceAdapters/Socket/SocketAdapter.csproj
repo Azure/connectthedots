@@ -55,7 +55,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy $(TargetPath) $(SolutionDir)Tests\CoreTest\$(OutDir)
-copy $(TargetPath) $(SolutionDir)Tests\WindowsEXE\$(OutDir)</PostBuildEvent>
+copy $(TargetPath) $(SolutionDir)WindowsEXE\$(OutDir)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
