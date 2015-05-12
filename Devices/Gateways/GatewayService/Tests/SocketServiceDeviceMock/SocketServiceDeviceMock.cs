@@ -24,7 +24,7 @@
 
 namespace Microsoft.ConnectTheDots.Test
 {
-    using Microsoft.ConnectTheDots.Gateway;
+    using Microsoft.ConnectTheDots.Common;
 
     //--//
 

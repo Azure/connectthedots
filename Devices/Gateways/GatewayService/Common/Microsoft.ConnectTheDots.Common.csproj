@@ -30,7 +30,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NLog">
+      <HintPath>..\packages\NLog.3.2.0.0\lib\net45\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -39,8 +43,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Adapter\SensorEndpoint.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="IPAddressHelper.cs" />
+    <Compile Include="Logger\NLogEventLogger.cs" />
     <Compile Include="Logger\SafeLogger.cs" />
     <Compile Include="Logger\TunableLogger.cs" />
     <Compile Include="Platform.cs" />
@@ -48,6 +54,10 @@
     <Compile Include="SafeAction.cs" />
     <Compile Include="SafeFunction.cs" />
     <Compile Include="Threading\TaskWrapper.cs" />
+    <Compile Include="Utils\Loader.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

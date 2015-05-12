@@ -67,7 +67,6 @@
     <Compile Include="Models\QueuedItem.cs" />
     <Compile Include="Models\SensorDataContract.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Adapter\SensorEndpoint.cs" />
     <Compile Include="ServiceInstantiation\IService.cs" />
     <Compile Include="ServiceInstantiation\ServiceBehavior.cs" />
     <Compile Include="ServiceInstantiation\ServiceInstanceProvider.cs" />

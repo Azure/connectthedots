@@ -27,6 +27,7 @@ namespace Microsoft.ConnectTheDots.Test
     using System;
     using System.Collections.Generic;
     using System.Configuration;
+    using Microsoft.ConnectTheDots.Common;
     using Microsoft.ConnectTheDots.Gateway;
 
     //--//
