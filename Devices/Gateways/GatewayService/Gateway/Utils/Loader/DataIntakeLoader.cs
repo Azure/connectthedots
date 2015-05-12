@@ -28,9 +28,11 @@ namespace Microsoft.ConnectTheDots.Gateway
 {
     using System;
     using System.Collections.Generic;
-    using System.Reflection;
-    using System.IO;
     using System.Diagnostics;
+    using System.IO;
+    using System.Linq;
+    using System.Reflection;
+    
     using Microsoft.ConnectTheDots.Common;
 
     //--//
@@ -60,22 +62,6 @@ namespace Microsoft.ConnectTheDots.Gateway
 
             _dataIntakes = new List<DeviceAdapterAbstract>( );
 
-            //for each filename will store a flag - whether it was specified at config or not
-            Dictionary<String, bool> sourcesToLoad = new Dictionary<string, bool>( );
-            if( sources != null )
-            {
-                foreach( var filename in sources )
-                {
-                    sourcesToLoad.Add( filename, true );
-                }
-            }
-                
-#if DEBUG_LOG
-            else
-            {
-                _logger.LogInfo( "No list of DeviceAdapters in configuration file, continuing..." );
-            }
-#endif
 
             if( endpoints != null )
             {
@@ -116,15 +102,30 @@ namespace Microsoft.ConnectTheDots.Gateway
                 directories.Add( di3 );
             }
 
-            foreach( string directory in directories )
+            //for each filename will store a flag - whether it was specified at config or not
+            Dictionary<String, bool> sourcesToLoad = new Dictionary<string, bool>( );
+            if( sources != null && sources.Any( ) )
             {
-                //Dinar: dont want to try all windows/system32 directory for now
-                if( !directory.ToLowerInvariant( ).Contains( "system32" ) )
+                foreach( var filename in sources )
                 {
-                    foreach( string filename in Directory.GetFiles( directory ) )
+                    sourcesToLoad.Add( filename, true );
+                }
+            }
+            else
+            {
+#if DEBUG_LOG
+                _logger.LogInfo( "No list of DeviceAdapters in configuration file, continuing..." );
+#endif
+                foreach( string directory in directories )
+                {
+                    //Dinar: dont want to try all windows/system32 directory for now
+                    if( !directory.ToLowerInvariant( ).Contains( "system32" ) )
                     {
-                        //false flag - file was not specified at config
-                        sourcesToLoad.Add( filename, false );
+                        foreach( string filename in Directory.GetFiles( directory ) )
+                        {
+                            //false flag - file was not specified at config
+                            sourcesToLoad.Add( filename, false );
+                        }
                     }
                 }
             }

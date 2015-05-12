@@ -34,6 +34,50 @@ namespace Microsoft.ConnectTheDots.Test
 
     public class TestRunner
     {
+
+        private static void TestMockData( ILogger logger )
+        {
+            /////////////////////////////////////////////////////////////////////////////////////////////
+            // Test core service 
+            //
+            CoreTest mockDataTest = new CoreTest( logger );
+            mockDataTest.Run( );
+            Console.WriteLine( String.Format( "Core Test completed" ) );
+        }
+
+        private static void TestWebService( ILogger logger )
+        {
+            //////////////////////////////////////////////////////////////////////////////////////////////
+            // Test Web service and core service 
+            //
+            SensorDataContract sensorData = RandomSensorDataGenerator.Generate( );
+            string serializedData = JsonConvert.SerializeObject( sensorData );
+
+            WebServiceTest webServiceTest = new WebServiceTest( "http://localhost:8000/GatewayService/API/Enqueue?jsonData=" + serializedData, logger );
+            webServiceTest.Run( );
+            Console.WriteLine( String.Format( "WebService Test completed, {0} messages sent", webServiceTest.TotalMessagesSent ) );
+        }
+
+        private static void TestSocket( ILogger logger )
+        {
+            /////////////////////////////////////////////////////////////////////////////////////////////
+            // Test Socket
+            //
+            SocketTest socketTest = new SocketTest( logger );
+            socketTest.Run( );
+            Console.WriteLine( String.Format( "Socket Test completed" ) );
+        }
+
+        private static void TestRealData( ILogger logger )
+        {
+            /////////////////////////////////////////////////////////////////////////////////////////////
+            // Test Socket
+            //
+            RealDataTest realDataTest = new RealDataTest( logger );
+            realDataTest.Run( );
+            Console.WriteLine( String.Format( "Socket Test completed" ) );
+        }
+
         static void Main( string[] args )
         {
             // we do not need a tunable logger, but this is a nice way to test it...
@@ -45,30 +89,35 @@ namespace Microsoft.ConnectTheDots.Test
 
             logger.Level = ( loggingLevel != TunableLogger.LoggingLevel.Undefined ) ? loggingLevel : TunableLogger.LoggingLevel.Errors;
 
+            if( args.Length == 0 )
+            {
+                //if started without arguments
+                TestRealData( logger );
+            }
 
-            /////////////////////////////////////////////////////////////////////////////////////////////
-            // Test core service 
-            //
-            CoreTest t2 = new CoreTest( logger );
-            t2.Run( );
-            Console.WriteLine( String.Format( "Core Test completed" ) );
-
-            //////////////////////////////////////////////////////////////////////////////////////////////
-            // Test Web service and core service 
-            //
-            SensorDataContract sensorData = RandomSensorDataGenerator.Generate( );
-            string serializedData = JsonConvert.SerializeObject( sensorData );
-
-            WebServiceTest t1 = new WebServiceTest( "http://localhost:8000/GatewayService/API/Enqueue?jsonData=" + serializedData, logger );
-            t1.Run( );
-            Console.WriteLine( String.Format( "WebService Test completed, {0} messages sent", t1.TotalMessagesSent ) );
-
-            /////////////////////////////////////////////////////////////////////////////////////////////
-            // Test Socket
-            //
-            SocketTest t3 = new SocketTest( logger );
-            t3.Run( );
-            Console.WriteLine( String.Format( "Socket Test completed" ) );
+            foreach( string t in args )
+            {
+                switch( t.Substring( 0, 1 ).Replace( "/", "-" ) + t.Substring( 1 ).ToLowerInvariant( ) )
+                {
+                    case "-MockData":
+                        TestMockData( logger );
+                        break;
+                    case "-WebService":
+                        TestWebService( logger );
+                        break;
+                    case "-Socket":
+                        TestSocket( logger );
+                        break;
+                    case "-AllTimeBounded":
+                        TestMockData( logger );
+                        TestWebService( logger );
+                        TestSocket( logger );
+                        break;
+                    case "-RealData":
+                        TestRealData( logger );
+                        break;
+                }
+            }
 
             // wait for logging tasks to complete
             Console.WriteLine( "Press enter to exit" );
