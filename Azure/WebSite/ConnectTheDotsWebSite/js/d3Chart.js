@@ -293,9 +293,7 @@ d3Chart.prototype = {
 			.append("svg")
 			.attr("width", self._width + margin.left + margin.right)
 			.attr("height", self._height + margin.top + margin.bottom)
-			.style("margin-left", margin.left + "px")
 			.style("margin-bottom", margin.bottom + "px")
-			.style("margin-right", margin.right + "px")
 			.append("g")
 			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
