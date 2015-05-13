@@ -1,0 +1,85 @@
+<?define Name = "ConnectTheDots GatewayService" ?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?define Microsoft.ConnectTheDots.GatewayService_BIN=$(var.SolutionDir)WindowsService\Bin\$(var.Configuration)\?>
+  <?define SerialPortAdapter_BIN=$(var.SolutionDir)DeviceAdapters\SerialPort\Bin\$(var.Configuration)\?>
+  <?define SocketAdapter_BIN=$(var.SolutionDir)DeviceAdapters\Socket\Bin\$(var.Configuration)\?>
+	<Product Id="*" Name="$(var.Name)" Language="1033" Version="1.0.0.0" Manufacturer="ConnectTheDots" UpgradeCode="33840066-93c1-42d6-9cad-5bf88b97de0d">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+		<MediaTemplate />
+
+		<Feature Id="ProductFeature" Title="WindowsServiceSetup" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+		</Feature>
+
+    <UI>
+      <UIRef Id="WixUI_InstallDir" />
+      <!-- Skip license dialog -->
+      <Publish Dialog="WelcomeDlg"
+               Control="Next"
+               Event="NewDialog"
+               Value="InstallDirDlg"
+               Order="2">1</Publish>
+      <Publish Dialog="InstallDirDlg"
+               Control="Back"
+               Event="NewDialog"
+               Value="WelcomeDlg"
+               Order="2">1</Publish>
+    </UI>
+	</Product>
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLFOLDER" Name="ConnectTheDots GatewayService" />
+			</Directory>
+		</Directory>
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+	</Fragment>
+
+	<Fragment>
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="Amqp.Net.dll" Guid="72cc9068-bf6b-4f84-b7c4-542d8530a98b">
+        <File Id="Amqp.Net.dll" Name="Amqp.Net.dll" Source="$(var.Microsoft.ConnectTheDots.GatewayService_BIN)Amqp.Net.dll" />
+      </Component>
+      <Component Id="Newtonsoft.Json.dll" Guid="6c312480-6c0a-4334-b769-8d973093ccf6">
+        <File Id="Newtonsoft.Json.dll" Name="Newtonsoft.Json.dll" Source="$(var.Microsoft.ConnectTheDots.GatewayService_BIN)Newtonsoft.Json.dll" />
+      </Component>
+      <Component Id="Microsoft.ConnectTheDots.Common.dll" Guid="cc681188-11eb-4871-bb48-b73f1fdd8ddb">
+        <File Id="Microsoft.ConnectTheDots.Common.dll" Name="Microsoft.ConnectTheDots.Common.dll" Source="$(var.Microsoft.ConnectTheDots.GatewayService_BIN)Microsoft.ConnectTheDots.Common.dll" />
+      </Component>
+      <Component Id="NLog.dll" Guid="879254b4-3907-4f5e-a0c0-bff8661baf12">
+        <File Id="NLog.dll" Name="NLog.dll" Source="$(var.Microsoft.ConnectTheDots.GatewayService_BIN)NLog.dll" />
+      </Component>
+      <Component Id="Microsoft.ConnectTheDots.Gateway.dll" Guid="ea18470b-1032-4245-8327-a83a169163c4">
+        <File Id="Microsoft.ConnectTheDots.Gateway.dll" Name="Microsoft.ConnectTheDots.Gateway.dll" Source="$(var.Microsoft.ConnectTheDots.GatewayService_BIN)Microsoft.ConnectTheDots.Gateway.dll" />
+      </Component>
+      <Component Id="Microsoft.ConnectTheDots.GatewayService.exe" Guid="6be39dfd-883c-4c42-93b4-933f210e8262">
+        <File Id="Microsoft.ConnectTheDots.GatewayService.exe" Name="Microsoft.ConnectTheDots.GatewayService.exe" Source="$(var.Microsoft.ConnectTheDots.GatewayService_BIN)Microsoft.ConnectTheDots.GatewayService.exe" />
+        <ServiceInstall Id="ServiceInstaller"
+                        Type="ownProcess"
+                        Name="TestService"
+                        DisplayName="$(var.Name)"
+                        Description="Gateway Service for ConnectTheDots"
+                        Start="auto"
+                        ErrorControl="normal" />
+        <!-- Tell WiX to start the Service -->
+        <ServiceControl Id="StartService" Start="install" Stop="both" Remove="uninstall" Name="TestService" Wait="yes" />
+      </Component>
+      <Component Id="Microsoft.ConnectTheDots.GatewayService.exe.config" Guid="64ac2ff8-709b-412f-a3a2-23355f9f5242">
+        <File Id="Microsoft.ConnectTheDots.GatewayService.exe.config" Name="Microsoft.ConnectTheDots.GatewayService.exe.config" Source="$(var.Microsoft.ConnectTheDots.GatewayService_BIN)Microsoft.ConnectTheDots.GatewayService.exe.config" />
+      </Component>
+      <Component Id="NLog.config" Guid="28871bcf-004e-4ec6-b690-9d591da5795b">
+        <File Id="NLog.config" Name="NLog.config" Source="$(var.Microsoft.ConnectTheDots.GatewayService_BIN)NLog.config" />
+      </Component>
+      <Component Id="Microsoft.ConnectTheDots.SerialPortAdapter.dll" Guid="8ad1f68f-4dae-4a9f-b8ed-c22d083bfe00">
+        <File Id="Microsoft.ConnectTheDots.SerialPortAdapter.dll" Name="Microsoft.ConnectTheDots.SerialPortAdapter.dll" Source="$(var.SerialPortAdapter_BIN)Microsoft.ConnectTheDots.SerialPortAdapter.dll" />
+      </Component>
+      <Component Id="Microsoft.ConnectTheDots.SocketAdapter.dll" Guid="c18745f2-c67e-4d1f-834e-0d9a5a6d3e2c">
+        <File Id="Microsoft.ConnectTheDots.SocketAdapter.dll" Name="Microsoft.ConnectTheDots.SocketAdapter.dll" Source="$(var.SocketAdapter_BIN)Microsoft.ConnectTheDots.SocketAdapter.dll" />
+      </Component>
+    </ComponentGroup>
+	</Fragment>
+</Wix>
