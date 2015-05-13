@@ -39,7 +39,7 @@ const string Location = "{location}";
 
 * Once you have applied these changes to the code, connect the temperature & humidity sensor, the Ethernet adapter and the USB power extension to the Gadgeteer FEZ mainboard as shown in the picture below (Light Sensor slot 10, Temp Sensor slot 11, Ethernet Adapter slot 7, USB DP Module slot 1)
 
-![Gadgeteer Connections](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/GadgeteerConnection.png).
+![Gadgeteer Connections](GadgeteerConnection.png).
 
 * Connect the Ethernet Module to an Ethernet cable connected to a network with DHCP, connect the USB cable from your PC to the USB DP Module.  If the output windows shows a connection of 0.0.0.0 you may need to unplug and replug the Ethernet cable.
 

@@ -9,13 +9,14 @@ The [Azure Event Hubs REST API](https://msdn.microsoft.com/en-us/library/azure/d
 ## Create the Mobile Service ##
 Create a new Azure Mobile Service with a Javascript Backend:
 
-![Create the Azure Mobile Service](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/CreateAMS.png)
+![Create the Azure Mobile Service](CreateAMS.png)
 
-![Select the Javascript Backend](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/AMS-JS-Option.png)
+
+![Select the Javascript Backend](AMS-JS-Option.png)
 
 Next Create an API within the service, I named mine 'temp' for temperature:
 
-![Create an API within the Azure Mobile Service](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/AMS-API.png)
+![Create an API within the Azure Mobile Service](AMS-API.png)
 
 ## Add Custom JS Modules to the newly created API ##
 
@@ -43,4 +44,4 @@ var my_key_name = 'KEYNAME';
 
 var my_key = 'KEY';
 
-![Modify the Azure Mobile Service API Code](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/AMS-API-Code.png)
+![Modify the Azure Mobile Service API Code](AMS-API-Code.png)

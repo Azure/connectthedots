@@ -14,7 +14,7 @@ Ensure that you have completed  setting up the [AzureMobileServiceEventHub Proxy
 ## Wiring Instructions ##
 Using your solderless breadboard jumpers, connect GNG to GND, VCC to 3v3, and DAT to D2 on your Spark Core as shown below:
 
-![Spark+DHT11 Wiring Instructions](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/Spark+DHT11.jpg)
+![Spark+DHT11 Wiring Instructions](Spark+DHT11.jpg)
 
 ## Code Deployment ##
 Ensure your Spark Core is configured for deployment by following this [Instructable](http://www.instructables.com/id/Getting-a-Spark-Core-running-without-using-Sparks-/).

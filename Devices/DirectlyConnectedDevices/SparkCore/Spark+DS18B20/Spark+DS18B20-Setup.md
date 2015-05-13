@@ -17,9 +17,9 @@ Soldering Iron / Solder
 
 With the DS18B20 sensor in hand, solder VDD (Red Wire) to 3v3, GND (Black Wire) to GND, and D (White Wire) to D7 on the Spark Button board.  You will then want to connect a 4.7k Ohm resistor between VDD and D.  It is recommended that you perform the soldering while the Spark Core is detached from the Spark Button board.  For more details on this circuit, see [ContractorWolf's - The Spark Core IOT Temperature Sensor with the DS18b20](http://contractorwolf.com/sparkcore-temp-ds18b20/).  The finished product should resemble the images below:
 
-![Spark+DHT11 Wiring Instructions](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/Spark+DS18B20-1.jpg)
+![Spark+DHT11 Wiring Instructions](Spark+DS18B20-1.jpg)
 
-![Spark+DHT11 Wiring Instructions](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/Spark+DS18B20-2.jpg)
+![Spark+DHT11 Wiring Instructions](Spark+DS18B20-2.jpg)
 
 ## Code Deployment ##
 Ensure your Spark Core is configured for deployment by following this [Instructable](http://www.instructables.com/id/Getting-a-Spark-Core-running-without-using-Sparks-/).
