@@ -24,7 +24,7 @@ Raspberry PI Configuration
 
 The I2C port needs to be enabled on the PI, and the login shell over serial needs to be disabled. This can be done with:
 
-> sudo raspi-config
+	sudo raspi-config
 
 Choose AdvancedI2C Configuration enable, then choose AdvancesSerial Configurationdisable
 
@@ -33,7 +33,7 @@ Python Setup
 
 You will need several packages installed for the python scripts to run:
 
-apt-get install I2C\_Tools python-serial python-smbbus
+    apt-get install I2C\_Tools python-serial python-smbbus
 
 Running the Code
 ================

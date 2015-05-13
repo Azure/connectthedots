@@ -2,7 +2,8 @@
 
 [ConnectTheDots.io](http://connectthedots.io) is an open source project created by <a href="http://msopentech.com">Microsoft Open Technologies</a> to help you get tiny devices connected to Microsoft Azure, and to implement great IoT solutions taking advantage of Microsoft Azure advanced analytic services such as Azure Stream Analytics and Azure Machine Learning. 
 
-![](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/ConnectTheDots%20architecture.png)
+![](ConnectTheDots-architecture.png)
+
 
 In this project there are code samples, configuration scripts and guides that will help you set up devices and sensors, and configure Microsoft Azure services to view and analyze the data produced by those devices. Some of these samples have been provided by MS Open Tech, others by third parties; we encourage everyone to submit code samples or configuration documentation to grow this project.
 
@@ -101,4 +102,4 @@ If you select “All”, you should see raw readings from the device coming in e
 If the temperature exceeds 75 degrees (F), you should see an alert showing in the alerts table, once every 20 seconds while the temperature on any of the devices exceeds 75 degrees (F).
 If you cover the shield, you will see an alert telling you the light is turned off.
 
-![](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/WebSiteCapture.png)
+![](WebSiteCapture.png)

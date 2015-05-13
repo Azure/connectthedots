@@ -14,7 +14,7 @@ Unplug the Raspberry Pi.
 
 Get yourself one of these great Adafruit cables. Not any cable will work, you will need something that works with your operating system and with the Raspberry Pi. The Adafruit cable works with Windows, including 8+, Linux, OSX. In the Microsoft-run labs, these cables are provided for you.
 
-![Adafruit TTL cable](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/AdafruitUSBSerialCable.png).
+![Adafruit Serial Cable](AdafruitUSBSerialCable.png)
 
 You can purchase the cable here: http://www.adafruit.com/products/954
 
@@ -22,7 +22,7 @@ Now, connect the cable to the Raspberry Pi. **Do not yet plug it into the USB po
 
 I'll show the connection a few different ways here. It's important that you get it correct.
 
-![Pi Serial Pins](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/PISerialPinout.png).
+![Pi Serial Pins](PISerialPinout.png).
  
 Use the first +5v pin as shown here. Make sure you're on the outer row of pins -- the row nearest the edge of the board.
 Pin 2: +5v
@@ -30,7 +30,7 @@ Pin 6: Ground
 Pin 8: Pi Transmit (PC receive)
 Pin 9: Pi Receive (PC transmit)
 
-![Pi Serial Connection](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/PISerialDebugConnection.png).
+![Pi Serial Connection](PISerialDebugConnection.png).
  
 Those are the correct pins for the Pi rev 2, the B+, and the Pi 2. For other versions of the Pi, consult the pin descriptions.
 
@@ -40,11 +40,11 @@ You're not required to do that though. You can plug the Pi into a dedicated powe
 
 Once plugged in, Windows will detect the adapter and install the driver.
  
-![Driver installation](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/AdafruitCableDriverInstall.png).
+![Driver installation](AdafruitCableDriverInstall.png).
 
 While the driver is installing, pay attention to the COM port listed. In this case, it's COM5. If you miss that, or if it's been a while since you installed the USB->TTL adapter, you can check device manager. For Windows 8+, right click the start button and select "Device Manager", then look under "Ports (COM & LPT)" as shown here. The port will be listed right in the entry.
  
-![Device Manager](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/DeviceManagerUSBSerial.png).
+![Device Manager](DeviceManagerUSBSerial.png).
 
 ##Connecting to the Pi over Serial
 
@@ -70,7 +70,7 @@ Note that the shell has good completion, so you can type "sudo nano /etc/wp{tab}
 
 You'll then type this information in. For example, the default information for one of the ZyXel travel routers is shown below.
 
-![wpa_supplicant.conf](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/NanoWPAConfig.png).
+![wpa_supplicant.conf](NanoWPAConfig.png).
  
 When you've entered the required information, hit control-X to exit. You'll be prompted to save, so answer "Y". Just hit enter to save over the old file.
 
@@ -80,7 +80,7 @@ The next step is to edit the /etc/network/interfaces file to add in wlan0. To do
 
 Once edited, your interfaces file should look like this:
  
-![Network Interfaces file](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/NanoNetworkInterfaces.png).
+![Network Interfaces file](NanoNetworkInterfaces.png).
 
 As before, exit nano, saving the file.
 
@@ -98,7 +98,7 @@ Now the easy part! To see the network configuration for your pi, at the command 
 
 If the Pi was able to connect to your WiFi network, you'll see the IP address in the results from that command
 
-![ifconfig](https://github.com/MSOpenTech/connectthedots/blob/master/Wiki/Images/ifconfig.png).
+![ifconfig](ifconfig.png).
  
 You now know the IP address of your WiFi-connected Raspberry Pi.
 
