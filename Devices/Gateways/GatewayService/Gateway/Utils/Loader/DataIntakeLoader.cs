@@ -164,7 +164,7 @@ namespace Microsoft.ConnectTheDots.Gateway
                             string assmPath = Path.Combine( d, assmName );
                             if( File.Exists( assmPath ) )
                             {
-                                assm = Assembly.LoadFrom( fileName );
+                                assm = Assembly.LoadFrom( assmPath );
                             }
                         }
 
