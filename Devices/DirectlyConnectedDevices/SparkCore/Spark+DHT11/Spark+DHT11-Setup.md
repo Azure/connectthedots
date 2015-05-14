@@ -7,7 +7,7 @@ Ensure that you have completed  setting up the [AzureMobileServiceEventHub Proxy
 ## Hardware Requirements ##
 [Spark Core Device](https://store.spark.io/?product=spark-core)
 
-[3 Solderless Breadboard Jumper Wires](http://www.amazon.com/Wosang-Solderless-Flexible-Breadboard-Jumper/dp/B005TZJ0AM/ref=sr_1_1?ie=UTF8&qid=1430780052&sr=8-1&keywords=solderless+jumper+wires)
+[3 Solderless Male to Female Jumper Wires](http://www.amazon.com/YOUCable-Multicolor-Waterproof-Solderless-Breadboard/dp/B00L51YKSG/)
 
 [DHT11 Sensor](http://www.amazon.com/gp/product/B00AF22GDC/ref=oh_aui_detailpage_o00_s00?ie=UTF8&psc=1)
 
