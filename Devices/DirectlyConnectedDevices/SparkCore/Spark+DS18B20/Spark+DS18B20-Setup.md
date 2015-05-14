@@ -1,4 +1,4 @@
-## Spark+DHT11 Setup ##
+## Spark+DS18B20 Setup ##
 This wiki will describe how to connect the DS18B20 sensor to your Spark Core and upload the code to connect it to your ConnectTheDots Event Hub.  Using the Spark Button, we will give color feedback on the temperature from the device itself, in addition to publishing the temperature data to a ConnectTheDots Event Hub.
 
 ## Prerequisites ##
