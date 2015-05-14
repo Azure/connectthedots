@@ -1,0 +1,211 @@
+﻿#define CTD_WEB_JSON_FORMAT
+
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
+using TrafficFlow.Common;
+using TrafficFlow.Common.Repositories;
+
+namespace WorkerHost
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Configuration;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Threading;
+    using Microsoft.ConnectTheDots.Common;
+    using Microsoft.ConnectTheDots.Gateway;
+    using Microsoft.WindowsAzure.Diagnostics;
+    using Microsoft.WindowsAzure.ServiceRuntime;
+    using Newtonsoft.Json;
+
+    public class WorkerHost : RoleEntryPoint
+    {
+        private static readonly ILogger _logger = EventLogger.Instance;
+
+        private static readonly FlowCache _cache = new FlowCache();
+
+        private static FlowDataRepository _FlowDataRepository;
+        private static FlowSourcesRepository _FlowSourcesRepository;
+
+        private enum _UpdateType
+        {
+            FlowValue = 0,
+            FlowSource = 1
+        }
+        private static readonly ConcurrentQueue<KeyValuePair<_UpdateType, Flow>> _UpdateQueue
+             = new ConcurrentQueue<KeyValuePair<_UpdateType, Flow>>();
+        
+
+        static void Main()
+        {
+            StartHost();
+        }
+
+        public override void Run()
+        {
+            StartHost();
+        }
+
+        private static void StartHost()
+        {
+            string sqlDatabaseConnectionString = ConfigurationManager.AppSettings.Get("sqlDatabaseConnectionString");
+            _FlowDataRepository = new FlowDataRepository(sqlDatabaseConnectionString);
+            _FlowSourcesRepository = new FlowSourcesRepository(sqlDatabaseConnectionString);
+
+            _logger.LogInfo("Starting Worker...");
+
+            const int SLEEP_TIME_MS = 20000;//20 sec
+
+            //gateway for Flow-formatted data
+            AMQPConfig amqpSR520Config = Loader.GetAMQPConfig("SR520AMQPConfig", _logger);
+            GatewayService flowGateway = CreateGateway(amqpSR520Config);
+
+            //gateway for CTD-style json formatted data
+            AMQPConfig amqpDevicesConfig = Loader.GetAMQPConfig("DevicesAMQPConfig", _logger);
+            GatewayService devicesGateway = CreateGateway(amqpDevicesConfig);
+
+            string url = ConfigurationManager.AppSettings.Get("ApiUrl") + ConfigurationManager.AppSettings.Get("AccessCode"); ;
+            ApiReader test = new ApiReader(url);
+
+            Task.Run(() => UpdateQueueProcessor());
+
+            for (; ; )
+            {
+                try
+                {
+                    IEnumerable<Flow> list = test.GetTrafficFlowsAsJson().Result;
+
+                    foreach (Flow flow in list)
+                    {
+                        flowGateway.Enqueue(JsonConvert.SerializeObject(flow));
+
+                        bool updateFlowValue, updateFlowSource;
+                        _cache.Set(flow, out updateFlowValue, out updateFlowSource);
+                        
+                        if (updateFlowValue)
+                        {
+#if CTD_WEB_JSON_FORMAT
+                            SensorDataContract message = new SensorDataContract
+                            {
+                                Guid = flow.FlowDataID.ToString(),
+                                DisplayName = flow.FlowStationLocation.Description,
+                                MeasureName = flow.FlowStationLocation.RoadName,
+                                UnitOfMeasure = "Flow on " + flow.FlowStationLocation.RoadName,
+                                Location = flow.FlowStationLocation.RoadName + "\n" + flow.FlowStationLocation.Latitude + " " + flow.FlowStationLocation.Longitude,
+                                Value = flow.FlowReadingValue,
+                                TimeCreated = flow.Time,
+                                Organization = ""
+                            };
+                            devicesGateway.Enqueue(JsonConvert.SerializeObject(message));
+#endif
+                            _UpdateQueue.Enqueue(new KeyValuePair<_UpdateType, Flow>(_UpdateType.FlowValue, flow));
+                        }
+
+                        if (updateFlowSource)
+                        {
+                            _UpdateQueue.Enqueue(new KeyValuePair<_UpdateType, Flow>(_UpdateType.FlowSource, flow));
+                        }
+                    }
+
+                    Thread.Sleep(SLEEP_TIME_MS);
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogError(ex.Message);
+                }
+            }
+        }
+
+        public static void UpdateQueueProcessor()
+        {
+            const int SLEEP_TIME_MS = 100;
+            const int BATCH_SIZE = 90;
+
+            for (;;)
+            {
+                try
+                {
+                    int count = Math.Min(_UpdateQueue.Count, BATCH_SIZE);
+
+                    if (count > 0)
+                    {
+                        List<Flow> updateValueList = new List<Flow>();
+                        List<Flow> updateSourcesList = new List<Flow>();
+
+                        for (int dequeueTry = 0; dequeueTry < count; ++dequeueTry)
+                        {
+                            KeyValuePair<_UpdateType, Flow> updatePair;
+                            if (_UpdateQueue.TryDequeue(out updatePair))
+                            {
+                                switch (updatePair.Key)
+                                {
+                                    case _UpdateType.FlowValue:
+                                        updateValueList.Add(updatePair.Value);
+                                        break;
+                                    case _UpdateType.FlowSource:
+                                        updateSourcesList.Add(updatePair.Value);
+                                        break;
+                                }
+                            }
+                        }
+
+                        _FlowSourcesRepository.ProcessEvents(updateSourcesList);
+                        _FlowDataRepository.ProcessEvents(updateValueList);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogError(ex.Message);
+                }
+
+                Thread.Sleep(SLEEP_TIME_MS);
+            }
+        }
+
+        public static GatewayService CreateGateway(AMQPConfig amqpConfig)
+        {
+            try
+            {
+                var _gatewayQueue = new GatewayQueue<QueuedItem>();
+
+                var _AMPQSender = new AMQPSender<TrafficFlow.Common.SensorDataContract>(
+                                                    amqpConfig.AMQPSAddress,
+                                                    amqpConfig.EventHubName,
+                                                    amqpConfig.EventHubMessageSubject,
+                                                    amqpConfig.EventHubDeviceId,
+                                                    amqpConfig.EventHubDeviceDisplayName,
+                                                    _logger
+                                                    );
+
+                var _batchSenderThread = new BatchSenderThread<QueuedItem, TrafficFlow.Common.SensorDataContract>(
+                                                    _gatewayQueue,
+                                                    _AMPQSender,
+                                                    null,
+                                                    m => m.JsonData,
+                                                    _logger);
+
+                _batchSenderThread.Start();
+
+                GatewayService service = new GatewayService(
+                    _gatewayQueue,
+                    _batchSenderThread
+                )
+                {
+                    Logger = _logger
+                };
+
+                service.OnDataInQueue += (data) => _batchSenderThread.Process();
+                _logger.Flush();
+
+                return service;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Exception on creating Gateway: " + ex.Message);
+            }
+
+            return null;
+        }
+    }
+}

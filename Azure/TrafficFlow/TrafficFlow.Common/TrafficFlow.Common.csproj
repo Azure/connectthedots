@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4C8A147E-13D2-4D6E-83F3-55791B6FF6DC}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{0C6A8F1B-D8B5-4317-BA0A-0DF8CDA5CF46}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.ConnectTheDots.GatewayExe</RootNamespace>
-    <AssemblyName>Microsoft.ConnectTheDots.GatewayExe</AssemblyName>
+    <RootNamespace>TrafficFlow.Common</RootNamespace>
+    <AssemblyName>TrafficFlow.Common</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -36,16 +34,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.7.0.1-beta3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="NLog, Version=3.2.1.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\NLog.3.2.1\lib\net45\NLog.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="System.ServiceModel.Web" />
-    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -53,38 +44,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Flow.cs" />
+    <Compile Include="FlowCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\FlowDataRepository.cs" />
+    <Compile Include="Repositories\FlowSourcesRepository.cs" />
+    <Compile Include="SensorDataContract.cs" />
+    <Compile Include="Utils\SqlDBReaderSafeParser.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config">
-      <SubType>Designer</SubType>
-    </None>
-    <Content Include="NLog.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <None Include="NLog.xsd">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Common\Microsoft.ConnectTheDots.Common.csproj">
-      <Project>{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}</Project>
-      <Name>Microsoft.ConnectTheDots.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DeviceAdapters\SerialPort\SerialPortAdapter.csproj">
-      <Project>{a7b77408-0dba-4384-a31a-404187caec89}</Project>
-      <Name>SerialPortAdapter</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DeviceAdapters\Socket\SocketAdapter.csproj">
-      <Project>{9d9da1eb-90da-4fc0-a97f-c650201dd994}</Project>
-      <Name>SocketAdapter</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Gateway\Microsoft.ConnectTheDots.Gateway.csproj">
-      <Project>{E14D1C61-1979-452E-BE8B-0303A95EF764}</Project>
-      <Name>Microsoft.ConnectTheDots.Gateway</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
