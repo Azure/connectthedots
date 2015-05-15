@@ -58,6 +58,8 @@ function d3Chart(containerId) {
         self.updateChart();
     });
 
+    self._wasResizeHandled = true;
+
     return self;
 }
 
@@ -213,6 +215,8 @@ d3Chart.prototype = {
             window['resizeCallback@' + containerId] = true;
             $(window).bind('resize', function () {
                 console.log('rezise chart: ' + containerId);
+                self._wasResizeHandled = false;
+
                 // remove visual elements
                 for (var id in self._flowsVisuals) {
                     self.removeFlowVisual(id);
@@ -275,7 +279,7 @@ d3Chart.prototype = {
         }
         // seed the axes with some dummy values
         self._x = d3.time.scale()
-			.domain([new Date("2015-01-01T04:02:39.867841Z"), new Date("2015-01-01T04:07:39.867841Z")])
+			.domain([0, 1])
 			.range([0, self._width]);
 
         self._y0 = d3.scale.linear()
@@ -289,9 +293,7 @@ d3Chart.prototype = {
 			.append("svg")
 			.attr("width", self._width + margin.left + margin.right)
 			.attr("height", self._height + margin.top + margin.bottom)
-			.style("margin-left", margin.left + "px")
 			.style("margin-bottom", margin.bottom + "px")
-			.style("margin-right", margin.right + "px")
 			.append("g")
 			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -359,24 +361,20 @@ d3Chart.prototype = {
     updateChart: function () {
 
         var self = this;
-        var someData = false;
 
-        var minDate = new Date("3015-01-01T04:02:39.867841Z");
-        var maxDate = new Date("1915-01-01T04:02:39.867841Z")
+        var minDate = new Date(3015, 1, 1);
+        var maxDate = new Date(1915, 1, 1);
 
         var minVal = [Number.MAX_VALUE, Number.MAX_VALUE];
         var maxVal = [0, 0];
 
         var displayHeight = $(window).height();
 
-
         for (var id in self._flows) {
             var dataFlow = self._flows[id];
             if (dataFlow.visible == false) continue;
             var data = dataFlow.getData();
             if (data.length == 0 || !dataFlow.displayName()) continue;
-
-            someData = true;
 
             // sort data
             data.sort(function (a, b) {
@@ -410,8 +408,6 @@ d3Chart.prototype = {
             }
         }
 
-        if (!someData) return;
-
         // create chart on demand
         if (self._svg == null) {
             self.createChart();
@@ -420,38 +416,41 @@ d3Chart.prototype = {
         // check y0 label
         self.setY0Label();
 
-        if (minVal[0] < Number.MAX_VALUE) {
+        var wasBoundsChanged = !self._previousBounds || self._previousBounds.maxVal0 !== maxVal[0] || self._previousBounds.minVal0 !== minVal[0];
+
+        if (!self._wasResizeHandled || wasBoundsChanged && minVal[0] < Number.MAX_VALUE) {
             var scaleMargin = (maxVal[0] - minVal[0]) * 10 / 100;
-            self._y0 = d3.scale.linear()
-				.domain([minVal[0] - scaleMargin, maxVal[0] + scaleMargin])
-				.range([self._height, 0]);
+            self._y0 = self._y0
+				.domain([minVal[0] - scaleMargin, maxVal[0] + scaleMargin]);
 
             var yAxisLeft = d3.svg.axis()
 				.scale(self._y0)
 				.orient("left")
-
             self._svg.selectAll("g.y0.axis")
 				.call(yAxisLeft);
+
+            self._wasResizeHandled = true;
         }
 
-        if (minVal[1] < Number.MAX_VALUE) {
+        wasBoundsChanged = !self._previousBounds || self._previousBounds.maxVal1 !== maxVal[1] || self._previousBounds.minVal1 !== minVal[1];
+
+        if (!self._wasResizeHandled || wasBoundsChanged && minVal[1] < Number.MAX_VALUE) {
             var scaleMargin = (maxVal[1] - minVal[1]) * 10 / 100;
 
-            self._y1 = d3.scale.linear()
-				.domain([minVal[1] - scaleMargin, maxVal[1] + scaleMargin])
-				.range([self._height, 0]);
+            self._y1 = self._y1
+				.domain([minVal[1] - scaleMargin, maxVal[1] + scaleMargin]);
 
             var yAxisRight = d3.svg.axis()
 				.scale(self._y1)
 				.orient("right")
-
             self._svg.selectAll("g.y1.axis")
 				.call(yAxisRight);
+
+            self._wasResizeHandled = true;
         }
 
-        self._x = d3.time.scale()
-			.domain([minDate, maxDate])
-			.range([0, self._width]);
+        self._x = self._x
+			.domain([minDate, maxDate]);
 
         var xAxis = d3.svg.axis()
 			.scale(self._x)
@@ -461,25 +460,34 @@ d3Chart.prototype = {
         self._svg.selectAll("g.x.axis")
 			.call(xAxis);
 
-        var line = [
-			d3.svg.line()
-			.interpolate("monotone")
-			.x(function (d) {
-			    return self._x(d.time);
-			})
-			.y(function (d) {
-			    return self._y0(d.data);
-			}),
+        self._previousBounds = {
+            maxVal0: maxVal[0],
+            maxVal1: maxVal[1],
+            minVal0: minVal[0],
+            minVal1: minVal[1],
+        };
 
-			d3.svg.line()
-			.interpolate("monotone")
-			.x(function (d) {
-			    return self._x(d.time);
-			})
-			.y(function (d) {
-			    return self._y1(d.data);
-			})
-        ];
+        if (!self._line) {
+            self._line = [
+                d3.svg.line()
+                .interpolate("monotone")
+                .x(function (d) {
+                    return self._x(d.time);
+                })
+                .y(function (d) {
+                    return self._y0(d.data);
+                }),
+
+                d3.svg.line()
+                .interpolate("monotone")
+                .x(function (d) {
+                    return self._x(d.time);
+                })
+                .y(function (d) {
+                    return self._y1(d.data);
+                })
+            ];
+        }
 
         try {
             var pos = 0;
@@ -496,14 +504,14 @@ d3Chart.prototype = {
 						.append("path")
 						.datum(data)
 						.attr("class", "line")
-						.attr("d", line[yAxis])
+						.attr("d", self._line[yAxis])
 						.style("stroke", function (d) {
 						    return self._colors(dataGUID);
 						});
                 }
 
                 dataFlowVisuals.path.datum(data)
-					.attr("d", line[yAxis]);
+					.attr("d", self._line[yAxis]);
 
                 // draw alert points
                 for (var pnt in data) {
