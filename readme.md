@@ -42,9 +42,12 @@ Furthermore, the project is built upon the premise that the *sensors* create and
 All the device code included in this project, or submitted for inclusion, must conform to the JSON format requirement above. 
 
 ### Devices and Gateway ###
-ConnectTheDots provides a Gateway to collect data from devices that cannot, or should not, target the cloud directly. The Gateway code is tested in Mono for Linux and on the .NET Framework on Windows. It is located at in the source tree under ['/Devices/Gateways/GatewayService'] (https://github.com/MSOpenTech/connectthedots/tree/master/Devices/Gateways/GatewayService), and is a simple system service. To send data froma device to a gateway, you can just use the same exact data format and a device protocol adapter to implement any transport of your choice. The device protocol adapter is an assembly that implements the DeviceAdapterAbstract type to collect data from the device and enqueu them to the gateway for upload to the cloud. The Gateway automatically loads the device adapters from the Gateway binary directory, so deployement is extremely simple. 
-You can find some examples under ['/Devices/Gateways/GatewayService/DeviceAdapters'] (https://github.com/MSOpenTech/connectthedots/tree/master/Devices/Gateways/GatewayService/DeviceAdapters) and the matching devices under  ['/Devices/GatewayConnectedDevices'](https://github.com/MSOpenTech/connectthedots/tree/master/Devices/GatewayConnectedDevices). 
-Please note that we have devices running in separate processes as a Python script, sending data to an adapter Gateway on a socket or a serial port connection. It does not get any easier thatn that!
+ConnectTheDots provides a Gateway to collect data from devices that cannot, or should not, target the cloud directly. The Gateway code is tested in Mono for Linux and on the .NET Framework on Windows. It is located at in the source tree under [Devices/Gateways/GatewayService](Devices/Gateways/GatewayService/), and is a simple system service. 
+
+To send data froma device to a gateway, you can just use the same exact data format and a device protocol adapter to implement any transport of your choice. The device protocol adapter is an assembly that implements the DeviceAdapterAbstract type to collect data from the device and enqueu them to the gateway for upload to the cloud. The Gateway automatically loads the device adapters from the Gateway binary directory, so deployement is extremely simple. 
+You can find some examples under [Devices/Gateways/GatewayService/DeviceAdapters](Devices/Gateways/GatewayService/DeviceAdapters), and the matching devices under  [Devices/GatewayConnectedDevices](Devices/GatewayConnectedDevices). 
+
+Please note that we have some devices running in separate processes as a Python script, sending data to an adapter Gateway on a socket or a serial port connection. It does not get any easier than that!
 
 ## Software prerequisites ##
 In order to reproduce one of the ConnectTheDots.io scenarios, you will need the following:
@@ -89,6 +92,7 @@ Setting up your IoT solution involves several distinct steps, each of which is f
 1. [Azure prep](Azure/AzurePrep/AzurePrep.md) - Creating basic Azure resources
 1. [Device setup](Devices/DeviceSetup.md) - Configuring your device(s)
 1. [Sample website deployment](Azure/WebSite/WebsitePublish.md) - Publishing a generic sample website for viewing the data
+2. [Stream Analytics integration](Azure/StreamAnalyticsQueries/SA_setup.md) - Configuring Stream Analytics to send alerts and averages to the sample website.
   
 To get started with a simple example, complete the "Connect The Dots starter solution" tasks identified in each of the above steps.
 
