@@ -36,21 +36,21 @@ function d3Chart(containerId) {
     self._CONSTANTS = {
         MS_PER_MINUTE: 60000,
         WINDOW_MINUTES: 10,
-    }
+    };
     self._isBulking = false;
     self._colors = d3.scale.category10();
 
-    self._onEventObjectHandler = function (event) {
+    self._onEventObjectHandler = function(event) {
         self._onMessageHandler.call(self, event);
-    }
+    };
 
-    self._onEventRemoveGuid = function (event) {
+    self._onEventRemoveGuid = function(event) {
         self._onMessageRemoveGuid.call(self, event);
-    }
+    };
 
     self._onEventAddGuid = function (event) {
         self._onMessageAddGuid.call(self, event);
-    }
+    };
 
     // register update handler
     self.addEventListener('update', function (evt) {
@@ -101,7 +101,6 @@ d3Chart.prototype = {
 
         newFlow.yAxis(yAxis);
         newFlow.attachToChart(self);
-        self._colors.domain(newFlow.getGUID());
 
         return self;
     },
@@ -240,7 +239,7 @@ d3Chart.prototype = {
                     .attr("transform", "rotate(-90)")
                     .attr("class", "y0 label")
                     .attr("text-anchor", "middle")
-                    .attr("y", -50)
+                    .attr("y", -55)
                     .attr("x", -self._height / 2)
                     .attr("dy", "1em")
                     .attr("font-size", self._fontSize + "px")
@@ -253,9 +252,9 @@ d3Chart.prototype = {
 
         var margin = {
             top: 5,
-            right: 250,
+            right: 245,
             bottom: 20,
-            left: 50
+            left: 55
         };
 
         // remember container
@@ -347,7 +346,7 @@ d3Chart.prototype = {
     pruneOldData: function () {
         var self = this;
         var now = new Date();
-        var cutoff = new Date(now - self._CONSTANTS.WINDOW_MINUTES * self._CONSTANTS.MS_PER_MINUTE)
+        var cutoff = new Date(now - self._CONSTANTS.WINDOW_MINUTES * self._CONSTANTS.MS_PER_MINUTE);
 
         // cut data
         for (var id in self._flows) {
@@ -494,7 +493,10 @@ d3Chart.prototype = {
             for (var id in self._flows) {
                 var dataGUID = id;
                 var dataFlow = self._flows[id];
-                if (dataFlow.visible == false) continue;
+                if (dataFlow.visible == false) {
+                    pos++;
+                    continue;
+                }
                 var dataFlowVisuals = self._flowsVisuals[id];
                 var data = dataFlow.getData();
                 var yAxis = dataFlow.yAxis();
