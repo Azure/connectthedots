@@ -1,0 +1,25 @@
+BT example UART setup instruction:
+
+0) Install raspbian wheezy on you raspberry, just follow instructions on raspbian official site.
+1) Call SetupSerialBaudRate.py with need baudrate as argument - it will set up uart.
+2) Reboot RPI
+3) Install prerequisites:
+	a. sudo apt-get install python-pip
+	b. sudo pip install pySerial
+4) Disable Raspberry: sudo shutdown -h now, unplug micro-usb after 10-15 seconds
+5) Do the wiring. Raspberry PI pinout depends on Raspberry version. You need to find RX and TX lines on your.
+	a. Connect TX on bluetooth module to RX on raspberry
+	b. Connect RX on bluetooth module to TX on raspberry
+	c. Connect Ground on bluetooth module to Ground on RPI
+	d. Checkout what voltage your BT module uses. RPI has 5V or 3.3V. 
+		HC-06 module uses 3.3V, so if you have HC-06 BT module connect it's VCC to 3.3V on RPI.
+	e. Power up raspberry.
+6) Pair your device (cellphone, sensor or etc) with bluetooth module.
+7) To start reading UART and sending data to gateway: python BluetoothUARTExample.py on your Raspberry
+
+Notes:
+
+1)	To check UART and wiring without bluetooth you can build test device using arduino and RPI. 
+	You can find instructions in UartSetup.pdf (same folder)
+2) Clearly this instruction should work for any bluetooth module that supports UART. 
+	User just need to know uart baudrate and set it via script.

@@ -23,26 +23,43 @@ REM //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS I
 REM //  THE SOFTWARE.
 REM //  ---------------------------------------------------------------------------------
 
-set puttydir="C:\software\putty\"
-set prjdir=..\..\..\Gateways\GatewayService\
+set puttydir="C:\Program Files (x86)\PuTTY\"
+set prjdir=..\..\
 set scdir=%prjdir%Scripts\ScriptConverter\bin\
-set rpi_ip=xxx.xxx.xxx.xxx
+set rpi_ip=192.168.1.213
 set rpi_usr=pi
 set rpi_pw=raspberry
-set Configuration=Release
+set Configuration=Debug
 set GW_Home=ctdgtwy
 set Staging=%GW_Home%/staging
 set PUTTY_CMD=%puttydir%putty %rpi_usr%@%rpi_ip% -pw %rpi_pw% 
 set PSCP_CMD=%puttydir%pscp -pw %rpi_pw% 
-
+set PYTHON_SCRIPTS_DIR=..\..\..\..\GatewayConnectedDevices\
+set BT_PYTHON_SCRIPT_DIR=%PYTHON_SCRIPTS_DIR%BluetoothUARTExample\
+set BT_USB_PYTHON_SCRIPT_DIR=%PYTHON_SCRIPTS_DIR%BtUSB_2_BtUART_Example\
+set WENSN_PYTHON_SCRIPT_DIR=%PYTHON_SCRIPTS_DIR%WensnSoundLevelMeter\WensnPiVS01\
 echo editing line endings for Pi
-%scdir%%Configuration%\ScriptConverter.exe "autorun2.sh" 
+%scdir%%Configuration%\ScriptConverter.exe "autorunWensnSoundSensor.sh" 
+%scdir%%Configuration%\ScriptConverter.exe "autorunUartBT.sh" 
+%scdir%%Configuration%\ScriptConverter.exe "autorunUart2UsbBt.sh" 
 
 echo Copying file that starts up python script to read USB port connected to Wensn and format as JSON
-%PSCP_CMD% WensnPiVS01.py  %rpi_usr%@%rpi_ip%:%Staging%/
-%PSCP_CMD% Modified\autorun2.sh  %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %WENSN_PYTHON_SCRIPT_DIR%WensnPiVS01.py  %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% Modified\autorunWensnSoundSensor.sh  %rpi_usr%@%rpi_ip%:%Staging%/
 
-echo Marking autorun2.sh as executable
+echo Copying file that starts up python script to read UART port connected to BT and format as JSON
+%PSCP_CMD% %BT_PYTHON_SCRIPT_DIR%BluetoothUARTExample.py  %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %BT_PYTHON_SCRIPT_DIR%SetupSerialBaudRate.py  %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% Modified\autorunUartBT.sh  %rpi_usr%@%rpi_ip%:%Staging%/
+
+echo Copying file that starts up python script to read USB BT module and format as JSON
+%PSCP_CMD% %BT_USB_PYTHON_SCRIPT_DIR%BtUSB_2_BtUART_Example.py  %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% %BT_USB_PYTHON_SCRIPT_DIR%TestServer.py  %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% Modified\autorunUart2UsbBt.sh  %rpi_usr%@%rpi_ip%:%Staging%/
+
+echo Marking autorunWensnSoundSensor.sh and autorunUartBT.sh as executables
 del /f %temp%\rpigatewayautorunx.tmp
-echo chmod 755 %Staging%/autorun2.sh    	>> %temp%\rpigatewayautorunx.tmp
+echo chmod 755 %Staging%/autorunWensnSoundSensor.sh     >> %temp%\rpigatewayautorunx.tmp
+echo chmod 755 %Staging%/autorunUartBT.sh               >> %temp%\rpigatewayautorunx.tmp
+echo chmod 755 %Staging%/autorunUart2UsbBt.sh           >> %temp%\rpigatewayautorunx.tmp
 %PUTTY_CMD% -m                                    %temp%\rpigatewayautorunx.tmp

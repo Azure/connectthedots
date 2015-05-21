@@ -24,9 +24,9 @@
 #!/bin/bash
 #
 export GW_HOME=/home/pi/ctdgtwy
-echo "$(date) => autorun2.sh: started" >> $GW_HOME/boot_sequence.log
+echo "$(date) => autorunUartBT.sh: started" >> $GW_HOME/boot_sequence.log
 echo "Starting secondary script"
 cd $GW_HOME
-sudo python $GW_HOME/WensnPiVS01.py &
-echo "$(date) => autorun2.sh: finished" >> $GW_HOME/boot_sequence.log
+sudo python $GW_HOME/BtUSB_2_BtUART_Example.py &
+echo "$(date) => autorunUartBT.sh: finished" >> $GW_HOME/boot_sequence.log
 

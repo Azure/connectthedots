@@ -110,3 +110,6 @@ UpgradeLog*.XML
 # NuGet Packages
 *.nupkg
 .nuget
+
+#Thumbs.db
+Thumbs.db
