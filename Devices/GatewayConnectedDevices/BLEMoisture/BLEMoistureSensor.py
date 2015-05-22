@@ -22,7 +22,7 @@
 
 # code based on https://github.com/switchdoclabs/iBeacon-Scanner-
 
-DEBUG = True
+DEBUG = False
 
 import os
 import sys
