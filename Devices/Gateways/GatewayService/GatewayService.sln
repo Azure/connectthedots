@@ -36,7 +36,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerialPortAdapter", "Device
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketAdapter", "DeviceAdapters\Socket\SocketAdapter.csproj", "{9D9DA1EB-90DA-4FC0-A97F-C650201DD994}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BluetoothAdapter", "DeviceAdapters\Bluetooth\BluetoothAdapter.csproj", "{A49E31A1-79DC-4B05-AE48-2B594E168EB9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BluetoothAdapter", "DeviceAdapters\Bluetooth\BluetoothUARTAdapter.csproj", "{A49E31A1-79DC-4B05-AE48-2B594E168EB9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConnectTheDots.Common", "Common\Microsoft.ConnectTheDots.Common.csproj", "{96FEDA4B-C7E0-4DDB-AD3A-BFF2FD8D973D}"
 EndProject
