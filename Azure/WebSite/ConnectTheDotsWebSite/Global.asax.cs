@@ -48,6 +48,7 @@ namespace ConnectTheDotsWebSite
     public struct GlobalSettings
     {
         public bool ForceSocketCloseOnUserActionsTimeout { get; set; }
+        public bool NeedHideFlows { get; set; }
     }
 
     public class Global : System.Web.HttpApplication
@@ -152,6 +153,8 @@ namespace ConnectTheDotsWebSite
             {
                 globalSettings.ForceSocketCloseOnUserActionsTimeout =
                     CloudConfigurationManager.GetSetting("ForceSocketCloseOnUserActionsTimeout") == "true";
+                globalSettings.NeedHideFlows =
+                    CloudConfigurationManager.GetSetting("NeedHideFlows") == "true";
             }
             catch (Exception)
             {

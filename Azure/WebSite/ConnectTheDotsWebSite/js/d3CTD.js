@@ -24,6 +24,7 @@
 
 var dataFlows = {};
 var bulkMode = false;
+var needShowAll = true;
 var wasFirstChartCreated = false; //we show by default only one chart
 
 function clearData() {
@@ -97,10 +98,10 @@ function addNewDataFlow(eventObject) {
         };
         // create flows controller
         $('#controllersContainer').append('<ul id="' + dataFlows[measurename].controllerId + '" style="top: ' + (Object.keys(dataFlows).length - 2) * 300 + 'px;" class="controller"></ul>');
-        if (!wasFirstChartCreated) {
-            dataFlows[measurename].controller = new d3ChartControl(dataFlows[measurename].controllerId, eventObject.guid);
+        if (!needShowAll && !wasFirstChartCreated) {
+            dataFlows[measurename].controller = new d3ChartControl(dataFlows[measurename].controllerId, needShowAll, eventObject.guid);
         } else {
-            dataFlows[measurename].controller = new d3ChartControl(dataFlows[measurename].controllerId);
+            dataFlows[measurename].controller = new d3ChartControl(dataFlows[measurename].controllerId, needShowAll);
         }
 
         dataFlows[measurename].controller.setOption({
@@ -114,8 +115,8 @@ function addNewDataFlow(eventObject) {
         // add new div object
         $('#chartsContainer').height((Object.keys(dataFlows).length - 1) * 300 + 'px');
         $('#chartsContainer').append('<div id="' + dataFlows[measurename].containerId + '" style="top: ' + (Object.keys(dataFlows).length - 2) * 300 + 'px;" class="chart"></div>');
-        // create first chart
-        if (!wasFirstChartCreated) {
+        // create chart
+        if (needShowAll || !wasFirstChartCreated) {
             dataFlows[measurename].chart = (new d3Chart(dataFlows[measurename].containerId))
                 .addEventListeners({ 'loading': onLoading, 'loaded': onLoaded })
                 .attachToDataSource(dataFlows[measurename].dataSourceFilter)
@@ -135,7 +136,7 @@ function addNewDataFlow(eventObject) {
 
     dataFlows[measurename].flows[eventObject.guid] = newFlow;
 
-    if (!wasFirstChartCreated && Object.keys(dataFlows[measurename].flows).length < 2) {
+    if (needShowAll || !wasFirstChartCreated && Object.keys(dataFlows[measurename].flows).length < 2) {
         dataFlows[measurename].chart.addFlow(newFlow, 0);
         wasFirstChartCreated = true;
     } else if (!dataFlows[measurename].controller.hasListenerForCreatingChart) {
@@ -253,7 +254,7 @@ function onNewEvent(evt) {
                     }).remove();
             }
 
-            if (dataFlows[eventObject.measurename].hasOwnProperty('chart')) {
+            if (!needShowAll && dataFlows[eventObject.measurename].hasOwnProperty('chart')) {
                 // Add the new alert to the table
                 var message = 'message';
                 if (eventObject.message != null) message = eventObject.message;
@@ -291,6 +292,7 @@ function timerIncrement() {
 $(document).ready(function () {
     var globalSettings = $('.globalSettings');
     var forceSocketCloseOnUserActionsTimeout = globalSettings.find('.ForceSocketCloseOnUserActionsTimeout').text().toLowerCase() == 'true';
+    needShowAll = globalSettings.find('.NeedHideFlows').text().toLowerCase() === 'false';
 
     if (forceSocketCloseOnUserActionsTimeout) {
         var idleInterval = setInterval(timerIncrement, 1000); // 1 second

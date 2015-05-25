@@ -22,7 +22,7 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-function d3ChartControl(containerId, firstGuid) {
+function d3ChartControl(containerId, needShowAll, displayedGuid) {
     var self = this;
     // call base class contructor
     baseClass.call(self);
@@ -33,7 +33,8 @@ function d3ChartControl(containerId, firstGuid) {
     self._containerId = containerId;
     self._ulOptions = {};
 
-    self._firstGuid = firstGuid;
+    self._displayedGuid = displayedGuid;
+    self._needShowAll = needShowAll;
 
     this._onEventObjectHandler = function (event) {
         self._onNewDataHandler.call(self, event);
@@ -69,7 +70,7 @@ d3ChartControl.prototype = {
         if (!self._ulOptions.hasOwnProperty(params.guid)) {
             self._ulOptions[guid] = {};
             self._ulOptions[guid].li = $('<li><div style="display:inline-block">' + params.title + "</div></li>").appendTo("#" + self._containerId);
-            if (guid === self._firstGuid) {
+            if (self._needShowAll || guid === self._displayedGuid) {
                 self._ulOptions[guid].li.addClass('selected');
             }
             self._ulOptions[guid].state = self._ulOptions[guid].li.hasClass('selected');

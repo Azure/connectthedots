@@ -53,6 +53,7 @@
 <body>
     <div class="globalSettings" style="display:none">
         <div class="ForceSocketCloseOnUserActionsTimeout"><%= ForceSocketCloseOnUserActionsTimeout %></div>
+        <div class="NeedHideFlows"><%= NeedHideFlows %></div>
     </div>
     
     <div id="loading" style="display: none;">

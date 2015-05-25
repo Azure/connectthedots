@@ -247,6 +247,36 @@ d3Chart.prototype = {
                 break;
             }
     },
+
+    getDefaultTickLabelValue: function () {
+        //We need add manually tick label if we have one visual flow and all values are same
+        //This function returns tick label value if it should be shown
+        var self = this;
+
+        var visibleFlows = [];
+        for (var id in self._flows) {
+            if (self._flows[id].visible === false) continue;
+            visibleFlows.push(self._flows[id]);
+        }
+
+        if (visibleFlows.length === 1) {
+            var flowData = visibleFlows[0].getData();
+
+            var hasFlowAllSameValues = true;
+            for (var i = 0; i < flowData.length - 1; i++) {
+                if (flowData[i].data !== flowData[i + 1].data) {
+                    hasFlowAllSameValues = false;
+                    break;
+                }
+            }
+
+            if (hasFlowAllSameValues && flowData.length > 1 && flowData[0].data !== 0) {
+                return flowData[0].data;
+            }
+        }
+        return null;
+    },
+
     createChart: function () {
         var self = this;
 
@@ -265,7 +295,7 @@ d3Chart.prototype = {
 
         var dataFlowsArray = [];
 
-        self._width = self._container.width() - margin.right;
+        self._width = self._container.width() - margin.right - margin.left;
         self._height = self._container.height() - margin.top - margin.bottom;
 
         // create dataFlows array
@@ -407,7 +437,6 @@ d3Chart.prototype = {
             }
         }
 
-        // create chart on demand
         if (self._svg == null) {
             self.createChart();
         }
@@ -415,9 +444,10 @@ d3Chart.prototype = {
         // check y0 label
         self.setY0Label();
 
+        var defaultTickLabelValue = self.getDefaultTickLabelValue();
         var wasBoundsChanged = !self._previousBounds || self._previousBounds.maxVal0 !== maxVal[0] || self._previousBounds.minVal0 !== minVal[0];
 
-        if (!self._wasResizeHandled || wasBoundsChanged && minVal[0] < Number.MAX_VALUE) {
+        if (!self._wasResizeHandled || wasBoundsChanged && minVal[0] < Number.MAX_VALUE || defaultTickLabelValue) {
             var scaleMargin = (maxVal[0] - minVal[0]) * 10 / 100;
             self._y0 = self._y0
 				.domain([minVal[0] - scaleMargin, maxVal[0] + scaleMargin]);
@@ -425,6 +455,13 @@ d3Chart.prototype = {
             var yAxisLeft = d3.svg.axis()
 				.scale(self._y0)
 				.orient("left")
+
+            if (defaultTickLabelValue) {
+                yAxisLeft = yAxisLeft
+                    .ticks(2)
+                    .tickValues([defaultTickLabelValue]);
+            }
+
             self._svg.selectAll("g.y0.axis")
 				.call(yAxisLeft);
 
@@ -442,6 +479,13 @@ d3Chart.prototype = {
             var yAxisRight = d3.svg.axis()
 				.scale(self._y1)
 				.orient("right")
+
+            if (defaultTickLabelValue) {
+                yAxisRight = yAxisRight
+                    .ticks(2)
+                    .tickValues([defaultTickLabelValue]);
+            }
+
             self._svg.selectAll("g.y1.axis")
 				.call(yAxisRight);
 
@@ -577,6 +621,14 @@ d3Chart.prototype = {
                     dataFlowVisuals.legend.text(dataFlow.displayName());
                 }
                 pos++;
+            }
+
+            var pxPerTickLabel = 43;
+            var ticks = $('#' + self._containerId).find('.x.axis').find('.tick');
+            if (self._width / ticks.length < pxPerTickLabel) {
+                for (var i = 1; i < ticks.length; i += 2) {
+                    ticks[i].remove();
+                }
             }
         } catch (e) {
             console.log(e);
