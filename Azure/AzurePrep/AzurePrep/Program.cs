@@ -600,6 +600,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
             catch( Exception ex )
             {
                 _ConsoleBuffer.Add( "Exception on creation Stream Analytics Job " + jobName + ": " + ex.Message );
+                _ConsoleBuffer.Add( "Inner exception message: " + ex.InnerException.Message );
                 created = false;
             }
             if( created )
