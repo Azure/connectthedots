@@ -55,6 +55,14 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
             return regions;
         }
 
+        public static ResourceGroupExtended CreateResourceGroup( SubscriptionCloudCredentials creds, string name, string location )
+        {
+            var resourceMgmtClient = new ResourceManagementClient( creds );
+            var resourceGroupsResponse = resourceMgmtClient.ResourceGroups.CreateOrUpdate( name, new ResourceGroup { Location = location } );
+            
+            return resourceGroupsResponse.ResourceGroup;
+        }
+
         public static ResourceGroupExtended[] GetResourceGroups( SubscriptionCloudCredentials creds )
         {
             var resourceMgmtClient = new ResourceManagementClient( creds );

@@ -429,6 +429,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
 
             Console.WriteLine( "Available Resource Groups: " );
 
+            Console.WriteLine( "0: Create new Resource Group." );
             for( int current = 1; current <= count; ++current )
             {
                 Console.WriteLine( current + ": " + groups[ current - 1 ].Name );
@@ -440,15 +441,42 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
 
                 string answer = Console.ReadLine( );
                 int selection = 0;
-                if( !int.TryParse( answer, out selection ) || selection > count || selection < 1 )
+                if( !int.TryParse( answer, out selection ) || selection > count || selection < 0 )
                 {
                     Console.WriteLine( "Incorrect Resource Group number." );
                     continue;
                 }
 
-                if( ConsoleHelper.Confirm( "Are you sure you want to select Resource Group " + groups[ selection - 1 ].Name + "?" ) )
+                if( selection == 0 )
                 {
-                    return groups[ selection - 1 ].Name;
+                    if( ConsoleHelper.Confirm( "Are you sure you want to create new Resource Group?" ) )
+                    {
+                        string resourceGroupName;
+                        for( ;; )
+                        {
+                            Console.WriteLine( "Enter a name for Resource Group (only letters and digits, less than 17 chars long)." );
+                            Console.WriteLine( "(Note that fully qualified path may also be subject to further length restrictions.)" );
+                            resourceGroupName = Console.ReadLine( );
+                            if( string.IsNullOrEmpty( resourceGroupName ) || !CheckNamePrefix( resourceGroupName ) )
+                            {
+                                Console.WriteLine( "Namespace prefix should contain only letters and digits and have length less than 17." );
+                                continue;
+                            }
+                            if( ConsoleHelper.Confirm( "Are you sure you want to create a Resource Group called " + resourceGroupName + "?" ) )
+                            {
+                                break;
+                            }
+                        }
+                        AzureProvider.CreateResourceGroup( inputs.Credentials, resourceGroupName, inputs.Location );
+                        return resourceGroupName;
+                    }
+                }
+                else
+                {
+                    if( ConsoleHelper.Confirm( "Are you sure you want to select Resource Group " + groups[ selection - 1 ].Name + "?" ) )
+                    {
+                        return groups[ selection - 1 ].Name;
+                    }    
                 }
             }
         }
