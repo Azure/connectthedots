@@ -26,7 +26,7 @@ REM //  ------------------------------------------------------------------------
 set puttydir="C:\software\putty\"
 set prjdir=..\..\Gateways\GatewayService\
 set scdir=%prjdir%Scripts\ScriptConverter\bin\
-set rpi_ip=xxx.xxx.xxx.xxx
+set rpi_ip=10.121.204.139
 set rpi_usr=pi
 set rpi_pw=raspberry
 set Configuration=Release
@@ -40,6 +40,7 @@ echo editing line endings for Pi
 
 echo Copying file that starts up python script to read hydrology sensors and format as JSON
 %PSCP_CMD% SensorAgent.py  %rpi_usr%@%rpi_ip%:%Staging%/
+%PSCP_CMD% BLEMoistureSensor.py  %rpi_usr%@%rpi_ip%:%Staging%/
 %PSCP_CMD% Modified\autorun2.sh  %rpi_usr%@%rpi_ip%:%Staging%/
 
 echo Marking autorun2.sh as executable

@@ -1,6 +1,7 @@
 Get the Bluetooth stack on Raspbian:
 
 sudo apt-get install bluetooth bluez-utils blueman
+sudo apt-get install python-bluez
 
 Enable the Bluetooth device
 
