@@ -48,6 +48,7 @@ SEND_INTERVAL          = 5
 s = None
 		
 def processSensorData( macAddress, value ) :
+        global s
 		timeStr = datetime.datetime.utcnow().isoformat()
 		
 		# replace last group of digits with mac address of BLE sensor board
@@ -73,6 +74,7 @@ def processSensorData( macAddress, value ) :
 		
 def main() :
 	try:
+        global s
 		# setup moisture sensor
 		moistureSensor = BLEMoistureSensor()
 		moistureSensor.setSensorDataAvailableEvent(processSensorData)
