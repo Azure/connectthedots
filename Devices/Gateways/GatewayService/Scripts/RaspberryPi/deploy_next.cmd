@@ -39,9 +39,12 @@ set BT_PYTHON_SCRIPT_DIR=%PYTHON_SCRIPTS_DIR%BluetoothUARTExample\
 set BT_USB_PYTHON_SCRIPT_DIR=%PYTHON_SCRIPTS_DIR%BtUSB_2_BtUART_Example\
 set WENSN_PYTHON_SCRIPT_DIR=%PYTHON_SCRIPTS_DIR%WensnSoundLevelMeter\WensnPiVS01\
 echo editing line endings for Pi
+
 %scdir%%Configuration%\ScriptConverter.exe "autorunWensnSoundSensor.sh" 
 %scdir%%Configuration%\ScriptConverter.exe "autorunUartBT.sh" 
 %scdir%%Configuration%\ScriptConverter.exe "autorunUart2UsbBt.sh" 
+%scdir%%Configuration%\ScriptConverter.exe "setup_autostart.sh" 
+%scdir%%Configuration%\ScriptConverter.exe "setupWifi.py" 
 
 echo Copying file that starts up python script to read USB port connected to Wensn and format as JSON
 %PSCP_CMD% %WENSN_PYTHON_SCRIPT_DIR%WensnPiVS01.py  %rpi_usr%@%rpi_ip%:%Staging%/
@@ -56,6 +59,12 @@ echo Copying file that starts up python script to read USB BT module and format 
 %PSCP_CMD% %BT_USB_PYTHON_SCRIPT_DIR%BtUSB_2_BtUART_Example.py  %rpi_usr%@%rpi_ip%:%Staging%/
 %PSCP_CMD% %BT_USB_PYTHON_SCRIPT_DIR%TestServer.py  %rpi_usr%@%rpi_ip%:%Staging%/
 %PSCP_CMD% Modified\autorunUart2UsbBt.sh  %rpi_usr%@%rpi_ip%:%Staging%/
+
+echo Copying file that sets up gateway on start up when launched
+%PSCP_CMD% Modified\setup_autostart.sh  %rpi_usr%@%rpi_ip%:%Staging%/
+
+echo Copying file that sets up wi fi when launched
+%PSCP_CMD% Modified\setupWifi.py  %rpi_usr%@%rpi_ip%:%Staging%/
 
 echo Marking autorunWensnSoundSensor.sh and autorunUartBT.sh as executables
 del /f %temp%\rpigatewayautorunx.tmp
