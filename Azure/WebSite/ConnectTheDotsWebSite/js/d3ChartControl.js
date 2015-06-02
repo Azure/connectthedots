@@ -22,7 +22,7 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-function d3ChartControl(containerId, needShowAll, displayedGuid) {
+function d3ChartControl(controllerId, containerId, needShowAll, displayedGuid) {
     var self = this;
     // call base class contructor
     baseClass.call(self);
@@ -30,6 +30,7 @@ function d3ChartControl(containerId, needShowAll, displayedGuid) {
     self.hasListenerForCreatingChart = false;
 
     // create ul
+    self._controllerId = controllerId;
     self._containerId = containerId;
     self._ulOptions = {};
 
@@ -60,6 +61,24 @@ d3ChartControl.prototype = {
             allOption: true         // if true, guid = 0 and it's main switcher for all
         }
     */
+
+    shiftCharts: function () {
+        var self = this;
+        var minHeightOfControl = 300;//TODO: Should we get this value from css file?
+
+        var ulHeight = $('#controllersContainer').find('#' + self._controllerId).height();
+
+        /* If chart control has excess height then we increase 
+        padding-bottom of corresponding chart to shift underlying charts. */
+        if (ulHeight > minHeightOfControl) {
+            var excessHeight = ulHeight - minHeightOfControl;
+            var currentChart = $('#chartsContainer').find('#' + self._containerId);
+
+            currentChart.css('padding-bottom', excessHeight);
+            console.log('shift');
+        }
+    },
+
     setOption: function (params) {
         var self = this;
 
@@ -69,7 +88,7 @@ d3ChartControl.prototype = {
         // check if exists or create new
         if (!self._ulOptions.hasOwnProperty(params.guid)) {
             self._ulOptions[guid] = {};
-            self._ulOptions[guid].li = $('<li><div style="display:inline-block">' + params.title + "</div></li>").appendTo("#" + self._containerId);
+            self._ulOptions[guid].li = $('<li><div style="display:inline-block">' + params.title + "</div></li>").appendTo("#" + self._controllerId);
             if (self._needShowAll || guid === self._displayedGuid) {
                 self._ulOptions[guid].li.addClass('selected');
             }
@@ -105,6 +124,7 @@ d3ChartControl.prototype = {
             });
         }
 
+        self.shiftCharts();
         return self;
     },
     attachToDataSource: function (dataSource) {
@@ -117,6 +137,7 @@ d3ChartControl.prototype = {
 
         return self;
     },
+
     // private members
     _onNewDataHandler: function (eventObject) {
         var self = this;

@@ -146,21 +146,27 @@ path.line {
 }
 
 .controller {
-    height: 300px;
+    min-height: 300px;
+    height: auto;
     right : 10px;
-    position: absolute;
+    position: relative;
     text-align: left;
+    margin-bottom: 16px;
+    margin-top: 16px;
 }
 
 #chartsContainer {
     margin-left: 200px;
+    margin-top: 64px;
     position: relative;
 }
 
 .chart {
     height: 300px;
     width: 100%;
-    position: absolute;
+    position: relative;
+    margin-top: 16px;
+    margin-bottom: 16px;
 }
 
 #chartTwo {

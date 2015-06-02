@@ -97,11 +97,11 @@ function addNewDataFlow(eventObject) {
             flows: {}
         };
         // create flows controller
-        $('#controllersContainer').append('<ul id="' + dataFlows[measurename].controllerId + '" style="top: ' + (Object.keys(dataFlows).length - 2) * 300 + 'px;" class="controller"></ul>');
+        $('#controllersContainer').append('<ul id="' + dataFlows[measurename].controllerId + '" class="controller"></ul>');
         if (!needShowAll && !wasFirstChartCreated) {
-            dataFlows[measurename].controller = new d3ChartControl(dataFlows[measurename].controllerId, needShowAll, eventObject.guid);
+            dataFlows[measurename].controller = new d3ChartControl(dataFlows[measurename].controllerId, dataFlows[measurename].containerId, needShowAll, eventObject.guid);
         } else {
-            dataFlows[measurename].controller = new d3ChartControl(dataFlows[measurename].controllerId, needShowAll);
+            dataFlows[measurename].controller = new d3ChartControl(dataFlows[measurename].controllerId, dataFlows[measurename].containerId, needShowAll);
         }
 
         dataFlows[measurename].controller.setOption({
@@ -113,8 +113,7 @@ function addNewDataFlow(eventObject) {
         dataFlows[measurename].controller.attachToDataSource(dataFlows[measurename].dataSourceFilter);
 
         // add new div object
-        $('#chartsContainer').height((Object.keys(dataFlows).length - 1) * 300 + 'px');
-        $('#chartsContainer').append('<div id="' + dataFlows[measurename].containerId + '" style="top: ' + (Object.keys(dataFlows).length - 2) * 300 + 'px;" class="chart"></div>');
+        $('#chartsContainer').append('<div id="' + dataFlows[measurename].containerId + '" class="chart"></div>');
         // create chart
         if (needShowAll || !wasFirstChartCreated) {
             dataFlows[measurename].chart = (new d3Chart(dataFlows[measurename].containerId))
