@@ -143,6 +143,7 @@ path.line {
 #controllersContainer {
     position: relative;
     text-align: center;
+    margin-bottom: 16px;
 }
 
 .controller {

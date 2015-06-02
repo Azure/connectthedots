@@ -640,6 +640,7 @@ d3Chart.prototype = {
 
         if (self._flows.hasOwnProperty(evt.owner)) {
             self._flows[evt.owner].visible = true;
+            self.updateChart();
         }
     },
     _onMessageRemoveGuid: function (evt) {
