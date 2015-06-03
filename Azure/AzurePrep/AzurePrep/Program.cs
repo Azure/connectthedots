@@ -246,7 +246,13 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.AzurePrep
 
             for( int currentRegion = 1; currentRegion <= regionsCount; ++currentRegion )
             {
-                Console.WriteLine( currentRegion + ": " + regions[ currentRegion - 1 ] );
+                string suffixMessage = string.Empty;
+                if( regions[currentRegion - 1] == "East US" )
+                {
+                    //see https://github.com/MSOpenTech/connectthedots/issues/168
+                    suffixMessage = " (creating new Resource Group is not supported)";
+                }
+                Console.WriteLine( currentRegion + ": " + regions[ currentRegion - 1 ] + suffixMessage );
             }
 
             for( ;; )
