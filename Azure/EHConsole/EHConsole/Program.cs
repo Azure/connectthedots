@@ -52,8 +52,6 @@ namespace Microsoft.ConnectTheDots.EHConsole
             public string NamePrefix;
             public string SBNamespace;
             public string Location;
-            public string EventHubNameDevices;
-            public string EventHubNameAlerts;
             public string StorageAccountName;
             public SubscriptionCloudCredentials Credentials;
         }
@@ -93,9 +91,6 @@ namespace Microsoft.ConnectTheDots.EHConsole
             result.SBNamespace = result.NamePrefix + "-ns";
             result.StorageAccountName = result.NamePrefix.ToLowerInvariant( ) + "storage";
 
-            result.EventHubNameDevices = "ehdevices";
-            result.EventHubNameAlerts = "ehalerts";
-
             return true;
         }
 
@@ -121,7 +116,7 @@ namespace Microsoft.ConnectTheDots.EHConsole
 
             NamespaceManager nsManager = NamespaceManager.CreateFromConnectionString( nsConnectionString );
 
-            EventHubDescription ehDevices = nsManager.GetEventHub( inputs.EventHubNameDevices );
+            EventHubDescription ehDevices = AzureConsoleHelper.SelectEventHub( nsManager, inputs.Credentials );
 
             StorageManagementClient stgMgmt = new StorageManagementClient( inputs.Credentials );
             var keyResponse = stgMgmt.StorageAccounts.GetKeys( inputs.StorageAccountName.ToLowerInvariant( ) );
@@ -133,7 +128,7 @@ namespace Microsoft.ConnectTheDots.EHConsole
             }
 
             var serviceNamespace = inputs.SBNamespace;
-            var hubName = inputs.EventHubNameDevices;
+            var hubName = ehDevices.Path;
             
             var sharedAccessAuthorizationRule = ehDevices.Authorization.First( ( d )
                 => String.Equals( d.KeyName, receiverKeyName, StringComparison.InvariantCultureIgnoreCase ) ) as SharedAccessAuthorizationRule;

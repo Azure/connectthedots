@@ -31,6 +31,8 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
     //--//
 
     using Microsoft.Azure;
+    using Microsoft.ServiceBus;
+    using Microsoft.ServiceBus.Messaging;
     using Microsoft.WindowsAzure.Management.ServiceBus.Models;
     using Microsoft.WindowsAzure.Subscriptions.Models;
 
@@ -167,6 +169,40 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
                     }
 
                     return namespaces[ selection - 1 ];
+                }
+            }
+        }
+
+        public static EventHubDescription SelectEventHub( NamespaceManager nsManager, SubscriptionCloudCredentials credentials )
+        {
+            Console.WriteLine( "Retrieving a list of created Event Hubs..." );
+
+            EventHubDescription[ ] eventHubs = nsManager.GetEventHubs( ).ToArray( );
+            int eventHubCount = eventHubs.Length;
+
+            Console.WriteLine( "Created Event Hubs: " );
+
+            for( int currentNamespace = 1; currentNamespace <= eventHubCount; ++currentNamespace )
+            {
+                Console.WriteLine( currentNamespace + ": " + eventHubs[ currentNamespace - 1 ].Path );
+            }
+
+            for( ;; )
+            {
+                Console.WriteLine( "Please select Event Hub you want to use: " );
+
+                string answer = Console.ReadLine( );
+
+                int selection;
+                if( !int.TryParse( answer, out selection ) || selection > eventHubCount || selection < -1 )
+                {
+                    Console.WriteLine( "Incorrect Event Hub number." );
+                    continue;
+                }
+
+                if( ConsoleHelper.Confirm( "Are you sure you want to select " + eventHubs[ selection - 1 ].Path + " Event Hub?" ) )
+                {
+                    return eventHubs[ selection - 1 ];
                 }
             }
         }
