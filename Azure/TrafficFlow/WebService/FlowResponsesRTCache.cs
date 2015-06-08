@@ -42,7 +42,25 @@ namespace WebService
         {
             try
             {
-                Flow flow = JsonConvert.DeserializeObject<Flow>(jsonFlow);
+                FlowEHDataContract ehData = JsonConvert.DeserializeObject<FlowEHDataContract>(jsonFlow);
+                Flow flow = new Flow
+                {
+                    FlowDataID = int.Parse(ehData.FlowDataID),
+                    FlowReadingValue = (int)ehData.Value,
+                    FlowStationLocation = new FlowStationLocation
+                    {
+                        Description = ehData.LocationDescription,
+                        Direction = ehData.Direction,
+                        Latitude = double.Parse(ehData.Latitude),
+                        Longitude = double.Parse(ehData.Longitude),
+                        MilePost = double.Parse(ehData.MilePost),
+                        RoadName = ehData.RoadName
+                    },
+                    Region = ehData.Region,
+                    StationName = ehData.StationName,
+                    Time = ehData.TimeCreated
+                };
+                
                 Set(flow);
             }
             catch { }

@@ -49,7 +49,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\FlowDataRepository.cs" />
     <Compile Include="Repositories\FlowSourcesRepository.cs" />
-    <Compile Include="SensorDataContract.cs" />
+    <Compile Include="FlowEHDataContract.cs" />
     <Compile Include="Utils\SqlDBReaderSafeParser.cs" />
   </ItemGroup>
   <ItemGroup>

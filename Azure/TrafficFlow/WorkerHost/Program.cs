@@ -1,4 +1,4 @@
-﻿#define CTD_WEB_JSON_FORMAT
+﻿//#define CTD_WEB_JSON_FORMAT
 
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
@@ -58,11 +58,11 @@ namespace WorkerHost
             const int SLEEP_TIME_MS = 20000;//20 sec
 
             //gateway for Flow-formatted data
-            AMQPConfig amqpSR520Config = Loader.GetAMQPConfig("SR520AMQPConfig", _logger);
+            AMQPConfig amqpSR520Config = Loader.GetAMQPConfig("SR520AMQPConfig", _logger);              // set to eh520 in config file
             GatewayService flowGateway = CreateGateway(amqpSR520Config);
 
             //gateway for CTD-style json formatted data
-            AMQPConfig amqpDevicesConfig = Loader.GetAMQPConfig("DevicesAMQPConfig", _logger);
+            AMQPConfig amqpDevicesConfig = Loader.GetAMQPConfig("DevicesAMQPConfig", _logger);          // set to ehdevices in config file
             GatewayService devicesGateway = CreateGateway(amqpDevicesConfig);
 
             string url = ConfigurationManager.AppSettings.Get("ApiUrl") + ConfigurationManager.AppSettings.Get("AccessCode"); ;
@@ -78,7 +78,21 @@ namespace WorkerHost
 
                     foreach (Flow flow in list)
                     {
-                        flowGateway.Enqueue(JsonConvert.SerializeObject(flow));
+                        FlowEHDataContract message520 = new FlowEHDataContract
+                        {
+                            FlowDataID = flow.FlowDataID.ToString(),
+                            Region = flow.Region,
+                            StationName = flow.StationName,
+                            LocationDescription = flow.FlowStationLocation.Description,
+                            Direction = flow.FlowStationLocation.Direction,
+                            Latitude = flow.FlowStationLocation.Latitude.ToString(),
+                            Longitude = flow.FlowStationLocation.Longitude.ToString(),
+                            MilePost = flow.FlowStationLocation.MilePost.ToString(),
+                            RoadName = flow.FlowStationLocation.RoadName,
+                            Value = flow.FlowReadingValue,
+                            TimeCreated = flow.Time
+                        };
+                        flowGateway.Enqueue(JsonConvert.SerializeObject(message520));
 
                         bool updateFlowValue, updateFlowSource;
                         _cache.Set(flow, out updateFlowValue, out updateFlowSource);
@@ -86,8 +100,9 @@ namespace WorkerHost
                         if (updateFlowValue)
                         {
 #if CTD_WEB_JSON_FORMAT
-                            SensorDataContract message = new SensorDataContract
+                           SensorDataContract message = new SensorDataContract
                             {
+
                                 Guid = flow.FlowDataID.ToString(),
                                 DisplayName = flow.FlowStationLocation.Description,
                                 MeasureName = flow.FlowStationLocation.RoadName,
@@ -97,7 +112,7 @@ namespace WorkerHost
                                 TimeCreated = flow.Time,
                                 Organization = ""
                             };
-                            devicesGateway.Enqueue(JsonConvert.SerializeObject(message));
+                            devicesGateway.Enqueue(JsonConvert.SerializeObject(message));         // sending JSON received and reformated as CTD format to ehdevices. Not needed.
 #endif
                             _UpdateQueue.Enqueue(new KeyValuePair<_UpdateType, Flow>(_UpdateType.FlowValue, flow));
                         }
@@ -169,7 +184,7 @@ namespace WorkerHost
             {
                 var _gatewayQueue = new GatewayQueue<QueuedItem>();
 
-                var _AMPQSender = new AMQPSender<TrafficFlow.Common.SensorDataContract>(
+                var _AMPQSender = new AMQPSender<TrafficFlow.Common.FlowEHDataContract>(
                                                     amqpConfig.AMQPSAddress,
                                                     amqpConfig.EventHubName,
                                                     amqpConfig.EventHubMessageSubject,
@@ -178,7 +193,7 @@ namespace WorkerHost
                                                     _logger
                                                     );
 
-                var _batchSenderThread = new BatchSenderThread<QueuedItem, TrafficFlow.Common.SensorDataContract>(
+                var _batchSenderThread = new BatchSenderThread<QueuedItem, TrafficFlow.Common.FlowEHDataContract>(
                                                     _gatewayQueue,
                                                     _AMPQSender,
                                                     null,
