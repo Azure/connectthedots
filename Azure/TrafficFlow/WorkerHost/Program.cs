@@ -1,4 +1,5 @@
 ﻿//#define CTD_WEB_JSON_FORMAT
+//#define UPDATE_SQL
 
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
@@ -164,9 +165,10 @@ namespace WorkerHost
                                 }
                             }
                         }
-
+#if UPDATE_SQL
                         _FlowSourcesRepository.ProcessEvents(updateSourcesList);
                         _FlowDataRepository.ProcessEvents(updateValueList);
+#endif
                     }
                 }
                 catch(Exception ex)
