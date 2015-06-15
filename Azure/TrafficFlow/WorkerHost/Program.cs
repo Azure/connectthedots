@@ -37,7 +37,6 @@ namespace WorkerHost
         private static readonly ConcurrentQueue<KeyValuePair<_UpdateType, Flow>> _UpdateQueue
              = new ConcurrentQueue<KeyValuePair<_UpdateType, Flow>>();
         
-
         static void Main()
         {
             StartHost();
@@ -56,7 +55,7 @@ namespace WorkerHost
 
             _logger.LogInfo("Starting Worker...");
 
-            const int SLEEP_TIME_MS = 20000;//20 sec
+            const int SLEEP_TIME_MS = 60000;//1 minute
 
             //gateway for Flow-formatted data
             AMQPConfig amqpSR520Config = Loader.GetAMQPConfig("SR520AMQPConfig", _logger);              // set to eh520 in config file
@@ -93,10 +92,15 @@ namespace WorkerHost
                             Value = flow.FlowReadingValue,
                             TimeCreated = flow.Time
                         };
-                        flowGateway.Enqueue(JsonConvert.SerializeObject(message520));
+                        
 
                         bool updateFlowValue, updateFlowSource;
                         _cache.Set(flow, out updateFlowValue, out updateFlowSource);
+
+                        //if (updateFlowValue || updateFlowSource)
+                        {
+                            flowGateway.Enqueue(JsonConvert.SerializeObject(message520));
+                        }
                         
                         if (updateFlowValue)
                         {
