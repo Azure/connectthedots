@@ -16,7 +16,6 @@ namespace WorkerHost
     using System.Threading;
     using Microsoft.ConnectTheDots.Common;
     using Microsoft.ConnectTheDots.Gateway;
-    using Microsoft.WindowsAzure.Diagnostics;
     using Microsoft.WindowsAzure.ServiceRuntime;
     using Newtonsoft.Json;
 
