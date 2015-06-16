@@ -2,7 +2,7 @@
 This wiki will describe how to connect the DHT11 sensor to your Particle Core and upload the code to connect it to your ConnectTheDots Event Hub.
 
 ## Prerequisites ##
-Ensure that you have completed  setting up the [AzureMobileServiceEventHub Proxy](https://github.com/MSOpenTech/connectthedots/blob/master/Devices/DirectlyConnectedDevices/ParticleCore/AzureMobileServiceEventHubProxy/AzureMobileServiceEventHubProxy-Setup.md) and [ConnectTheDots EventHub Deployment](https://github.com/toolboc/connectthedots/blob/master/Azure/AzurePrep/AzurePrep.md)
+Ensure that you have completed  setting up the [Particle Webhook](https://github.com/MSOpenTech/connectthedots/blob/master/Devices/DirectlyConnectedDevices/ParticleCore/ParticleWebHook/ParticleWebHook-Setup.md)and [ConnectTheDots EventHub Deployment](https://github.com/toolboc/connectthedots/blob/master/Azure/AzurePrep/AzurePrep.md)
 
 ## Hardware Requirements ##
 [Particle Core Device](https://store.particle.io/?product=particle-core)

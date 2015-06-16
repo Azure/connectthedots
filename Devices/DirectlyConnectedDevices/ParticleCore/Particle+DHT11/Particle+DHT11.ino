@@ -72,34 +72,9 @@ void loop()
 //	}   
    
     char payload[300];
-    snprintf(payload, sizeof(payload), "{ \"subject\":\"wthr\", \"unitofmeasure\":\"F\",\"location\":\"%s\",\"measurename\":\"Temperature\",\"timecreated\":\"%s\",\"organization\":\"%s\",\"guid\":\"00000000-0000-0000-0000-000000000000\",\"value\": %f,\"displayname\":\"%s\" }", Locn, timeNowChar, Org, f, Disp);
-    sendToAMS(payload);
-    strcpy(timeNowChar, timeNowString.c_str());
-    snprintf(payload, sizeof(payload), "{ \"subject\":\"wthr\", \"unitofmeasure\":\"%%\",\"location\":\"%s\",\"measurename\":\"Humidity\",\"timecreated\":\"%s\",\"organization\":\"%s\",\"guid\":\"00000000-0000-0000-0000-000000000000\",\"value\": %f,\"displayname\":\"%s\" }", Locn, timeNowChar, Org, h, Disp);
-    sendToAMS(payload);
+    snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"F\",\"l\":\"%s\",\"m\":\"Temperature\",\"t\":\"%s\",\"o\":\"%s\",\"g\":\"00000000-0000-0000-0000-000000000000\",\"v\": %f,\"d\":\"%s\" }", Locn, timeNowString.c_str(), Org, f, Disp);
+    Spark.publish("ConnectTheDots", payload);
     
-}
-
-void sendToAMS(String payload)
-{
-       http_header_t headers[] = {
-        { "X-ZUMO-APPLICATION", AzureMobileServiceKey },
-        { "Cache-Control", "no-cache" },
-        { NULL, NULL } // NOTE: Always terminate headers with NULL
-    };
-    
-    http_request_t request;
-    http_response_t response;
-    
-    request.hostname = AzureMobileService;
-    request.port = 80;
-    request.path = "/api/" + AzureMobileSeriveAPI;
-    request.body = payload;
-
-    http.post(request, response, headers);
-    Serial.print("Application>\tResponse status: ");
-    Serial.println(response.status);
-
-    Serial.print("Application>\tHTTP Response Body: ");
-    Serial.println(response.body);
+    snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"%%\",\"l\":\"%s\",\"m\":\"Humidity\",\"t\":\"%s\",\"o\":\"%s\",\"g\":\"00000000-0000-0000-0000-000000000000\",\"v\": %f,\"d\":\"%s\" }", Locn, timeNowString.c_str(), Org, h, Disp);
+    Spark.publish("ConnectTheDots", payload);
 }

@@ -20,4 +20,4 @@ OR
 [Particle.io account](http://particle.io)
 
 ## Preconditions
-You will need an [AzureMobileServiceEventHub Proxy](https://github.com/MSOpenTech/connectthedots/blob/master/Devices/DirectlyConnectedDevices/ParticleCore/AzureMobileServiceEventHubProxy/AzureMobileServiceEventHubProxy-Setup.md) configured to relay data to your existing [ConnectTheDots EventHub Deployment](https://github.com/toolboc/connectthedots/blob/master/Azure/AzurePrep/AzurePrep.md)
+You will need an [Particle Webhook](https://github.com/MSOpenTech/connectthedots/blob/master/Devices/DirectlyConnectedDevices/ParticleCore/ParticleWebHook/ParticleWebHook-Setup.md) configured to relay data to your existing [ConnectTheDots EventHub Deployment](https://github.com/toolboc/connectthedots/blob/master/Azure/AzurePrep/AzurePrep.md).
