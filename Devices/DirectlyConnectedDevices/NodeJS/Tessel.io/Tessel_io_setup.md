@@ -10,6 +10,7 @@ Connect the Climate module to connector B
 ## Configure the Tessel##
 
 Follow the instructions on the [Tessel site](http://start.tessel.io/install) to setup your environment and the Tessel board.
+Make sure you have setup the Wifi connection so that your Tessel board can send data to Azure.
 
 ##Prepare settings files##
 You will need to edit the settings file of the application before deploying the application on the board to apply your own connection information for your Azure Event Hub.
