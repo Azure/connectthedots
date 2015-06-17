@@ -26,10 +26,6 @@ char Org[] = "ORGANIZATIONNAME";
 char Disp[] = "DISPLAYNAME";
 char Locn[] = "LOCATION";
 
-String AzureMobileService = "MOBILESERVICE.azure-mobile.net.azure-mobile.net";
-String AzureMobileSeriveAPI = "APINAME";
-char AzureMobileServiceKey[40] = "MOBILESERVICEKEY";
-
 UDP UDPClient;
 SparkTime rtc;
 HttpClient http;
