@@ -21,8 +21,13 @@ Ensure your Particle Core is configured for deployment by following this [Instru
 
 [Login to the Particle IDE](https://build.particle.io/build) and create a new project.
 
-Add the ADAFRUIT_DHT, HTTPCLIENT, and SPARKTIME libraries by following the [Flash apps with Particle Build Using Libraries Documentation](http://docs.particle.io/build/#flash-apps-with-particle-build-using-libraries).
+Add the ADAFRUIT_DHT library by following the [Flash apps with Particle Build Using Libraries Documentation](http://docs.particle.io/build/#flash-apps-with-particle-build-using-libraries).
 
 Create a new app and paste in the following [code](https://github.com/MSOpenTech/connectthedots/blob/master/Devices/DirectlyConnectedDevices/ParticleCore\Particle+DHT11\Particle+DHT11.ino).
+
+Update the following variables:
+char Org[] = "ORGANIZATION_NAME";
+char Disp[] = "DISPLAY_NAME";
+char Locn[] = "LOCATION";
 
 Verify and Deploy to your Particle Core!

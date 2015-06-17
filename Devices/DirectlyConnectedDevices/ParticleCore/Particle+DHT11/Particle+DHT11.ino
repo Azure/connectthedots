@@ -15,27 +15,13 @@
 
 DHT dht(DHTPIN, DHTTYPE);
 
-// This #include statement was automatically added by the Spark IDE.
-#include "HttpClient/HttpClient.h"
-
-// This #include statement was automatically added by the Spark IDE.
-#include "SparkTime/SparkTime.h"
-  
-
-char Org[] = "ORGANIZATIONNAME";
-char Disp[] = "DISPLAYNAME";
+char Org[] = "ORGANIZATION_NAME";
+char Disp[] = "DISPLAY_NAME";
 char Locn[] = "LOCATION";
 
-UDP UDPClient;
-SparkTime rtc;
-HttpClient http;
-  
 
 void setup()
 {
-    rtc.begin(&UDPClient, "north-america.pool.ntp.org");
-    rtc.setTimeZone(-5); // gmt offset
-    Serial.begin(9600);
     dht.begin();
     delay(10000);
 }
@@ -44,13 +30,6 @@ void setup()
 void loop()
 {
     delay(5000);
-    
-    unsigned long currentTime;
-    currentTime = rtc.now();
-    
-    String timeNowString = rtc.ISODateUTCString(currentTime);
-    char timeNowChar[sizeof(timeNowString)]; 
-    strcpy(timeNowChar, timeNowString.c_str());
     
 // Reading temperature or humidity takes about 250 milliseconds!
 // Sensor readings may also be up to 2 seconds 'old' (its a 
@@ -67,10 +46,13 @@ void loop()
 //		return;
 //	}   
    
+//If using multiple Spark / Particle devices, you will want to ensure the 'g' value is unique   
+   
     char payload[300];
-    snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"F\",\"l\":\"%s\",\"m\":\"Temperature\",\"t\":\"%s\",\"o\":\"%s\",\"g\":\"00000000-0000-0000-0000-000000000000\",\"v\": %f,\"d\":\"%s\" }", Locn, timeNowString.c_str(), Org, f, Disp);
+    snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"F\",\"l\":\"%s\",\"m\":\"Temperature\",\"o\":\"%s\",\"g\":\"10000000-0000-0000-0000-000000000001\",\"v\": %f,\"d\":\"%s\" }", Locn, Org, f, Disp);
     Spark.publish("ConnectTheDots", payload);
     
-    snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"%%\",\"l\":\"%s\",\"m\":\"Humidity\",\"t\":\"%s\",\"o\":\"%s\",\"g\":\"00000000-0000-0000-0000-000000000000\",\"v\": %f,\"d\":\"%s\" }", Locn, timeNowString.c_str(), Org, h, Disp);
+    snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"%%\",\"l\":\"%s\",\"m\":\"Humidity\",\"o\":\"%s\",\"g\":\"10000000-0000-0000-0000-000000000001\",\"v\": %f,\"d\":\"%s\" }", Locn, Org, h, Disp);
     Spark.publish("ConnectTheDots", payload);
+    
 }
