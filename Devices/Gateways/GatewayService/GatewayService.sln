@@ -52,6 +52,8 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "WindowsExeSetup", "Setup\Wi
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "WindowsServiceSetup", "Setup\WindowsServiceSetup\WindowsServiceSetup.wixproj", "{F7630E5C-40A9-44F4-A6D4-49AE731F4A38}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BluetoothUARTAdapter", "DeviceAdapters\Bluetooth\BluetoothUARTAdapter.csproj", "{A49E31A1-79DC-4B05-AE48-2B594E168EB9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -210,6 +212,16 @@ Global
 		{F7630E5C-40A9-44F4-A6D4-49AE731F4A38}.Release|Mixed Platforms.Build.0 = Release|x86
 		{F7630E5C-40A9-44F4-A6D4-49AE731F4A38}.Release|x86.ActiveCfg = Release|x86
 		{F7630E5C-40A9-44F4-A6D4-49AE731F4A38}.Release|x86.Build.0 = Release|x86
+		{A49E31A1-79DC-4B05-AE48-2B594E168EB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A49E31A1-79DC-4B05-AE48-2B594E168EB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A49E31A1-79DC-4B05-AE48-2B594E168EB9}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{A49E31A1-79DC-4B05-AE48-2B594E168EB9}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{A49E31A1-79DC-4B05-AE48-2B594E168EB9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A49E31A1-79DC-4B05-AE48-2B594E168EB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A49E31A1-79DC-4B05-AE48-2B594E168EB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A49E31A1-79DC-4B05-AE48-2B594E168EB9}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A49E31A1-79DC-4B05-AE48-2B594E168EB9}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{A49E31A1-79DC-4B05-AE48-2B594E168EB9}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -232,5 +244,6 @@ Global
 		{8D4BB859-6779-4D53-86C6-79712956A772} = {A5D7B51F-689A-4BB1-AE4C-7C12F4B443FA}
 		{CD583705-1033-4D51-B613-07295C56DF57} = {406E3AC9-A86B-4857-B6FF-C6033EDF8EF3}
 		{F7630E5C-40A9-44F4-A6D4-49AE731F4A38} = {406E3AC9-A86B-4857-B6FF-C6033EDF8EF3}
+		{A49E31A1-79DC-4B05-AE48-2B594E168EB9} = {5094CC44-E8F8-4472-8042-BE7E78899225}
 	EndGlobalSection
 EndGlobal
