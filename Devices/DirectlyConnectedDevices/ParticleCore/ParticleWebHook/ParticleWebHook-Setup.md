@@ -18,7 +18,7 @@
         "organization": "{{o}}",
         "displayname": "{{d}}",
         "location": "{{l}}",
-        "timecreated": "{{t}}",
+        "timecreated": "{{SPARK_PUBLISHED_AT}}",
         "guid":  "{{g}}"
     },
     "azure_sas_token": {
