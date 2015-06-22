@@ -14,8 +14,6 @@
   </WebRole>
   <WorkerRole name="WorkerHost" vmsize="Small">
     <Imports>
-      <Import moduleName="RemoteAccess" />
-      <Import moduleName="RemoteForwarder" />
     </Imports>
   </WorkerRole>
 </ServiceDefinition>
