@@ -33,8 +33,9 @@ Manually create 2 custom libraries by clicking the "+" to the far right of the P
 Within the .ino of your newly created project, paste in the following [code](https://github.com/MSOpenTech/connectthedots/blob/master/Devices/DirectlyConnectedDevices/ParticleCore/Particle+DS18B20/Particle+DS18B20.ino).
 
 Update the following variables:
-char Org[] = "ORGANIZATION_NAME";
-char Disp[] = "DISPLAY_NAME";
-char Locn[] = "LOCATION";
+
+    char Org[] = "ORGANIZATION_NAME";
+    char Disp[] = "DISPLAY_NAME";
+    char Locn[] = "LOCATION";
 
 Verify and Deploy to your Particle Core!
