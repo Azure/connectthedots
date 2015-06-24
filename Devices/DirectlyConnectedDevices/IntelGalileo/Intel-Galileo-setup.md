@@ -132,6 +132,6 @@ You can view diagnostic data in the Output Windows (View => Output or Ctrl+W,O) 
 
   [1]: https://www.visualstudio.com/products/visual-studio-community-vs
   [2]: https://www.windowsondevices.com/signup.aspx
-  [3]: http://ms-iot.github.io/content/SetupPC.htm
-  [4]: http://ms-iot.github.io/content/SetupGalileo.htm
-  [5]: http://ms-iot.github.io/content/AdvancedUsage.htm
+  [3]: http://ms-iot.github.io/content/en-US/win8/SetupPC.htm
+  [4]: http://ms-iot.github.io/content/en-US/win8/SetupGalileo.htm
+  
