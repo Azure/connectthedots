@@ -8,33 +8,19 @@
 // This #include statement was automatically added by the Spark IDE.
 #include "DS18B20.h"
 
-// This #include statement was automatically added by the Spark IDE.
-#include "SparkTime/SparkTime.h"
-
-// This #include statement was automatically added by the Spark IDE.
-#include "HttpClient/HttpClient.h"
 
 SparkButton b = SparkButton();
 
 DS18B20 ds18b20 = DS18B20(D7);
 
-char Org[] = "ORGANIZATIONNAME";
-char Disp[] = "DISPLAYNAME";
+char Org[] = "ORGANIZATION_NAME";
+char Disp[] = "DISPLAY_NAME";
 char Locn[] = "LOCATION";
-
-UDP UDPClient;
-SparkTime rtc;
-HttpClient http;
   
-
 void setup()
 {
     b.begin();
-    rtc.begin(&UDPClient, "north-america.pool.ntp.org");
-    rtc.setTimeZone(-5); // gmt offset
-    Serial.begin(9600);
-    
-    delay(10000);
+    delay(1000);
 }
 
  
@@ -66,19 +52,14 @@ void loop()
         b.allLedsOn(255,69,0);  //red
     else if(f > 100)
         b.allLedsOn(255,0,0);   //very red
-    
-    unsigned long currentTime;
-    currentTime = rtc.now();
-    
-    String timeNowString = rtc.ISODateUTCString(currentTime);
-    char timeNowChar[sizeof(timeNowString)]; 
-    strcpy(timeNowChar, timeNowString.c_str());
    
     char payload[300];
     
-    snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"F\",\"l\":\"%s\",\"m\":\"Temperature\",\"t\":\"%s\",\"o\":\"%s\",\"g\":\"00000000-0000-0000-0000-000000000000\",\"v\": %f,\"d\":\"%s\" }", Locn, timeNowString.c_str(), Org, f, Disp);
+    //If using multiple Spark / Particle devices, you will want to ensure the 'g' value is unique   
+    
+    snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"F\",\"l\":\"%s\",\"m\":\"Temperature\",\"o\":\"%s\",\"g\":\"A0000000-0000-0000-0000-000000000002\",\"v\": %f,\"d\":\"%s\" }", Locn, Org, f, Disp);
     Spark.publish("ConnectTheDots", payload);
     
-    //snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"%%\",\"l\":\"%s\",\"m\":\"Humidity\",\"t\":\"%s\",\"o\":\"%s\",\"g\":\"00000000-0000-0000-0000-000000000000\",\"v\": %f,\"d\":\"%s\" }", Locn, timeNowString.c_str(), Org, h, Disp);
+    //snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"%%\",\"l\":\"%s\",\"m\":\"Humidity\",\"o\":\"%s\",\"g\":\"A0000000-0000-0000-0000-000000000002\",\"v\": %f,\"d\":\"%s\" }", Locn, Org, h, Disp);
     //Spark.publish("ConnectTheDots", payload);    
 }

@@ -26,10 +26,16 @@ Ensure your Particle Core is configured for deployment by following this [Instru
 
 [Login to the Particle IDE](https://build.particle.io/build) and create a new project.
 
-Add the SPARKBUTTON, HTTPCLIENT, and SPARKTIME libraries by following the [Flash apps with Particle Build Using Libraries Documentation](http://docs.particle.io/build/#flash-apps-with-particle-build-using-libraries).
+Add the SPARKBUTTON library by following the [Flash apps with Particle Build Using Libraries Documentation](http://docs.particle.io/build/#flash-apps-with-particle-build-using-libraries).
 
 Manually create 2 custom libraries by clicking the "+" to the far right of the Particle Web IDE.  Name  the first "DS18B20" and the second "OneWire".  This will create a DS18B20.cpp, DS18B20.h, OneWire.cpp, and OneWire.h file within the Particle IDE. Once these have been created, copy and paste in the contents for each respective file from the [Particle+DS18B20 Repo](https://github.com/MSOpenTech/connectthedots/blob/master/Devices/DirectlyConnectedDevices/ParticleCore/Particle+DS18B20).
 
 Within the .ino of your newly created project, paste in the following [code](https://github.com/MSOpenTech/connectthedots/blob/master/Devices/DirectlyConnectedDevices/ParticleCore/Particle+DS18B20/Particle+DS18B20.ino).
+
+Update the following variables:
+
+    char Org[] = "ORGANIZATION_NAME";
+    char Disp[] = "DISPLAY_NAME";
+    char Locn[] = "LOCATION";
 
 Verify and Deploy to your Particle Core!
