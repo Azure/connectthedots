@@ -5,13 +5,13 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>2.5</ProductVersion>
-    <ProjectGuid>d823450d-1a4d-44a6-a9ad-bb1591319e1b</ProjectGuid>
+    <ProjectGuid>{3b74cf3e-65dd-4e98-b411-ba22841c2b74}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WebRole</RootNamespace>
     <AssemblyName>WebRole</AssemblyName>
     <StartDevelopmentStorage>True</StartDevelopmentStorage>
-    <Name>Deploy</Name>
+    <Name>DeployWeb</Name>
     <PackageEnableRemoteDebugger>False</PackageEnableRemoteDebugger>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -40,27 +40,14 @@
   <ItemGroup>
     <Folder Include="Profiles" />
     <Folder Include="WebServiceContent" />
-    <Folder Include="WorkerHostContent\" />
   </ItemGroup>
   <ItemGroup>
-    <DiagnosticsConfiguration Include="WebServiceContent\diagnostics.wadcfgx" />
-    <DiagnosticsConfiguration Include="WorkerHostContent\diagnostics.wadcfgx" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\WebService\WebService.csproj">
+    <ProjectReference Include="..\..\WebService\WebService.csproj">
       <Name>WebService</Name>
       <Project>{75a73daa-aacf-4ce9-9a4e-7e5b47432c31}</Project>
       <Private>True</Private>
       <RoleType>Web</RoleType>
       <RoleName>WebService</RoleName>
-    </ProjectReference>
-    <ProjectReference Include="..\WorkerHost\WorkerHost.csproj">
-      <Name>WorkerHost</Name>
-      <Project>{25079398-1602-45ee-837c-d4195a1fbc27}</Project>
-      <Private>True</Private>
-      <RoleType>Worker</RoleType>
-      <RoleName>WorkerHost</RoleName>
-      <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
     </ProjectReference>
   </ItemGroup>
   <!-- Import the target files for this project template -->

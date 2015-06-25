@@ -38,12 +38,27 @@ namespace WorkerHost
         
         static void Main()
         {
-            StartHost();
+            try
+            {
+                StartHost();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
         }
 
         public override void Run()
         {
-            StartHost();
+            try
+            {
+                StartHost();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                
+            }
         }
 
         private static void StartHost()
