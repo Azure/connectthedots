@@ -21,3 +21,10 @@ OR
 
 ## Preconditions
 You will need an [Particle Webhook](https://github.com/MSOpenTech/connectthedots/blob/master/Devices/DirectlyConnectedDevices/ParticleCore/ParticleWebHook/ParticleWebHook-Setup.md) configured to relay data to your existing [ConnectTheDots EventHub Deployment](https://github.com/toolboc/connectthedots/blob/master/Azure/AzurePrep/AzurePrep.md).
+
+## Projects ##
+Once you have satisfied the above chose the appropriate project based on your hardware:
+
+[Particle + DHT11](https://github.com/toolboc/connectthedots/blob/master/Devices/DirectlyConnectedDevices/ParticleCore/Particle%2BDHT11/Particle%2BDHT11-Setup.md)
+
+[Particle + DS18B20 w / Particle Button](https://github.com/toolboc/connectthedots/blob/master/Devices/DirectlyConnectedDevices/ParticleCore/Particle%2BDS18B20/Particle%2BDS18B20-Setup.md)

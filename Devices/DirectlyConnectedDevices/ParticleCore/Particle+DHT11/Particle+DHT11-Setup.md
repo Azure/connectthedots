@@ -2,7 +2,7 @@
 This wiki will describe how to connect the DHT11 sensor to your Particle Core and upload the code to connect it to your ConnectTheDots Event Hub.
 
 ## Prerequisites ##
-Ensure that you have completed  setting up the [Particle Webhook](https://github.com/MSOpenTech/connectthedots/blob/master/Devices/DirectlyConnectedDevices/ParticleCore/ParticleWebHook/ParticleWebHook-Setup.md)and [ConnectTheDots EventHub Deployment](https://github.com/toolboc/connectthedots/blob/master/Azure/AzurePrep/AzurePrep.md)
+Ensure that you have completed  setting up the [Particle Webhook](https://github.com/MSOpenTech/connectthedots/blob/master/Devices/DirectlyConnectedDevices/ParticleCore/ParticleWebHook/ParticleWebHook-Setup.md) and [ConnectTheDots EventHub Deployment](https://github.com/toolboc/connectthedots/blob/master/Azure/AzurePrep/AzurePrep.md)
 
 ## Hardware Requirements ##
 [Particle Core Device](https://store.particle.io/?product=particle-core)
@@ -17,7 +17,7 @@ Using your solderless breadboard jumpers, connect GNG to GND, VCC to 3v3, and DA
 ![Particle+DHT11 Wiring Instructions](Particle+DHT11.jpg)
 
 ## Code Deployment ##
-Ensure your Particle Core is configured for deployment by following this [Instructable](http://www.instructables.com/id/Getting-a-Spark-Core-running-without-using-Particles-/).
+Ensure your Particle Core is configured for deployment by following this [Instructable](http://www.instructables.com/id/Getting-a-Spark-Core-running-without-using-Sparks-/).
 
 [Login to the Particle IDE](https://build.particle.io/build) and create a new project.
 

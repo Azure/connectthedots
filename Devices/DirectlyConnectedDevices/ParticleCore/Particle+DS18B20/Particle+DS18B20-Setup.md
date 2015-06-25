@@ -22,7 +22,7 @@ With the DS18B20 sensor in hand, solder VDD (Red Wire) to 3v3, GND (Black Wire) 
 ![Particle+DHT11 Wiring Instructions](Particle+DS18B20-2.jpg)
 
 ## Code Deployment ##
-Ensure your Particle Core is configured for deployment by following this [Instructable](http://www.instructables.com/id/Getting-a-Spark-Core-running-without-using-Particles-/).
+Ensure your Particle Core is configured for deployment by following this [Instructable](http://www.instructables.com/id/Getting-a-Spark-Core-running-without-using-Sparks-/).
 
 [Login to the Particle IDE](https://build.particle.io/build) and create a new project.
 
