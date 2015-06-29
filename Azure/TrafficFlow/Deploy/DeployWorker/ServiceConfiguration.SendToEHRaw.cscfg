@@ -4,8 +4,8 @@
     <Instances count="1" />
     <ConfigurationSettings>
       <Setting name="sendToEHRaw" value="true" />
-      <Setting name="sendToEHDevices" value="true" />
-      <Setting name="sendToSQL" value="true" />
+      <Setting name="sendToEHDevices" value="false" />
+      <Setting name="sendToSQL" value="false" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>

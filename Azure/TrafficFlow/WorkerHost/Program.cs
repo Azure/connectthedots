@@ -1,23 +1,22 @@
-﻿//#define CTD_WEB_JSON_FORMAT
-//#define UPDATE_SQL
-
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
-using TrafficFlow.Common;
-using TrafficFlow.Common.Repositories;
-
-namespace WorkerHost
+﻿namespace WorkerHost
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.Concurrent;
+    
     using System.Configuration;
     using System.Diagnostics;
     using System.Linq;
     using System.Threading;
+    using System.Threading.Tasks;
+    using Microsoft.Azure;
     using Microsoft.ConnectTheDots.Common;
     using Microsoft.ConnectTheDots.Gateway;
     using Microsoft.WindowsAzure.ServiceRuntime;
     using Newtonsoft.Json;
+
+    using TrafficFlow.Common;
+    using TrafficFlow.Common.Repositories;
 
     public class WorkerHost : RoleEntryPoint
     {
@@ -63,26 +62,34 @@ namespace WorkerHost
 
         private static void StartHost()
         {
-            string sqlDatabaseConnectionString = ConfigurationManager.AppSettings.Get("sqlDatabaseConnectionString");
-            _FlowDataRepository = new FlowDataRepository(sqlDatabaseConnectionString);
-            _FlowSourcesRepository = new FlowSourcesRepository(sqlDatabaseConnectionString);
+            bool sendToEHRaw = CloudConfigurationManager.GetSetting("sendToEHRaw").ToLowerInvariant() == "true";
+            bool sendToEHDevices = CloudConfigurationManager.GetSetting("sendToEHDevices").ToLowerInvariant() == "true";
+            bool sendToSQL = CloudConfigurationManager.GetSetting("sendToSQL").ToLowerInvariant() == "true";
+
+            if (sendToSQL)
+            {
+                string sqlDatabaseConnectionString = CloudConfigurationManager.GetSetting("sqlDatabaseConnectionString");
+
+                _FlowDataRepository = new FlowDataRepository(sqlDatabaseConnectionString);
+                _FlowSourcesRepository = new FlowSourcesRepository(sqlDatabaseConnectionString);
+
+                Task.Run(() => UpdateQueueProcessor());
+            }
 
             _logger.LogInfo("Starting Worker...");
 
             const int SLEEP_TIME_MS = 60000;//1 minute
 
             //gateway for Flow-formatted data
-            AMQPConfig amqpSR520Config = Loader.GetAMQPConfig("SR520AMQPConfig", _logger);              // set to eh520 in config file
-            GatewayService flowGateway = CreateGateway(amqpSR520Config);
+            AMQPConfig amqpRAWConfig = Loader.GetAMQPConfig("RawDataAMQPConfig", _logger);              // set to ehraw in config file
+            GatewayService flowGateway = CreateGateway(amqpRAWConfig);
 
             //gateway for CTD-style json formatted data
             AMQPConfig amqpDevicesConfig = Loader.GetAMQPConfig("DevicesAMQPConfig", _logger);          // set to ehdevices in config file
             GatewayService devicesGateway = CreateGateway(amqpDevicesConfig);
 
-            string url = ConfigurationManager.AppSettings.Get("ApiUrl") + ConfigurationManager.AppSettings.Get("AccessCode"); ;
+            string url = CloudConfigurationManager.GetSetting("ApiUrl") + CloudConfigurationManager.GetSetting("AccessCode");
             ApiReader test = new ApiReader(url);
-
-            Task.Run(() => UpdateQueueProcessor());
 
             for (; ; )
             {
@@ -92,7 +99,7 @@ namespace WorkerHost
 
                     foreach (Flow flow in list)
                     {
-                        FlowEHDataContract message520 = new FlowEHDataContract
+                        FlowEHDataContract messageRaw = new FlowEHDataContract
                         {
                             FlowDataID = flow.FlowDataID.ToString(),
                             Region = flow.Region,
@@ -111,34 +118,42 @@ namespace WorkerHost
                         bool updateFlowValue, updateFlowSource;
                         _cache.Set(flow, out updateFlowValue, out updateFlowSource);
 
-                        //if (updateFlowValue || updateFlowSource)
+                        if (sendToEHRaw)
                         {
-                            flowGateway.Enqueue(JsonConvert.SerializeObject(message520));
+                            flowGateway.Enqueue(JsonConvert.SerializeObject(messageRaw));
                         }
                         
-                        if (updateFlowValue)
+                        if (sendToEHDevices && updateFlowValue)
                         {
-#if CTD_WEB_JSON_FORMAT
-                           SensorDataContract message = new SensorDataContract
+                            // sending JSON received and reformated as CTD format to ehdevices.
+
+                            SensorDataContract message = new SensorDataContract
                             {
 
                                 Guid = flow.FlowDataID.ToString(),
                                 DisplayName = flow.FlowStationLocation.Description,
                                 MeasureName = flow.FlowStationLocation.RoadName,
                                 UnitOfMeasure = "Flow on " + flow.FlowStationLocation.RoadName,
-                                Location = flow.FlowStationLocation.RoadName + "\n" + flow.FlowStationLocation.Latitude + " " + flow.FlowStationLocation.Longitude,
+                                Location =
+                                    flow.FlowStationLocation.RoadName + "\n" + flow.FlowStationLocation.Latitude +
+                                    " " + flow.FlowStationLocation.Longitude,
                                 Value = flow.FlowReadingValue,
                                 TimeCreated = flow.Time,
                                 Organization = ""
                             };
-                            devicesGateway.Enqueue(JsonConvert.SerializeObject(message));         // sending JSON received and reformated as CTD format to ehdevices. Not needed.
-#endif
-                            _UpdateQueue.Enqueue(new KeyValuePair<_UpdateType, Flow>(_UpdateType.FlowValue, flow));
+                            devicesGateway.Enqueue(JsonConvert.SerializeObject(message));                                
                         }
 
-                        if (updateFlowSource)
+                        if (sendToSQL)
                         {
-                            _UpdateQueue.Enqueue(new KeyValuePair<_UpdateType, Flow>(_UpdateType.FlowSource, flow));
+                            if (updateFlowValue)
+                            {
+                                _UpdateQueue.Enqueue(new KeyValuePair<_UpdateType, Flow>(_UpdateType.FlowValue, flow));
+                            }
+                            if (updateFlowSource)
+                            {
+                                _UpdateQueue.Enqueue(new KeyValuePair<_UpdateType, Flow>(_UpdateType.FlowSource, flow));
+                            }
                         }
                     }
 
@@ -183,10 +198,8 @@ namespace WorkerHost
                                 }
                             }
                         }
-#if UPDATE_SQL
                         _FlowSourcesRepository.ProcessEvents(updateSourcesList);
                         _FlowDataRepository.ProcessEvents(updateValueList);
-#endif
                     }
                 }
                 catch(Exception ex)

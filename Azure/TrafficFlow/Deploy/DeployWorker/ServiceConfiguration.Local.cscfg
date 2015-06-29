@@ -2,6 +2,10 @@
 <ServiceConfiguration serviceName="WebRole" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="4" osVersion="*" schemaVersion="2014-06.2.4">
   <Role name="WorkerHost">
     <Instances count="1" />
-    <ConfigurationSettings />
+    <ConfigurationSettings>
+      <Setting name="sendToEHRaw" value="true" />
+      <Setting name="sendToEHDevices" value="true" />
+      <Setting name="sendToSQL" value="true" />
+    </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>

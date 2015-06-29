@@ -3,9 +3,9 @@
   <Role name="WorkerHost">
     <Instances count="1" />
     <ConfigurationSettings>
-      <Setting name="sendToEHRaw" value="true" />
+      <Setting name="sendToEHRaw" value="false" />
       <Setting name="sendToEHDevices" value="true" />
-      <Setting name="sendToSQL" value="true" />
+      <Setting name="sendToSQL" value="false" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>

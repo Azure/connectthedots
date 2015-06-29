@@ -3,5 +3,10 @@
   <WorkerRole name="WorkerHost" vmsize="Small">
     <Imports>
     </Imports>
+    <ConfigurationSettings>
+      <Setting name="sendToEHRaw" />
+      <Setting name="sendToEHDevices" />
+      <Setting name="sendToSQL" />
+    </ConfigurationSettings>  
   </WorkerRole>
 </ServiceDefinition>
