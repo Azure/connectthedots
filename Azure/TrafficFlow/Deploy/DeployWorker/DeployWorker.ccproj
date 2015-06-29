@@ -36,6 +36,8 @@
     <ServiceDefinition Include="ServiceDefinition.csdef" />
     <ServiceConfiguration Include="ServiceConfiguration.Local.cscfg" />
     <ServiceConfiguration Include="ServiceConfiguration.Cloud.cscfg" />
+    <ServiceConfiguration Include="ServiceConfiguration.SendToEHDevices.cscfg" />
+    <ServiceConfiguration Include="ServiceConfiguration.SendToEHRaw.cscfg" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Profiles" />
