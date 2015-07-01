@@ -36,6 +36,7 @@
     <ServiceDefinition Include="ServiceDefinition.csdef" />
     <ServiceConfiguration Include="ServiceConfiguration.Local.cscfg" />
     <ServiceConfiguration Include="ServiceConfiguration.SendToAll.cscfg" />
+    <ServiceConfiguration Include="ServiceConfiguration.SendToEHRawAndEHDevices.cscfg" />
     <ServiceConfiguration Include="ServiceConfiguration.SendToSQL.cscfg" />
     <ServiceConfiguration Include="ServiceConfiguration.SendToEHDevices.cscfg" />
     <ServiceConfiguration Include="ServiceConfiguration.SendToEHRaw.cscfg" />
