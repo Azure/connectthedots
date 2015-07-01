@@ -6,7 +6,8 @@
 
 
 {
-    "eventName": "ConnectTheDots",
+    
+"event": "ConnectTheDots",
 
     "url": "https://YOUR_EVENT_HUB_NAME-ns.servicebus.windows.net/ehdevices/messages",
     "requestType": "POST",
@@ -19,7 +20,7 @@
         "displayname": "{{d}}",
         "location": "{{l}}",
         "timecreated": "{{SPARK_PUBLISHED_AT}}",
-        "guid":  "{{g}}"
+        "guid":  "{{SPARK_CORE_ID}}"
     },
     "azure_sas_token": {
         "key_name": "D1",

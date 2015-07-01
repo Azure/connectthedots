@@ -46,13 +46,14 @@ void loop()
 //		return;
 //	}   
    
-//If using multiple Spark / Particle devices, you will want to ensure the 'g' value is unique   
-   
-    char payload[300];
-    snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"F\",\"l\":\"%s\",\"m\":\"Temperature\",\"o\":\"%s\",\"g\":\"10000000-0000-0000-0000-000000000001\",\"v\": %f,\"d\":\"%s\" }", Locn, Org, f, Disp);
+    char payload[255];
+    
+    snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"F\",\"l\":\"%s\",\"m\":\"Temperature\",\"o\":\"%s\",\"v\": %f,\"d\":\"%s\" }", Locn, Org, f, Disp);
     Spark.publish("ConnectTheDots", payload);
     
-    snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"%%\",\"l\":\"%s\",\"m\":\"Humidity\",\"o\":\"%s\",\"g\":\"10000000-0000-0000-0000-000000000001\",\"v\": %f,\"d\":\"%s\" }", Locn, Org, h, Disp);
+    delay(1000);
+    
+    snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"%%\",\"l\":\"%s\",\"m\":\"Humidity\",\"o\":\"%s\",\"v\": %f,\"d\":\"%s\" }", Locn, Org, h, Disp);
     Spark.publish("ConnectTheDots", payload);
     
 }
