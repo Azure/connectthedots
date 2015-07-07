@@ -17,7 +17,7 @@
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= 
  Code to read a moisture sensor attached to a RedBear BLE Nano, then augment and format as JSON to send via socket connection to a gateway.
  Example of sending hydrology data to Microsoft Azure and analyzing with Azure Stream Analytics or Azure Machine Learning.
- Real time output viewable at http://connectthedots.msopentech.com .
+ 
 '''
 import sys
 import socket
@@ -29,11 +29,11 @@ from BLEMoistureSensor import BLEMoistureSensor
 
 Debug = False
 
-Org      = "MSOpenTech";
-Disp     = "Hydrology Sensors" 				       # will be the label for the curve on the chart
-GUID     = "nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn"  # ensures all the data from this sensor appears on the same chart. You can use the Tools/Create GUID in Visual Studio to create.
+Org      = "Organization Name";
+Disp     = "Display name" 				       # will be the label for the curve on the chart
+GUID     = "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # ensures all the data from this sensor appears on the same chart. You can use the Tools/Create GUID in Visual Studio to create.
 												   # The last 6 bytes will be replaced with the mac address of the BLE module that is transmitting the moisture data.
-Locn     = "here";
+Locn     = "Sensor location";
 
 Vendor   = 0xfffe                                  # Vendor ID for our custom device
 Product  = 0xfffe                                  # Product ID for our custom device
@@ -49,32 +49,32 @@ s = None
 		
 def processSensorData( macAddress, value ) :
         global s
-		timeStr = datetime.datetime.utcnow().isoformat()
+	timeStr = datetime.datetime.utcnow().isoformat()
 		
-		# replace last group of digits with mac address of BLE sensor board
-		deviceID = GUID
-		deviceID = deviceID[:24] + macAddress
+	# replace last group of digits with mac address of BLE sensor board
+	deviceID = GUID
+	deviceID = deviceID[:24] + macAddress
 		
-		JSONString = "{"
-		JSONString += "\"value\":" 				+ value
-		JSONString += ",\"guid\":\"" 			+ deviceID
-		JSONString += "\",\"organization\":\"" 	+ Org
-		JSONString += "\",\"displayname\":\"" 	+ Disp
-		JSONString += "\",\"unitofmeasure\":\"" + "unitless"
-		JSONString += "\",\"measurename\":\"" 	+ "moisture"
-		JSONString += "\",\"location\":\"" 		+ Locn
-		JSONString += "\",\"timecreated\":\"" 	+ timeStr + "\""
-		JSONString += "}"
+	JSONString = "{"
+	JSONString += "\"value\":" 				+ value
+	JSONString += ",\"guid\":\"" 			+ deviceID
+	JSONString += "\",\"organization\":\"" 	+ Org
+	JSONString += "\",\"displayname\":\"" 	+ Disp
+	JSONString += "\",\"unitofmeasure\":\"" + "unitless"
+	JSONString += "\",\"measurename\":\"" 	+ "moisture"
+	JSONString += "\",\"location\":\"" 		+ Locn
+	JSONString += "\",\"timecreated\":\"" 	+ timeStr + "\""
+	JSONString += "}"
 
-		if Debug == True:
-			print "JSONString=", JSONString
+	if Debug == True:
+		print "JSONString=", JSONString
 
-		if s != None :
-			s.send("<" + JSONString + ">");         # sends to gateway over socket interface
+	if s != None :
+		s.send("<" + JSONString + ">");         # sends to gateway over socket interface
 		
 def main() :
 	try:
-        global s
+                global s
 		# setup moisture sensor
 		moistureSensor = BLEMoistureSensor()
 		moistureSensor.setSensorDataAvailableEvent(processSensorData)
@@ -90,7 +90,7 @@ def main() :
 				except socket.error as msg:
 					print("Socket connection failed. Error Code : " + str(msg[0]) + " Message " + msg[1])
 					time.sleep(CONNECT_RETRY_INTERVAL)
-			print ("Socket connection succeeded.")
+                        print ("Socket connection succeeded.")
 
 		# this will listen forever for advertising events and call processSensorData() when data arrives
 		moistureSensor.Listen();
