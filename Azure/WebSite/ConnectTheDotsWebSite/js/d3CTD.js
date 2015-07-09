@@ -25,6 +25,17 @@
 var dataFlows = {};
 var bulkMode = false;
 
+String.prototype.hashCode = function () {
+    var hash = 0;
+    if (this.length == 0) return hash;
+    for (var i = 0, len = this.length; i < len; i++) {
+        var chr = this.charCodeAt(i);
+        hash = ((hash << 5) - hash) + chr;
+        hash |= 0;
+    }
+    return hash;
+};
+
 function clearData() {
     for (var id in dataFlows) {
         if (id == 'dataSource') continue;
@@ -85,28 +96,30 @@ function onOpen(evt) {
 }
 
 function addNewDataFlow(eventObject) {
-    var measurename = eventObject['measurename'];
+    var measurenameOriginal = eventObject['measurename'] + '';
+    var measurenameHash = measurenameOriginal.hashCode();
+
     // create chart if necessary
-    if (!dataFlows.hasOwnProperty(measurename)) {
-        dataFlows[measurename] = {
-            containerId: 'chart_' + measurename,
-            controllerId: 'controller_' + measurename,
-            dataSourceFilter: new d3CTDDataSourceFilter(dataFlows.dataSource, { measurename: measurename }),
+    if (!dataFlows.hasOwnProperty(measurenameHash)) {
+        dataFlows[measurenameHash] = {
+            containerId: 'chart_' + measurenameHash,
+            controllerId: 'controller_' + measurenameHash,
+            dataSourceFilter: new d3CTDDataSourceFilter(dataFlows.dataSource, { measurename: measurenameOriginal }),
             flows: {}
         };
         // create flows controller
-        $('#controllersContainer').append('<ul id="' + dataFlows[measurename].controllerId + '" style="top: ' + (Object.keys(dataFlows).length - 2) * 300 + 'px;" class="controller"></ul>');
-        dataFlows[measurename].controller = new d3ChartControl(dataFlows[measurename].controllerId)
-                    .attachToDataSource(dataFlows[measurename].dataSourceFilter);
+        $('#controllersContainer').append('<ul id="' + dataFlows[measurenameHash].controllerId + '" style="top: ' + (Object.keys(dataFlows).length - 2) * 300 + 'px;" class="controller"></ul>');
+        dataFlows[measurenameHash].controller = new d3ChartControl(dataFlows[measurenameHash].controllerId)
+                    .attachToDataSource(dataFlows[measurenameHash].dataSourceFilter);
 
         // add new div object
         $('#chartsContainer').height((Object.keys(dataFlows).length - 1) * 300 + 'px');
-        $('#chartsContainer').append('<div id="' + dataFlows[measurename].containerId + '" style="top: ' + (Object.keys(dataFlows).length - 2) * 300 + 'px;" class="chart"></div>');
+        $('#chartsContainer').append('<div id="' + dataFlows[measurenameHash].containerId + '" style="top: ' + (Object.keys(dataFlows).length - 2) * 300 + 'px;" class="chart"></div>');
         // create chart
-        dataFlows[measurename].chart = (new d3Chart(dataFlows[measurename].containerId))
+        dataFlows[measurenameHash].chart = (new d3Chart(dataFlows[measurenameHash].containerId))
                     .addEventListeners({ 'loading': onLoading, 'loaded': onLoaded })
-                    .attachToDataSource(dataFlows[measurename].dataSourceFilter)
-                    .setFilter(dataFlows[measurename].controller)
+                    .attachToDataSource(dataFlows[measurenameHash].dataSourceFilter)
+                    .setFilter(dataFlows[measurenameHash].controller)
                     .setBulkMode(bulkMode);
 
     };
@@ -116,9 +129,9 @@ function addNewDataFlow(eventObject) {
 
     //addNewSensorOption(newFlow, eventObject);
 
-    dataFlows[measurename].flows[eventObject.guid] = newFlow;
+    dataFlows[measurenameHash].flows[eventObject.guid] = newFlow;
 
-    dataFlows[measurename].chart.addFlow(newFlow, 0);
+    dataFlows[measurenameHash].chart.addFlow(newFlow, 0);
 
     $(window).resize();
 }
@@ -179,9 +192,9 @@ function onNewEvent(evt) {
 
     // check object necessary properties
     if (!eventObject.hasOwnProperty('guid') || !eventObject.hasOwnProperty('measurename')) return;
-
+    var measurenameHash = eventObject['measurename'].hashCode();
     // auto add flows
-    if (!dataFlows.hasOwnProperty(eventObject['measurename']) || !dataFlows[eventObject['measurename']].flows.hasOwnProperty(eventObject['guid']))
+    if (!dataFlows.hasOwnProperty(measurenameHash) || !dataFlows[measurenameHash].flows.hasOwnProperty(eventObject['guid']))
         addNewDataFlow(eventObject);
 
     if (eventObject.alerttype != null) {
