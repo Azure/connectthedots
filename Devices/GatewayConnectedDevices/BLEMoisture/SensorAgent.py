@@ -29,10 +29,10 @@ from BLEMoistureSensor import BLEMoistureSensor
 
 Debug = False
 
-Org      = "Organization Name";
-Disp     = "Display name" 				       # will be the label for the curve on the chart
-GUID     = "xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # ensures all the data from this sensor appears on the same chart. You can use the Tools/Create GUID in Visual Studio to create.
-												   # The last 6 bytes will be replaced with the mac address of the BLE module that is transmitting the moisture data.
+Org      = "Your organization";
+Disp     = "Sensor display name" 				       # will be the label for the curve on the chart
+GUID     = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # ensures all the data from this sensor appears on the same chart. You can use the Tools/Create GUID in Visual Studio to create.
+            						   # The last 6 bytes will be replaced with the mac address of the BLE module that is transmitting the moisture data.
 Locn     = "Sensor location";
 
 Vendor   = 0xfffe                                  # Vendor ID for our custom device
@@ -60,8 +60,8 @@ def processSensorData( macAddress, value ) :
 	JSONString += ",\"guid\":\"" 			+ deviceID
 	JSONString += "\",\"organization\":\"" 	+ Org
 	JSONString += "\",\"displayname\":\"" 	+ Disp
-	JSONString += "\",\"unitofmeasure\":\"" + "unitless"
-	JSONString += "\",\"measurename\":\"" 	+ "moisture"
+	JSONString += "\",\"unitofmeasure\":\"" + "vol/vol"
+	JSONString += "\",\"measurename\":\"" 	+ "WaterContent"
 	JSONString += "\",\"location\":\"" 		+ Locn
 	JSONString += "\",\"timecreated\":\"" 	+ timeStr + "\""
 	JSONString += "}"
