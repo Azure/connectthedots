@@ -1,29 +1,24 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.ServiceModel;
-using System.ServiceModel.PeerResolvers;
 using System.ServiceModel.Web;
 using System.Text;
-using System.Threading.Tasks;
-using System.Web.Security;
+using Data.Contracts;
+using Data.Repositories;
 using Microsoft.WindowsAzure;
 using Newtonsoft.Json;
-using TrafficFlow.Common;
-using TrafficFlow.Common.Repositories;
 
 namespace WebService
 {
-    public class FlowService : IFlowService
+    public class DataService : IDataService
     {
-        private static readonly FlowResponsesRTCache _cache = FlowResponsesRTCache.Instance;
-        private static readonly FlowCache _sourcesCache = new FlowCache();
+        private static readonly ResponsesRTCache _cache = ResponsesRTCache.Instance;
+        private static readonly DataCache _sourcesCache = new DataCache();
 
-        private static FlowDataRepository _FlowDataRepository;
-        private static FlowSourcesRepository _FlowSourcesRepository;
+        private static DataValueRepository _FlowDataRepository;
+        private static DataSourceRepository _FlowSourcesRepository;
 
-        static FlowService()
+        static DataService()
         {
             //Task.Run(()=>Init());
             Init();
@@ -36,8 +31,8 @@ namespace WebService
             var consumerGroup = String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")) ? "local" : "WebSite";
 
             string sqlDatabaseConnectionString = CloudConfigurationManager.GetSetting("sqlDatabaseConnectionString");
-            _FlowDataRepository = new FlowDataRepository(sqlDatabaseConnectionString);
-            _FlowSourcesRepository = new FlowSourcesRepository(sqlDatabaseConnectionString);
+            _FlowDataRepository = new DataValueRepository(sqlDatabaseConnectionString);
+            _FlowSourcesRepository = new DataSourceRepository(sqlDatabaseConnectionString);
 
             UpdateSourcesCache();
 
@@ -57,10 +52,10 @@ namespace WebService
         {
             SetContentTypeToJson();
 
-            IList<Flow> dataList = _FlowDataRepository.QueryByDateInterval(start, end);
+            IList<ApiDataContract> dataList = _FlowDataRepository.QueryByDateInterval(start, end);
             foreach (var data in dataList)
             {
-                var cachedData = _sourcesCache.GetValue(data.FlowDataID) ?? _cache.GetValue(data.FlowDataID);
+                var cachedData = _sourcesCache.GetValue(data.DataID) ?? _cache.GetValue(data.DataID);
 
                 if (cachedData == null)
                 {
@@ -69,28 +64,28 @@ namespace WebService
                 }
             }
 
-            var resultList = new List<Flow>();
+            var resultList = new List<ApiDataContract>();
             foreach (var data in dataList)
             {
-                var cachedData = _sourcesCache.GetValue(data.FlowDataID) ?? _cache.GetValue(data.FlowDataID);
+                var cachedData = _sourcesCache.GetValue(data.DataID) ?? _cache.GetValue(data.DataID);
 
-                if (cachedData != null && cachedData.FlowStationLocation != null)
+                if (cachedData != null && cachedData.StationLocation != null)
                 {
-                    var valueToAdd = new Flow
+                    var valueToAdd = new ApiDataContract
                     {
-                        FlowDataID = data.FlowDataID,
-                        FlowReadingValue = data.FlowReadingValue,
+                        DataID = data.DataID,
+                        ReadingValue = data.ReadingValue,
                         Time = data.Time,
                         Region = cachedData.Region,
                         StationName = cachedData.StationName,
-                        FlowStationLocation = new FlowStationLocation
+                        StationLocation = new StationLocation
                         {
-                            Description = cachedData.FlowStationLocation.Description,
-                            Direction = cachedData.FlowStationLocation.Direction,
-                            Latitude = cachedData.FlowStationLocation.Latitude,
-                            Longitude = cachedData.FlowStationLocation.Longitude,
-                            MilePost = cachedData.FlowStationLocation.MilePost,
-                            RoadName = cachedData.FlowStationLocation.RoadName
+                            Description = cachedData.StationLocation.Description,
+                            Direction = cachedData.StationLocation.Direction,
+                            Latitude = cachedData.StationLocation.Latitude,
+                            Longitude = cachedData.StationLocation.Longitude,
+                            MilePost = cachedData.StationLocation.MilePost,
+                            RoadName = cachedData.StationLocation.RoadName
                         }
                     };
                     resultList.Add(valueToAdd);
@@ -110,7 +105,7 @@ namespace WebService
 
         private static void UpdateSourcesCache()
         {
-            IList<Flow> sourcesList = _FlowSourcesRepository.FetchAll();
+            IList<ApiDataContract> sourcesList = _FlowSourcesRepository.FetchAll();
             foreach (var flow in sourcesList)
             {
                 bool updateFlowValue;

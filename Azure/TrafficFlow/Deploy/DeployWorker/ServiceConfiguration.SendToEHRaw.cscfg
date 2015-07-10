@@ -6,6 +6,7 @@
       <Setting name="sendToEHRaw" value="true" />
       <Setting name="sendToEHDevices" value="false" />
       <Setting name="sendToSQL" value="false" />
+      <Setting name="sendXMLApiRawEH" value="false" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>

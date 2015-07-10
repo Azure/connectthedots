@@ -156,14 +156,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApiReader.cs" />
     <Compile Include="EventLogger.cs" />
     <Compile Include="Loader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -200,10 +201,18 @@
       <Project>{E14D1C61-1979-452E-BE8B-0303A95EF764}</Project>
       <Name>Microsoft.ConnectTheDots.Gateway</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TrafficFlow.Common\TrafficFlow.Common.csproj">
+    <ProjectReference Include="..\ApiReaders\ApiReaders.csproj">
+      <Project>{88FC7CDD-ABD1-4531-BA53-4196B363CA66}</Project>
+      <Name>ApiReaders</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Data.Repositories\Data.Repositories.csproj">
       <Project>{0C6A8F1B-D8B5-4317-BA0A-0DF8CDA5CF46}</Project>
-      <Name>TrafficFlow.Common</Name>
+      <Name>Data.Repositories</Name>
       <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\Data.Contracts\Data.Contracts.csproj">
+      <Project>{D6B0577B-49D0-455C-8DA3-7C8B6E1F9BC4}</Project>
+      <Name>Data.Contracts</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

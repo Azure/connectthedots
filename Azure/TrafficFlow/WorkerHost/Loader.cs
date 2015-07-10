@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
 using Microsoft.ConnectTheDots.Common;
 
 namespace WorkerHost
@@ -16,6 +19,20 @@ namespace WorkerHost
 
     public class Loader
     {
+        public static IList<XMLApiConfigItem> GetAPIConfigItems()
+        {
+            var result = new List<XMLApiConfigItem>();
+
+            XMLApiListConfigSection config = ConfigurationManager.GetSection("XMLApiListConfig") as XMLApiListConfigSection;
+
+            if (config != null)
+            {
+                result.AddRange(config.Instances.Cast<XMLApiConfigItem>());
+            }
+
+            return result;
+        }
+
         internal static AMQPConfig GetAMQPConfig(string configSection, ILogger logger)
         {
             AMQPConfig configData = null;
@@ -109,6 +126,77 @@ namespace WorkerHost
             set
             {
                 this["EventHubDeviceDisplayName"] = value;
+            }
+        }
+    }
+
+    public class XMLApiListConfigSection : ConfigurationSection
+    {
+        [ConfigurationProperty("", IsRequired = true, IsDefaultCollection = true)]
+        public APIListConfigInstanceCollection Instances
+        {
+            get { return (APIListConfigInstanceCollection)this[""]; }
+            set { this[""] = value; }
+        }
+    }
+
+    public class APIListConfigInstanceCollection : ConfigurationElementCollection
+    {
+        protected override ConfigurationElement CreateNewElement()
+        {
+            return new XMLApiConfigItem();
+        }
+
+        protected override object GetElementKey(ConfigurationElement element)
+        {
+            return ((XMLApiConfigItem)element).APIAddress;
+        }
+    }
+
+    public class XMLApiConfigItem : ConfigurationElement
+    {
+        [ConfigurationProperty("APIAddress", IsKey = true, IsRequired = true)]
+        public string APIAddress
+        {
+            get
+            {
+                return (string)base["APIAddress"];
+            }
+        }
+
+        [ConfigurationProperty("DefinitionAddress", IsRequired = true)]
+        public string DefinitionAddress
+        {
+            get
+            {
+                return (string)base["DefinitionAddress"];
+            }
+        }
+
+        [ConfigurationProperty("DataXMLRootNodeName", IsRequired = true)]
+        public string DataXMLRootNodeName
+        {
+            get
+            {
+                return (string)base["DataXMLRootNodeName"];
+            }
+        }
+
+        [ConfigurationProperty("DefinitionXMLRootNodeName", IsRequired = true)]
+        public string DefinitionXMLRootNodeName
+        {
+            get
+            {
+                return (string)base["DefinitionXMLRootNodeName"];
+            }
+        }
+
+        [ConfigurationProperty("IntervalSecs", IsRequired = true)]
+        public int IntervalSecs
+        {
+            get
+            {
+                return (int)base["IntervalSecs"];
             }
         }
     }

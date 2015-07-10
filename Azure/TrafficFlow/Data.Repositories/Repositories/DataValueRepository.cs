@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Threading.Tasks;
-using TrafficFlow.Common.Utils;
+using Data.Contracts;
+using Data.Repositories.Utils;
 
-namespace TrafficFlow.Common.Repositories
+namespace Data.Repositories
 {
-    public class FlowDataRepository
+    public class DataValueRepository
     {
-        private const string FlowDataId = "FlowDataId";
+        private const string DataId = "FlowDataId";
         private const string Value = "Value";
         private const string Time = "Time";
 
@@ -24,12 +24,12 @@ namespace TrafficFlow.Common.Repositories
 
         private readonly string _sqlDatabaseConnectionString;
 
-        public FlowDataRepository(string sqlDatabaseConnectionString)
+        public DataValueRepository(string sqlDatabaseConnectionString)
         {
             _sqlDatabaseConnectionString = sqlDatabaseConnectionString;
         }
 
-        public void ProcessEvents(IList<Flow> eventDataList)
+        public void ProcessEvents(IList<ApiDataContract> eventDataList)
         {
             if (eventDataList == null)
             {
@@ -45,7 +45,7 @@ namespace TrafficFlow.Common.Repositories
                     var table = new DataTable();
 
                     // Add columns to the table
-                    table.Columns.Add(FlowDataId, typeof(int));
+                    table.Columns.Add(DataId, typeof(int));
                     table.Columns.Add(Value, typeof(int));
                     table.Columns.Add(Time, typeof(DateTime));
 
@@ -53,7 +53,7 @@ namespace TrafficFlow.Common.Repositories
                     foreach (var eventData in eventDataList)
                     {
                         // Note: EventData is disposable
-                        table.Rows.Add(eventData.FlowDataID, eventData.FlowReadingValue, eventData.Time);
+                        table.Rows.Add(eventData.DataID, eventData.ReadingValue, eventData.Time);
                     }
 
                     // Create command
@@ -80,7 +80,7 @@ namespace TrafficFlow.Common.Repositories
             }
         }
 
-        public IList<Flow> QueryByDateInterval(DateTime? start, DateTime? end)
+        public IList<ApiDataContract> QueryByDateInterval(DateTime? start, DateTime? end)
         {
             if (start == null)
             {
@@ -109,15 +109,15 @@ namespace TrafficFlow.Common.Repositories
 
                     // Execute the query
 
-                    IList<Flow> result = new List<Flow>();
+                    IList<ApiDataContract> result = new List<ApiDataContract>();
                     using (SqlDataReader r = sqlCommand.ExecuteReader())
                     {
                         while (r.Read())
                         {
-                            Flow flow = new Flow
+                            ApiDataContract flow = new ApiDataContract
                             {
-                                FlowDataID = r.SafeParse<int>(FlowDataId),
-                                FlowReadingValue = r.SafeParse<int>(Value),
+                                DataID = r.SafeParse<int>(DataId),
+                                ReadingValue = r.SafeParse<int>(Value),
                                 Time = r.SafeParse<DateTime>(Time)
                             };
                             result.Add(flow);

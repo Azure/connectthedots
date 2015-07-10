@@ -1,53 +1,53 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using Data.Contracts;
 using Newtonsoft.Json;
-using TrafficFlow.Common;
 
 namespace WebService
 {
-    public class FlowResponsesRTCache
+    public class ResponsesRTCache
     {
-        private readonly FlowCache _FlowCache = new FlowCache();
+        private readonly DataCache _Cache = new DataCache();
         private byte[] _currentSerializedValues = new byte[0];
         private long _counter = 0, _currentVersion = 0;
 
-        private static readonly FlowResponsesRTCache _FlowDataCache =
-               new FlowResponsesRTCache();
-        public static FlowResponsesRTCache Instance
+        private static readonly ResponsesRTCache _ResponsesCache =
+               new ResponsesRTCache();
+        public static ResponsesRTCache Instance
         {
-            get { return _FlowDataCache; }
+            get { return _ResponsesCache; }
         }
 
-        private FlowResponsesRTCache() { }   
+        private ResponsesRTCache() { }   
 
-        public void Set(Flow flow)
+        public void Set(ApiDataContract data)
         {
-            bool updateFlowValue;
-            bool updateFlowSource;
+            bool updateDataValue;
+            bool updateDataSource;
 
-            _FlowCache.Set(flow, out updateFlowValue, out updateFlowSource);
-            if (updateFlowValue || updateFlowSource)
+            _Cache.Set(data, out updateDataValue, out updateDataSource);
+            if (updateDataValue || updateDataSource)
             {
                 Interlocked.Increment(ref _counter);
             }
         }
 
-        public Flow GetValue(int id)
+        public ApiDataContract GetValue(int id)
         {
-            return _FlowCache.GetValue(id);
+            return _Cache.GetValue(id);
         }
 
-        public void DeserializeAndSet(string jsonFlow)
+        public void DeserializeAndSet(string jsonData)
         {
             try
             {
-                FlowEHDataContract ehData = JsonConvert.DeserializeObject<FlowEHDataContract>(jsonFlow);
-                Flow flow = new Flow
+                EHRawDataContract ehData = JsonConvert.DeserializeObject<EHRawDataContract>(jsonData);
+                ApiDataContract data = new ApiDataContract
                 {
-                    FlowDataID = int.Parse(ehData.FlowDataID),
-                    FlowReadingValue = (int)ehData.Value,
-                    FlowStationLocation = new FlowStationLocation
+                    DataID = int.Parse(ehData.DataID),
+                    ReadingValue = (int)ehData.Value,
+                    StationLocation = new StationLocation
                     {
                         Description = ehData.LocationDescription,
                         Direction = ehData.Direction,
@@ -60,8 +60,8 @@ namespace WebService
                     StationName = ehData.StationName,
                     Time = ehData.TimeCreated
                 };
-                
-                Set(flow);
+
+                Set(data);
             }
             catch { }
         }
@@ -79,7 +79,7 @@ namespace WebService
                     if (_currentVersion < counterValue)
                     {
                         _currentVersion = counterValue;
-                        var values = _FlowCache.GetValues();
+                        var values = _Cache.GetValues();
                         _currentSerializedValues = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(values));
                     }
                 }

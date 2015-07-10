@@ -3,10 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.Concurrent;
-    
-    using System.Configuration;
-    using System.Diagnostics;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure;
@@ -15,25 +11,30 @@
     using Microsoft.WindowsAzure.ServiceRuntime;
     using Newtonsoft.Json;
 
-    using TrafficFlow.Common;
-    using TrafficFlow.Common.Repositories;
+    using ApiReaders;
+    using Data.Repositories;
+    using Data.Contracts;
 
     public class WorkerHost : RoleEntryPoint
     {
         private static readonly ILogger _logger = EventLogger.Instance;
 
-        private static readonly FlowCache _cache = new FlowCache();
+        private static readonly DataCache _cache = new DataCache();
 
-        private static FlowDataRepository _FlowDataRepository;
-        private static FlowSourcesRepository _FlowSourcesRepository;
+        private static DataValueRepository _FlowDataRepository;
+        private static DataSourceRepository _FlowSourceRepository;
+
+        private static GatewayService flowGateway;
+        private static GatewayService devicesGateway;
+        private static GatewayService xmlApiGateway;
 
         private enum _UpdateType
         {
             FlowValue = 0,
             FlowSource = 1
         }
-        private static readonly ConcurrentQueue<KeyValuePair<_UpdateType, Flow>> _UpdateQueue
-             = new ConcurrentQueue<KeyValuePair<_UpdateType, Flow>>();
+        private static readonly ConcurrentQueue<KeyValuePair<_UpdateType, ApiDataContract>> _UpdateQueue
+             = new ConcurrentQueue<KeyValuePair<_UpdateType, ApiDataContract>>();
         
         static void Main()
         {
@@ -60,18 +61,52 @@
             }
         }
 
+        public static void OnXMLApiData(XMLApiDefinition definitionForData, XMLApiData data)
+        {
+            DateTime currentTime = DateTime.UtcNow;
+            EHRawXMLApiDataContract ehData = new EHRawXMLApiDataContract
+            {
+                StationID = data.id,
+                Route = definitionForData.Route,
+                Direction = definitionForData.Direction,
+                Milepost = definitionForData.Milepost,
+                Location = definitionForData.Location,
+                Volume = data.Volume,
+                Occupancy = data.Occupancy,
+                Speed = data.Speed,
+                TimeCreated = currentTime
+            };
+            xmlApiGateway.Enqueue(JsonConvert.SerializeObject(ehData));
+        }
+
+        private static void StartXMLApiProcesses()
+        {
+            var configItems = Loader.GetAPIConfigItems();
+            foreach (var config in configItems)
+            {
+                XMLApiReaderProcess<string, XMLApiDefinition, XMLApiData> process =
+                new XMLApiReaderProcess<string, XMLApiDefinition, XMLApiData>(
+                    config.DefinitionAddress, config.DefinitionXMLRootNodeName,
+                    config.APIAddress, config.DataXMLRootNodeName,
+                    config.IntervalSecs, OnXMLApiData
+                );
+                process.Start();
+            }
+        }
+
         private static void StartHost()
         {
             bool sendToEHRaw = CloudConfigurationManager.GetSetting("sendToEHRaw").ToLowerInvariant() == "true";
             bool sendToEHDevices = CloudConfigurationManager.GetSetting("sendToEHDevices").ToLowerInvariant() == "true";
             bool sendToSQL = CloudConfigurationManager.GetSetting("sendToSQL").ToLowerInvariant() == "true";
+            bool sendXMLApiRawEH = CloudConfigurationManager.GetSetting("sendXMLApiRawEH").ToLowerInvariant() == "true";
 
             if (sendToSQL)
             {
                 string sqlDatabaseConnectionString = CloudConfigurationManager.GetSetting("sqlDatabaseConnectionString");
 
-                _FlowDataRepository = new FlowDataRepository(sqlDatabaseConnectionString);
-                _FlowSourcesRepository = new FlowSourcesRepository(sqlDatabaseConnectionString);
+                _FlowDataRepository = new DataValueRepository(sqlDatabaseConnectionString);
+                _FlowSourceRepository = new DataSourceRepository(sqlDatabaseConnectionString);
 
                 Task.Run(() => UpdateQueueProcessor());
             }
@@ -80,13 +115,21 @@
 
             const int SLEEP_TIME_MS = 60000;//1 minute
 
-            //gateway for Flow-formatted data
+            //gateway for raw data
             AMQPConfig amqpRAWConfig = Loader.GetAMQPConfig("RawDataAMQPConfig", _logger);              // set to ehraw in config file
-            GatewayService flowGateway = CreateGateway(amqpRAWConfig);
-
+            flowGateway = CreateGateway(amqpRAWConfig);
+            
             //gateway for CTD-style json formatted data
             AMQPConfig amqpDevicesConfig = Loader.GetAMQPConfig("DevicesAMQPConfig", _logger);          // set to ehdevices in config file
-            GatewayService devicesGateway = CreateGateway(amqpDevicesConfig);
+            devicesGateway = CreateGateway(amqpDevicesConfig);
+
+            AMQPConfig amqpXMLApiConfig = Loader.GetAMQPConfig("XMLApiAMQPConfig", _logger);          // set to ehraw in config file
+            xmlApiGateway = CreateGateway(amqpXMLApiConfig);
+
+            if (sendXMLApiRawEH)
+            {
+                StartXMLApiProcesses();
+            }
 
             string url = CloudConfigurationManager.GetSetting("ApiUrl") + CloudConfigurationManager.GetSetting("AccessCode");
             ApiReader test = new ApiReader(url);
@@ -95,50 +138,50 @@
             {
                 try
                 {
-                    IEnumerable<Flow> list = test.GetTrafficFlowsAsJson().Result;
+                    IEnumerable<ApiDataContract> list = test.GetTrafficFlowsAsJson<ApiDataContract>().Result;
 
-                    foreach (Flow flow in list)
+                    foreach (ApiDataContract data in list)
                     {
-                        FlowEHDataContract messageRaw = new FlowEHDataContract
+                        EHRawDataContract messageRaw = new EHRawDataContract
                         {
-                            FlowDataID = flow.FlowDataID.ToString(),
-                            Region = flow.Region,
-                            StationName = flow.StationName,
-                            LocationDescription = flow.FlowStationLocation.Description,
-                            Direction = flow.FlowStationLocation.Direction,
-                            Latitude = flow.FlowStationLocation.Latitude.ToString(),
-                            Longitude = flow.FlowStationLocation.Longitude.ToString(),
-                            MilePost = flow.FlowStationLocation.MilePost.ToString(),
-                            RoadName = flow.FlowStationLocation.RoadName,
-                            Value = flow.FlowReadingValue,
-                            TimeCreated = flow.Time
+                            DataID = data.DataID.ToString(),
+                            Region = data.Region,
+                            StationName = data.StationName,
+                            LocationDescription = data.StationLocation.Description,
+                            Direction = data.StationLocation.Direction,
+                            Latitude = data.StationLocation.Latitude.ToString(),
+                            Longitude = data.StationLocation.Longitude.ToString(),
+                            MilePost = data.StationLocation.MilePost.ToString(),
+                            RoadName = data.StationLocation.RoadName,
+                            Value = data.ReadingValue,
+                            TimeCreated = data.Time
                         };
                         
 
-                        bool updateFlowValue, updateFlowSource;
-                        _cache.Set(flow, out updateFlowValue, out updateFlowSource);
+                        bool updateDataValue, updateDataSource;
+                        _cache.Set(data, out updateDataValue, out updateDataSource);
 
                         if (sendToEHRaw)
                         {
                             flowGateway.Enqueue(JsonConvert.SerializeObject(messageRaw));
                         }
                         
-                        if (sendToEHDevices && updateFlowValue)
+                        if (sendToEHDevices && updateDataValue)
                         {
                             // sending JSON received and reformated as CTD format to ehdevices.
 
                             SensorDataContract message = new SensorDataContract
                             {
 
-                                Guid = flow.FlowDataID.ToString(),
-                                DisplayName = flow.FlowStationLocation.Description,
-                                MeasureName = flow.FlowStationLocation.RoadName,
-                                UnitOfMeasure = "Flow on " + flow.FlowStationLocation.RoadName,
+                                Guid = data.DataID.ToString(),
+                                DisplayName = data.StationLocation.Description,
+                                MeasureName = data.StationLocation.RoadName,
+                                UnitOfMeasure = "Flow on " + data.StationLocation.RoadName,
                                 Location =
-                                    flow.FlowStationLocation.RoadName + "\n" + flow.FlowStationLocation.Latitude +
-                                    " " + flow.FlowStationLocation.Longitude,
-                                Value = flow.FlowReadingValue,
-                                TimeCreated = flow.Time,
+                                    data.StationLocation.RoadName + "\n" + data.StationLocation.Latitude +
+                                    " " + data.StationLocation.Longitude,
+                                Value = data.ReadingValue,
+                                TimeCreated = data.Time,
                                 Organization = ""
                             };
                             devicesGateway.Enqueue(JsonConvert.SerializeObject(message));                                
@@ -146,13 +189,13 @@
 
                         if (sendToSQL)
                         {
-                            if (updateFlowValue)
+                            if (updateDataValue)
                             {
-                                _UpdateQueue.Enqueue(new KeyValuePair<_UpdateType, Flow>(_UpdateType.FlowValue, flow));
+                                _UpdateQueue.Enqueue(new KeyValuePair<_UpdateType, ApiDataContract>(_UpdateType.FlowValue, data));
                             }
-                            if (updateFlowSource)
+                            if (updateDataSource)
                             {
-                                _UpdateQueue.Enqueue(new KeyValuePair<_UpdateType, Flow>(_UpdateType.FlowSource, flow));
+                                _UpdateQueue.Enqueue(new KeyValuePair<_UpdateType, ApiDataContract>(_UpdateType.FlowSource, data));
                             }
                         }
                     }
@@ -179,12 +222,12 @@
 
                     if (count > 0)
                     {
-                        List<Flow> updateValueList = new List<Flow>();
-                        List<Flow> updateSourcesList = new List<Flow>();
+                        List<ApiDataContract> updateValueList = new List<ApiDataContract>();
+                        List<ApiDataContract> updateSourcesList = new List<ApiDataContract>();
 
                         for (int dequeueTry = 0; dequeueTry < count; ++dequeueTry)
                         {
-                            KeyValuePair<_UpdateType, Flow> updatePair;
+                            KeyValuePair<_UpdateType, ApiDataContract> updatePair;
                             if (_UpdateQueue.TryDequeue(out updatePair))
                             {
                                 switch (updatePair.Key)
@@ -198,7 +241,7 @@
                                 }
                             }
                         }
-                        _FlowSourcesRepository.ProcessEvents(updateSourcesList);
+                        _FlowSourceRepository.ProcessEvents(updateSourcesList);
                         _FlowDataRepository.ProcessEvents(updateValueList);
                     }
                 }
@@ -217,7 +260,7 @@
             {
                 var _gatewayQueue = new GatewayQueue<QueuedItem>();
 
-                var _AMPQSender = new AMQPSender<TrafficFlow.Common.FlowEHDataContract>(
+                var _AMPQSender = new AMQPSender<EHRawDataContract>(
                                                     amqpConfig.AMQPSAddress,
                                                     amqpConfig.EventHubName,
                                                     amqpConfig.EventHubMessageSubject,
@@ -226,7 +269,7 @@
                                                     _logger
                                                     );
 
-                var _batchSenderThread = new BatchSenderThread<QueuedItem, TrafficFlow.Common.FlowEHDataContract>(
+                var _batchSenderThread = new BatchSenderThread<QueuedItem, EHRawDataContract>(
                                                     _gatewayQueue,
                                                     _AMPQSender,
                                                     null,

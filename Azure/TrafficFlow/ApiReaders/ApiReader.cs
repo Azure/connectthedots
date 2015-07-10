@@ -1,20 +1,13 @@
-﻿namespace WorkerHost
+﻿namespace ApiReaders
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
-    using System.Linq;
     using System.Net;
-    using System.Runtime.Serialization.Json;
     using System.Text;
     using System.Threading.Tasks;
-    using System.Web.Script.Serialization;
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
-
-    using TrafficFlow.Common;
-
     
 
     public class ApiReader
@@ -25,12 +18,12 @@
             _url = url;
         }
 
-        public async Task<IList<Flow>> GetTrafficFlowsAsJson()
+        public async Task<IList<T>> GetTrafficFlowsAsJson<T>()
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(_url);
             request.Method = "GET";
 
-            IList<Flow> messagePayloads = null;
+            IList<T> messagePayloads = null;
 
             using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
             {
@@ -48,7 +41,7 @@
                         try
                         {
                             messagePayloads =
-                                JsonConvert.DeserializeObject<IList<Flow>>(responseJSON);
+                                JsonConvert.DeserializeObject<IList<T>>(responseJSON);
                         }
                         catch (Exception e)
                         {

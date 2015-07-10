@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Threading.Tasks;
-using TrafficFlow.Common.Utils;
+using Data.Contracts;
+using Data.Repositories.Utils;
 
-namespace TrafficFlow.Common.Repositories
+namespace Data.Repositories
 {
-    public class FlowSourcesRepository
+    public class DataSourceRepository
     {
         private const string Id = "Id";
         private const string Region = "Region";
@@ -28,12 +28,12 @@ namespace TrafficFlow.Common.Repositories
 
         private readonly string _sqlDatabaseConnectionString;
 
-        public FlowSourcesRepository(string sqlDatabaseConnectionString)
+        public DataSourceRepository(string sqlDatabaseConnectionString)
         {
             _sqlDatabaseConnectionString = sqlDatabaseConnectionString;
         }
 
-        public void ProcessEvents(IList<Flow> eventDataList)
+        public void ProcessEvents(IList<ApiDataContract> eventDataList)
         {
             if (eventDataList == null)
             {
@@ -64,15 +64,15 @@ namespace TrafficFlow.Common.Repositories
                     foreach (var eventData in eventDataList)
                     {
                         table.Rows.Add(
-                            eventData.FlowDataID,
+                            eventData.DataID,
                             eventData.Region,
                             eventData.StationName,
-                            eventData.FlowStationLocation.Description,
-                            eventData.FlowStationLocation.Direction,
-                            eventData.FlowStationLocation.Latitude,
-                            eventData.FlowStationLocation.Longitude,
-                            eventData.FlowStationLocation.MilePost,
-                            eventData.FlowStationLocation.RoadName
+                            eventData.StationLocation.Description,
+                            eventData.StationLocation.Direction,
+                            eventData.StationLocation.Latitude,
+                            eventData.StationLocation.Longitude,
+                            eventData.StationLocation.MilePost,
+                            eventData.StationLocation.RoadName
                             );
                     }
 
@@ -100,7 +100,7 @@ namespace TrafficFlow.Common.Repositories
             }
         }
 
-        public IList<Flow> FetchAll()
+        public IList<ApiDataContract> FetchAll()
         {
             try
             {
@@ -116,17 +116,17 @@ namespace TrafficFlow.Common.Repositories
 
                     // Execute the query
 
-                    IList<Flow> result = new List<Flow>();
+                    IList<ApiDataContract> result = new List<ApiDataContract>();
                     using (SqlDataReader r = sqlCommand.ExecuteReader())
                     {
                         while (r.Read())
                         {
-                            Flow flow = new Flow
+                            ApiDataContract flow = new ApiDataContract
                             {
-                                FlowDataID = r.SafeParse<int>(Id),
+                                DataID = r.SafeParse<int>(Id),
                                 Region = r.SafeParse<string>(Region),
                                 StationName = r.SafeParse<string>(StationName),
-                                FlowStationLocation = new FlowStationLocation
+                                StationLocation = new StationLocation
                                 {
                                     Description = r.SafeParse<string>(LocationDescription),
                                     Direction = r.SafeParse<string>(LocationDirection),

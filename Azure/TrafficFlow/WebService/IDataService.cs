@@ -10,7 +10,7 @@ using System.Text;
 namespace WebService
 {
     [ServiceContract]
-    public interface IFlowService
+    public interface IDataService
     {
 
         [OperationContract]

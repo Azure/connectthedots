@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace TrafficFlow.Common
+namespace Data.Contracts
 {
     [DataContract]
-    public class FlowEHDataContract
+    public class EHRawDataContract
     {
         [DataMember(Name = "FlowDataID")]
-        public string FlowDataID { get; set; }
+        public string DataID { get; set; }
 
         [DataMember(Name = "Region")]
         public string Region { get; set; }

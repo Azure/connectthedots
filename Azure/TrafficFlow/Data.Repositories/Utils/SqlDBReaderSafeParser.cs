@@ -2,7 +2,7 @@
 using System.Data.SqlClient;
 using System.Reflection;
 
-namespace TrafficFlow.Common.Utils
+namespace Data.Repositories.Utils
 {
     public static class SqlDBReaderSafeParser
     {

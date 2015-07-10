@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace TrafficFlow.Common
+namespace Data.Contracts
 {
     [Serializable]
     [DataContract]
-    public class FlowStationLocation
+    public class StationLocation
     {
         [DataMember(Name = "Description")]
         public string Description;
@@ -28,16 +28,16 @@ namespace TrafficFlow.Common
 
     [Serializable]
     [DataContract]
-    public class Flow
+    public class ApiDataContract
     {
         [DataMember(Name = "FlowDataID")]
-        public int FlowDataID;
+        public int DataID;
 
         [DataMember(Name = "FlowReadingValue")]
-        public int FlowReadingValue;
+        public int ReadingValue;
 
         [DataMember(Name = "FlowStationLocation")]
-        public FlowStationLocation FlowStationLocation;
+        public StationLocation StationLocation;
 
         [DataMember(Name = "Region")]
         public string Region;
