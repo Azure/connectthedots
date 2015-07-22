@@ -34,59 +34,45 @@ IronPythonPlatform = 'cli'
 if sys.platform != IronPythonPlatform:
     from BLEMoistureSensor import BLEMoistureSensor
 
-Org =  "Your organization"
-Disp = "Sensor display name"                    # will be the label for the curve on the chart
-GUID = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"   # ensures all the data from this sensor appears on the same chart.  You can
-                                                # use the Tools/Create GUID in Visual Studio to create.
-                                                # The last 6 bytes will be
-                                                # replaced with the mac
-                                                # address of the BLE module
-                                                # that is transmitting the
-                                                # moisture data.
-Locn = "Sensor location"
-
-Vendor = 0xfffe                                 # Vendor ID for our custom device
-Product = 0xfffe                                # Product ID for our custom device
-HOST = '127.0.0.1'   
-PORT = 5002
-
 CONNECT_RETRY_INTERVAL = 2
 EXCEPTION_THRESHOLD = 3
 SEND_INTERVAL = 5
 
 s = None
-config = {}
+deviceConfig = {}
+sensorAgentConfig = None
 
 def processSensorData(macAddress, value) :
     global s
-    global config
+    global deviceConfig
+    global sensorAgentConfig
     timeStr = datetime.datetime.utcnow().isoformat()
 
     macAddressRecognized = False
 
     # replace last group of digits with mac address of BLE sensor board
-    deviceID = GUID
+    deviceID = sensorAgentConfig["GUID"]
     deviceID = deviceID[:24] + macAddress
     JSONString = "{"
-    JSONString += "\"value\":" + value
+    JSONString += "\"value\": %s" % value
     JSONString += ",\"guid\":\"" + deviceID
 
     macAddressKey = macAddress
     displayName = ""
-    if macAddress in config:
+    if macAddress in deviceConfig:
         macAddressRecognized = True
-        displayName = config[macAddressKey]["DisplayName"]
-    elif '*' in config:
+        displayName = deviceConfig[macAddressKey]["DisplayName"]
+    elif '*' in deviceConfig:
         macAddressKey = '*'
         macAddressRecognized = True
         displayName = macAddress
 
     if macAddressRecognized == True:
-        JSONString += "\",\"organization\":\"" + config[macAddressKey]["Organization"]
+        JSONString += "\",\"organization\":\"" + deviceConfig[macAddressKey]["Organization"]
         JSONString += "\",\"displayname\":\"" + displayName
-        JSONString += "\",\"unitofmeasure\":\"" + config[macAddressKey]["UnitsOfMeasure"]
-        JSONString += "\",\"measurename\":\"" + config[macAddressKey]["MeasureName"]
-        JSONString += "\",\"location\":\"" + config[macAddressKey]["Location"]
+        JSONString += "\",\"unitofmeasure\":\"" + deviceConfig[macAddressKey]["UnitsOfMeasure"]
+        JSONString += "\",\"measurename\":\"" + deviceConfig[macAddressKey]["MeasureName"]
+        JSONString += "\",\"location\":\"" + deviceConfig[macAddressKey]["Location"]
         JSONString += "\",\"timecreated\":\"" + timeStr + "\""
         JSONString += "}"
 
@@ -98,23 +84,33 @@ def processSensorData(macAddress, value) :
 
 def main() :
     global s
-    global config
+    global deviceConfig
+    global sensorAgentConfig
 
-    # parse configuration CSV file
+    # parse SensorAgent configuration CSV file
     try:
-        with open('DeviceConfig.csv') as csvfile:
-            configSource = csv.DictReader(csvfile) 
-            for row in configSource:
-                config[row["MACAddress"]] = row
-
-        if sys.platform == IronPythonPlatform:
-            processSensorData('1', '0.035001')
-            processSensorData('2', '0.1234567')
-            processSensorData('23123123', '0.00000000')
-
+        with open('SensorAgentConfig.csv') as sensorAgentConfigFile:
+            sensorAgentConfigSource = csv.DictReader(sensorAgentConfigFile) 
+            for row in sensorAgentConfigSource :
+                sensorAgentConfig = row
+                # we only care about first row in config file
+                break;
     except:
         print "Error reading config file. Please correct before continuing."
         sys.exit()
+
+
+    # parse device configuration (BLE device) CSV file
+    try:
+        with open('DeviceConfig.csv') as deviceConfigFile:
+            deviceConfigSource = csv.DictReader(deviceConfigFile) 
+            for row in deviceConfigSource:
+                deviceConfig[row["MACAddress"]] = row
+    except:
+        print "Error reading config file. Please correct before continuing."
+        sys.exit()
+
+    processSensorData( "DEADF00D", 0.35 );
 
     try:
         # setup moisture sensor
@@ -128,7 +124,7 @@ def main() :
             print("Socket created.")
             while True:
                 try:
-                    s.connect((HOST, PORT))
+                    s.connect((sensorAgentConfig["HOST"], sensorAgentConfig["PORT"]))
                     break
                 except socket.error as msg:
                     print("Socket connection failed. Error Code : " + str(msg[0]) + " Message " + msg[1])
