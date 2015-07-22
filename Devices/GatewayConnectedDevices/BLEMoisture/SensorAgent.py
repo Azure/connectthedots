@@ -72,15 +72,18 @@ def processSensorData(macAddress, value) :
     JSONString += ",\"guid\":\"" + deviceID
 
     macAddressKey = macAddress
+    displayName = ""
     if macAddress in config:
         macAddressRecognized = True
+        displayName = config[macAddressKey]["DisplayName"]
     elif '*' in config:
         macAddressKey = '*'
         macAddressRecognized = True
+        displayName = macAddress
 
     if macAddressRecognized == True:
         JSONString += "\",\"organization\":\"" + config[macAddressKey]["Organization"]
-        JSONString += "\",\"displayname\":\"" + config[macAddressKey]["DisplayName"]
+        JSONString += "\",\"displayname\":\"" + displayName
         JSONString += "\",\"unitofmeasure\":\"" + config[macAddressKey]["UnitsOfMeasure"]
         JSONString += "\",\"measurename\":\"" + config[macAddressKey]["MeasureName"]
         JSONString += "\",\"location\":\"" + config[macAddressKey]["Location"]
