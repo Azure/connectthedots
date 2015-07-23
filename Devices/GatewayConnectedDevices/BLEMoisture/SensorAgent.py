@@ -110,8 +110,6 @@ def main() :
         print "Error reading config file. Please correct before continuing."
         sys.exit()
 
-    processSensorData( "DEADF00D", 0.35 );
-
     try:
         # setup moisture sensor
         if sys.platform != 'cli':
@@ -121,15 +119,15 @@ def main() :
         # setup server socket
         if Debug == False :
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            print("Socket created.")
+            print "Socket created."
             while True:
                 try:
-                    s.connect((sensorAgentConfig["HOST"], sensorAgentConfig["PORT"]))
+                    s.connect((sensorAgentConfig["Host"], int(sensorAgentConfig["Port"])))
                     break
                 except socket.error as msg:
-                    print("Socket connection failed. Error Code : " + str(msg[0]) + " Message " + msg[1])
+                    print "Socket connection failed. Error Code : " + str(msg[0]) + " Message " + msg[1]
                     time.sleep(CONNECT_RETRY_INTERVAL)
-                    print ("Socket connection succeeded.")
+                    print "Socket connection succeeded."
 
         # this will listen forever for advertising events and call
         # processSensorData() when data arrives
@@ -137,7 +135,7 @@ def main() :
             moistureSensor.Listen()
 
     except KeyboardInterrupt: 
-        print("Continuous polling stopped")
+        print "Continuous polling stopped"
 
 if __name__ == '__main__':
     main()
