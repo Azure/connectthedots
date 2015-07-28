@@ -68,13 +68,13 @@
     <Reference Include="Gadgeteer.WebServer, Version=2.43.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="GHI.Networking, Version=4.3.6.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="GHI.Networking, Version=4.3.7.9, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="GHIElectronics.Gadgeteer.FEZSpider, Version=4.3.6.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="GTM.GHIElectronics.EthernetJ11D, Version=4.3.6.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="GTM.GHIElectronics.EthernetJ11D, Version=4.3.7.9, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="GTM.GHIElectronics.LightSense, Version=4.3.6.0, Culture=neutral, processorArchitecture=MSIL">
@@ -83,7 +83,7 @@
     <Reference Include="GTM.GHIElectronics.TempHumidSI70, Version=4.3.6.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="GTM.GHIElectronics.USBClientDP, Version=4.3.6.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="GTM.GHIElectronics.USBClientSP, Version=4.3.7.9, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Json.NetMF">
