@@ -1,8 +1,4 @@
-﻿#define ETHERNET
-//#define WIFI
-//#define CELLULAR
-
-//  ---------------------------------------------------------------------------------
+﻿//  ---------------------------------------------------------------------------------
 //  Copyright (c) Microsoft Open Technologies, Inc.  All rights reserved.
 // 
 //  The MIT License (MIT)
@@ -35,62 +31,55 @@ using System.Threading;
 using Amqp;
 using Amqp.Framing;
 using Amqp.Types;
+using Gadgeteer.Modules.GHIElectronics;
+using GHI.Networking;
 using Json.NETMF;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Hardware;
-using Microsoft.SPOT.Net.NetworkInformation;
-using Microsoft.SPOT.Time;
 using GT = Gadgeteer;
 using GTM = Gadgeteer.Modules;
-using Gadgeteer.Modules.GHIElectronics;
-using GHI.Networking;
 
 namespace ConnectTheDotsGadgeteer
 {
     public partial class Program
     {
+
         #region Confidential Settings
 
-#if (WIFI)
-        private const string SSID = "YourSSID";
-        private const string WIFI_PASSWORD = "WifiPassword";
-#endif
+        //private const string SSID = "YourSSID";
 
-#if (CELLULAR)
-        //Cellular connection credentials
-        private const string apn = "YourAPNURL";
-        private const string username = "CellularUserName";
-        private const string password = "CellularPassword";
-#endif
+        //private const string WIFI_PASSWORD = "WifiPassword";
+
+        private const string apn = "apn.zerogravitywireless.com";
+        private const string username = "";
+        private const string password = "";
+
+        // Azure Event Hub connection information
+        private const string AMQPAddress =
+            "amqps://D1:%2FJAslH3L%2FA9LySC8%2B1CzUiSjyWtAnfxyvj2bZYd95DQ%3D@blakeyyc-ns.servicebus.windows.net";
+
+        // unique GUID per device. Use GUIDGEN to generate new one
+        private const string SensorGUID = "AC615ABE-3C0C-41C3-991F-B8A9009EE04D";
 
         #endregion
 
-        //// Azure Event Hub connection information
-        //private const string AMQPAddress = "amqps://{key-name}:{key}@{namespace-name}.servicebus.windows.net"; // Azure event hub connection string
-
-        //private const string EventHub = "ehdevices"; // Azure event hub name
-        //private const string SensorName = "Gadgeteer"; // Name of the device you want to display
-        //private const string SensorGUID = "{GUID}"; // unique GUID per device. Use GUIDGEN to generate new one
-
-        //private const string Organization = "MSOpenTech"; // Your organization name
-        //private const string Location = "My Room"; // Location of the device
+        // Azure Event Hub connection information
+        private const string SensorName = "Cellular Gadgeteer"; // Name of the device you want to display
+        private const string Location = "Could be anywhere"; // Location of the device
+        private const string EventHub = "ehdevices"; // Azure event hub name
+        private const string Organization = "ZingPow"; // Your organization name
 
         // Define the frequency at which we want the device to send its sensor data (in milliseconds)
-        const int SendFrequency = 10000;
+        private const int SendFrequency = 10000;
         private readonly GT.Timer _timer = new GT.Timer(SendFrequency);
 
-        // Using InterlockExchange to ensure there is no concurrency in using the AMQP connexion
-        private static int _isSendingMessage;
-        
         // AMQP connection to Azure Event Hubs resources
         private Address _address;
         private Connection _connection;
         private SenderLink _sender;
         private Session _session;
-
-        //TimeServer Settings
-        private int _daylightSavingsShift;
-        private const int LocalTimeZone = -7 * 60;
+        // Using InterlockExchange to ensure there is no concurrency in using the AMQP connexion
+        private static int _isSendingMessage;
 
         // This method is run when the mainboard is powered up or reset.   
         private void ProgramStarted()
@@ -100,8 +89,7 @@ namespace ConnectTheDotsGadgeteer
 
             _timer.Tick += _timer_Tick;
 
-#if (CELLULAR)
-            //setup event handlers needed for cellular connection
+            //setup event handlers needed for cellular module for this project
             cellularRadio.NetworkDown += cellularRadio_NetworkDown;
             cellularRadio.NetworkUp += cellularRadio_NetworkUp;
 
@@ -114,24 +102,8 @@ namespace ConnectTheDotsGadgeteer
             cellularRadio.LineReceived += (s, e) => Debug.Print("Recv: " + e.TrimEnd('\r', '\n')); //Handy for debugging
 
             cellularRadio.PowerOn();
-#endif
-
-#if (!CELLULAR)
-            NetworkChange.NetworkAddressChanged += NetworkChange_NetworkAddressChanged;
-            NetworkChange.NetworkAvailabilityChanged += NetworkChange_NetworkAvailabilityChanged;
-#endif
-#if (WIFI)
-            WifiSetup(SSID, WIFI_PASSWORD);
-#endif
-
-#if (ETHERNET)
-            EthernetSetup();
-#endif
         }
 
-#if (CELLULAR)
-#region Cellular Routines
-        //Cellular Connection routines
         private void cellularRadio_GprsNetworkRegistrationChanged(CellularRadio sender,
     CellularRadio.NetworkRegistrationState networkState)
         {
@@ -212,210 +184,6 @@ namespace ConnectTheDotsGadgeteer
             }
         }
 
-        public static bool NTPTime(string TimeServer, int GmtOffset = 0)
-        {
-            Socket s = null;
-            try
-            {
-                EndPoint rep = new IPEndPoint(Dns.GetHostEntry(TimeServer).AddressList[0], 123);
-                s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                var ntpData = new byte[48];
-                Array.Clear(ntpData, 0, 48);
-                ntpData[0] = 0x1B; // Set protocol version
-                s.SendTo(ntpData, rep); // Send Request   
-                if (s.Poll(30 * 1000 * 1000, SelectMode.SelectRead)) // Waiting an answer for 30s, if nothing: timeout
-                {
-                    s.ReceiveFrom(ntpData, ref rep); // Receive Time
-                    byte offsetTransmitTime = 40;
-                    ulong intpart = 0;
-                    ulong fractpart = 0;
-                    for (var i = 0; i <= 3; i++) intpart = (intpart << 8) | ntpData[offsetTransmitTime + i];
-                    for (var i = 4; i <= 7; i++) fractpart = (fractpart << 8) | ntpData[offsetTransmitTime + i];
-                    var milliseconds = (intpart * 1000 + (fractpart * 1000) / 0x100000000L);
-                    s.Close();
-                    var dateTime = new DateTime(1900, 1, 1) +
-                                   TimeSpan.FromTicks((long)milliseconds * TimeSpan.TicksPerMillisecond);
-
-                    Utility.SetLocalTime(dateTime); //sets the time as UTC
-
-                    return true;
-                }
-                s.Close();
-            }
-            catch
-            {
-                try
-                {
-                    s.Close();
-                }
-                catch
-                {
-                }
-            }
-            return false;
-        }
-#endregion
-#endif
-
-#if (WIFI)
-#region WIFI Routines
-        private void WifiSetup(string ssid, string key)
-        {
-            wifiRS21.NetworkInterface.Open();
-
-            wifiRS21.NetworkInterface.EnableDhcp();
-
-            wifiRS21.NetworkInterface.EnableDynamicDns();
-
-            try
-            {
-                wifiRS21.NetworkInterface.Join(ssid, key);
-            }
-            catch (Exception e)
-            {
-                Debug.Print(e.Message);
-            }
-        }
-
-        private void NetworkChange_NetworkAddressChanged(object sender, EventArgs e)
-        {
-            Debug.Print("Network Address Change to: " + wifiRS21.NetworkInterface.IPAddress);
-            if (wifiRS21.NetworkInterface.IPAddress != "0.0.0.0")
-            {
-                Debug.Print("Gateway Address: " + wifiRS21.NetworkInterface.GatewayAddress);
-                foreach (var dns in wifiRS21.NetworkInterface.DnsAddresses)
-                {
-                    Debug.Print("DNS Address: " + dns);
-                }
-
-                // get Internet Time using SNTP
-                GetInternetTime();
-
-                // Initialize AMQP _connection with Azure Event Hub
-                InitAMQPconnection();
-
-                _timer.Start();
-            }
-        }
-#endregion
-#endif
-
-#if (ETHERNET)
-#region (Ethernet Routines)
-        private void EthernetSetup()
-        {
-            ethernetJ11D.NetworkInterface.EnableDhcp();
-
-            ethernetJ11D.NetworkInterface.EnableDynamicDns();
-
-            ethernetJ11D.NetworkInterface.Open();
-        }
-         
-
-        private void NetworkChange_NetworkAddressChanged(object sender, EventArgs e)
-        {
-            Debug.Print("Network Address Change to: " + ethernetJ11D.NetworkInterface.IPAddress);
-            if (ethernetJ11D.NetworkInterface.IPAddress != "0.0.0.0")
-            {
-                Debug.Print("IP Address: " + ethernetJ11D.NetworkInterface.IPAddress);
-                Debug.Print("Gateway Address: " + ethernetJ11D.NetworkInterface.GatewayAddress);
-                foreach (string dns in ethernetJ11D.NetworkInterface.DnsAddresses)
-                {
-                    Debug.Print("DNS Address: " + dns);
-                }
-
-                // get Internet Time using SNTP
-                GetInternetTime();
-
-                // Initialize AMQP _connection with Azure Event Hub
-                InitAMQPconnection();
-
-                _timer.Start();
-            }
-        }
-#endregion
-#endif
-
-#if (!CELLULAR)
-#region TimeServer
-        private void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
-        {
-            Debug.Print("network is " + (e.IsAvailable ? "Available" : "Isn't Available"));
-        }
-
-        private void GetInternetTime()
-        {
-            try
-            {
-                var NTPTime = new TimeServiceSettings();
-                NTPTime.AutoDayLightSavings = true;
-                NTPTime.ForceSyncAtWakeUp = true;
-                NTPTime.RefreshTime = 3600;
-                //Thread.Sleep(1500);
-                NTPTime.PrimaryServer = Dns.GetHostEntry("2.ca.pool.ntp.org").AddressList[0].GetAddressBytes();
-                NTPTime.AlternateServer = Dns.GetHostEntry("time.nist.gov").AddressList[0].GetAddressBytes();
-                //Thread.Sleep(1500);
-                TimeService.Settings = NTPTime;
-                TimeService.SetTimeZoneOffset(LocalTimeZone); // MST Time zone : GMT-7
-                TimeService.SystemTimeChanged += OnSystemTimeChanged;
-                TimeService.TimeSyncFailed += OnTimeSyncFailed;
-                TimeService.Start();
-                //Thread.Sleep(500);
-                TimeService.UpdateNow(0);
-                //Thread.Sleep(9000);
-                //Debug.Print("It is : " + DateTime.Now);
-
-                var time = DateTime.Now;
-
-                Utility.SetLocalTime(time);
-                TimeService.Stop();
-            }
-            catch (Exception ex)
-            {
-                Debug.Print(ex.Message);
-            }
-        }
-
-        private void OnSystemTimeChanged(Object sender, SystemTimeChangedEventArgs e)
-        // Called on successful NTP Synchronization
-        {
-            var now = DateTime.Now; // Used to manipulate dates and time
-
-            #region Check if we are in summer time and thus daylight savings apply
-
-            // Check if we are in Daylight savings. The following algorithm works pour Europe and associated countries
-            // In Europe, daylight savings (+60 min) starts the last Sunday of march and ends the last sunday of october
-
-            var aprilFirst = new DateTime(now.Year, 4, 1);
-            var novemberFirst = new DateTime(now.Year, 11, 1);
-            var sundayshift = new[] { 0, -1, -2, -3, -4, -5, -6 };
-            var marchLastSunday = aprilFirst.DayOfYear + sundayshift[(int)aprilFirst.DayOfWeek];
-            var octoberLastSunday = novemberFirst.DayOfYear + sundayshift[(int)novemberFirst.DayOfWeek];
-
-            if ((now.DayOfYear >= marchLastSunday) && (now.DayOfYear < octoberLastSunday))
-                _daylightSavingsShift = 60;
-            else
-                _daylightSavingsShift = 0;
-
-            TimeService.SetTimeZoneOffset(LocalTimeZone + _daylightSavingsShift);
-
-            #endregion
-
-            // Display the synchronized date on the Debug Console
-
-            now = DateTime.Now;
-            var date = now.ToString("dd/MM/yyyy");
-            var here = now.ToString("HH:mm:ss");
-            Debug.Print(date + " // " + here);
-        }
-
-        private void OnTimeSyncFailed(Object sender, TimeSyncFailedEventArgs e)
-        // Called on unsuccessful NTP Synchronization
-        {
-            Debug.Print("NTPService : Error synchronizing system time with NTP server");
-        }
-#endregion
-#endif
 
         private void _timer_Tick(GT.Timer timer)
         {
@@ -485,7 +253,7 @@ namespace ConnectTheDotsGadgeteer
                 {
                     // Create the AMQP message
                     var encodedTextData = Encoding.UTF8.GetBytes(payload);
-                    var message = new Message
+                    var message = new Message // Message
                     {
                         BodySection = new Data
                         {
@@ -514,6 +282,49 @@ namespace ConnectTheDotsGadgeteer
                 // release lock
                 Interlocked.Exchange(ref _isSendingMessage, 0);
             }
+        }
+
+        public static bool NTPTime(string TimeServer, int GmtOffset = 0)
+        {
+            Socket s = null;
+            try
+            {
+                EndPoint rep = new IPEndPoint(Dns.GetHostEntry(TimeServer).AddressList[0], 123);
+                s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                var ntpData = new byte[48];
+                Array.Clear(ntpData, 0, 48);
+                ntpData[0] = 0x1B; // Set protocol version
+                s.SendTo(ntpData, rep); // Send Request   
+                if (s.Poll(30 * 1000 * 1000, SelectMode.SelectRead)) // Waiting an answer for 30s, if nothing: timeout
+                {
+                    s.ReceiveFrom(ntpData, ref rep); // Receive Time
+                    byte offsetTransmitTime = 40;
+                    ulong intpart = 0;
+                    ulong fractpart = 0;
+                    for (var i = 0; i <= 3; i++) intpart = (intpart << 8) | ntpData[offsetTransmitTime + i];
+                    for (var i = 4; i <= 7; i++) fractpart = (fractpart << 8) | ntpData[offsetTransmitTime + i];
+                    var milliseconds = (intpart * 1000 + (fractpart * 1000) / 0x100000000L);
+                    s.Close();
+                    var dateTime = new DateTime(1900, 1, 1) +
+                                   TimeSpan.FromTicks((long)milliseconds * TimeSpan.TicksPerMillisecond);
+
+                    Utility.SetLocalTime(dateTime); //sets the time as UTC
+
+                    return true;
+                }
+                s.Close();
+            }
+            catch
+            {
+                try
+                {
+                    s.Close();
+                }
+                catch
+                {
+                }
+            }
+            return false;
         }
     }
 }
