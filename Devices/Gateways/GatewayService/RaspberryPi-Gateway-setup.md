@@ -15,10 +15,10 @@ To build the project you will need Visual Studio 2013 [Community Edition](http:/
 ## Configure the Raspberry Pi ##
 
 * Connect the Raspberry Pi to a power supply, keyboard, mouse, monitor, and Ethernet cable (or Wi-Fi dongle) with an Internet connection.
-* Get a Raspbian NOOBS SD Card or download a NOOBS image as per the instructions on [http://www.raspberrypi.org/downloads/](http://www.raspberrypi.org/downloads/)
-* Boot the NOOBS SD Card and choose Raspbian (see [http://www.raspberrypi.org/help/noobs-setup/](http://www.raspberrypi.org/help/noobs-setup/) for more information).
+* Get a Raspbian NOOBS SD Card or download a NOOBS image as per the instructions on [http://www.raspberrypi.org/downloads/](http://www.raspberrypi.org/downloads/){:target="_blank"}
+* Boot the NOOBS SD Card and choose Raspbian (see [http://www.raspberrypi.org/help/noobs-setup/](http://www.raspberrypi.org/help/noobs-setup/){:target="_blank"} for more information).
 * Connect to the Raspberry Pi from your laptop, either via a USB-Serial adapter or via the network via SSH (enable once as per these instructions while booting via a monitor on HDMI and a USB keyboard). To connect using SSH:
-    * For Windows, download PuTTY and PSCP from [here](http://www.putty.org/).
+    * For Windows, download PuTTY and PSCP from [here](http://www.putty.org/){:target="_blank"}.
     * Connect to the Pi using the IP address of the Pi.
 * Once you have connected to the Pi, install on it the Mono runtime and root certs required for a secure SSL connection to Azure:
     * Run the following from a shell (i.e. via SSH)
@@ -42,7 +42,7 @@ To build the project you will need Visual Studio 2013 [Community Edition](http:/
 
 * Open the Devices\Gateways\GatewayService\GatewayService.sln solution in Visual Studio
 * In Visual Studio, update \GatewayService\Gateway\Microsoft.ConnectTheDots.GatewayService\App.config with any one of the four amqp address strings returned by AzurePrep.exe, i.e. amqps://D1:xxxxxxxx@yyyyyyyy.servicebus.windows.net, and the 
-name that you assigned to your gateway. It is important that the key is being url-encoded, meaning all special characters should be replaced by their ASCII code (e.g. "=" should be replaced by "%3D". You can use tools like [http://meyerweb.com/eric/tools/dencoder/](http://meyerweb.com/eric/tools/dencoder/) to url-encode the key. Four strings you can use are in the file created on your desktop by the AzurePrep.exe utility used earlier. Copy one of those strings and replace the relevant line in App.config:
+name that you assigned to your gateway. It is important that the key is being url-encoded, meaning all special characters should be replaced by their ASCII code (e.g. "=" should be replaced by "%3D". You can use tools like [http://meyerweb.com/eric/tools/dencoder/](http://meyerweb.com/eric/tools/dencoder/){:target="_blank"} to url-encode the key. Four strings you can use are in the file created on your desktop by the AzurePrep.exe utility used earlier. Copy one of those strings and replace the relevant line in App.config:
 
 	Before:
     
@@ -65,11 +65,47 @@ name that you assigned to your gateway. It is important that the key is being ur
 
 	You can also replace the EventHubDeviceId with an ID of your choice.
 
-* Use  the file \Scripts\RaspberryPi\deploy.cmd to copy all requisite files from your computer to the Pi. To use the .CMD file, you will need to 
+* Use  the file `\Scripts\RaspberryPi\deploy.cmd` to copy all requisite files from your computer to the Pi. To use the .CMD file, you will need to 
         
     * Update the IP address
     * Change the Putty and Project directories in the .CMD file as necessary
+	    * Do not put your project directory in quotations(") as it will cause the PuTTY calls to fail.  You should see the following:
     * Change Configuration to Release or Debug to reflect whether you built the solution to Debug or Release. 
+
+	Once you had edited the above items, run `deploy.cmd` from the command line while in that directory.
+
+	If it ran correctly, you should see the following:
+
+		editing line endings for Pi
+		Processing dos2unix for certificate_update.sh
+		Processing dos2unix for autorun_install.sh
+		Processing dos2unix for kill_all.sh
+		Processing dos2unix for deploy_and_start_ctd_on_boot.sh
+		Creating GatewayService directory
+		Copying Gateway files
+		Amqp.Net.dll              | 188 kB | 188.5 kB/s | ETA: 00:00:00 | 100%
+		Microsoft.ConnectTheDots. | 17 kB |  17.5 kB/s | ETA: 00:00:00 | 100%
+		Microsoft.ConnectTheDots. | 59 kB |  59.5 kB/s | ETA: 00:00:00 | 100%
+		Microsoft.ConnectTheDots. | 32 kB |  32.0 kB/s | ETA: 00:00:00 | 100%
+		Microsoft.ConnectTheDots. | 81 kB |  81.5 kB/s | ETA: 00:00:00 | 100%
+		Microsoft.ConnectTheDots. | 13 kB |  13.0 kB/s | ETA: 00:00:00 | 100%
+		Microsoft.ConnectTheDots. | 3 kB |   3.7 kB/s | ETA: 00:00:00 | 100%
+		Microsoft.ConnectTheDots. | 25 kB |  25.5 kB/s | ETA: 00:00:00 | 100%
+		Newtonsoft.Json.dll       | 495 kB | 495.5 kB/s | ETA: 00:00:00 | 100%
+		Newtonsoft.Json.xml       | 471 kB | 471.9 kB/s | ETA: 00:00:00 | 100%
+		NLog.config               | 0 kB |   0.9 kB/s | ETA: 00:00:00 | 100%
+		NLog.dll                  | 410 kB | 410.5 kB/s | ETA: 00:00:00 | 100%
+		NLog.xml                  | 786 kB | 786.5 kB/s | ETA: 00:00:00 | 100%
+		Microsoft.ConnectTheDots. | 9 kB |   9.0 kB/s | ETA: 00:00:00 | 100%
+		Microsoft.ConnectTheDots. | 9 kB |   9.5 kB/s | ETA: 00:00:00 | 100%
+		Microsoft.ConnectTheDots. | 6 kB |   6.5 kB/s | ETA: 00:00:00 | 100%
+		copying scripts
+		certificate_update.sh     | 1 kB |   1.5 kB/s | ETA: 00:00:00 | 100%
+		autorun_install.sh        | 3 kB |   3.5 kB/s | ETA: 00:00:00 | 100%
+		kill_all.sh               | 1 kB |   1.7 kB/s | ETA: 00:00:00 | 100%
+		deploy_and_start_ctd_on_b | 3 kB |   3.9 kB/s | ETA: 00:00:00 | 100%
+		Marking autorun_once.sh and autorun_install.sh as executable
+		Run deploy_next.sh for any supplementary sensor files
     
 * On the Raspberry Pi, modify /etc/rc.local with nano:
     

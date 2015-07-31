@@ -7,11 +7,11 @@ See [Hardware](Hardware.md) file in this folder.
 ##Prepare the Arduino Uno R3 ##
 
 * Connect the Arduino Uno R3 directly to your computer with the USB cable
-* Install and run the Arduino IDE (we recommend the 1.5.8 version, with the Windows Installer) which you can find on the [Arduino.cc](http://arduino.cc/en/Main/Software) website.
-* If necessary, install the Windows device drivers for the Arduino on your computer, following the instructions [here](http://arduino.cc/en/Guide/Windows#toc4).
-* Download the Weather Shield libraries from [here](https://dlnmh9ip6v2uc.cloudfront.net/assets/b/5/9/7/f/52cd8187ce395fa7158b456c.zip) (as per the instruction in the [Weather Shield Hookup guide](https://learn.sparkfun.com/tutorials/weather-shield-hookup-guide)).
+* Install and run the Arduino IDE (we recommend the 1.5.8 version, with the Windows Installer) which you can find on the [Arduino.cc](http://arduino.cc/en/Main/Software){:target="_blank"} website.
+* If necessary, install the Windows device drivers for the Arduino on your computer, following the instructions [here](http://arduino.cc/en/Guide/Windows#toc4){:target="_blank"}.
+* Download the Weather Shield libraries from [here](https://dlnmh9ip6v2uc.cloudfront.net/assets/b/5/9/7/f/52cd8187ce395fa7158b456c.zip) (as per the instruction in the [Weather Shield Hookup guide](https://learn.sparkfun.com/tutorials/weather-shield-hookup-guide){:target="_blank"}).
     * Extract all files from the ZIP file to a temporary location, then import the two folders (HTU21D_Humidity and MPL3115A2_Pressure) in the Arduino IDE by clicking Sketch, Import Library, Add Library and selecting the folder (once for each folder).
-* In the Arduino IDE open Devices\Arduino\WeathershieldJson.ino. (It is modified from the original Sparkfun sample to send data in JSON format as well as additional self-describing fields.) Edit the code to set your own values for the first four constants (GUID - Location) - for example, DisplayName will contain the label for the sensor on the website. (If you send multiple variables (e.g. temp and humidity), you need to reproduce the UnitOfMeasure and the MeasureName fields. See the  Serial print statements in WeatherShield INO file for a more detailed implementation example).
+* In the Arduino IDE open Devices/GatewayConnectedDevices/Arduino UNO/Weather/WeatherShieldJsonWeathershieldJson.ino. (It is modified from the original Sparkfun sample to send data in JSON format as well as additional self-describing fields.) Edit the code to set your own values for the first four constants (GUID - Location) - for example, DisplayName will contain the label for the sensor on the website. (If you send multiple variables (e.g. temp and humidity), you need to reproduce the UnitOfMeasure and the MeasureName fields. See the  Serial print statements in WeatherShield INO file for a more detailed implementation example).
    
 		char GUID[] = "81E79059-A393-4797-8A7E-526C3EF9D64B";
 		char Organization[] = "Me";
