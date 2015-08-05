@@ -2,7 +2,7 @@
 As good first task we'll walk you through building a simple temperature sensing network. It can be built quickly and easily with minimal knowledge of programming or Microsoft Azure, using commodity devices available locally or online - for example an Arduino UNO board with a weather shield, connected to a Raspberry Pi sending data to an Azure website. 
 
 
-![](Arduino-Pi-IoT.png)
+![](images\Arduino-Pi-IoT.png)
 
 
 Sample code for this is included in the project, as well as for many other more elaborate scenarios.
@@ -58,4 +58,4 @@ If you select “All”, you should see raw readings from the device coming in e
 If the temperature exceeds 75 degrees (F), you should see an alert showing in the alerts table, once every 20 seconds while the temperature on any of the devices exceeds 75 degrees (F).
 If you cover the shield, you will see an alert telling you the light is turned off.
 
-![](WebSiteCapture.png)
+![](images\WebSiteCapture.png)
