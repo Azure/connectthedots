@@ -16,30 +16,48 @@ Note also that these queries are hard-coded to the data streams defined in the g
 * Make sure you have access to the  ASA preview> If you don’t, sign up at  [https://account.windowsazure.com/PreviewFeatures ](https://account.windowsazure.com/PreviewFeatures )
 * Create the first job
     * Open the Azure Management Portal, and create a new job “Aggregates”:
-        * "+” in lower left corner -> Data Services -> Stream Analytics -> Quick Create -> Job name “Aggregates”.
+        * *"+” in lower left corner > Data Services > Stream Analytics > Quick Create > Job name “Aggregates”*.
     * Create an input
         * Select the Inputs tab in the Aggregates job.
-            * Inputs tab -> Add an Input -> Data Stream, Event Hub
+            * *Inputs tab > Add an Input > Data Stream*, hit the next arrow, then *Event Hub*
         * Input Alias: “DevicesInput”
         * Subscription: “Use Event Hub from Current Subscription”
-        * Choose the namespace `<name>`-ns, where `<name>` is the name you created when running AzurePrep.exe previously to create the Event Hubs
-        * Event Hub “ehdevices”
-        * Policy Name: “StreamAnalytics”
-        * Serialization: JSON, UTF8
+        * Choose the namespace `<name>`-ns, where `<name>` is the name you created when running AzurePrep.exe previously to create the Event Hubs (this is likely automatically filled for you)
+        * Event Hub *ehdevices*
+        * Policy Name: *StreamingAnalytics*
+        * Consumer Group: Leave as *$Default*
+        * Serialization: *JSON*
+        * Encoding: *UTF8*
     * Create a query 
         * Select the Query tab in the Aggregates job
-        * Copy/paste contents “Aggregates.sql” found in the ConnectTheDots\Azure\StreamAnalyticsQueries folder in Windows Explorer
+        * Copy/paste contents `Aggregates.sql` found in the `ConnectTheDots\Azure\StreamAnalyticsQueries` folder in Windows Explorer
         * Save
         * 
 ![](AzureStreamAnalyticsQuery.png)
     * Create an output
         * Select the Output tab in the Aggregates job
-            * Output tab -> Add an Output, Event Hub,
-		* Choose the namespace <name>-ns, 
-        * Event Hub “ehdevices”
-        * Policy name “StreamAnalytics”
-        * Serialization “JSON”, UTF8
+            * *Output tab > Add an Output > Event Hub*
+        * Choose a name for the output alias.
+		* Choose the namespace <name>-ns 
+        * Event Hub: *ehdevices*
+        * Policy name: *StreamingAnalytics*
+        * Serialization: *JSON*
+        * Encoding: *UTF8*
     * Start the Job
-        * Dashboard, Start
-* Create a second job “Alerts”: as above, but use “alert.sql” contents for the query, and use "ehalerts" for the Output Event Hub, not "ehdevices".
-* Create a third job “LightSensor”: as above, but use “lightsensor.sql” contents for the query, and use "ehalerts" for the Output Event Hub.
+        * *Dashboard > Start* on the bottom bar.
+* Create a second job “Alerts”: as above, but use `alert.sql` contents for the query, and use *ehalerts* for the Output Event Hub, not *ehdevices*.
+* Create a third job “LightSensor”: as above, but use `lightsensor.sql` contents for the query, and use *ehalerts* for the Output Event Hub.
+
+Once all three are running, go check out your site at http://`<yourURL>`.azurewebsites.net/.
+
+### What these streams do ###
+Now that you have them set up, a quick explanation of what each one does would be helpful.
+
+**Aggregates** job gets the data from the temperature sensor, and creates the average within a given window. This allows us to chart the rolling average on top of the temperature chart.
+
+**Alerts** keeps tabs on the temperature max, and creates an alert if the temperature rises above 80, on both the raw data and the average coming from the Aggregates stream.
+
+**Light Sensor** issues an alert when the lights are turned off, which in the query we have provided, is when the lumen value is under 0.02.
+
+For more details on the website and what it shows, check out the [Website Details](../Website/WebsiteDetails.md).
+

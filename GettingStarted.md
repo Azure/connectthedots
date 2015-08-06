@@ -1,4 +1,4 @@
-#Getting Started#
+# Getting Started #
 As good first task we'll walk you through building a simple temperature sensing network. It can be built quickly and easily with minimal knowledge of programming or Microsoft Azure, using commodity devices available locally or online - for example an Arduino UNO board with a weather shield, connected to a Raspberry Pi sending data to an Azure website. 
 
 

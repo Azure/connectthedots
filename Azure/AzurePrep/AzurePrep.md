@@ -14,8 +14,8 @@ Make sure you have all software installed and necessary subscriptions as indicat
 
 ###Create Event Hubs###
 
-* Open the ConnectTheDots\Azure\AzurePrep\AzurePrep.sln solution in Visual Studio and build the project from the BUILD menu (Select Release, not Debug).
-* Run the application (hitting F5 in Visual Studio or double clicking on the ConnectTheDots\Azure\AzurePrep\AzurePrep\bin\Release\azureprep.exe file)
+* Open the `ConnectTheDots\Azure\AzurePrep\AzurePrep.sln` solution in Visual Studio and build the project from the *BUILD* menu (Select Release, not Debug).
+* Run the application (hitting F5 in Visual Studio or double clicking on the `ConnectTheDots\Azure\AzurePrep\AzurePrep\bin\Release\azureprep.exe` file)
 * The application will ask you for several things:
 	* Login to Azure and if you have several subscriptions, select the one you want to deploy your services on from the choice provided in the next prompt.
 	* Enter the namespace prefix you would like for your Service Bus namespace for the Event Hubs
@@ -32,7 +32,7 @@ Make sure you have all software installed and necessary subscriptions as indicat
 			amqps://D3:xxxxxxxx@yyyyyyyy.servicebus.windows.net
 			amqps://D4:xxxxxxxx@yyyyyyyy.servicebus.windows.net
 
-The AzurePrep.exe command created two Event Hubs, EHDevices and EHAlerts or a single EHDevices one depending on your choice during the execution.
+The `AzurePrep.exe` command created two Event Hubs, EHDevices and EHAlerts or a single EHDevices one depending on your choice during the execution.
 It also created four endpoints for AMQP connections from your remote devices such as Raspberry Pi devices. If you deleted or can't find the file AzurePrep created on your desktop, you can retrieve the endpoint strings by 
 
 1. Launching http://manage.windowsazure.com
@@ -47,10 +47,10 @@ Finally, and depending on your choice during the execution, the tool created the
 ###Create Website config info###
 You'll need to create the website configuration info.  This is easily done by the following:
 
-* Run the application ConnectTheDots\Azure\AzurePrep\CreateWebConfig\bin\Release\CreateWebConfig.exe
-*  Login using your Azure subscription credentials
+* Run the application `ConnectTheDots\Azure\AzurePrep\CreateWebConfig\bin\Release\CreateWebConfig.exe`
+* Login using your Azure subscription credentials
 * Select the namespace prefix and location you chose when creating the Event Hubs
 * The application has now created a web.config file and put it on your desktop. You need to copy that file over the existing web.config file in the ConnectTheDotsWebSite folder of the Website project before you publish your site.
 
 
-Next step is [Device Setup](../../Devices/DeviceSetup.md)
+The next step in the getting started project is [Device Setup](../../Devices/DeviceSetup.md).

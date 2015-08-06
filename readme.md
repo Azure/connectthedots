@@ -16,5 +16,5 @@ If you're new to the project, we recommend the [Getting Started](GettingStarted.
 ####[Introduction](Introduction.md)####
 Visit the [Introduction](Introduction.md) page for more details into how the project works.
 
-####Available Devices####
-For more devices and code samples check out the ever growing list of supported gateways and sensors.
+####[Available Devices](SupportedDevices.md)####
+For more devices and code samples check out the ever growing list of [supported gateways and sensors](SupportedDevices.md).

@@ -4,4 +4,4 @@ To set up a Raspberry Pi as a simple gateway for connecting Arduino or other sen
 2. Power supply
 3. Case (optional)
 
-Note: Only the model above has been tested. 
+**Note**: Only the model above has been tested. 
