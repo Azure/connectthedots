@@ -12,3 +12,8 @@ If you have Stream Analytics set up, such as for temperature in our getting star
 
 #### Hover over data streams ####
 If you hover over the data stream on the left, you'll be presented with the location of the device.  In the case of the getting started project, you'll see both the public and local IP address of your gateway.
+
+#### Alert table ####
+Below the charts, you'll see a table listing all the real time alerts, including the message, time, which device, and what alert was fired.
+
+![](AlertsTable.png)
