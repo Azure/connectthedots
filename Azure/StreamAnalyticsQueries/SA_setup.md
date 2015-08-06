@@ -1,14 +1,15 @@
-The instructions below will help you setup the Stream Analytics queries in the Connect The Dots starter solution, but they can be adapted as necessary for other scenarios. This document assumes you have all the necessary software and subscriptions and that you cloned or downloaded the ConnectTheDots.io project on your machine.
+# Stream Analytics Setup #
+The instructions below will help you setup the Stream Analytics queries in the Connect The Dots getting started project, but they can be adapted as necessary for other scenarios. This document assumes you have all the necessary software and subscriptions and that you cloned or downloaded the ConnectTheDots.io project on your machine.
 
 ## Prerequisites ##
 
-Make sure you have all software installed and necessary subscriptions as indicated in the Readme.md file for the project. To repeat them here, you need
+Make sure you have all software installed and necessary subscriptions as indicated in the Introduction.md file for the project. To repeat them here, you need
 
 1. Microsoft Azure subscription ([free trial subscription](http://azure.microsoft.com/en-us/pricing/free-trial/) is sufficient)
 1. Access to the [Azure Streaming Analytics Preview](https://account.windowsazure.com/PreviewFeatures)
-1. Visual Studio 2013 – [Community Edition](http://www.visualstudio.com/downloads/download-visual-studio-vs)
+1. Visual Studio – [Community Edition](http://www.visualstudio.com/downloads/download-visual-studio-vs)
 
-Note also that these queries are hard-coded to the data streams defined in the "starter kit" in this project, meaning the same JSON string contents, etc. Also note that the SQL queries ARE CASE SENSITIVE, so that "temperature" <> "TEMPERATURE". You should make sure that the spelling and case of the incoming measure names are the same as in the SQL queries.
+Note also that these queries are hard-coded to the data streams defined in the getting started walkthrough in this project, meaning the same JSON string contents, etc. Also note that the SQL queries ARE CASE SENSITIVE, so that "temperature" <> "TEMPERATURE". You should make sure that the spelling and case of the incoming measure names are the same as in the SQL queries.
 
 ## Create three Azure Stream Analytics (ASA) jobs ##
 

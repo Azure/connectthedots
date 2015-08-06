@@ -1,14 +1,15 @@
+# Website Publish #
 This document explains how to build and deploy a sample website that is used to show data and alerts in the Connect The Dots project. It assumes you have all necessary software and subscriptions and that you have cloned or download the ConnectTheDots.io project on your machine.
 
 ## Prerequisites ##
 
-Make sure you have all software installed and necessary subscriptions as indicated in the Readme.md file for the project. To repeat them here, you need
+Make sure you have all software installed and necessary subscriptions as indicated in the Introduction.md file for the project. To repeat them here, you need
 
 1. Microsoft Azure subscription ([free trial subscription](http://azure.microsoft.com/en-us/pricing/free-trial/) is sufficient)
 1. Access to the [Azure Streaming Analytics Preview](https://account.windowsazure.com/PreviewFeatures)
-1. Visual Studio 2013 – [Community Edition](http://www.visualstudio.com/downloads/download-visual-studio-vs)
+1. Visual Studio – [Community Edition](http://www.visualstudio.com/downloads/download-visual-studio-vs)
 
-In addition, you must have run the AzurePrep program discussed in that section, as it creates the event hubs from which the website pulls data, as well as populates the web.config file that is published for the Azure website. If you already have the event hubs and are simply republishing a website, you can just edit the web.config file manually before publishing. To do this, open ConnectTheDots\Azure\WebSite\ConnectTheDotsWebSite\web.config and find the lines
+In addition, you must have run the AzurePrep program discussed in the getting started project, as it creates the event hubs from which the website pulls data, as well as populates the `web.config` file that is published for the Azure website. If you already have the event hubs and are simply republishing a website, you can just edit the `web.config` file manually before publishing. To do this, open `ConnectTheDots\Azure\WebSite\ConnectTheDotsWebSite\web.config` and find the lines
 
     <add key="Microsoft.ServiceBus.EventHubDevices" value="ehdevices" />
     <add key="Microsoft.ServiceBus.EventHubAlerts" value="ehalerts" />
@@ -38,8 +39,10 @@ You will need to replace the last four connection strings with the appropriate v
 ## Websockets setting ##
 * Enable WebSockets for the new Azure Web site
     * Browse to https://manage.windowsazure.com and select your Azure Web Site.
-    * Click on the Configure tag. Then set WebSockets to On and Click "Save"
+    * Click on the Configure tab. Then set WebSockets to On and Click "Save"
 	
 ##Running the site
 * Open the site in a browser to verify it has deployed correctly. 
-    * At the bottom of the page you should see “Connected.”. If you see “ERROR undefined” you likely didn’t enable WebSockets for the Azure Web Site (see step d above).
+    * At the bottom of the page you should see “Connected.”. If you see “ERROR undefined” you likely didn’t enable WebSockets for the Azure Web Site (see above section).
+
+If you're following the getting started project, the next task is [Stream Analytics integration](../StreamAnalyticsQueries/SA_setup.md).

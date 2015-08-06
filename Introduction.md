@@ -53,16 +53,16 @@ If you are going to deploy the starter solution, you need to procure an Arduino 
 
 If you decide to connect another device, you can check out the samples provided in the devices sub folder containing .NET, C++ and Node.js examples. Other languages examples are coming soon! The devices currently showcased are the following:
 
-- Directly connected devices:
+- [Directly connected devices](Devices/DirectlyConnectedDevices/):
     - Intel Galileo running a C++ application and sending data from an Arduino compatible Weather Shield over AMQP
     - Intel Edison running a node.js application sending data from a TI SensorTag BLEn sensor kit over HTTP/REST
     - Gadgeteer device running a C# .Net Micro Framework application sending Gadgeteer sensors data over AMQP
     - Raspberry Pi 2 running Windows 10 IoT Core and a Universal Application sending dummy data over HTTP/REST
     - Windows Phone C# application sending the phone sensors (light and accelerometer) over HTTP/REST
     - Windows Phone C# application sending a data from a paired Microsoft Band (accelerometer, body temperature, heartbeat)over HTTP/REST
-- Gateways:
+- [Gateways](Devices/Gateways/GatewayService/):
     - Raspberry Pi supporting several types of device connections (see below) and running a C# service on top of Mono, or .NET Framework on Windows, sending data over AMQP. 
-- Gateway connected devices (devices connecting to a gateway to send their data)
+- [Gateway connected devices](Devices/GatewayConnectedDevices/) (devices connecting to a gateway to send their data)
     - Arduino UNO with one or several of the following sensors
         - Accelerometer Memsic2125
         - Temperature sensor DS18B20
