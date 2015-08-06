@@ -32,7 +32,7 @@ Once you have setup the services, published the site, provisioned and connected 
 You should see average temperature measurements showing up in the web browser every 20 seconds.
 
 If you select “All”, you should see raw readings from the device coming in every second.
-If the temperature exceeds 75 degrees (F), you should see an alert showing in the alerts table, once every 20 seconds while the temperature on any of the devices exceeds 75 degrees (F).
+If the temperature exceeds 80 degrees (F), you should see an alert showing in the alerts table, once every 20 seconds while the temperature on any of the devices exceeds 80 degrees (F).
 If you cover the shield, you will see an alert telling you the light is turned off.
 
 ![](images/WebSiteCapture.png)
