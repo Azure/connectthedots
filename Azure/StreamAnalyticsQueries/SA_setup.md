@@ -43,6 +43,10 @@ Note also that these queries are hard-coded to the data streams defined in the g
         * Policy name: *StreamingAnalytics*
         * Serialization: *JSON*
         * Encoding: *UTF8*
+        * **Note** You will likely get an error just about the same container being used as input and output. This is OK, the job will still work.
+        * 
+![](SameContainerWarning.png)
+
     * Start the Job
         * *Dashboard > Start* on the bottom bar.
 * Create a second job “Alerts”: as above, but use `alert.sql` contents for the query, and use *ehalerts* for the Output Event Hub, not *ehdevices*.
