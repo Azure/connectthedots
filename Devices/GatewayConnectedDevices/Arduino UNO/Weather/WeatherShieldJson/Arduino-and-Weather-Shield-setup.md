@@ -1,7 +1,7 @@
 # Setup Arduino and Weather Shield #
 This document explains how to setup an Arduino Uno R3 with a Sparkfun weather shield for monitoring temperature and humidity in the Connect The Dots getting started project. It assumes that you have the right tools installed and that you have cloned or downloaded the ConnectTheDots.io project on your machine.
 
-![](ArduinoWeatherShield.png)
+![](ArduinoWeatherShield.jpg)
 
 ##Hardware requirements ##
 See [Hardware](Hardware.md) file in this folder for the required hardware.
