@@ -1,3 +1,4 @@
+# Wifi Configuration #
 In our solution, the Raspberry Pi is most typically run in a headless configuration. When following the labs in your own home or office, you can usually find a keyboard, mouse, and HDMI display to use to connect to the Pi, configure WiFi, and identify the IP address. Or, you can just use a wired connection. In a classroom or lab situation, or when you are working from a laptop using WiFi, this can be more difficult, so we need to use a different approach.
 
 ##Prerequisites
@@ -74,7 +75,7 @@ You'll then type this information in. For example, the default information for o
  
 When you've entered the required information, hit control-X to exit. You'll be prompted to save, so answer "Y". Just hit enter to save over the old file.
 
-The next step is to edit the /etc/network/interfaces file to add in wlan0. To do that, at the command prompt, type:
+The next step is to edit the `/etc/network/interfaces` file to add in wlan0. To do that, at the command prompt, type:
 
     sudo nano /etc/network/interfaces
 
