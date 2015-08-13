@@ -139,8 +139,10 @@ name that you assigned to your gateway. It is important that the key is being ur
 
 * At this point your Raspberry Pi is ready to be used as a Gateway for sensor devices connected over USB to send their data to Azure Event Hubs.
 
+If you're following the getting started solution, next step is the [Sample website deployment](../../../Azure/WebSite/WebsitePublish.md).
+
 ## Wifi ##
 
 If you want to use Wifi instead of Ethernet in your configuration, you can follow [these instructions](WiFi-Configuration.md)
 
-If you're following the getting started solution, next step is the [Sample website deployment](../../../Azure/WebSite/WebsitePublish.md).
+
