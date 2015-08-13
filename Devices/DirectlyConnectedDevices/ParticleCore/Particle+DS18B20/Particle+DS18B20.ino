@@ -53,13 +53,11 @@ void loop()
     else if(f > 100)
         b.allLedsOn(255,0,0);   //very red
    
-    char payload[300];
+    char payload[255];
     
-    //If using multiple Spark / Particle devices, you will want to ensure the 'g' value is unique   
-    
-    snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"F\",\"l\":\"%s\",\"m\":\"Temperature\",\"o\":\"%s\",\"g\":\"A0000000-0000-0000-0000-000000000002\",\"v\": %f,\"d\":\"%s\" }", Locn, Org, f, Disp);
+    snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"F\",\"l\":\"%s\",\"m\":\"Temperature\",\"o\":\"%s\",\"v\": %f,\"d\":\"%s\" }", Locn, Org, f, Disp);
     Spark.publish("ConnectTheDots", payload);
     
-    //snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"%%\",\"l\":\"%s\",\"m\":\"Humidity\",\"o\":\"%s\",\"g\":\"A0000000-0000-0000-0000-000000000002\",\"v\": %f,\"d\":\"%s\" }", Locn, Org, h, Disp);
+    //snprintf(payload, sizeof(payload), "{ \"s\":\"wthr\", \"u\":\"%%\",\"l\":\"%s\",\"m\":\"Humidity\",\"o\":\"%s\",\"v\": %f,\"d\":\"%s\" }", Locn, Org, h, Disp);
     //Spark.publish("ConnectTheDots", payload);    
 }
