@@ -42,4 +42,4 @@ If you select “All”, you should see raw readings from the device coming in e
 If the temperature exceeds 80 degrees (F), you should see an alert showing in the alerts table, once every 20 seconds while the temperature on any of the devices exceeds 80 degrees (F).
 If you cover the shield, you will see an alert telling you the light is turned off.
 
-![](images/WebSiteCapture.JPG)
+![](images/WebSitesCapture.jpg)
