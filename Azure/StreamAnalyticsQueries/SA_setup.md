@@ -63,5 +63,5 @@ Now that you have them set up, a quick explanation of what each one does would b
 
 **Light Sensor** issues an alert when the lights are turned off, which in the query we have provided, is when the lumen value is under 0.02.
 
-For more details on the website and what it shows, check out the [Website Details](../Website/WebsiteDetails.md).
+For more details on the website and what it shows, check out the [Website Details](../WebSite/WebsiteDetails.md).
 

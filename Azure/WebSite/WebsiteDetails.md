@@ -2,7 +2,7 @@
 
 Once you have your website running, you'll notice more is being displayed on the charts than just the raw data.  Here you'll learn about the features of the website that weren't discussed during setup.
 
-![](ASAAlertsChart.png)
+![](ASAAlertsChart.jpg)
 
 #### Dots on the graph ####
 You'll see dots showing up on the graph if you've set up alerts for that data stream.  In the getting started project, this was done with the light sensor data to register an alert whenever the light is off, as well as when the temperature rises above 80 degrees.  Hovering over that dot shows you the value during the alert, and what that alert is.
@@ -16,4 +16,4 @@ If you hover over the data stream on the left, you'll be presented with the loca
 #### Alert table ####
 Below the charts, you'll see a table listing all the real time alerts, including the message, time, which device, and what alert was fired.
 
-![](AlertsTable.png)
+![](AlertsTable.jpg)
