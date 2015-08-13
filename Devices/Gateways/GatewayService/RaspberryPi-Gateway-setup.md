@@ -143,11 +143,4 @@ name that you assigned to your gateway. It is important that the key is being ur
 
 If you want to use Wifi instead of Ethernet in your configuration, you can follow [these instructions](WiFi-Configuration.md)
 
-## Log file ##
-
-If you look at the RaspberryPiGateway.Log file on the Raspberry, you will see the same JSON formatted data being read from the serial port of the Raspberry as you saw being sent from the serial port of the Arduino:
-    
-	Parsed data from serial port as: ":0,"windgustmph_10m":0.0,"windgustdir_10m":0,"hmdt":44.9,"temp":73.1,"tempH":23.6,"rainin":0.0,"dailyrainin":0.0,"prss":100432.75,"batt":4.39,"lght":0.74}
-
-
-Shortly later in the log file you will see “Message sent” meaning that same data was sent over AMQPS to Azure.
+If you're following the getting started solution, next step is the [Sample website deployment](../../../Azure/WebSite/WebsitePublish.md).

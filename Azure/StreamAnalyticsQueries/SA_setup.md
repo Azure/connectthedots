@@ -45,7 +45,7 @@ Note also that these queries are hard-coded to the data streams defined in the g
         * Encoding: *UTF8*
         * **Note** You will likely get an error just about the same container being used as input and output. This is OK, the job will still work.
         * 
-![](SameContainerWarning.png)
+![](SameContainerWarning.jpg)
 
     * Start the Job
         * *Dashboard > Start* on the bottom bar.

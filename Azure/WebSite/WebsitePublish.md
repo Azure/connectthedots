@@ -55,6 +55,6 @@ You will need to replace the last four connection strings with the appropriate v
 
 **Note** There is a chance you won't see any data coming into your site when you first stand it up.  If that is the case, try rebooting your gateway.
 
-![](WebsiteRunning.png)
+![](WebsiteRunning.jpg)
 
 If you're following the getting started project, the next task is [Stream Analytics integration](../StreamAnalyticsQueries/SA_setup.md).

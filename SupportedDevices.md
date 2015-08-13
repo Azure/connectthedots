@@ -11,7 +11,9 @@ If you are going to deploy the getting started project, you need to procure an A
 Once you have these, head over to the [Getting Started project](GettingStarted.md) to get going.
 
 ## Additional devices ##
-If you decide to connect another device, you can check out the samples provided in the devices sub folder containing .NET, C++ and Node.js examples. Other languages examples are coming soon! The devices currently showcased are the following:
+If you decide to connect another device, you can check out the samples provided in the devices sub folder containing .NET, C++ and Node.js examples. Other languages examples are coming soon! Additionally, we encourage the community to submit new devices.  See the [Contribute](Contribute.md) page for details on how to do that.
+
+The devices currently showcased are the following:
 
 - [Directly connected devices](Devices/DirectlyConnectedDevices/):
     - Intel Galileo running a C++ application and sending data from an Arduino compatible Weather Shield over AMQP

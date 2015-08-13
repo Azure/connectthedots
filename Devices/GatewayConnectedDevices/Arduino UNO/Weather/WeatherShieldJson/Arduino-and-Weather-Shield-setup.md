@@ -31,7 +31,7 @@ See [Hardware](Hardware.md) file in this folder for the required hardware.
 	* If the upload fails, make sure you have the correct board selected on the correct COM port through `Tools > Port` menu.
 * Open the serial monitor (Shift-Ctrl-M). You should now see temperature and other data on the serial monitor. Note the format of the data being sent out the serial port of the Arduino – in the next section you’ll see the same data being read from the serial port of the Raspberry Pi:
 
-![](ArduinoCOMCapture.png)
+![](ArduinoCOMCapture.jpg)
 
 * Disconnect the Arduino from your computer
 

@@ -4,6 +4,8 @@ ConnectTheDots is put together to demonstrate the power of Azure IoT and its use
 
 The JSON string is sent to the Event Hub one of two ways: packaged into an AMQP message or in a REST packet.  This can be done via a Gateway, which is how the [Getting Started](Gettingstarted.md) sample does it, or through a device that is directly connected to the Event Hub, if the device is capable.  More details on each of those options are below.
 
+We encourage the community to contribute to the project!  See [Contribute](Contribute.md) page for details.
+
 ## Device basics ##
 The current project is built on the premise that data from sensors is sent to an Azure Event Hub in a prescribed JSON format. The minimum structure, with required attribute names, is 
 
@@ -42,7 +44,7 @@ We even have some devices running in separate processes as a Python script, send
 In order to reproduce one of the ConnectTheDots.io scenarios, you will need the following:
 
 1. Microsoft Azure subscription ([free trial subscription](http://azure.microsoft.com/en-us/pricing/free-trial/) is sufficient)
-1. Visual Studio 2013 – [Community Edition](http://www.visualstudio.com/downloads/download-visual-studio-vs) or above
+1. Visual Studio 2013 or above – [Community Edition](http://www.visualstudio.com/downloads/download-visual-studio-vs) is sufficient
 1. [WiX Toolset](http://wixtoolset.org) - if you want to build installer of Gateway for Windows
 
 ## Where to start ##
