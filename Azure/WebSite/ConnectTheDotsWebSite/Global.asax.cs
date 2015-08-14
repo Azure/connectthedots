@@ -94,8 +94,8 @@ namespace ConnectTheDotsWebSite
                 foreach (ConsumerGroupDescription consumerGroupDesc in eventHubSettings.namespaceManager.GetConsumerGroups(eventHubSettings.client.Path))
                 {
                     // We remove any previously created consumergroups containing the word WebSite in the name
-                    if (consumerGroupDesc.Name.Contains("WebSite") && !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME"))
-                        || consumerGroupDesc.Name.Contains("local") && String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")))
+                    if (consumerGroupDesc.Name.ToLowerInvariant().Contains("website") && !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME"))
+                        || consumerGroupDesc.Name.ToLowerInvariant().Contains("local") && String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")))
                         eventHubSettings.namespaceManager.DeleteConsumerGroup(eventHubSettings.name, consumerGroupDesc.Name);
                 }
             }
@@ -177,8 +177,8 @@ namespace ConnectTheDotsWebSite
             }
             else
             {
-                eventHubDevicesSettings.consumerGroup = "WebSite";
-                eventHubAlertsSettings.consumerGroup = "WebSite";
+                eventHubDevicesSettings.consumerGroup = "website";
+                eventHubAlertsSettings.consumerGroup = "website";
             }
         }
 

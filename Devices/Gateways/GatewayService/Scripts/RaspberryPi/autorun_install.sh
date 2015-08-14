@@ -42,6 +42,8 @@ echo "$(date) => autorun.sh: calling supplementary startup script autorunUartBT.
 $GW_HOME/autorunUartBT.sh &
 echo "$(date) => autorun.sh: calling supplementary startup script autorunUart2UsbBt.sh if necessary" >> $GW_HOME/boot_sequence.log
 $GW_HOME/autorunUart2UsbBt.sh &
+echo "$(date) => autorun.sh: calling supplementary startup script autorun2.sh if necessary" >> $GW_HOME/boot_sequence.log
+$GW_HOME/autorun2.sh &
 #
 
 #

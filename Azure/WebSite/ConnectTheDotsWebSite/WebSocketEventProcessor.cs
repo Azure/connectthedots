@@ -91,6 +91,10 @@ namespace ConnectTheDotsWebSite
 							{
 								eventBodyAsString = eventBodyAsString.Replace("}{", "},{");
 							}
+                            if (eventBodyAsString.IndexOf("}\r\n{") >= 0)
+                            {
+                                eventBodyAsString = eventBodyAsString.Replace("}\r\n{", "},{");
+                            }
 							if (!eventBodyAsString.EndsWith("]"))
 								eventBodyAsString = eventBodyAsString + "]";
 							if (!eventBodyAsString.StartsWith("["))

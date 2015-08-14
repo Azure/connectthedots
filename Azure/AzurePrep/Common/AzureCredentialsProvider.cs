@@ -108,7 +108,7 @@ namespace Microsoft.ConnectTheDots.CloudDeploy.Common
                 resource: "https://management.core.windows.net/",
                 clientId: clientId,
                 redirectUri: new Uri( redirectUri ),
-                parameters: new AuthorizationParameters( requireLogin ? PromptBehavior.Always : PromptBehavior.Auto, null )
+                parameters: new PlatformParameters( requireLogin ? PromptBehavior.Always : PromptBehavior.Auto, null )
             ).Result;
 
             return result.AccessToken;

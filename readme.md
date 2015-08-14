@@ -54,6 +54,7 @@ In order to reproduce one of the ConnectTheDots.io scenarios, you will need the 
 
 1. Microsoft Azure subscription ([free trial subscription](http://azure.microsoft.com/en-us/pricing/free-trial/) is sufficient)
 1. Visual Studio 2013 – [Community Edition](http://www.visualstudio.com/downloads/download-visual-studio-vs) or above
+1. [WiX Toolset](http://wixtoolset.org) - if you want to build installer of Gateway for Windows
 
 ## Hardware prerequisites for Connect The Dots starter solution ##
 If you are going to deploy the starter solution, you need to procure an Arduino UNO and Raspberry Pi, as shown in the documentation for those devices in the appropriate folders:

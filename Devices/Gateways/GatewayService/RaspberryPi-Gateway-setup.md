@@ -73,7 +73,7 @@ name that you assigned to your gateway. It is important that the key is being ur
     
 * On the Raspberry Pi, modify /etc/rc.local with nano:
     
-		Sudo nano /etc/rc.local
+		sudo nano /etc/rc.local
  
 * When you are in the nano editor, edit rc.local to the following:
     
