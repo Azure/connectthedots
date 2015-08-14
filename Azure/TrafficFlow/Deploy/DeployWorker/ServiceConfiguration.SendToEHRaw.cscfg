@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ServiceConfiguration serviceName="WebRole" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="4" osVersion="*" schemaVersion="2015-04.2.6">
+  <Role name="WorkerHost">
+    <Instances count="1" />
+    <ConfigurationSettings>
+      <Setting name="sendToEHRaw" value="true" />
+      <Setting name="sendToEHDevices" value="false" />
+      <Setting name="sendToSQL" value="false" />
+      <Setting name="sendXMLApiRawEH" value="false" />
+    </ConfigurationSettings>
+  </Role>
+</ServiceConfiguration>
