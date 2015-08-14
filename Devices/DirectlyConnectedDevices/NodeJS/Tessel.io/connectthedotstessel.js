@@ -56,8 +56,8 @@ var led2 = tessel.led[1].output(0);
 var isWifiConnected = false;
 
 var wifiSettings = {
-  ssid: 'ConnectTheDotsWifi',
-  password: 'ConnectTheDots9*',
+  ssid: '[SSID]',
+  password: '[Key]',
   security: 'wpa2',
   timeout: 30
 };

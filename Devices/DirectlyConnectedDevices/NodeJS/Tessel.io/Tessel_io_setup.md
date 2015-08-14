@@ -25,7 +25,14 @@ Open the file connectthedots\Devices\DirectlyConnectedDevices\NodeJS\Tessel.io\c
     displayname: 'Tessel',
     organization: 'MS Open Tech',
     location:  'Here'
+    
+For WIfi connection, enter the SSID and key for your access point
 
+    ssid: '[SSID]',
+    password: '[Key]',
+    security: 'wpa2',
+    timeout: 30
+    
 ##Run the app##
 
 Start the app typing the following command in a command prompt from the project's folder
