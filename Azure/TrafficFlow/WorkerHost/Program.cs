@@ -128,7 +128,7 @@
 
             if (sendXMLApiRawEH)
             {
-                StartXMLApiProcesses();
+                Task.Run(() => StartXMLApiProcesses());
             }
 
             string url = CloudConfigurationManager.GetSetting("ApiUrl") + CloudConfigurationManager.GetSetting("AccessCode");
