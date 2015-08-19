@@ -368,7 +368,7 @@ namespace ConnectTheDotsWebSite
 				if (comp.Compare(list[m], value) < 0) lo = m + 1;
 				else hi = m - 1;
 			}
-			if (comp.Compare(list[lo], value) < 0) lo++;
+			if (lo < list.Count && comp.Compare(list[lo], value) < 0) lo++;
 			return lo;
 		}
 
