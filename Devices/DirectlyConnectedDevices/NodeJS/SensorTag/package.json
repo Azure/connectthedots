@@ -1,0 +1,20 @@
+{
+  "name": "SensorTag",
+  "version": "1.0.0",
+  "description": "SensorTag connection to Connect The Dots",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Marian C Moldovan",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^1.4.2",
+    "crypto": "0.0.3",
+    "lodash": "^3.10.1",
+    "moment": "^2.10.6",
+    "request": "^2.61.0",
+    "sensortag": "^1.1.1"
+  }
+}
