@@ -1,0 +1,12 @@
+{
+  "name": "SensorTag",
+  "version": "1.0.0",
+  "description": "SensorTag connection to Connect The Dots",
+  "main": "index.js",
+  "scripts": {
+  	"start": "node index",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Marian C Moldovan",
+  "license": "ISC"
+}
