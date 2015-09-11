@@ -1,0 +1,16 @@
+{
+  "name": "ConnectTheDots",
+  "version": "1.0.0",
+  "description": "Simple Node app sending data from sensors to Azure IoT services",
+  "main": "connectthedots.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "johnny-five": "latest",
+    "edison-io": "latest",
+    "moment": "latest"
+  }
+}

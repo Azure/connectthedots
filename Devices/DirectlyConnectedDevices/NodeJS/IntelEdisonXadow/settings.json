@@ -1,0 +1,11 @@
+﻿{
+    "namespace": "{namespace}",
+    "keyname": "{key-name}",
+    "key": "{key}",
+    "eventhubname": "ehdevices",
+    "guid1": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "guid2": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "displayname": "BeagleBoneBlack",
+    "organization": "My Org",
+    "location":  "My location"
+}
