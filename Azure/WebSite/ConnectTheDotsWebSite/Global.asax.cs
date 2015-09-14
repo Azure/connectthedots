@@ -30,6 +30,7 @@ using System.Web.Routing;
 using Microsoft.ServiceBus.Messaging;
 using Microsoft.WindowsAzure;
 using Microsoft.ServiceBus;
+using Microsoft.Azure;
 
 namespace ConnectTheDotsWebSite
 {
