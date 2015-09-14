@@ -34,21 +34,8 @@
 
     <!-- general styles -->
 
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.3/css/jquery.dataTables.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.9/css/jquery.dataTables.css" />
     <link rel="stylesheet" type="text/css" href="css/connectthedots.css" />
-
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.3/js/jquery.dataTables.min.js"></script>
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
-    <script type="text/javascript" src="js/d3utils.js"></script>
-    <script type="text/javascript" src="js/d3DataFlow.js"></script>
-    <script type="text/javascript" src="js/d3Chart.js"></script>
-    <script type="text/javascript" src="js/d3ChartControl.js"></script>
-    <script type="text/javascript" src="js/d3DataSourceSocket.js"></script>
-    <script type="text/javascript" src="js/d3CTDDataSourceSocket.js"></script>
-    <script type="text/javascript" src="js/d3CTDDataSourceFilter.js"></script>
-    <script type="text/javascript" src="js/d3CTD.js"></script>
 </head>
 <body>
     <div class="globalSettings" style="display:none">
@@ -70,7 +57,7 @@
     </div>
 
     <form id="form2" runat="server">
-        <a target="_blank" href="http://connectthedots.io"><img style="position: absolute; top: 0; right: 0; border: 0;" src="img/forkme_CTD.png" alt="Fork me on GitHub" ></a>
+        <a target="_blank" href="http://connectthedots.io"><img style="position: absolute; top: 0; right: 0; border: 0;" src="img/forkme_CTD.png" alt="Fork me on GitHub" /></a>
 
         <div class="big-block">
             <h3>Live Sensor Data</h3>
@@ -111,5 +98,18 @@
             <div id="messages"></div>
         </div>
     </form>
+
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.9/js/jquery.dataTables.min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+    <script type="text/javascript" src="js/d3utils.js"></script>
+    <script type="text/javascript" src="js/d3DataFlow.js"></script>
+    <script type="text/javascript" src="js/d3Chart.js"></script>
+    <script type="text/javascript" src="js/d3ChartControl.js"></script>
+    <script type="text/javascript" src="js/d3DataSourceSocket.js"></script>
+    <script type="text/javascript" src="js/d3CTDDataSourceSocket.js"></script>
+    <script type="text/javascript" src="js/d3CTDDataSourceFilter.js"></script>
+    <script type="text/javascript" src="js/d3CTD.js"></script>
 </body>
 </html>
