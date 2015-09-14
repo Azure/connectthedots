@@ -24,7 +24,7 @@ REM THE SOFTWARE.
 REM ---------------------------------------------------------------------------------
 set puttydir="C:\program files (x86)\PuTTY\"
 set prjdir=..\
-set board_ip=157.59.34.103
+set board_ip=xxx.xxx.xxx.xxx
 set board_usr=root
 set board_pw=
 set CTD_Home=/root/node_app_slot
@@ -46,6 +46,7 @@ echo Copying new project files
 %PSCP_CMD% %prjdir%\package.json %board_usr%@%board_ip%:%CTD_Home%/
 %PSCP_CMD% %prjdir%\settings.json %board_usr%@%board_ip%:%CTD_Home%/
 
+echo Installing/updating node modules
 del /f %TEMP%\boardconnectthedotsmacro.tmp
 echo cd %CTD_Home% >> %TEMP%\boardconnectthedotsmacro.tmp
 echo npm install >> %TEMP%\boardconnectthedotsmacro.tmp

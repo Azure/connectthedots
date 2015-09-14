@@ -32,14 +32,13 @@ To work on the code of the project, you can use your favorite editor.
 ##Prepare settings files##
 You will need to edit the settings file of the application before deploying the application on the board to apply your own connection information for your Azure Event Hub.
 
-* Open the file connectthedots\Devices\DirectlyConnectedDevices\NodeJS\IntelEdisonXadow\settings.json and edit the settings based on the configuration of your ehdevices Event Hub. Create 2 different guids (i.e. using guidgen.com) for each sensor.
+* Open the file connectthedots\Devices\DirectlyConnectedDevices\NodeJS\IntelEdisonXadow\settings.json and edit the settings based on the configuration of your ehdevices Event Hub. Create a guid (i.e. using guidgen.com) for the device.
 
                  "namespace": "{namespace}",
                  "keyname": "{key-name}",
                  "key": "{key}",
                  "eventhubname": "ehdevices",
-                 "guid1": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-                 "guid2": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+                 "guid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
                  "displayname": "Edison",
                  "organization": "My Org",
                  "location":  "My location"

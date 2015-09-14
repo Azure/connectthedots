@@ -33,7 +33,8 @@ set PUTTY_CMD=%puttydir%putty %board_usr%@%board_ip% -pw %board_pw%
 set PSCP_CMD=%puttydir%pscp -pw %board_pw% 
 
 echo Copying Project files
-%PSCP_CMD% %prjdir%\connectthedots.js %board_usr%@%board_ip%:%CTD_Home%/
+%PSCP_CMD% %prjdir%\..\Common\connectthedots.js %board_usr%@%board_ip%:%CTD_Home%/
+%PSCP_CMD% %prjdir%\inteledisonctd.js %board_usr%@%board_ip%:%CTD_Home%/
 %PSCP_CMD% %prjdir%\package.json %board_usr%@%board_ip%:%CTD_Home%/
 %PSCP_CMD% %prjdir%\settings.json %board_usr%@%board_ip%:%CTD_Home%/
 

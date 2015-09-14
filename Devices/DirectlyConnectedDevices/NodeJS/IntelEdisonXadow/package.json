@@ -1,16 +1,17 @@
 {
-  "name": "ConnectTheDots",
-  "version": "1.0.0",
+  "name": "ConnectTheDots on Intel Edison",
+  "version": "1.0.1",
   "description": "Simple Node app sending data from sensors to Azure IoT services",
-  "main": "connectthedots.js",
+  "main": "inteledisonctd.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "johnny-five": "latest",
-    "edison-io": "latest",
-    "moment": "latest"
+    "johnny-five": "^0.8.91",
+    "edison-io": "^0.8.18",
+    "crypto": "^0.0.3",
+    "moment": "^2.10.6"
   }
 }
