@@ -1,4 +1,4 @@
-This document explains how to set up an Intel Edison board to send data to Azure Event Hub using the REST interface. 
+This document explains how to set up a BeagleBone Black board to send data to Azure IoT services Hub using the REST interface. 
 It assumes that you have the right tools installed and that you have cloned or downloaded the ConnectTheDots.io project on your machine.
 
 ##Hardware requirements ##
@@ -11,7 +11,7 @@ To deploy the application you will need the following:
 * For Windows, download PuTTY and PSCP from [here](http://www.putty.org/).
 * Wired Internet access for the device.
 
-To work on the code of the project, you can use your favorite editor... 
+To work on the code of the project, you can use your favorite code editor. 
 
 ## Configure the BeagleBone Black##
 
@@ -31,14 +31,13 @@ The default BBB image comes with node.js preinstalled.
 ##Prepare settings files##
 You will need to edit the settings file of the application before deploying the application on the board to apply your own connection information for your Azure Event Hub.
 
-* Open the file connectthedots\Devices\DirectlyConnectedDevices\NodeJS\BeagleBoneBlack\settings.json and edit the settings based on the configuration of your ehdevices Event Hub and create a copule of different guids (i.e. using guidgen.com); these guid will allow to identify each of the 2 sensors we are using in this sample
+* Open the file connectthedots\Devices\DirectlyConnectedDevices\NodeJS\BeagleBoneBlack\settings.json and edit the settings based on the configuration of your ehdevices Event Hub and create a guid (i.e. using guidgen.com) for the device.
 
                  "namespace": "{namespace}",
                  "keyname": "{key-name}",
                  "key": "{key}",
                  "eventhubname": "ehdevices",
-                 "guid1": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-                 "guid2": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+                 "guid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
                  "displayname": "BeagleBoneBlack",
                  "organization": "My Org",
                  "location":  "My location"
@@ -52,7 +51,7 @@ The deployment is done using the deploy.cmd file found in the scripts subfolder:
 * After the files are copied in the /root/node_app_slot, you can test the app by typing the following commands in the remote terminal:
 
         cd /root/node_app_slot
-        node connectthedots.js
+        node beagleboneblackctd.js
 
 ##Setup the app to start automatically at boot##
  In order to have the application start automatically at boot, you need to modify the startup script rc.local.
@@ -65,7 +64,7 @@ The deployment is done using the deploy.cmd file found in the scripts subfolder:
     
 * In nano, edit the rc.local file by adding the following lines just before the "exit 0" line
 
-        /usr/local/bin/forever start -a -f --spinSleepTime 5000 /root/node_app_slot/connectthedots.js
+        /usr/local/bin/forever start -a -f --spinSleepTime 5000 /root/node_app_slot/beagleboneblackctd.js
     
 * To save the file, press CTRL + X then Y and ENTER
 * You can now reboot the board typing 
