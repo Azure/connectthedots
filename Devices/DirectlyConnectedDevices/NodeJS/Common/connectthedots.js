@@ -24,11 +24,9 @@
 
 // Using HTTP Rest connection to Azure event Hubs
 var https = require('https');
-var crypto = require('crypto');
-var moment = require('moment');
 
 // Using a json settings file for Events Hub connectivity
-var settings = require('./settings.json');
+var devicesettings;
 
 // Variables
 var connectionstring;
@@ -38,7 +36,7 @@ var fixedsastoken = false;
 // ---------------------------------------------------------------
 // validate settings from JSON file  passed as a parameter to the app
 function validate_settings(settings, options) {
-    console.log("Reading settings from config file");
+    console.log("Validating device settings");
     var missing = [];
     for (var idx in options) {
         if (settings[options[idx]] === undefined) missing.push(options[idx]);
@@ -61,6 +59,10 @@ function set_sas_token(token)
 // Create a SAS token
 // See http://msdn.microsoft.com/library/azure/dn170477.aspx
 function create_sas_token(uri, key_name, key) {
+    // We do the require in the function so that devices using fixed SAS Tokens don't need to add the libs as dependencies
+    var crypto = require('crypto');
+    var moment = require('moment');
+
     // Token expires in one hour
     var expiry = moment().add(1, 'hours').unix();
     var string_to_sign = encodeURIComponent(uri) + '\n' + expiry;
@@ -80,7 +82,7 @@ function create_sas_token(uri, key_name, key) {
 function update_sas_token()
 {
     if (!fixedsastoken)
-        sastoken = create_sas_token(connectionstring, settings.keyname, settings.key);
+        sastoken = create_sas_token(connectionstring, devicesettings.keyname, devicesettings.key);
     console.log("New SAS token generated: " + sastoken);        
 }
 
@@ -103,17 +105,19 @@ function format_sensor_data(guid, displayname, organization, location, measurena
 
 // ---------------------------------------------------------------
 // Initializes connection settings to Event Hub
-exports.init_connection = function(token)
+exports.init_connection = function(settings, token)
 {
+    devicesettings = settings;
+    
     // Validate settings
-    validate_settings(settings, ['namespace', 'keyname', 'key', 'eventhubname', 'displayname', 'guid', 'organization', 'location']);
+    validate_settings(devicesettings, ['namespace', 'keyname', 'key', 'eventhubname', 'displayname', 'guid', 'organization', 'location']);
 
     // ---------------------------------------------------------------
     // Get the full Event Hub publisher URI
-    connectionstring = 'https://' + settings.namespace + '.servicebus.windows.net' + '/' + settings.eventhubname + '/publishers/' + settings.displayname + '/messages';
+    connectionstring = 'https://' + devicesettings.namespace + '.servicebus.windows.net' + '/' + devicesettings.eventhubname + '/publishers/' + devicesettings.displayname + '/messages';
     console.log("Event Hub connection string: " + connectionstring);
  
-    if (arguments.length >0)
+    if (arguments.length >1)
     {
         fixedsastoken = true;
         sastoken = token;
@@ -132,15 +136,15 @@ exports.init_connection = function(token)
 exports.send_message = function(measurename, unitofmeasure, value)
 {
     var currentTime = new Date().toISOString();
-    var message = format_sensor_data(settings.guid, settings.displayname, settings.organization, settings.location, measurename, unitofmeasure, currentTime, value);
+    var message = format_sensor_data(devicesettings.guid, devicesettings.displayname, devicesettings.organization, devicesettings.location, measurename, unitofmeasure, currentTime, value);
 	console.log("Sending message: " + message);
     
     // Send the request to the Event Hub
     var http_options = {
             
-        hostname: settings.namespace + '.servicebus.windows.net',
+        hostname: devicesettings.namespace + '.servicebus.windows.net',
         port: 443,
-        path: '/' + settings.eventhubname + '/publishers/' + settings.displayname + '/messages',
+        path: '/' + devicesettings.eventhubname + '/publishers/' + devicesettings.displayname + '/messages',
         method: 'POST',
         headers: {
             'Authorization': sastoken,

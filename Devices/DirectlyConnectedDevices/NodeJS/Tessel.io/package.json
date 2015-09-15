@@ -1,18 +1,18 @@
 {
-  "name": "tessel_code",
-  "version": "1.0.0",
+  "name": "ConnectTheDotsTessel",
+  "version": "1.0.1",
   "description": "",
-  "main": "connectthedotstessel.js",
+  "main": "tesselctd.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "MS Open Tech",
+  "author": "Microsoft",
   "license": "MIT",
   "dependencies": {
     "ambient-attx4": "^0.2.5",
     "climate-si7020": "^0.1.1",
-    "tessel-wifi": "^0.0.1" // ,
-    // "event-hub-client": "^1.0.1"
+    "tessel-wifi": "latest",
+    "connectthedots": "file:../Common"
   }
 }

@@ -1,0 +1,11 @@
+{
+  "name": "connectthedots",
+  "version": "1.0.0",
+  "description": "Simple library to connect a node app to Azure IoT using ConnectTheDots.io",
+  "main": "connectthedots.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Microsoft",
+  "license": "MIT"
+}

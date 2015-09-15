@@ -15,7 +15,8 @@ Make sure you have setup the Wifi connection so that your Tessel board can send 
 ##Prepare settings files##
 You will need to edit the settings file of the application before deploying the application on the board to apply your own connection information for your Azure Event Hub.
 
-Open the file connectthedots\Devices\DirectlyConnectedDevices\NodeJS\Tessel.io\connectthedotstessel.js and edit the settings based on the configuration of your ehdevices Event Hub
+Open the file connectthedots\Devices\DirectlyConnectedDevices\NodeJS\Tessel.io\tesselctd.js and edit the settings based on the configuration of your ehdevices Event Hub
+Also create a new guid for the device (i.e. using a tool such as guidgen.com)
     
     namespace: '[namespace]',
     keyname: '[keyname]',
@@ -23,20 +24,27 @@ Open the file connectthedots\Devices\DirectlyConnectedDevices\NodeJS\Tessel.io\c
     eventhubname: 'ehdevices',
     guid: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
     displayname: 'Tessel',
-    organization: 'MS Open Tech',
-    location:  'Here'
+    organization: 'My Org',
+    location:  'My Location'
     
-For WIfi connection, enter the SSID and key for your access point
+In the same file, edit the settings for Wifi connection, enter the SSID and key for your access point
 
     ssid: '[SSID]',
     password: '[Key]',
     security: 'wpa2',
     timeout: 30
     
+IMPORTANT: In the same file you will have to add an SAS Token as the Tessel doesn't support SH256 encryption which is required to generate an SAS Token used to secure connection with Azure IoT services
+Search for the call to the function connectthedots.init_connection in the code and enter an SAS Token generated using a tool such as the one mentionned in the comment above the code.
+    
 ##Run the app##
+
+In the a command prompt, navigate to the project's folder connectthedots\Devices\DirectlyConnectedDevices\NodeJS\Tessel.io and run the following commands to initialize and install dependencies
+
+    npm install 
 
 Start the app typing the following command in a command prompt from the project's folder
     
-    tessel run connectthedotstessel.js
+    tessel run tesselctd.js
 
 

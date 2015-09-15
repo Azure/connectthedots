@@ -26,6 +26,7 @@
 var five = require('johnny-five');
 var Edison = require("edison-io");
 var connectthedots = require('./connectthedots.js');
+var devicesettings = require('./settings.json');
 
 // ---------------------------------------------------------------
 // Let's connect_the_dots
@@ -93,7 +94,7 @@ function connect_the_dots()
 // Init app
 
 // Init connection to Azure IoT
-connectthedots.init_connection()
+connectthedots.init_connection(devicesettings)
 
 // Init board
 var board = new five.Board({io: new Edison(Edison.Boards.Xadow)});

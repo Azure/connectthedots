@@ -1,5 +1,5 @@
 {
-  "name": "ConnectTheDots on BeagleBone Black",
+  "name": "ConnectTheDotsBeagleBoneBlack",
   "version": "1.0.1",
   "description": "Simple Node app sending data from BeagleBone Black + Grove sensors to Azure IoT services",
   "main": "beagleboneblackctd.js",

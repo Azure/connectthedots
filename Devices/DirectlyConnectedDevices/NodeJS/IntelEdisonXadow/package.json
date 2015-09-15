@@ -1,5 +1,5 @@
 {
-  "name": "ConnectTheDots on Intel Edison",
+  "name": "ConnectTheDotsIntelEdison",
   "version": "1.0.1",
   "description": "Simple Node app sending data from sensors to Azure IoT services",
   "main": "inteledisonctd.js",
