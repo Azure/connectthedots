@@ -26,6 +26,7 @@ namespace WorkerHost
             public string AnomalyDetectionApiUrl;
             public string AnomalyDetectionAuthKey;
             public string LiveId;
+            public string MeasureNameFilter;
 
             public string TukeyThresh;
             public string ZscoreThresh;
@@ -67,6 +68,8 @@ namespace WorkerHost
             config.AnomalyDetectionAuthKey = ConfigurationManager.AppSettings.Get("AnomalyDetectionAuthKey");
             config.LiveId = ConfigurationManager.AppSettings.Get("LiveId");
 
+            config.MeasureNameFilter = ConfigurationManager.AppSettings.Get("MeasureNameFilter");
+
             config.TukeyThresh = ConfigurationManager.AppSettings.Get("TukeyThresh");
             config.ZscoreThresh = ConfigurationManager.AppSettings.Get("ZscoreThresh");
 
@@ -89,7 +92,7 @@ namespace WorkerHost
             var alertEventHub = EventHubClient.CreateFromConnectionString(config.AlertEHConnectionString, config.AlertEHName);
 
             Trace.TraceInformation("Starting to receive messages...");
-            _eventHubReader.Run(config.DeviceEHConnectionString, config.DeviceEHName);
+            _eventHubReader.Run(config.DeviceEHConnectionString, config.DeviceEHName, config.MeasureNameFilter);
 
             var timerInterval = TimeSpan.FromSeconds(1);
             var alertLastTimes = new Dictionary<string, DateTime>();
