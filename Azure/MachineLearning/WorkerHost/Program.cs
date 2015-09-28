@@ -12,6 +12,7 @@ using Microsoft.ServiceBus.Messaging;
 using Microsoft.WindowsAzure.Diagnostics;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using Newtonsoft.Json;
+using WorkerHost.Data.Outputs;
 
 namespace WorkerHost
 {
@@ -34,11 +35,19 @@ namespace WorkerHost
             public bool UseMarketApi;
             public int MessagesBufferSize;
             public int AlertsIntervalSec;
+
+            public string StorageConnectionString;
+            public string BlobContainerName;
+            public string BlobNamePrefix;
+            public string SqlDatabaseConnectionString;
         }
 
         private static Analyzer        _analyzer;
         private static EventHubReader  _eventHubReader;
         private static Timer           _timer;
+
+        private static BlobWriter _blobWriter;
+        private static SQLOutputRepository _sqlOutputRepository;
 
         static void Main()
         {
@@ -78,12 +87,28 @@ namespace WorkerHost
             int.TryParse(ConfigurationManager.AppSettings.Get("MessagesBufferSize"), out config.MessagesBufferSize);
             int.TryParse(ConfigurationManager.AppSettings.Get("AlertsIntervalSec"), out config.AlertsIntervalSec);
 
+            config.StorageConnectionString = ConfigurationManager.AppSettings.Get("Microsoft.Storage.ConnectionString");
+            config.BlobContainerName = ConfigurationManager.AppSettings.Get("blobContainerName");
+            config.BlobNamePrefix = ConfigurationManager.AppSettings.Get("blobNamePrefix");
+            config.SqlDatabaseConnectionString = ConfigurationManager.AppSettings.Get("sqlDatabaseConnectionString");
 
             _analyzer = new Analyzer(config.AnomalyDetectionApiUrl, config.AnomalyDetectionAuthKey,
                 config.LiveId, config.UseMarketApi, config.TukeyThresh, config.ZscoreThresh);
 
             _eventHubReader = new EventHubReader(config.MessagesBufferSize, consumerGroupPrefix);
 
+            if (ConfigurationManager.AppSettings.Get("sendToBlob") == "true")
+            {
+                _blobWriter = new BlobWriter();
+                if (_blobWriter.Connect(config.BlobNamePrefix, config.BlobContainerName, config.StorageConnectionString))
+                {
+                    _blobWriter = null;
+                }
+            }
+            if (ConfigurationManager.AppSettings.Get("sendToSQL") == "true")
+            {
+                _sqlOutputRepository = new SQLOutputRepository(config.SqlDatabaseConnectionString);
+            }
             Process(config);
         }
 
@@ -108,6 +133,8 @@ namespace WorkerHost
 
                     Task.WaitAll(tasks.Values.ToArray());
 
+                    List<SensorDataContract> alertsToSQl = new List<SensorDataContract>();
+
                     foreach (var kvp in tasks)
                     {
                         var key = kvp.Key;
@@ -119,20 +146,39 @@ namespace WorkerHost
                             alertLastTime = DateTime.MinValue;
                         }
 
+                        
                         foreach (var alert in alerts)
                         {
                             if ((alert.Time - alertLastTime).TotalSeconds >= config.AlertsIntervalSec)
                             {
                                 Trace.TraceInformation("Alert - {0}", alert.ToString());
 
+                                string eventJSON = OutputResults(key, historicData[key].LastOrDefault(), alert);
                                 alertEventHub.Send(
-                                    new EventData(Encoding.UTF8.GetBytes(
-                                        OutputResults(key, historicData[key].LastOrDefault(),alert))));
+                                    new EventData(Encoding.UTF8.GetBytes(eventJSON)));
 
                                 alertLastTime = alert.Time;
                                 alertLastTimes[@key] = alertLastTime;
+
+                                if (historicData[key].Length > 0)
+                                {
+                                    alertsToSQl.Add(historicData[key].Last());
+                                    if (_blobWriter != null)
+                                    {
+                                        _blobWriter.WriteLine(eventJSON);
+                                    }    
+                                }
                             }
                         }
+                    }
+
+                    if (_sqlOutputRepository != null)
+                    {
+                        _sqlOutputRepository.ProcessEvents(alertsToSQl);
+                    }
+                    if (_blobWriter != null)
+                    {
+                        _blobWriter.Flush();
                     }
                 }
                 catch (Exception e)
