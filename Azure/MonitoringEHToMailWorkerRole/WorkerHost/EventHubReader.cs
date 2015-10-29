@@ -45,7 +45,8 @@ namespace WorkerHost
             NamespaceManager nsmgr = NamespaceManager.CreateFromConnectionString(connectionString);
             EventHubDescription desc = nsmgr.GetEventHub(hubName);
 
-            string consumerGroupName = _consumerGroupPrefix + DateTime.UtcNow.Ticks.ToString();
+            //we use already defined consumerGroup name to not reach limit on CG count
+            string consumerGroupName = _consumerGroupPrefix;
             ConsumerGroupDescription consumerGroupDesc = nsmgr.CreateConsumerGroupIfNotExists(new ConsumerGroupDescription(hubName, consumerGroupName));
 
             EventHubClient client = EventHubClient.CreateFromConnectionString(connectionString, hubName);

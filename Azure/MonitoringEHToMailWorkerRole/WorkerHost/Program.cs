@@ -25,7 +25,8 @@ namespace WorkerHost
             public string MessageFromAddress;
             public string MessageFromName;
             public string MessageSubject;
-
+            public string ConsumerGroupPrefix;
+            
             public IList<string> MailToList;
         }
 
@@ -36,15 +37,15 @@ namespace WorkerHost
 
         static void Main()
         {
-            StartHost("lchecker");
+            StartHost("L0cal");
         }
 
         public override void Run()
         {
-            StartHost("checker");
+            StartHost("R0le");
         }
 
-        private static void StartHost(string consumerGroupPrefix)
+        private static void StartHost(string consumerGroupSuffix)
         {
             Trace.WriteLine("Starting Worker...");
 #if DEBUG_LOG
@@ -60,13 +61,14 @@ namespace WorkerHost
                 MessageFromAddress = ConfigurationManager.AppSettings.Get("MessageFromAddress"),
                 MessageFromName = ConfigurationManager.AppSettings.Get("MessageFromName"),
                 MessageSubject = ConfigurationManager.AppSettings.Get("MessageSubject"),
-                MailToList = ConfigurationLoader.GetMailToList()
+                MailToList = ConfigurationLoader.GetMailToList(),
+                ConsumerGroupPrefix = ConfigurationManager.AppSettings.Get("ConsumerGroupPrefix") + consumerGroupSuffix,
             };
 
             var credentials = new NetworkCredential(config.SendGridUserName, config.SendGridPassword);
             _SendGridTransportWeb = new Web(credentials);
 
-            _eventHubReader = new EventHubReader(consumerGroupPrefix, OnMessage);
+            _eventHubReader = new EventHubReader(config.ConsumerGroupPrefix, OnMessage);
 
              Process();
         }
@@ -88,7 +90,7 @@ namespace WorkerHost
 
                     myMessage.From = new MailAddress(config.MessageFromAddress, config.MessageFromName);
                     myMessage.Subject = config.MessageSubject;
-                    myMessage.Text = "Mesage Received: \n" + serializedData;
+                    myMessage.Text = "Message Received: \n" + serializedData;
 
                     _SendGridTransportWeb.DeliverAsync(myMessage).Wait();
                 }
