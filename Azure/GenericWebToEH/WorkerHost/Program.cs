@@ -50,10 +50,12 @@
             AMQPConfig amqpDevicesConfig = Loader.GetAMQPConfig("TargetAMQPConfig", _logger);
             gateway = CreateGateway(amqpDevicesConfig);
 
-            NetworkCredential credeitialToUse = new NetworkCredential(CloudConfigurationManager.GetSetting("UserName"),
+            NetworkCredential credentialToUse = new NetworkCredential(CloudConfigurationManager.GetSetting("UserName"),
                 CloudConfigurationManager.GetSetting("Password"));
 
-            var readers = PrepareReaders(credeitialToUse);
+            bool useXML = CloudConfigurationManager.GetSetting("SendJson").ToLowerInvariant().Contains("false");
+
+            var readers = PrepareReaders(useXML, credentialToUse);
 
             for (; ; )
             {
@@ -78,13 +80,13 @@
             }
         }
 
-        private static IEnumerable<RawXMLWithHeaderToJsonReader> PrepareReaders(NetworkCredential credeitial)
+        private static IEnumerable<RawXMLWithHeaderToJsonReader> PrepareReaders(bool useXML, NetworkCredential credeitial)
         {
             List<RawXMLWithHeaderToJsonReader> result = new List<RawXMLWithHeaderToJsonReader>();
             var configItems = Loader.GetAPIConfigItems();
             foreach (var config in configItems)
             {
-                result.Add(new RawXMLWithHeaderToJsonReader(config.APIAddress, credeitial));
+                result.Add(new RawXMLWithHeaderToJsonReader(useXML, config.APIAddress, credeitial));
             }
             return result;
         }

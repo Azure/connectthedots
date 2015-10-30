@@ -11,15 +11,18 @@
 
     public class RawXMLWithHeaderToJsonReader
     {
-        private string _initialApiAddress;
+        private readonly string _initialApiAddress;
         private string _currentApiAddress;
 
+        private readonly bool _useXML;
         private readonly NetworkCredential _credential;
-        public RawXMLWithHeaderToJsonReader(string address, NetworkCredential credential)
+        public RawXMLWithHeaderToJsonReader(bool useXML, string address, NetworkCredential credential)
         {
             _credential = credential;
             _initialApiAddress = address;
             _currentApiAddress = address;
+
+            _useXML = useXML;
         }
 
         public string GetData()
@@ -79,8 +82,7 @@
                             }
                             if (notEmpty)
                             {
-                                return originalText;
-                                return jsonText;
+                                return _useXML ? originalText : jsonText;
                             }
                         }
                         catch (Exception e)
