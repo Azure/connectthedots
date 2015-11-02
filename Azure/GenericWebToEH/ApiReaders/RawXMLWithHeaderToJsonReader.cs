@@ -1,13 +1,10 @@
 ﻿namespace ApiReaders
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Net;
     using System.Xml;
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
 
     public class RawXMLWithHeaderToJsonReader
     {
@@ -48,41 +45,70 @@
 
                             XmlDocument doc = new XmlDocument();
                             doc.LoadXml(originalText);
-                            
-                            string jsonText = JsonConvert.SerializeXmlNode(doc);
 
-                            var messageDictionary = (IDictionary<string, object>)
-                                JsonConvert.DeserializeObject(jsonText, typeof(IDictionary<string, object>));
-                            var dataContent = (JObject)messageDictionary.First().Value;
+                            bool containsMessage = false;
 
-                            bool notEmpty = false;
-
-                            foreach (var pair in dataContent)
+                            if (doc.DocumentElement != null)
                             {
-                                var key = pair.Key;
-                                if (key.Contains("message"))
+                                foreach (XmlNode node in doc.DocumentElement.ChildNodes)
                                 {
-                                    notEmpty = true;
-                                }
-                                if (key.Contains("nextBuffer"))
-                                {
-                                    var nextBufferContent = (JObject)pair.Value;
-                                    foreach (var nextBufferPair in nextBufferContent)
+                                    if (node.Name == "message")
                                     {
-                                        if (nextBufferPair.Key == "url")
+                                        containsMessage = true;
+
+                                        XmlAttribute att = doc.CreateAttribute("json", "Array",
+                                            "http://james.newtonking.com/projects/json");
+                                        att.Value = "true";
+
+                                        if (node.Attributes != null)
                                         {
-                                            var newAddressCandidate = (string)nextBufferPair.Value;
-                                            if (newAddressCandidate.Length > 0)
+                                            node.Attributes.Append(att);
+                                        }
+
+                                        foreach (XmlNode messageNode in node.ChildNodes)
+                                        {
+                                            if (!messageNode.Name.EndsWith("Block")) continue;
+
+                                            XmlAttribute att2 = doc.CreateAttribute("json", "Array",
+                                            "http://james.newtonking.com/projects/json");
+                                            att2.Value = "true";
+                                            if (messageNode.Attributes != null)
                                             {
-                                                _currentApiAddress = newAddressCandidate;
+                                                messageNode.Attributes.Append(att2);
                                             }
+                                        }
+                                    }
+                                    else if (node.Name == "nextBuffer")
+                                    {
+                                        foreach (XmlNode nextBufferNode in node.ChildNodes)
+                                        {
+                                            if (nextBufferNode.Name != "url") continue;
+
+                                            bool changedAddress = false;
+
+                                            foreach (XmlNode child in nextBufferNode.ChildNodes)
+                                            {
+                                                if (child.NodeType != XmlNodeType.Text &&
+                                                    child.NodeType != XmlNodeType.CDATA) continue;
+
+                                                var newAddressCandidate = child.Value;
+                                                if (newAddressCandidate.Length > 0)
+                                                {
+                                                    _currentApiAddress = newAddressCandidate;
+                                                }
+                                                changedAddress = true;
+                                                break;
+                                            }
+                                            if (changedAddress) break;
                                         }
                                     }
                                 }
                             }
-                            if (notEmpty)
+                            
+                            if (containsMessage)
                             {
-                                return _useXML ? originalText : jsonText;
+                                string result = _useXML ? originalText : JsonConvert.SerializeXmlNode(doc);
+                                return result;
                             }
                         }
                         catch (Exception e)
