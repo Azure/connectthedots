@@ -69,12 +69,15 @@
                                         {
                                             if (!messageNode.Name.EndsWith("Block")) continue;
 
-                                            XmlAttribute att2 = doc.CreateAttribute("json", "Array",
-                                            "http://james.newtonking.com/projects/json");
-                                            att2.Value = "true";
-                                            if (messageNode.Attributes != null)
+                                            foreach (XmlNode blockNode in messageNode)
                                             {
-                                                messageNode.Attributes.Append(att2);
+                                                XmlAttribute att2 = doc.CreateAttribute("json", "Array",
+                                                    "http://james.newtonking.com/projects/json");
+                                                att2.Value = "true";
+                                                if (blockNode.Attributes != null)
+                                                {
+                                                    blockNode.Attributes.Append(att2);
+                                                }
                                             }
                                         }
                                     }
