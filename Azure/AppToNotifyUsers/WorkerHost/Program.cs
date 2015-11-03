@@ -19,8 +19,8 @@ namespace WorkerHost
             public string DeviceEHConnectionString;
             public string DeviceEHName;
 
-            public string SendGridUserName;
-            public string SendGridPassword;
+            public string EmailServiceUserName;
+            public string EmailServicePassword;
 
             public string MessageFromAddress;
             public string MessageFromName;
@@ -54,10 +54,10 @@ namespace WorkerHost
             config = new Configuration
             {
                 DeviceEHConnectionString =
-                    ConfigurationManager.AppSettings.Get("Microsoft.ServiceBus.ConnectionStringDevices"),
-                DeviceEHName = ConfigurationManager.AppSettings.Get("Microsoft.ServiceBus.EventHubDevices"),
-                SendGridUserName = ConfigurationManager.AppSettings.Get("SendGridUserName"),
-                SendGridPassword = ConfigurationManager.AppSettings.Get("SendGridPassword"),
+                    ConfigurationManager.AppSettings.Get("Microsoft.ServiceBus.EventHubConnectionString"),
+                DeviceEHName = ConfigurationManager.AppSettings.Get("Microsoft.ServiceBus.EventHubToMonitor"),
+                EmailServiceUserName = ConfigurationManager.AppSettings.Get("EmailServiceUserName"),
+                EmailServicePassword = ConfigurationManager.AppSettings.Get("EmailServicePassword"),
                 MessageFromAddress = ConfigurationManager.AppSettings.Get("MessageFromAddress"),
                 MessageFromName = ConfigurationManager.AppSettings.Get("MessageFromName"),
                 MessageSubject = ConfigurationManager.AppSettings.Get("MessageSubject"),
@@ -65,7 +65,7 @@ namespace WorkerHost
                 ConsumerGroupPrefix = ConfigurationManager.AppSettings.Get("ConsumerGroupPrefix") + consumerGroupSuffix,
             };
 
-            var credentials = new NetworkCredential(config.SendGridUserName, config.SendGridPassword);
+            var credentials = new NetworkCredential(config.EmailServiceUserName, config.EmailServicePassword);
             _SendGridTransportWeb = new Web(credentials);
 
             _eventHubReader = new EventHubReader(config.ConsumerGroupPrefix, OnMessage);
