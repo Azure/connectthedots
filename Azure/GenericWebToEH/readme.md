@@ -4,7 +4,7 @@ Generally speaking, you will have devices which you want to connect to Azure, an
 
 However, there are times when you do not have access to the devices or data producers, for example when you want to use public data feeds (such as the Department of Transportation's traffic information feed) as your data source. In this case you do not have the ability to put any code on the device or remote gateway to push the data to an Azure Event Hub or IoT Hub; rather, you need to set up something to pull the data from those sources and then push it to Azure. The simplest way is to run an application in Azure to do this.
 
-For this, and only this scenario, you should use the [GenericWebToEH](https://tbd) application. 
+For this, **and only this**, scenario, you should use the [GenericWebToEH](https://tbd) application. 
 
 ## Prerequisites ##
 
