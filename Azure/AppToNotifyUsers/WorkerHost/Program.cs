@@ -19,9 +19,12 @@ namespace WorkerHost
             public string DeviceEHConnectionString;
             public string DeviceEHName;
 
+
+            public string NotificationService;
             public string EmailServiceUserName;
             public string EmailServicePassword;
 
+            public string SmtpHost;
             public string MessageFromAddress;
             public string MessageFromName;
             public string MessageSubject;
@@ -32,8 +35,21 @@ namespace WorkerHost
 
         private static EventHubReader _eventHubReader;
         private static Timer _timer;
+        
         private static Web _SendGridTransportWeb;
+        private static SmtpClient _SmtpClient;
+
+        private static MailAddress _FromAddress;
+        private static MailAddress[] _ToAddress;
+
         private static Configuration config;
+
+        private static NotificationServiceType _NotificationService;
+        enum NotificationServiceType
+        {
+            Smtp = 1,
+            SendGridWeb = 2
+        }
 
         static void Main()
         {
@@ -56,8 +72,10 @@ namespace WorkerHost
                 DeviceEHConnectionString =
                     ConfigurationManager.AppSettings.Get("Microsoft.ServiceBus.EventHubConnectionString"),
                 DeviceEHName = ConfigurationManager.AppSettings.Get("Microsoft.ServiceBus.EventHubToMonitor"),
+                NotificationService = ConfigurationManager.AppSettings.Get("NotificationService"),
                 EmailServiceUserName = ConfigurationManager.AppSettings.Get("EmailServiceUserName"),
                 EmailServicePassword = ConfigurationManager.AppSettings.Get("EmailServicePassword"),
+                SmtpHost = ConfigurationManager.AppSettings.Get("SmtpHost"),
                 MessageFromAddress = ConfigurationManager.AppSettings.Get("MessageFromAddress"),
                 MessageFromName = ConfigurationManager.AppSettings.Get("MessageFromName"),
                 MessageSubject = ConfigurationManager.AppSettings.Get("MessageSubject"),
@@ -65,8 +83,41 @@ namespace WorkerHost
                 ConsumerGroupPrefix = ConfigurationManager.AppSettings.Get("ConsumerGroupPrefix") + consumerGroupSuffix,
             };
 
+            _NotificationService =
+                  (NotificationServiceType)Enum.Parse(typeof(NotificationServiceType), config.NotificationService);
+
             var credentials = new NetworkCredential(config.EmailServiceUserName, config.EmailServicePassword);
-            _SendGridTransportWeb = new Web(credentials);
+
+            _FromAddress = new MailAddress(config.MessageFromAddress, config.MessageFromName);
+
+            _ToAddress = new MailAddress[config.MailToList.Count];
+            int mailToCount = 0;
+            foreach (var mailTo in config.MailToList)
+            {
+                _ToAddress[mailToCount++] = new MailAddress(mailTo);
+            }
+
+            switch (_NotificationService)
+            {
+                case NotificationServiceType.Smtp:
+                    {
+                        _SmtpClient = new SmtpClient
+                        {
+                            Port = 587,
+                            DeliveryMethod = SmtpDeliveryMethod.Network,
+                            UseDefaultCredentials = false,
+                            EnableSsl = true,
+                            Host = config.SmtpHost,
+                            Credentials = credentials
+                        };
+                    }
+                    break;
+                case NotificationServiceType.SendGridWeb:
+                    {
+                        _SendGridTransportWeb = new Web(credentials);
+                    }
+                    break;
+            }
 
             _eventHubReader = new EventHubReader(config.ConsumerGroupPrefix, OnMessage);
 
@@ -83,14 +134,33 @@ namespace WorkerHost
         {
             try
             {
-                if (config.MailToList.Any())
-                {
-                    SendGridMessage myMessage = new SendGridMessage();
-                    myMessage.AddTo(config.MailToList);
+                if (!config.MailToList.Any()) return;
 
-                    myMessage.From = new MailAddress(config.MessageFromAddress, config.MessageFromName);
-                    myMessage.Subject = config.MessageSubject;
-                    myMessage.Text = "Message Received: \n" + serializedData;
+                string messageBody = "Message Received: \n" + serializedData;
+
+                if (_SmtpClient != null)
+                {
+                    foreach (var mailTo in _ToAddress)
+                    {
+                        MailMessage myMessage = new MailMessage(_FromAddress, mailTo)
+                        {
+                            Subject = config.MessageSubject,
+                            Body = messageBody
+                        };
+
+                        _SmtpClient.Send(myMessage);
+                    }
+                }
+
+                if (_SendGridTransportWeb != null)
+                {
+                    SendGridMessage myMessage = new SendGridMessage(
+                        _FromAddress,
+                        _ToAddress,
+                        config.MessageSubject,
+                        string.Empty,
+                        messageBody
+                        );
 
                     _SendGridTransportWeb.DeliverAsync(myMessage).Wait();
                 }
