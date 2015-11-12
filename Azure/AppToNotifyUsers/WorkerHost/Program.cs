@@ -14,35 +14,17 @@ namespace WorkerHost
 {
     public class WorkerHost : RoleEntryPoint
     {
-        public class Configuration
-        {
-            public string DeviceEHConnectionString;
-            public string DeviceEHName;
+        private static EventHubReader          _EventHubReader;
+        private static Timer                   _Timer;
 
+        private static object                  _SenderLock;
+        private static Web                     _SendGridTransportWeb;
+        private static SmtpClient              _SmtpClient;
 
-            public string NotificationService;
-            public string EmailServiceUserName;
-            public string EmailServicePassword;
+        private static MailAddress             _FromAddress;
+        private static MailAddress[]           _ToAddress;
 
-            public string SmtpHost;
-            public string MessageFromAddress;
-            public string MessageFromName;
-            public string MessageSubject;
-            public string ConsumerGroupPrefix;
-            
-            public IList<string> MailToList;
-        }
-
-        private static EventHubReader _eventHubReader;
-        private static Timer _timer;
-        
-        private static Web _SendGridTransportWeb;
-        private static SmtpClient _SmtpClient;
-
-        private static MailAddress _FromAddress;
-        private static MailAddress[] _ToAddress;
-
-        private static Configuration config;
+        private static AppConfiguration        _Config;
 
         private static NotificationServiceType _NotificationService;
         enum NotificationServiceType
@@ -67,34 +49,26 @@ namespace WorkerHost
 #if DEBUG_LOG
             RoleEnvironment.TraceSource.TraceInformation("Starting Worker...");
 #endif
-            config = new Configuration
+
+            _Config = ConfigurationLoader.GetConfig();
+            if (_Config == null)
             {
-                DeviceEHConnectionString =
-                    ConfigurationManager.AppSettings.Get("Microsoft.ServiceBus.EventHubConnectionString"),
-                DeviceEHName = ConfigurationManager.AppSettings.Get("Microsoft.ServiceBus.EventHubToMonitor"),
-                NotificationService = ConfigurationManager.AppSettings.Get("NotificationService"),
-                EmailServiceUserName = ConfigurationManager.AppSettings.Get("EmailServiceUserName"),
-                EmailServicePassword = ConfigurationManager.AppSettings.Get("EmailServicePassword"),
-                SmtpHost = ConfigurationManager.AppSettings.Get("SmtpHost"),
-                MessageFromAddress = ConfigurationManager.AppSettings.Get("MessageFromAddress"),
-                MessageFromName = ConfigurationManager.AppSettings.Get("MessageFromName"),
-                MessageSubject = ConfigurationManager.AppSettings.Get("MessageSubject"),
-                MailToList = ConfigurationLoader.GetMailToList(),
-                ConsumerGroupPrefix = ConfigurationManager.AppSettings.Get("ConsumerGroupPrefix") + consumerGroupSuffix,
-            };
+                return;
+            }
+            _Config.ConsumerGroupPrefix += consumerGroupSuffix;
 
             _NotificationService =
-                  (NotificationServiceType)Enum.Parse(typeof(NotificationServiceType), config.NotificationService);
+                  (NotificationServiceType)Enum.Parse(typeof(NotificationServiceType), _Config.NotificationService);
 
-            var credentials = new NetworkCredential(config.EmailServiceUserName, config.EmailServicePassword);
+            var credentials = new NetworkCredential(_Config.EmailServiceUserName, _Config.EmailServicePassword);
 
-            _FromAddress = new MailAddress(config.MessageFromAddress, config.MessageFromName);
+            _FromAddress = new MailAddress(_Config.MessageFromAddress, _Config.MessageFromName);
 
-            _ToAddress = new MailAddress[config.MailToList.Count];
-            int mailToCount = 0;
-            foreach (var mailTo in config.MailToList)
+            _ToAddress = new MailAddress[_Config.SendToList.Count];
+            int sendToCount = 0;
+            foreach (var sendTo in _Config.SendToList)
             {
-                _ToAddress[mailToCount++] = new MailAddress(mailTo);
+                _ToAddress[sendToCount++] = new MailAddress(sendTo);
             }
 
             switch (_NotificationService)
@@ -103,11 +77,11 @@ namespace WorkerHost
                     {
                         _SmtpClient = new SmtpClient
                         {
-                            Port = 587,
+                            Port = _Config.SmtpEnableSSL ? 587 : 25,
                             DeliveryMethod = SmtpDeliveryMethod.Network,
                             UseDefaultCredentials = false,
-                            EnableSsl = true,
-                            Host = config.SmtpHost,
+                            EnableSsl = false,
+                            Host = _Config.SmtpHost,
                             Credentials = credentials
                         };
                     }
@@ -119,55 +93,58 @@ namespace WorkerHost
                     break;
             }
 
-            _eventHubReader = new EventHubReader(config.ConsumerGroupPrefix, OnMessage);
+            _EventHubReader = new EventHubReader(_Config.ConsumerGroupPrefix, OnMessage);
 
-             Process();
+            Process();
         }
 
         public static void Process()
         {
-            _eventHubReader.Run(config.DeviceEHConnectionString, config.DeviceEHName, string.Empty);
-            _eventHubReader.FailureEvent.WaitOne();
+            _EventHubReader.Run(_Config.DeviceEHConnectionString, _Config.DeviceEHName, string.Empty);
+            _EventHubReader.FailureEvent.WaitOne();
         }
 
         private static void OnMessage(string serializedData)
         {
-            try
+            lock (_SenderLock)
             {
-                if (!config.MailToList.Any()) return;
-
-                string messageBody = "Message Received: \n" + serializedData;
-
-                if (_SmtpClient != null)
+                try
                 {
-                    foreach (var mailTo in _ToAddress)
-                    {
-                        MailMessage myMessage = new MailMessage(_FromAddress, mailTo)
-                        {
-                            Subject = config.MessageSubject,
-                            Body = messageBody
-                        };
+                    if (!_Config.SendToList.Any()) return;
 
-                        _SmtpClient.Send(myMessage);
+                    string messageBody = "Message Received: \n" + serializedData;
+
+                    if (_SmtpClient != null)
+                    {
+                        foreach (var mailTo in _ToAddress)
+                        {
+                            MailMessage myMessage = new MailMessage(_FromAddress, mailTo)
+                            {
+                                Subject = _Config.MessageSubject,
+                                Body = messageBody
+                            };
+
+                            _SmtpClient.Send(myMessage);
+                        }
+                    }
+
+                    if (_SendGridTransportWeb != null)
+                    {
+                        SendGridMessage myMessage = new SendGridMessage(
+                            _FromAddress,
+                            _ToAddress,
+                            _Config.MessageSubject,
+                            string.Empty,
+                            messageBody
+                            );
+
+                        _SendGridTransportWeb.DeliverAsync(myMessage).Wait();
                     }
                 }
-
-                if (_SendGridTransportWeb != null)
+                catch (Exception)
                 {
-                    SendGridMessage myMessage = new SendGridMessage(
-                        _FromAddress,
-                        _ToAddress,
-                        config.MessageSubject,
-                        string.Empty,
-                        messageBody
-                        );
-
-                    _SendGridTransportWeb.DeliverAsync(myMessage).Wait();
+                    Trace.WriteLine("Exception on mail sending...");
                 }
-            }
-            catch (Exception)
-            {
-                Trace.WriteLine("Exception on mail sending...");
             }
         }
     }
