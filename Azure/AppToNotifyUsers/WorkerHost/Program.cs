@@ -17,7 +17,7 @@ namespace WorkerHost
         private static EventHubReader          _EventHubReader;
         private static Timer                   _Timer;
 
-        private static object                  _SenderLock;
+        private static object                  _SenderLock = new object();
         private static Web                     _SendGridTransportWeb;
         private static SmtpClient              _SmtpClient;
 
