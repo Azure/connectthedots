@@ -1,6 +1,7 @@
 ﻿namespace WorkerHost
 {
     using System;
+    using System.Configuration;
     using System.Threading;
     using Microsoft.Azure;
     using Microsoft.ConnectTheDots.Common;
@@ -47,15 +48,19 @@
 
             const int SLEEP_TIME_MS = 10000;
 
-            AMQPConfig amqpDevicesConfig = Loader.GetAMQPConfig("TargetAMQPConfig", _logger);
-            gateway = CreateGateway(amqpDevicesConfig);
-
+            
+            
             NetworkCredential credentialToUse = new NetworkCredential(CloudConfigurationManager.GetSetting("UserName"),
                 CloudConfigurationManager.GetSetting("Password"));
 
             bool useXML = CloudConfigurationManager.GetSetting("SendJson").ToLowerInvariant().Contains("false");
 
-            var readers = PrepareReaders(useXML, credentialToUse);
+            var xmlTemplate = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None).GetSection("MergeToXML").SectionInformation.GetRawXml();
+
+            var readers = PrepareReaders(xmlTemplate, useXML, credentialToUse);
+
+            AMQPConfig amqpDevicesConfig = Loader.GetAMQPConfig("TargetAMQPConfig", _logger);
+            gateway = CreateGateway(amqpDevicesConfig);
 
             for (; ; )
             {
@@ -80,13 +85,13 @@
             }
         }
 
-        private static IEnumerable<RawXMLWithHeaderToJsonReader> PrepareReaders(bool useXML, NetworkCredential credeitial)
+        private static IEnumerable<RawXMLWithHeaderToJsonReader> PrepareReaders(string xmlTemplate, bool useXML, NetworkCredential credeitial)
         {
             List<RawXMLWithHeaderToJsonReader> result = new List<RawXMLWithHeaderToJsonReader>();
             var configItems = Loader.GetAPIConfigItems();
             foreach (var config in configItems)
             {
-                result.Add(new RawXMLWithHeaderToJsonReader(useXML, config.APIAddress, credeitial));
+                result.Add(new RawXMLWithHeaderToJsonReader(xmlTemplate, useXML, config.APIAddress, credeitial));
             }
             return result;
         }
