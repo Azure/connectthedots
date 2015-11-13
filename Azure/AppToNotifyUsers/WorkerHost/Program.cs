@@ -9,6 +9,7 @@ using System.Net.Mail;
 using System.Threading;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using SendGrid;
+using Twilio;
 
 namespace WorkerHost
 {
@@ -20,6 +21,7 @@ namespace WorkerHost
         private static object                  _SenderLock = new object();
         private static Web                     _SendGridTransportWeb;
         private static SmtpClient              _SmtpClient;
+        private static TwilioRestClient        _TwilioRestClient;
 
         private static MailAddress             _FromAddress;
         private static MailAddress[]           _ToAddress;
@@ -30,7 +32,8 @@ namespace WorkerHost
         enum NotificationServiceType
         {
             Smtp = 1,
-            SendGridWeb = 2
+            SendGridWeb = 2,
+            Twilio = 3
         }
 
         static void Main()
@@ -62,14 +65,7 @@ namespace WorkerHost
 
             var credentials = new NetworkCredential(_Config.EmailServiceUserName, _Config.EmailServicePassword);
 
-            _FromAddress = new MailAddress(_Config.MessageFromAddress, _Config.MessageFromName);
-
-            _ToAddress = new MailAddress[_Config.SendToList.Count];
-            int sendToCount = 0;
-            foreach (var sendTo in _Config.SendToList)
-            {
-                _ToAddress[sendToCount++] = new MailAddress(sendTo);
-            }
+            PrepareMailAddressInstances();
 
             switch (_NotificationService)
             {
@@ -91,11 +87,47 @@ namespace WorkerHost
                         _SendGridTransportWeb = new Web(credentials);
                     }
                     break;
+                case NotificationServiceType.Twilio:
+                    {
+                        string ACCOUNT_SID = _Config.EmailServiceUserName;
+                        string AUTH_TOKEN = _Config.EmailServicePassword;
+
+                        _TwilioRestClient = new TwilioRestClient(ACCOUNT_SID, AUTH_TOKEN);
+                    }
+                    break;
             }
 
             _EventHubReader = new EventHubReader(_Config.ConsumerGroupPrefix, OnMessage);
 
             Process();
+        }
+
+        private static void PrepareMailAddressInstances()
+        {
+            try
+            {
+                _FromAddress = new MailAddress(_Config.MessageFromAddress, _Config.MessageFromName);
+            }
+            catch (Exception)
+            {
+                //incorrect mail address in config, maybe a phone number
+            }
+
+            IList<MailAddress> mailAddressList = new List<MailAddress>();
+
+            foreach (var sendTo in _Config.SendToList)
+            {
+                try
+                {
+                    mailAddressList.Add(new MailAddress(sendTo));
+                }
+                catch (Exception)
+                {
+                    //incorrect mail address in config, maybe a phone number
+                }
+            }
+
+            _ToAddress = mailAddressList.ToArray();
         }
 
         public static void Process()
@@ -139,6 +171,14 @@ namespace WorkerHost
                             );
 
                         _SendGridTransportWeb.DeliverAsync(myMessage).Wait();
+                    }
+
+                    if (_TwilioRestClient != null)
+                    {
+                        foreach (var smsTo in _Config.SendToList)
+                        {
+                            _TwilioRestClient.SendMessage(_Config.MessageFromAddress, smsTo, messageBody);
+                        }
                     }
                 }
                 catch (Exception)
