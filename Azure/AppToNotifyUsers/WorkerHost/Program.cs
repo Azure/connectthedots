@@ -150,13 +150,19 @@ namespace WorkerHost
                     {
                         foreach (var mailTo in _ToAddress)
                         {
-                            MailMessage myMessage = new MailMessage(_FromAddress, mailTo)
+                            try
                             {
-                                Subject = _Config.MessageSubject,
-                                Body = messageBody
-                            };
+                                MailMessage myMessage = new MailMessage(_FromAddress, mailTo)
+                                {
+                                    Subject = _Config.MessageSubject,
+                                    Body = messageBody
+                                };
 
-                            _SmtpClient.Send(myMessage);
+                                _SmtpClient.Send(myMessage);
+                            }
+                            catch (Exception)
+                            {
+                            }
                         }
                     }
 
@@ -177,7 +183,13 @@ namespace WorkerHost
                     {
                         foreach (var smsTo in _Config.SendToList)
                         {
-                            _TwilioRestClient.SendMessage(_Config.MessageFromAddress, smsTo, messageBody);
+                            try
+                            {
+                                _TwilioRestClient.SendMessage(_Config.MessageFromAddress, smsTo, messageBody);
+                            }
+                            catch (Exception)
+                            {
+                            }
                         }
                     }
                 }
