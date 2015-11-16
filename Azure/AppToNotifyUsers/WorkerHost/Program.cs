@@ -33,7 +33,8 @@ namespace WorkerHost
         {
             Smtp = 1,
             SendGridWeb = 2,
-            Twilio = 3
+            Twilio = 3,
+            TwilioCall = 4
         }
 
         static void Main()
@@ -88,6 +89,7 @@ namespace WorkerHost
                     }
                     break;
                 case NotificationServiceType.Twilio:
+                case NotificationServiceType.TwilioCall:
                     {
                         string ACCOUNT_SID = _Config.EmailServiceUserName;
                         string AUTH_TOKEN = _Config.EmailServicePassword;
@@ -181,15 +183,47 @@ namespace WorkerHost
 
                     if (_TwilioRestClient != null)
                     {
-                        foreach (var smsTo in _Config.SendToList)
+
+                        switch (_NotificationService)
                         {
-                            try
-                            {
-                                _TwilioRestClient.SendMessage(_Config.MessageFromAddress, smsTo, messageBody);
-                            }
-                            catch (Exception)
-                            {
-                            }
+                            case NotificationServiceType.Twilio:
+                                {
+                                    foreach (var smsTo in _Config.SendToList)
+                                    {
+                                        try
+                                        {
+                                            _TwilioRestClient.SendMessage(_Config.MessageFromAddress, smsTo,
+                                                messageBody);
+                                        }
+                                        catch (Exception)
+                                        {
+                                        }
+                                    }
+                                }
+                                break;
+                            case NotificationServiceType.TwilioCall:
+                                {
+                                    string callUrl = "http://twimlets.com/message?Message%5B0%5D=" + WebUtility.UrlEncode(_Config.MessageSubject);
+
+                                    foreach (var callTo in _Config.SendToList)
+                                    {
+                                        try
+                                        {
+                                            CallOptions options = new CallOptions
+                                            {
+                                                From = _Config.MessageFromAddress,
+                                                To = callTo,
+                                                Url = callUrl
+                                            };
+
+                                            Call call = _TwilioRestClient.InitiateOutboundCall(options);
+                                        }
+                                        catch (Exception)
+                                        {
+                                        }
+                                    }
+                                }
+                                break;
                         }
                     }
                 }
