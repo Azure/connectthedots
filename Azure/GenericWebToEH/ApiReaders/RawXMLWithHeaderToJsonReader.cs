@@ -12,75 +12,28 @@
         private readonly string _initialApiAddress;
         private string _currentApiAddress;
 
-        private readonly bool _useXML;
+        private readonly bool _outputAsXml;
+        private readonly bool _useMessageMarker;
+
         private readonly NetworkCredential _credential;
+
+        private const string MESSAGE_MARKER_ATTRIBUTE_NAME = "ctdMessageMarker";
+        private const string NEXT_BUFFER_ATTRIBUTE_NAME = "ctdNextBuffer";
 
         class AttributesMap : Dictionary<string, KeyValuePair<IList<XmlAttribute>, AttributesMap>> { }
 
         private readonly AttributesMap _templateAttributesMap;
 
-        public RawXMLWithHeaderToJsonReader(string xmlTemplate, bool useXML, string address, NetworkCredential credential)
+        public RawXMLWithHeaderToJsonReader(string xmlTemplate, bool outputAsXml, string address, NetworkCredential credential)
         {
-            _templateAttributesMap = PrepareAttributesMap(xmlTemplate);
+            _templateAttributesMap = PrepareAttributesMap(xmlTemplate, out _useMessageMarker);
 
             _credential = credential;
             _initialApiAddress = address;
             _currentApiAddress = address;
 
-            _useXML = useXML;
+            _outputAsXml = outputAsXml;
         }
-
-        private AttributesMap PrepareAttributesMap(string xmlText)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(xmlText);
-            AttributesMap result = ParseAttributesForXmlNode(doc.DocumentElement);
-            return result;
-        }
-
-        private AttributesMap ParseAttributesForXmlNode(XmlNode rootNode)
-        {
-            if (rootNode == null)
-            {
-                return null;
-            }
-
-            AttributesMap result = new AttributesMap();
-
-            foreach (XmlNode node in rootNode)
-            {
-                IList<XmlAttribute> list = new List<XmlAttribute>();
-                if (node.Attributes != null)
-                {
-                    foreach (XmlAttribute attribute in node.Attributes)
-                    {
-                        list.Add(attribute);
-                    }
-                }
-
-                result.Add(node.Name, new KeyValuePair<IList<XmlAttribute>, AttributesMap>(list, ParseAttributesForXmlNode(node)));
-            }
-
-            return result;
-        }
-
-        private void ApplyTemplateAttributes(XmlNode rootNode, AttributesMap templateMap, Action<XmlNode, XmlAttribute> applyAttributeToNode)
-        {
-            if (rootNode == null)
-                return;
-
-            foreach (XmlNode node in rootNode)
-            {
-                if (!templateMap.ContainsKey(node.Name)) continue;
-
-                foreach (XmlAttribute attributeInTemplate in templateMap[node.Name].Key)
-                {
-                    applyAttributeToNode(node, attributeInTemplate);
-                }
-                ApplyTemplateAttributes(node, templateMap[node.Name].Value, applyAttributeToNode);
-            }
-        }
-
 
         public string GetData()
         {
@@ -103,8 +56,7 @@
                             StreamReader reader = new StreamReader(responseStream);
                             string originalText = reader.ReadToEnd();
 
-                            XmlDocument doc = new XmlDocument();
-                            doc.LoadXml(originalText);
+                            XmlDocument doc = GetXmlFromOriginalText(originalText);
 
                             bool containsMessage = false;
 
@@ -115,7 +67,7 @@
                                     {
                                         switch (attributeInTemplate.LocalName)
                                         {
-                                            case "ctdNextBuffer":
+                                            case NEXT_BUFFER_ATTRIBUTE_NAME:
                                                 {
                                                     foreach (XmlNode child in node.ChildNodes)
                                                     {
@@ -131,7 +83,7 @@
                                                     }
                                                 }
                                                 break;
-                                            case "ctdMessageMarker":
+                                            case MESSAGE_MARKER_ATTRIBUTE_NAME:
                                                 {
                                                     containsMessage = true;
                                                 }
@@ -153,10 +105,27 @@
                                         }
                                     });
                             }
-                            
-                            if (containsMessage)
+
+                            if (!_useMessageMarker || containsMessage)
                             {
-                                string result = _useXML ? originalText : JsonConvert.SerializeXmlNode(doc);
+                                
+                                string result;
+
+                                if (_outputAsXml)
+                                {
+                                    using (var stringWriter = new StringWriter())
+                                    using (var xmlTextWriter = XmlWriter.Create(stringWriter))
+                                    {
+                                        doc.WriteTo(xmlTextWriter);
+                                        xmlTextWriter.Flush();
+                                        result = stringWriter.GetStringBuilder().ToString();
+                                    }
+                                }
+                                else
+                                {
+                                    result = JsonConvert.SerializeXmlNode(doc, Newtonsoft.Json.Formatting.Indented);
+                                }
+
                                 return result;
                             }
                         }
@@ -167,6 +136,93 @@
                 }
             }
             return null;
+        }
+
+        private AttributesMap PrepareAttributesMap(string xmlText, out bool useMessageMarker)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(xmlText);
+            AttributesMap result = ParseAttributesForXmlNode(doc.DocumentElement, out useMessageMarker);
+            return result;
+        }
+
+        private AttributesMap ParseAttributesForXmlNode(XmlNode rootNode, out bool useMessageMarker)
+        {
+            useMessageMarker = false;
+            if (rootNode == null)
+            {
+                return null;
+            }
+
+            AttributesMap result = new AttributesMap();
+
+            foreach (XmlNode node in rootNode)
+            {
+                IList<XmlAttribute> list = new List<XmlAttribute>();
+                if (node.Attributes != null)
+                {
+                    foreach (XmlAttribute attribute in node.Attributes)
+                    {
+                        if (attribute.LocalName == MESSAGE_MARKER_ATTRIBUTE_NAME)
+                        {
+                            useMessageMarker = true;
+                        }
+                        list.Add(attribute);
+                    }
+                }
+
+                bool useMessageMarkerInChild;
+                result.Add(node.Name, new KeyValuePair<IList<XmlAttribute>, AttributesMap>(list, ParseAttributesForXmlNode(node, out useMessageMarkerInChild)));
+                useMessageMarker |= useMessageMarkerInChild;
+            }
+
+            return result;
+        }
+
+        private void ApplyTemplateAttributes(XmlNode rootNode, AttributesMap templateMap, Action<XmlNode, XmlAttribute> applyAttributeToNode)
+        {
+            if (rootNode == null)
+            {
+                return;
+            }
+
+            foreach (XmlNode node in rootNode)
+            {
+                if (!templateMap.ContainsKey(node.Name)) continue;
+
+                foreach (XmlAttribute attributeInTemplate in templateMap[node.Name].Key)
+                {
+                    applyAttributeToNode(node, attributeInTemplate);
+                }
+                ApplyTemplateAttributes(node, templateMap[node.Name].Value, applyAttributeToNode);
+            }
+        }
+
+        private XmlDocument GetXmlFromOriginalText(string originalText)
+        {
+
+            XmlDocument result;
+            try
+            {
+                result = new XmlDocument();
+                result.LoadXml(originalText);
+                return result;
+            }
+            catch (Exception)
+            {
+            }
+
+            try
+            {
+                result = JsonConvert.DeserializeXmlNode(originalText);
+                return result;
+            }
+            catch (Exception)
+            {
+            }
+
+            result = JsonConvert.DeserializeXmlNode("{\"rootArrayBlock\":" + originalText + "}", "Json");
+            return result;
         }
     }
 }
