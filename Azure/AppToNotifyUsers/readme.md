@@ -1,4 +1,10 @@
-# Application to Notify Users of Alerts in Event Hub #
+---
+services: event-hubs, iot-hub, cloud-services, notification-hubs
+platforms: dotnet
+author: spyrossak
+---
+
+# Notify users of events received by an event or IoT hub #
 
 If you are using Azure Stream Analytics or Azure Machine Learning to generate alerts based upon data coming from your devices, you have various options on how to display those alerts. For example, as in the [Connect The Dots](https://github.com/Azure/connectthedots) project, you could display them on a website, so users could see them in real-time if they are looking at a web page. By contrast, the code here, in the AppToNotifyUsers solution, provides a very basic and stand-alone application for selected users to be notified of alerts. It does so by creating an Azure Cloud Service (worker role) that monitors the assigned event hub and pushes that data to a notification service specified by the administrator. Notification options in the solution include:
 
