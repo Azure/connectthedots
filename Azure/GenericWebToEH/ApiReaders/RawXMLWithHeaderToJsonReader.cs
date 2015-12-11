@@ -35,8 +35,9 @@
             _outputAsXml = outputAsXml;
         }
 
-        public string GetData()
+        public IEnumerable<string> GetData()
         {
+            List<string> resultList = new List<string>();
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(_currentApiAddress);
             request.Method = "GET";
             request.Credentials = _credential;
@@ -56,84 +57,104 @@
                             StreamReader reader = new StreamReader(responseStream);
                             string originalText = reader.ReadToEnd();
 
-                            XmlDocument doc = GetXmlFromOriginalText(originalText);
+                            IEnumerable<XmlDocument> documents = GetXmlFromOriginalText(originalText);
 
-                            bool containsMessage = false;
-
-                            if (doc.DocumentElement != null)
+                            foreach (XmlDocument document in documents)
                             {
-                                ApplyTemplateAttributes(doc.DocumentElement, _templateAttributesMap,
-                                    (node, attributeInTemplate) =>
-                                    {
-                                        switch (attributeInTemplate.LocalName)
-                                        {
-                                            case NEXT_BUFFER_ATTRIBUTE_NAME:
-                                                {
-                                                    foreach (XmlNode child in node.ChildNodes)
-                                                    {
-                                                        if (child.NodeType != XmlNodeType.Text &&
-                                                            child.NodeType != XmlNodeType.CDATA) continue;
-
-                                                        var newAddressCandidate = child.Value;
-                                                        if (newAddressCandidate.Length > 0)
-                                                        {
-                                                            _currentApiAddress = newAddressCandidate;
-                                                        }
-                                                        break;
-                                                    }
-                                                }
-                                                break;
-                                            case MESSAGE_MARKER_ATTRIBUTE_NAME:
-                                                {
-                                                    containsMessage = true;
-                                                }
-                                                break;
-                                            default:
-                                                {
-                                                    if (node.Attributes == null) return;
-
-                                                    XmlAttribute att = doc.CreateAttribute(
-                                                        attributeInTemplate.Prefix,
-                                                        attributeInTemplate.LocalName,
-                                                        attributeInTemplate.NamespaceURI
-                                                        );
-
-                                                    att.Value = attributeInTemplate.Value;
-                                                    node.Attributes.Append(att);
-                                                }
-                                                break;
-                                        }
-                                    });
-                            }
-
-                            if (!_useMessageMarker || containsMessage)
-                            {
-                                
-                                string result;
-
-                                if (_outputAsXml)
+                                string resultString = ProcessDocument(document);
+                                if (resultString != null)
                                 {
-                                    using (var stringWriter = new StringWriter())
-                                    using (var xmlTextWriter = XmlWriter.Create(stringWriter))
-                                    {
-                                        doc.WriteTo(xmlTextWriter);
-                                        xmlTextWriter.Flush();
-                                        result = stringWriter.GetStringBuilder().ToString();
-                                    }
+                                    resultList.Add(resultString);
                                 }
-                                else
-                                {
-                                    result = JsonConvert.SerializeXmlNode(doc, Newtonsoft.Json.Formatting.Indented);
-                                }
-
-                                return result;
                             }
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
+                            //error in reading
                         }
                     }
                 }
+            }
+            return resultList;
+        }
+
+        private string ProcessDocument(XmlDocument document)
+        {
+            try
+            {
+                bool containsMessage = false;
+
+                if (document.DocumentElement != null)
+                {
+                    ApplyTemplateAttributes(document.DocumentElement, _templateAttributesMap,
+                        (node, attributeInTemplate) =>
+                        {
+                            switch (attributeInTemplate.LocalName)
+                            {
+                                case NEXT_BUFFER_ATTRIBUTE_NAME:
+                                {
+                                    foreach (XmlNode child in node.ChildNodes)
+                                    {
+                                        if (child.NodeType != XmlNodeType.Text &&
+                                            child.NodeType != XmlNodeType.CDATA) continue;
+
+                                        var newAddressCandidate = child.Value;
+                                        if (newAddressCandidate.Length > 0)
+                                        {
+                                            _currentApiAddress = newAddressCandidate;
+                                        }
+                                        break;
+                                    }
+                                }
+                                    break;
+                                case MESSAGE_MARKER_ATTRIBUTE_NAME:
+                                {
+                                    containsMessage = true;
+                                }
+                                    break;
+                                default:
+                                {
+                                    if (node.Attributes == null) return;
+
+                                    XmlAttribute att = document.CreateAttribute(
+                                        attributeInTemplate.Prefix,
+                                        attributeInTemplate.LocalName,
+                                        attributeInTemplate.NamespaceURI
+                                        );
+
+                                    att.Value = attributeInTemplate.Value;
+                                    node.Attributes.Append(att);
+                                }
+                                    break;
+                            }
+                        });
+                }
+
+                if (!_useMessageMarker || containsMessage)
+                {
+                    string result;
+
+                    if (_outputAsXml)
+                    {
+                        using (var stringWriter = new StringWriter())
+                        using (var xmlTextWriter = XmlWriter.Create(stringWriter))
+                        {
+                            document.WriteTo(xmlTextWriter);
+                            xmlTextWriter.Flush();
+                            result = stringWriter.GetStringBuilder().ToString();
+                        }
+                    }
+                    else
+                    {
+                        result = JsonConvert.SerializeXmlNode(document, Newtonsoft.Json.Formatting.Indented);
+                    }
+
+                    return result;
+                }
+            }
+            catch (Exception)
+            {
+                //ignored
             }
             return null;
         }
@@ -198,14 +219,15 @@
             }
         }
 
-        private XmlDocument GetXmlFromOriginalText(string originalText)
+        private IEnumerable<XmlDocument> GetXmlFromOriginalText(string originalText)
         {
-
-            XmlDocument result;
+            List<XmlDocument> result = new List<XmlDocument>();
+            
             try
             {
-                result = new XmlDocument();
-                result.LoadXml(originalText);
+                XmlDocument resultItem = new XmlDocument();
+                resultItem.LoadXml(originalText);
+                result.Add(resultItem);
                 return result;
             }
             catch (Exception)
@@ -214,14 +236,30 @@
 
             try
             {
-                result = JsonConvert.DeserializeXmlNode(originalText);
+                XmlDocument resultItem = JsonConvert.DeserializeXmlNode(originalText);
+                result.Add(resultItem);
                 return result;
             }
             catch (Exception)
             {
             }
 
-            result = JsonConvert.DeserializeXmlNode("{\"rootArrayBlock\":" + originalText + "}", "Json");
+            XmlDocument resultArrayXml = JsonConvert.DeserializeXmlNode("{\"jsonRootNode\":" + originalText + "}", "Json");
+            foreach (XmlNode jsonBlock in resultArrayXml)
+            {
+                foreach (XmlNode childNode in jsonBlock)
+                {
+                    try
+                    {
+                        XmlDocument nodeDoc = new XmlDocument();
+                        nodeDoc.LoadXml(childNode.OuterXml);
+                        result.Add(nodeDoc);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+            }
             return result;
         }
     }

@@ -68,10 +68,14 @@
                 {
                     foreach (var reader in readers)
                     {
-                        string newDataJson = reader.GetData();
-                        if (newDataJson != null)
+
+                        IEnumerable<string> dataEnumerable = reader.GetData();
+                        foreach (string newDataJson in dataEnumerable)
                         {
-                            gateway.Enqueue(newDataJson);
+                            if (newDataJson != null)
+                            {
+                                gateway.Enqueue(newDataJson);
+                            }
                         }
                     }
 
