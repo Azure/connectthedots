@@ -6,8 +6,11 @@
     using Microsoft.Azure;
     using Microsoft.ConnectTheDots.Common;
     using Microsoft.ConnectTheDots.Gateway;
+    using Microsoft.ServiceBus;
+    using Microsoft.ServiceBus.Messaging;
     using Microsoft.WindowsAzure.ServiceRuntime;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Net;
 
     using ApiReaders;
@@ -59,7 +62,17 @@
 
             var readers = PrepareReaders(xmlTemplate, useXML, credentialToUse);
 
-            AMQPConfig amqpDevicesConfig = Loader.GetAMQPConfig("TargetAMQPConfig", _logger);
+            string serviceBusConnectionString = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.EventHubConnectionString");
+            string hubName = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.EventHubToUse");
+
+            AMQPConfig amqpDevicesConfig = PrepareAMQPConfig(serviceBusConnectionString, hubName);
+
+            if (amqpDevicesConfig == null)
+            {
+                _logger.LogInfo("Not able to construct AMQP config for Event Hub using provided connection string...");
+                return;
+            }
+
             gateway = CreateGateway(amqpDevicesConfig);
 
             for (; ; )
@@ -98,6 +111,34 @@
                 result.Add(new RawXMLWithHeaderToJsonReader(xmlTemplate, useXML, config.APIAddress, credeitial));
             }
             return result;
+        }
+
+        private static AMQPConfig PrepareAMQPConfig(string connectionString, string hubName)
+        {
+            NamespaceManager nsmgr = NamespaceManager.CreateFromConnectionString(connectionString);
+            EventHubDescription desc = nsmgr.GetEventHub(hubName);
+
+            foreach (var rule in desc.Authorization)
+            {
+                var accessAuthorizationRule = rule as SharedAccessAuthorizationRule;
+                if (accessAuthorizationRule == null) continue;
+                if (!accessAuthorizationRule.Rights.Contains(AccessRights.Send)) continue;
+
+                string amqpAddress = string.Format("amqps://{0}:{1}@{2}",
+                    accessAuthorizationRule.KeyName,
+                    Uri.EscapeDataString(accessAuthorizationRule.PrimaryKey), nsmgr.Address.Host);
+
+                AMQPConfig amqpConfig = new AMQPConfig
+                {
+                    AMQPSAddress = amqpAddress,
+                    EventHubName = hubName,
+                    EventHubDeviceDisplayName = "SensorGatewayService",
+                    EventHubDeviceId = "a94cd58f-4698-4d6a-b9b5-4e3e0f794618",
+                    EventHubMessageSubject = "gtsv"
+                };
+                return amqpConfig;
+            }
+            return null;
         }
 
         private static GatewayService CreateGateway(AMQPConfig amqpConfig)
