@@ -49,9 +49,14 @@
         {
             _logger.LogInfo("Starting Worker...");
 
-            const int SLEEP_TIME_MS = 10000;
-
-            
+            int sleepTimeMs;
+            if (!int.TryParse(CloudConfigurationManager.GetSetting("SleepTimeMs"), out sleepTimeMs))
+            {
+                _logger.LogInfo("Incorrect SleepTimeMs value, using default...");
+                //default sleep time interval is 10 sec
+                sleepTimeMs = 10000;
+            }
+            int sleepTimeOnExceptionMs = sleepTimeMs/2;
             
             NetworkCredential credentialToUse = new NetworkCredential(CloudConfigurationManager.GetSetting("UserName"),
                 CloudConfigurationManager.GetSetting("Password"));
@@ -92,11 +97,11 @@
                         }
                     }
 
-                    Thread.Sleep(SLEEP_TIME_MS);
+                    Thread.Sleep(sleepTimeMs);
                 }
                 catch(Exception ex)
                 {
-                    Thread.Sleep(SLEEP_TIME_MS/2);
+                    Thread.Sleep(sleepTimeOnExceptionMs);
                     _logger.LogError(ex.Message);
                 }
             }
