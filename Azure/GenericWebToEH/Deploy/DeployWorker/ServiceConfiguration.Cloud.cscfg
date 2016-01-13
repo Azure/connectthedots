@@ -3,6 +3,15 @@
   <Role name="WorkerHost">
     <Instances count="1" />
     <ConfigurationSettings>
+      <Setting name="Microsoft.ServiceBus.EventHubToUse" value="[event hub name]" />
+      <Setting name="Microsoft.ServiceBus.EventHubConnectionString" value="[event hub connection string]" />
+      <Setting name="UserName" value="[Api user name]" />
+      <Setting name="Password" value="[Api password]" />
+      <Setting name="SleepTimeMs" value="10000" />
+      <Setting name="SendJson" value="true" />
+      <Setting name="MessageSubject" value="" />
+      <Setting name="MessageDeviceId" value="" />
+      <Setting name="MessageDeviceDisplayName" value="" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>

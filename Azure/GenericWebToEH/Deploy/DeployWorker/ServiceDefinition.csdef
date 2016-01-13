@@ -3,6 +3,15 @@
   <WorkerRole name="WorkerHost" vmsize="Small">
     <Imports></Imports>
     <ConfigurationSettings>
+      <Setting name="Microsoft.ServiceBus.EventHubToUse" />
+      <Setting name="Microsoft.ServiceBus.EventHubConnectionString" />
+      <Setting name="UserName" />
+      <Setting name="Password" />
+      <Setting name="SleepTimeMs" />
+      <Setting name="SendJson" />
+      <Setting name="MessageSubject" />
+      <Setting name="MessageDeviceId" />
+      <Setting name="MessageDeviceDisplayName" />
     </ConfigurationSettings>
   </WorkerRole>
 </ServiceDefinition>
