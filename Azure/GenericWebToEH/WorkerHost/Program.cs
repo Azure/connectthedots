@@ -63,14 +63,18 @@
 
             bool useXML = CloudConfigurationManager.GetSetting("SendJson").ToLowerInvariant().Contains("false");
 
-            var xmlTemplate = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None).GetSection("MergeToXML").SectionInformation.GetRawXml();
+            string xmlTemplate = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None).GetSection("MergeToXML").SectionInformation.GetRawXml();
 
             var readers = PrepareReaders(xmlTemplate, useXML, credentialToUse);
 
             string serviceBusConnectionString = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.EventHubConnectionString");
             string hubName = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.EventHubToUse");
 
-            AMQPConfig amqpDevicesConfig = PrepareAMQPConfig(serviceBusConnectionString, hubName);
+            string messageSubject = CloudConfigurationManager.GetSetting("MessageSubject");
+            string messageDeviceId = CloudConfigurationManager.GetSetting("MessageDeviceId");
+            string messageDeviceDisplayName = CloudConfigurationManager.GetSetting("MessageDeviceDisplayName");
+
+            AMQPConfig amqpDevicesConfig = PrepareAMQPConfig(serviceBusConnectionString, hubName, messageSubject, messageDeviceId, messageDeviceDisplayName);
 
             if (amqpDevicesConfig == null)
             {
@@ -86,7 +90,6 @@
                 {
                     foreach (var reader in readers)
                     {
-
                         IEnumerable<string> dataEnumerable = reader.GetData();
                         foreach (string newDataJson in dataEnumerable)
                         {
@@ -118,7 +121,8 @@
             return result;
         }
 
-        private static AMQPConfig PrepareAMQPConfig(string connectionString, string hubName)
+        private static AMQPConfig PrepareAMQPConfig(string connectionString, string hubName,
+            string messageSubject, string messageDeviceId, string messageDeviceDisplayName)
         {
             NamespaceManager nsmgr = NamespaceManager.CreateFromConnectionString(connectionString);
             EventHubDescription desc = nsmgr.GetEventHub(hubName);
@@ -137,9 +141,9 @@
                 {
                     AMQPSAddress = amqpAddress,
                     EventHubName = hubName,
-                    EventHubDeviceDisplayName = "SensorGatewayService",
-                    EventHubDeviceId = "a94cd58f-4698-4d6a-b9b5-4e3e0f794618",
-                    EventHubMessageSubject = "gtsv"
+                    EventHubDeviceDisplayName = string.IsNullOrEmpty(messageSubject) ? "SensorGatewayService" : messageSubject,
+                    EventHubDeviceId = string.IsNullOrEmpty(messageDeviceId) ? "a94cd58f-4698-4d6a-b9b5-4e3e0f794618" : messageDeviceId,
+                    EventHubMessageSubject = string.IsNullOrEmpty(messageDeviceDisplayName) ? "gtsv" : messageDeviceDisplayName
                 };
                 return amqpConfig;
             }
