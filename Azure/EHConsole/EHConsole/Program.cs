@@ -97,7 +97,6 @@ namespace Microsoft.ConnectTheDots.EHConsole
         bool Run( )
         {
             var partitionCount = 8;
-            var receiverKeyName = "WebSite";
 
             CloudWebDeployInputs inputs = null;
             if( !GetInputs( out inputs ) )
@@ -130,8 +129,8 @@ namespace Microsoft.ConnectTheDots.EHConsole
             var serviceNamespace = inputs.SBNamespace;
             var hubName = ehDevices.Path;
             
-            var sharedAccessAuthorizationRule = ehDevices.Authorization.First( ( d )
-                => String.Equals( d.KeyName, receiverKeyName, StringComparison.InvariantCultureIgnoreCase ) ) as SharedAccessAuthorizationRule;
+            var sharedAccessAuthorizationRule = ehDevices.Authorization.FirstOrDefault( ( d )
+                => d.Rights.Contains(AccessRights.Listen)) as SharedAccessAuthorizationRule;
 
             if( sharedAccessAuthorizationRule == null )
             {
@@ -139,6 +138,7 @@ namespace Microsoft.ConnectTheDots.EHConsole
                 return false;
             }
 
+            var receiverKeyName = sharedAccessAuthorizationRule.KeyName;
             var receiverKey = sharedAccessAuthorizationRule.PrimaryKey;
             //Console.WriteLine("Starting temperature processor with {0} partitions.", partitionCount);
 
