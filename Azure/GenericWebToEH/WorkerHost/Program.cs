@@ -67,8 +67,8 @@
 
             var readers = PrepareReaders(xmlTemplate, useXML, credentialToUse);
 
-            string serviceBusConnectionString = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.EventHubConnectionString");
-            string hubName = CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.EventHubToUse");
+            string serviceBusConnectionString = ReadConfigValue("Microsoft.ServiceBus.EventHubConnectionString", "[event hub connection string]");
+            string hubName = ReadConfigValue("Microsoft.ServiceBus.EventHubToUse", "[event hub name]");
 
             string messageSubject = CloudConfigurationManager.GetSetting("MessageSubject");
             string messageDeviceId = CloudConfigurationManager.GetSetting("MessageDeviceId");
@@ -108,6 +108,16 @@
                     _logger.LogError(ex.Message);
                 }
             }
+        }
+
+        private static string ReadConfigValue(string keyName, string defaultNotSetValue)
+        {
+            string value = CloudConfigurationManager.GetSetting(keyName);
+            if (string.IsNullOrEmpty(value) || value.Equals(defaultNotSetValue))
+            {
+                value = ConfigurationManager.AppSettings.Get(keyName);
+            }
+            return value;
         }
 
         private static IEnumerable<RawXMLWithHeaderToJsonReader> PrepareReaders(string xmlTemplate, bool useXML, NetworkCredential credeitial)
