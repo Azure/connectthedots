@@ -67,7 +67,7 @@
 
             var readers = PrepareReaders(xmlTemplate, useXML, credentialToUse);
 
-            string serviceBusConnectionString = ReadConfigValue("Microsoft.ServiceBus.EventHubConnectionString", "[event hub connection string]");
+            string serviceBusConnectionString = ReadConfigValue("Microsoft.ServiceBus.ServiceBusConnectionString", "[Service Bus connection string]");
             string hubName = ReadConfigValue("Microsoft.ServiceBus.EventHubToUse", "[event hub name]");
 
             string messageSubject = CloudConfigurationManager.GetSetting("MessageSubject");

@@ -4,7 +4,7 @@
     <Imports></Imports>
     <ConfigurationSettings>
       <Setting name="Microsoft.ServiceBus.EventHubToUse" />
-      <Setting name="Microsoft.ServiceBus.EventHubConnectionString" />
+      <Setting name="Microsoft.ServiceBus.ServiceBusConnectionString" />
       <Setting name="UserName" />
       <Setting name="Password" />
       <Setting name="SleepTimeMs" />

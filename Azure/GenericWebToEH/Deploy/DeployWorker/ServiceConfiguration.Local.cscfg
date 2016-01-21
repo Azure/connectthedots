@@ -4,7 +4,7 @@
     <Instances count="1" />
     <ConfigurationSettings>
       <Setting name="Microsoft.ServiceBus.EventHubToUse" value="[event hub name]" />
-      <Setting name="Microsoft.ServiceBus.EventHubConnectionString" value="[event hub connection string]" />
+      <Setting name="Microsoft.ServiceBus.ServiceBusConnectionString" value="[Service Bus connection string]" />
       <Setting name="UserName" value="[Api user name]" />
       <Setting name="Password" value="[Api password]" />
       <Setting name="SleepTimeMs" value="10000" />
