@@ -1,4 +1,6 @@
-﻿namespace WorkerHost
+﻿using System.Threading.Tasks;
+
+namespace WorkerHost
 {
     using System;
     using System.Configuration;
@@ -17,9 +19,12 @@
 
     public class WorkerHost : RoleEntryPoint
     {
-        private static readonly ILogger _logger = EventLogger.Instance;
+        private static readonly ILogger _Logger = EventLogger.Instance;
+        private static GatewayService _Gateway;
+        private static IEnumerable<RawXMLWithHeaderToJsonReader> _Readers;
 
-        private static GatewayService gateway;
+        private static AppConfiguration _Config;
+        
 
         static void Main()
         {
@@ -29,7 +34,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _Logger.LogError(ex.Message);
             }
         }
 
@@ -41,83 +46,87 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _Logger.LogError(ex.Message);
             }
+        }
+
+        public override bool OnStart()
+        {
+            RoleEnvironment.Changed += RoleEnvironmentChanging;
+
+            return base.OnStart();
+        }
+
+        private void RoleEnvironmentChanging(object sender, RoleEnvironmentChangedEventArgs e)
+        {
+            if (!e.Changes.Any(change => change is RoleEnvironmentConfigurationSettingChange)) return;
+
+            InitWorkerConfiguration();
         }
 
         private static void StartHost()
         {
-            _logger.LogInfo("Starting Worker...");
+            _Logger.LogInfo("Starting Worker...");
 
-            int sleepTimeMs;
-            if (!int.TryParse(CloudConfigurationManager.GetSetting("SleepTimeMs"), out sleepTimeMs))
-            {
-                _logger.LogInfo("Incorrect SleepTimeMs value, using default...");
-                //default sleep time interval is 10 sec
-                sleepTimeMs = 10000;
-            }
-            int sleepTimeOnExceptionMs = sleepTimeMs/2;
-            
-            NetworkCredential credentialToUse = new NetworkCredential(CloudConfigurationManager.GetSetting("UserName"),
-                CloudConfigurationManager.GetSetting("Password"));
+            InitWorkerConfiguration();
 
-            bool useXML = CloudConfigurationManager.GetSetting("SendJson").ToLowerInvariant().Contains("false");
+            Process();
+        }
 
-            string xmlTemplate = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None).GetSection("MergeToXML").SectionInformation.GetRawXml();
+        private static void InitWorkerConfiguration()
+        {
+            AppConfiguration config = Loader.GetConfig(_Logger);
+            IEnumerable<RawXMLWithHeaderToJsonReader> readers = PrepareReaders(config.XmlTemplate, config.UseXml, config.CredentialToUse);
 
-            var readers = PrepareReaders(xmlTemplate, useXML, credentialToUse);
-
-            string serviceBusConnectionString = ReadConfigValue("Microsoft.ServiceBus.ServiceBusConnectionString", "[Service Bus connection string]");
-            string hubName = ReadConfigValue("Microsoft.ServiceBus.EventHubToUse", "[event hub name]");
-
-            string messageSubject = CloudConfigurationManager.GetSetting("MessageSubject");
-            string messageDeviceId = CloudConfigurationManager.GetSetting("MessageDeviceId");
-            string messageDeviceDisplayName = CloudConfigurationManager.GetSetting("MessageDeviceDisplayName");
-
-            AMQPConfig amqpDevicesConfig = PrepareAMQPConfig(serviceBusConnectionString, hubName, messageSubject, messageDeviceId, messageDeviceDisplayName);
+            AMQPConfig amqpDevicesConfig = PrepareAMQPConfig(config.ServiceBusConnectionString,
+                config.EventHubName,
+                config.MessageSubject,
+                config.MessageDeviceId,
+                config.MessageDeviceDisplayName);
 
             if (amqpDevicesConfig == null)
             {
-                _logger.LogInfo("Not able to construct AMQP config for Event Hub using provided connection string...");
+                Interlocked.Exchange(ref _Gateway, null);
+                Interlocked.Exchange(ref _Readers, null);
+                Interlocked.Exchange(ref _Config, config);
+                _Logger.LogInfo("Not able to construct AMQP config for Event Hub using provided connection string...");
                 return;
             }
+            Interlocked.Exchange(ref _Gateway, CreateGateway(amqpDevicesConfig));
+            Interlocked.Exchange(ref _Readers, readers);
+            Interlocked.Exchange(ref _Config, config);
+        }
 
-            gateway = CreateGateway(amqpDevicesConfig);
-
+        private static void Process()
+        {
+            const int SLEEP_TIME_ON_EXCEPTION_MS = 5000;
             for (; ; )
             {
                 try
                 {
-                    foreach (var reader in readers)
+                    if (_Readers != null)
                     {
-                        IEnumerable<string> dataEnumerable = reader.GetData();
-                        foreach (string newDataJson in dataEnumerable)
+                        foreach (var reader in _Readers)
                         {
-                            if (newDataJson != null)
+                            IEnumerable<string> dataEnumerable = reader.GetData();
+                            foreach (string newDataJson in dataEnumerable)
                             {
-                                gateway.Enqueue(newDataJson);
+                                if (_Gateway != null && newDataJson != null)
+                                {
+                                    _Gateway.Enqueue(newDataJson);
+                                }
                             }
                         }
                     }
 
-                    Thread.Sleep(sleepTimeMs);
+                    Thread.Sleep(_Config.SleepTimeMs);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    Thread.Sleep(sleepTimeOnExceptionMs);
-                    _logger.LogError(ex.Message);
+                    _Logger.LogError(ex.Message);
+                    Thread.Sleep(SLEEP_TIME_ON_EXCEPTION_MS);
                 }
             }
-        }
-
-        private static string ReadConfigValue(string keyName, string defaultNotSetValue)
-        {
-            string value = CloudConfigurationManager.GetSetting(keyName);
-            if (string.IsNullOrEmpty(value) || value.Equals(defaultNotSetValue))
-            {
-                value = ConfigurationManager.AppSettings.Get(keyName);
-            }
-            return value;
         }
 
         private static IEnumerable<RawXMLWithHeaderToJsonReader> PrepareReaders(string xmlTemplate, bool useXML, NetworkCredential credeitial)
@@ -134,28 +143,39 @@
         private static AMQPConfig PrepareAMQPConfig(string connectionString, string hubName,
             string messageSubject, string messageDeviceId, string messageDeviceDisplayName)
         {
-            NamespaceManager nsmgr = NamespaceManager.CreateFromConnectionString(connectionString);
-            EventHubDescription desc = nsmgr.GetEventHub(hubName);
-
-            foreach (var rule in desc.Authorization)
+            try
             {
-                var accessAuthorizationRule = rule as SharedAccessAuthorizationRule;
-                if (accessAuthorizationRule == null) continue;
-                if (!accessAuthorizationRule.Rights.Contains(AccessRights.Send)) continue;
+                NamespaceManager nsmgr = NamespaceManager.CreateFromConnectionString(connectionString);
+                EventHubDescription desc = nsmgr.GetEventHub(hubName);
 
-                string amqpAddress = string.Format("amqps://{0}:{1}@{2}",
-                    accessAuthorizationRule.KeyName,
-                    Uri.EscapeDataString(accessAuthorizationRule.PrimaryKey), nsmgr.Address.Host);
-
-                AMQPConfig amqpConfig = new AMQPConfig
+                foreach (var rule in desc.Authorization)
                 {
-                    AMQPSAddress = amqpAddress,
-                    EventHubName = hubName,
-                    EventHubDeviceDisplayName = string.IsNullOrEmpty(messageSubject) ? "SensorGatewayService" : messageSubject,
-                    EventHubDeviceId = string.IsNullOrEmpty(messageDeviceId) ? "a94cd58f-4698-4d6a-b9b5-4e3e0f794618" : messageDeviceId,
-                    EventHubMessageSubject = string.IsNullOrEmpty(messageDeviceDisplayName) ? "gtsv" : messageDeviceDisplayName
-                };
-                return amqpConfig;
+                    var accessAuthorizationRule = rule as SharedAccessAuthorizationRule;
+                    if (accessAuthorizationRule == null) continue;
+                    if (!accessAuthorizationRule.Rights.Contains(AccessRights.Send)) continue;
+
+                    string amqpAddress = string.Format("amqps://{0}:{1}@{2}",
+                        accessAuthorizationRule.KeyName,
+                        Uri.EscapeDataString(accessAuthorizationRule.PrimaryKey), nsmgr.Address.Host);
+
+                    AMQPConfig amqpConfig = new AMQPConfig
+                    {
+                        AMQPSAddress = amqpAddress,
+                        EventHubName = hubName,
+                        EventHubDeviceDisplayName =
+                            string.IsNullOrEmpty(messageSubject) ? "SensorGatewayService" : messageSubject,
+                        EventHubDeviceId =
+                            string.IsNullOrEmpty(messageDeviceId)
+                                ? "a94cd58f-4698-4d6a-b9b5-4e3e0f794618"
+                                : messageDeviceId,
+                        EventHubMessageSubject =
+                            string.IsNullOrEmpty(messageDeviceDisplayName) ? "gtsv" : messageDeviceDisplayName
+                    };
+                    return amqpConfig;
+                }
+            }
+            catch (Exception)
+            {
             }
             return null;
         }
@@ -172,7 +192,7 @@
                                                     amqpConfig.EventHubMessageSubject,
                                                     amqpConfig.EventHubDeviceId,
                                                     amqpConfig.EventHubDeviceDisplayName,
-                                                    _logger
+                                                    _Logger
                                                     );
 
                 var _batchSenderThread = new BatchSenderThread<QueuedItem, string>(
@@ -180,7 +200,7 @@
                                                     _AMPQSender,
                                                     null,
                                                     m => m.JsonData,
-                                                    _logger);
+                                                    _Logger);
 
                 _batchSenderThread.Start();
 
@@ -189,17 +209,17 @@
                     _batchSenderThread
                 )
                 {
-                    Logger = _logger
+                    Logger = _Logger
                 };
 
                 service.OnDataInQueue += (data) => _batchSenderThread.Process();
-                _logger.Flush();
+                _Logger.Flush();
 
                 return service;
             }
             catch (Exception ex)
             {
-                _logger.LogError("Exception on creating Gateway: " + ex.Message);
+                _Logger.LogError("Exception on creating Gateway: " + ex.Message);
             }
 
             return null;
