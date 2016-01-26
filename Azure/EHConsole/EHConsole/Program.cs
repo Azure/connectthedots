@@ -91,11 +91,10 @@ namespace Microsoft.ConnectTheDots.EHConsole
                 result.NamePrefix = result.NamePrefix.Substring( 0, result.NamePrefix.Length - 3 );
             }
 
-            result.Location = selectedNamespace.Region;
-
             result.SBNamespace = selectedNamespace.Name;
-
             result.StorageAccountName = result.NamePrefix.ToLowerInvariant( ) + "storage";
+
+            result.Location = selectedNamespace.Region;
 
             return true;
         }
