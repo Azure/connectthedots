@@ -77,9 +77,9 @@ In the XMLApiListConfig section, at a minimum enter
 Replace the APIAddress section with one or more URLs for web services you will access (the application will cycle through this list). It would look something like this if you have three URLs to access from the same root location:
 
     <XMLApiListConfig>
-      <add APIAddress="https://www.msconnectthedots.com/feed1"/>
-      <add APIAddress="https://www.msconnectthedots.com/feed2"/>
-      <add APIAddress="https://www.msconnectthedots.com/feed3"/>
+      <add APIAddress="https://www.somepublicdatasource.com/feed1"/>
+      <add APIAddress="https://somepublicdatasource.com/feed2"/>
+      <add APIAddress="https://somepublicdatasource.com/feed3"/>
     </XMLApiListConfig>
 
 ## Publishing the application ##
