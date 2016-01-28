@@ -78,8 +78,8 @@ Replace the APIAddress section with one or more URLs for web services you will a
 
     <XMLApiListConfig>
       <add APIAddress="https://www.somepublicdatasource.com/feed1"/>
-      <add APIAddress="https://somepublicdatasource.com/feed2"/>
-      <add APIAddress="https://somepublicdatasource.com/feed3"/>
+      <add APIAddress="https://www.somepublicdatasource.com/feed2"/>
+      <add APIAddress="https://www.somepublicdatasource.com/feed3"/>
     </XMLApiListConfig>
 
 ## Publishing the application ##
