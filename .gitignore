@@ -123,3 +123,4 @@ node_modules/
 
 # Visual Studio config files
 .vs/
+Azure/WebSite/ConnectTheDotsWebSite/Web.config
