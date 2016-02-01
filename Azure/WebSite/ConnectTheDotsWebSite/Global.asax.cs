@@ -97,36 +97,36 @@ namespace ConnectTheDotsWebSite
                 // Delete and recreate the consumer group
                 // this allows to ensure we will start receiving only fresh messages when the site starts
 
-                foreach (ConsumerGroupDescription consumerGroupDesc in eventHubSettings.namespaceManager.GetConsumerGroups(eventHubSettings.client.Path))
-                {
-                    // We remove any previously created consumergroups containing the word WebSite in the name
-                    if (consumerGroupDesc.Name.ToLowerInvariant().Contains("website") &&
-                        !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME"))
-                        ||
-                        consumerGroupDesc.Name.ToLowerInvariant().Contains("local") &&
-                        String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")))
-                    {
-                        eventHubSettings.namespaceManager.DeleteConsumerGroup(eventHubSettings.name, consumerGroupDesc.Name);
-                    }   
-                }
+                //foreach (ConsumerGroupDescription consumerGroupDesc in eventHubSettings.namespaceManager.GetConsumerGroups(eventHubSettings.client.Path))
+                //{
+                //    // We remove any previously created consumergroups containing the word WebSite in the name
+                //    if (consumerGroupDesc.Name.ToLowerInvariant().Contains("website") &&
+                //        !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME"))
+                //        ||
+                //        consumerGroupDesc.Name.ToLowerInvariant().Contains("local") &&
+                //        String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")))
+                //    {
+                //        eventHubSettings.namespaceManager.DeleteConsumerGroup(eventHubSettings.name, consumerGroupDesc.Name);
+                //    }   
+                //}
 
-                //Workaround to delete old blobs related to old consumer groups
-                CloudBlobContainer eventHubBlobContainer = BlobHelper.SetUpContainer(eventHubSettings.storageConnectionString, eventHubSettings.name);
+                ////Workaround to delete old blobs related to old consumer groups
+                //CloudBlobContainer eventHubBlobContainer = BlobHelper.SetUpContainer(eventHubSettings.storageConnectionString, eventHubSettings.name);
 
-                string blobPerfix = String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")) ? "local" : "website";
+                //string blobPerfix = String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")) ? "local" : "website";
 
-                IEnumerable<CloudBlockBlob> oldBlobs= eventHubBlobContainer.ListBlobs(blobPerfix, true, BlobListingDetails.All).OfType<CloudBlockBlob>();
-                foreach (var blob in oldBlobs)
-                {
-                    try
-                    {
-                        blob.DeleteIfExists();
-                    }
-                    catch (Exception)
-                    {
-                        Debug.Print("Error happened while trying to delete old ConsumerGroup related blob.");
-                    }
-                }
+                //IEnumerable<CloudBlockBlob> oldBlobs= eventHubBlobContainer.ListBlobs(blobPerfix, true, BlobListingDetails.All).OfType<CloudBlockBlob>();
+                //foreach (var blob in oldBlobs)
+                //{
+                //    try
+                //    {
+                //        blob.DeleteIfExists();
+                //    }
+                //    catch (Exception)
+                //    {
+                //        Debug.Print("Error happened while trying to delete old ConsumerGroup related blob.");
+                //    }
+                //}
             }
             catch
             {
@@ -138,9 +138,10 @@ namespace ConnectTheDotsWebSite
                 try
                 {
                     // We create a new consumer group with a new mame each time to 
-                    eventHubSettings.consumerGroup += DateTime.UtcNow.Ticks.ToString();
-                    eventHubSettings.namespaceManager.CreateConsumerGroupIfNotExists(eventHubSettings.name,
-                        eventHubSettings.consumerGroup);
+//                    eventHubSettings.consumerGroup += DateTime.UtcNow.Ticks.ToString();
+                    eventHubSettings.consumerGroup = "website";
+                    //eventHubSettings.namespaceManager.CreateConsumerGroupIfNotExists(eventHubSettings.name,
+                    //    eventHubSettings.consumerGroup);
                 }
                 catch(Exception ex)
                 {
