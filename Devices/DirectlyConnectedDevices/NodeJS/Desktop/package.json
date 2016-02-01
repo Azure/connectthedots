@@ -1,0 +1,15 @@
+{
+  "name": "ConnectTheDotsBeagleBoneBlack",
+  "version": "1.0.1",
+  "description": "Simple Node app sending fake data from desktop to Azure IoT services",
+  "main": "desktop.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "azure-iot-device": "1.0.0-preview.11",
+    "azure-iot-device-amqp": "1.0.0-preview.11"
+  }
+}

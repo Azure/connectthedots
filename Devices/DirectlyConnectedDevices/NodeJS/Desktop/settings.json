@@ -1,0 +1,7 @@
+﻿{
+    "iothubconnectionstring": "HostName=connectthedotsiothub.azure-devices.net;DeviceId=Edison;SharedAccessKey=9G+cW/yiD9d9sNClOyREzCYsGX/E1Ky0P/V762R0UGc=",
+    "deviceid": "edison",
+    "displayname": "Desktop",
+    "organization": "My Org",
+    "location":  "My location"
+}
