@@ -117,3 +117,9 @@ UpgradeLog*.XML
 #Thumbs.db
 Thumbs.db
 Azure/MachineLearning/UpgradeLog.htm
+
+# Node modules directory
+node_modules/
+
+# Visual Studio config files
+.vs/
