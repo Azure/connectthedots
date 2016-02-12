@@ -58,14 +58,14 @@ There are three sections of App.config you will need to change - to specify the 
 ## Step 1: Specifying the Event Hub to Monitor ##
 The code in the [AppToNotifyUsers](https://github.com/Azure/connectthedots/tree/master/Azure/AppToNotifyUsers) solution creates an Azure Cloud Service (worker role) that monitors an event hub identified by a URL you list a config file, App.config, together with the Shared Key that grants you access. The strings in App.config that needs to be modified are the following:
 ```
-<add key="Microsoft.ServiceBus.EventHubToMonitor" value="[event hub name]" />
-<add key="Microsoft.ServiceBus.EventHubConnectionString" value="[event hub connection string]" />
+<add key="Microsoft.ServiceBus.EventHubToMonitor" value="[Event Hub name]" />
+<add key="Microsoft.ServiceBus.ServiceBusConnectionString" value="[Service Bus connection string]" />
 ```
-If you deploy the example in the Connect The Dots, that event hub is called ehalerts, and you would replace [event hub name] with 'ehalerts', and the EventHubConnectionString string with the connection string for it, that you can find in the Azure management portal. It should look something like this:
+If you deploy the example in the Connect The Dots, that event hub is called ehalerts, and you would replace [Event Hub name] with 'ehalerts', and the ServiceBusConnectionString string with the connection string for it, that you can find in the Azure management portal. It should look something like this:
 
 ``` 
 <add key="Microsoft.ServiceBus.EventHubToMonitor" value="ehalerts" />
-<add key="Microsoft.ServiceBus.EventHubConnectionString" value="Endpoint=sb://mynamespace-ns.servicebus.windows.net/;SharedAccessKeyName=StreamingAnalytics;SharedAccessKey=X4a22abcXiRnA3dhBbzu0oHml3a6aLbTNuffrHJ0vHY=" />
+<add key="Microsoft.ServiceBus.ServiceBusConnectionString" value="Endpoint=sb://mynamespace-ns.servicebus.windows.net/;SharedAccessKeyName=StreamingAnalytics;SharedAccessKey=X4a22abcXiRnA3dhBbzu0oHml3a6aLbTNuffrHJ0vHY=" />
 ```
 The EventHubReader module in the code uses this information to get messages from ehalerts, and put it in a queue to be sent by whatever method you specify.
 

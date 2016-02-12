@@ -29,7 +29,7 @@ namespace WorkerHost
 {
     public class AppConfiguration
         {
-            public string DeviceEHConnectionString;
+            public string DeviceSBConnectionString;
             public string DeviceEHName;
 
 
@@ -155,8 +155,8 @@ namespace WorkerHost
 
             AppConfiguration config = new AppConfiguration
             {
-                DeviceEHConnectionString =
-                    ConfigurationManager.AppSettings.Get("Microsoft.ServiceBus.EventHubConnectionString"),
+                DeviceSBConnectionString =
+                    ConfigurationManager.AppSettings.Get("Microsoft.ServiceBus.ServiceBusConnectionString"),
                 DeviceEHName = ConfigurationManager.AppSettings.Get("Microsoft.ServiceBus.EventHubToMonitor"),
                 NotificationService = ConfigurationManager.AppSettings.Get("NotificationService"),
                 EmailServiceUserName = ConfigurationManager.AppSettings.Get("SenderUserName"),

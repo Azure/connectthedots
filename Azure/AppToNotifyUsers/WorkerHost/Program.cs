@@ -157,7 +157,7 @@ namespace WorkerHost
 
         public static void Process()
         {
-            _EventHubReader.Run(_Config.DeviceEHConnectionString, _Config.DeviceEHName, string.Empty);
+            _EventHubReader.Run(_Config.DeviceSBConnectionString, _Config.DeviceEHName, string.Empty);
             _EventHubReader.FailureEvent.WaitOne();
         }
 
