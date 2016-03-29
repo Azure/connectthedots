@@ -26,7 +26,7 @@
 var five = require('johnny-five');
 var Edison = require("edison-io");
 var TH02 = require("th02js");
-var connectthedots = require('./connectthedots.js');
+var connectthedots = require('connectthedots');
 var devicesettings = require('./settings.json');
 
 // [Linear Interpolation](https://en.wikipedia.org/wiki/Linear_interpolation)
