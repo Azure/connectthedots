@@ -31,6 +31,8 @@ var devicesettings;
 // Iot Hub client instance
 var client;
 
+var is_connected = false;
+var init_callback;
 
 // ---------------------------------------------------------------
 // validate settings from JSON file  passed as a parameter to the app
@@ -66,23 +68,65 @@ function format_sensor_data(deviceid, displayname, organization, location, measu
 
 // ---------------------------------------------------------------
 // Initializes connection settings to Event Hub
-exports.init_connection = function(settings)
+var connectCallback = function (err) {
+  if (err) {
+    console.error('Could not connect: ' + err.message);
+  } else {
+    console.log('IoT Hub Client connected');
+
+    client.on('message', function (msg) {
+      console.log('Id: ' + msg.messageId + ' Body: ' + msg.data);
+      client.complete(msg, printResultFor('completed'));
+      // TODO:Implement sending the received message up to the connectthedots user
+      // reject and abandon follow the same pattern.
+      // /!\ reject and abandon are not available with MQTT
+    });
+
+    client.on('error', function (err) {
+      console.error(err.message);
+    });
+
+    client.on('disconnect', function () {
+      is_connected = false;
+      client.removeAllListeners();
+      client.connect(connectCallback);
+    });
+    
+    is_connected = true;
+    init_callback();
+  }
+}
+
+exports.init_connection = function(settings, initCallback)
 {
+    console.log("Initializig the connection with Azure IoT Hub");
     devicesettings = settings;
     
+    console.log("Validating connection settings");
     // Validate settings
     validate_settings(devicesettings, ['deviceid', 'iothubconnectionstring', 'displayname', 'organization', 'location']);
 
+    console.log("Connecting to Azure IoT Hub");
     // Create Iot Hub Client instance 
-    client = clientFromConnectionString(devicesettings.iothubconnectionstring)
+    client = clientFromConnectionString(devicesettings.iothubconnectionstring);
+    init_callback = initCallback;
+    
+    // Open the transport stack
+    client.open(connectCallback);
+};
  
- };
-
 function send_raw_message(raw_message)
 {
-    var message = new Message(raw_message);
-    console.log('Sending message: ' + message.getData());
-    client.sendEvent(message, printResultFor('send'));
+    if (is_connected)
+    {
+        var message = new Message(raw_message);
+        console.log('Sending message: ' + message.getData());
+        client.sendEvent(message, printResultFor('send'));
+    } else
+    {
+        console.log("Transport channel is not opened. Trying to open it...");
+    }
+    
 }
 
 // ---------------------------------------------------------------

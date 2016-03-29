@@ -1,6 +1,6 @@
 {
   "name": "connectthedots",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Simple library to connect a node app to Azure IoT Hub using ConnectTheDots.io",
   "main": "connectthedots.js",
   "scripts": {
