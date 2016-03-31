@@ -128,7 +128,7 @@ var connect_the_dots = function()
         data_motion.value = 0;
 
     }, 1000);
-}
+};
 
 var initCallback = function (err) {
     // Init board
