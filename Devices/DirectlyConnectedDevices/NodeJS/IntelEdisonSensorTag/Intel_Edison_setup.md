@@ -27,21 +27,21 @@ To work on the code of the project, you can use your favorite editor... or lever
                  configure_edison --wifi
 
 * Once WiFi is setup you can connect your SSH tool through the network using the IP address displayed when doing the setup at previous step.
-* the VI text editor comes by default on the Yocto image for the Intel Edison, but if you prefer Nano, connect with SSH and type the following commands:
+* First thing you will need to do is to update the links to opkg packages in order to install a few libraries. In SSH console, type the following commands:
 
-                 opkg install http://repo.opkg.net/edison/repo/core2-32/ncurses-terminfo_5.9-r15.1_core2-32.ipk
-                 opkg install http://repo.opkg.net/edison/repo/core2-32/nano_2.2.5-r3.0_core2-32.ipk
-
-* To connect with the TI SensorTag, you need to enable Bluetooth low energy on the Intel Edison. Connect to the baord via SSH and type the following commands:
-    * edit the file /etc/opkg/base-feeds.conf using vi or nano (see above for installing nano) and add the following lines:
-
-                 src/gz all http://repo.opkg.net/edison/repo/all
-                 src/gz edison http://repo.opkg.net/edison/repo/edison
-                 src/gz core2-32 http://repo.opkg.net/edison/repo/core2-32
-
-    * back in SSH, type the following commands:
+                 echo "src/gz all http://repo.opkg.net/edison/repo/all" >> /etc/opkg/base-feeds.conf
+                 echo "src/gz edison http://repo.opkg.net/edison/repo/edison" >> /etc/opkg/base-feeds.conf
+                 echo "src/gz core2-32 http://repo.opkg.net/edison/repo/core2-32" >> /etc/opkg/base-feeds.conf
 
                  opkg update
+
+* the VI text editor comes by default on the Yocto image for the Intel Edison, but if you prefer Nano, connect with SSH and type the following commands:
+                 opkg install nano
+
+* To connect with the TI SensorTag, you need to enable Bluetooth low energy on the Intel Edison. Connect to the baord via SSH and type the following commands:
+
+    * In SSH, type the following commands:
+
 				 opkg install bluez5-dev
 
 	* To activate bluetooth low energy, you then have to type the following commands in SSH:
@@ -49,26 +49,37 @@ To work on the code of the project, you can use your favorite editor... or lever
                  rfkill unblock bluetooth
                  hciconfig hci0 up
 
-##Prepare settings files##
-You will need to edit the settings file of the application before deploying the application on the board to apply your own connection information for your Azure Event Hub.
+##Setup the app on the board##
 
-* Open the file connectthedots\Devices\DirectlyConnectedDevices\NodeJS\IntelEdison\settings.json and edit the settings based on the configuration of your ehdevices Event Hub
+* In the remote terminal, type the following commands:
 
-                 "namespace": "{namespace}",
-                 "keyname": "{key-name}",
-                 "key": "{key}",
-                 "eventhubname": "ehdevices",
-                 "guid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-                 "displayname": "Edison",
+                 cd /node_app_slot
+                 wget https://github.com/Azure/connectthedots/raw/IoTHub/Devices/DirectlyConnectedDevices/NodeJS/IntelEdisonSensorTag/inteledisonsensortagctd.js
+                 wget https://github.com/Azure/connectthedots/raw/IoTHub/Devices/DirectlyConnectedDevices/NodeJS/IntelEdisonSensorTag/package.json
+                 wget https://github.com/Azure/connectthedots/raw/IoTHub/Devices/DirectlyConnectedDevices/NodeJS/IntelEdisonSensorTag/settings.json
+                 mkdir lib
+                 cd lib
+                 wget https://github.com/Azure/connectthedots/raw/IoTHub/Devices/DirectlyConnectedDevices/NodeJS/IntelEdisonSensorTag/lib/cc2540.js
+                 wget https://github.com/Azure/connectthedots/raw/IoTHub/Devices/DirectlyConnectedDevices/NodeJS/IntelEdisonSensorTag/lib/cc2650.js
+                 wget https://github.com/Azure/connectthedots/raw/IoTHub/Devices/DirectlyConnectedDevices/NodeJS/IntelEdisonSensorTag/lib/common.js
+                 wget https://github.com/Azure/connectthedots/raw/IoTHub/Devices/DirectlyConnectedDevices/NodeJS/IntelEdisonSensorTag/lib/sensortag.js
+                 npm install
+                 
+* Before running the app, you need to update the settings.json file to input the device's connetion string and a unique device id.
+Following the instructions [here](../../../DeviceSetup.md), get the connection string for your device.
+                 
+* In the remote terminal, open the file settings.json and edit the settings based on the configuration of your ehdevices Event Hub (if you want to use nano, just type nano settings.json and once your edits are done, type CTRL+X then Y to save). Note that the device id shall be unique per device so that data is not messed up in the connectthedots portal.
+
+                 "iothubconnectionstring": "<connectionstring>",
+                 "deviceid": "<deviceid>",
+                 "displayname": "EdisonSensortag",
                  "organization": "My Org",
                  "location":  "My location"
+                 
+##Run the app##
 
-##Deploy the app##
+You can run the app manually typing the following in the remote terminal:
 
-The deployment is done using the deploy.cmd file found in the scripts subfolder:
-
-* Edit the deploy.cmd file and enter your Edison's IP address as well as the location on your machine of the PuTTY tools.
-* Start the deploy.cmd script in a cmd shell. This will copy the app files into the /node_app_slot folder on the device and will update the node packages required for the app to run.
-* Once the files are copied in the /node_app_slot, the app will start automatically at reboot. You can simply reboot the board to start sending data Azure!
-
-
+                 node .
+                 
+Because the application is deployed in the node_app_slot on the Intel Edison, it will start automatically at boot time.

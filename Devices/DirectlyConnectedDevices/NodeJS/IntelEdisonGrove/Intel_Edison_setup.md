@@ -42,8 +42,6 @@ To work on the code of the project, you can use your favorite editor.
                  echo "src/gz edison http://repo.opkg.net/edison/repo/edison" >> /etc/opkg/base-feeds.conf
                  echo "src/gz core2-32 http://repo.opkg.net/edison/repo/core2-32" >> /etc/opkg/base-feeds.conf
 
-                 Update your package cache
-
                  opkg update
 
                  opkg install nano
