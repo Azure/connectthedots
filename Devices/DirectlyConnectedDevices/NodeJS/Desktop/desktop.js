@@ -22,37 +22,39 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-// We are using the johnny-five library to access the hardware resources,'
-//var five = require('johnny-five');
-//var BeagleBone = require("beaglebone-io");
-var connectthedots = require('./connectthedots.js');
+var connectthedots = require('connectthedots');
 var devicesettings = require('./settings.json');
 
 // ---------------------------------------------------------------
 // Let's connect_the_dots
 // You can adapt the below code to your own sensors configuration
-function connect_the_dots()
+var connect_the_dots=function()
 {
     console.log("Device Ready to connect its dots");
 
     var lght = 0;
     var temp = 25;
 
-    // send data to Azure every 500 milliseconds    
+    // send data to Azure every 1000 milliseconds    
     setInterval(function(){
         connectthedots.send_message("Light", "L", lght);
         connectthedots.send_message("Temp", "C", temp);
-    }, 500);
+    }, 1000);
 
+};
+
+var initCallback = function (err) {
+    // Once the connection to Azure IoT Hub is establish you can initialize your hardware and start sending data
+    // This is where you would insert your sensors code
+    connect_the_dots();
 };
 
 // ---------------------------------------------------------------
 // Init app
 
 // Init connection to Azure IoT
-connectthedots.init_connection(devicesettings);
+connectthedots.init_connection(devicesettings, initCallback);
 
-connect_the_dots();
 
 
 
