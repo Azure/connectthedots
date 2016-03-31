@@ -14,6 +14,6 @@
     "crypto": "0.0.3",
     "moment": "^2.10.6",
     "sensortag": "^1.1.1",
-    "connectthedots": "file:../Common"
+    "connectthedots":"^1.0.1"
   }
 }
