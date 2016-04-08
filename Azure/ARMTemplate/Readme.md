@@ -10,9 +10,18 @@ We are using Azure Resource Manager to deploy the needed services and connect th
    ```
 1. Create a new resource group typing the following command:
    ```
-   azure group create -n "OlivierCTDRG" -l "East US"
+   azure group create -n "ConnectTheDotsRG" -l "East US"
    ```
-1. Deploy the solution typing the following command:
+1. Navigate to the Azure\ARMTemplate folder in the repo
    ```
-   azure group deployment create -f "C:\IoT\connectthedots\Azure\ARMTemplate\ConnectTheDots.json" OlivierCTDRG OlivierCTDDeploy 
+   cd C:\My\Repo\Location\Azure\ARMTemplate
+   ```
+1. Deploy the solution typing the below command. Note that you will be prompted for the following:
+
+   * iothub SKU:  you can seelct F1 (free), S1 or S2 (see [here](https://azure.microsoft.com/en-us/pricing/details/iot-hub/) for details on pricing for these skus). Note that only 1 instance of the free SKU of IoT Hub is allowed per Azure subscription.
+   * solution name: this name has to be **all lower case** and **less than 16 characters**
+
+   ```
+   azure group deployment create -f "ConnectTheDots.json" ConnectTheDotsRG ConnectTheDotsDeploy 
+   ```
    
