@@ -2,20 +2,6 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
     "contentVersion": "1.0.0.0",
   "parameters": {
-    "asaStartBehavior": {
-      "type": "string",
-      "metadata": {
-        "description": "The start behavior for Stream Analytics jobs [LastStopTime | JobStartTime (default)]"
-      },
-      "defaultValue": "JobStartTime"
-    },
-    "asaStartTime": {
-      "type": "string",
-      "metadata": {
-        "description": "The start time for Stream Analytics jobs"
-      },
-      "defaultValue": "Now"
-    },
     "iotHubSku": {
       "type": "string",
       "allowedValues": [
@@ -48,7 +34,7 @@
     "solutionName": {
       "type": "string",
       "metadata": {
-        "description": "The name of your ConnectTheDots solution (will be used to prefix the services names"
+        "description": "The name of your ConnectTheDots solution (will be used to prefix the services names)"
       }
     },
     "storageAccountSku": {
@@ -78,11 +64,11 @@
       "metadata": {
         "description": "The size of the webapp"
       }
-    }
+    }   
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "storageVersion": "2015-05-01-preview",
+    "storageVersion": "2015-06-15",
     "storageName": "[concat(parameters('solutionName'), 'storage')]",
     "storageId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
     "sbVersion": "[providers('Microsoft.Eventhub', 'namespaces').apiVersions[0]]",
@@ -212,6 +198,8 @@
         },
         "EventsOutOfOrderMaxDelayInSeconds": 10,
         "EventsOutOfOrderPolicy": "adjust",
+        "outputStartMode": "JobStartTime",
+        "outputStartTime": null,
         "Inputs": [
           {
             "Name": "IoTHubStream",
@@ -283,63 +271,82 @@
         "numberOfWorkers": "[parameters('webWorkerCount')]"
       }
     },
-    {
-      "name": "[variables('webSiteName')]",
-      "type": "Microsoft.Web/sites",
-      "location": "[variables('location')]",
-      "apiVersion": "2015-08-01",
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms', variables('webPlanName'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
-        "[resourceId('Microsoft.Devices/Iothubs', variables('iotHubName'))]",
-        "[concat('Microsoft.Eventhub/namespaces/', variables('sbName'))]"
-      ],
-      "tags": {
-        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('webPlanName'))]": "Resource",
-        "displayName": "WebSite"
-      },
-      "properties": {
-        "name": "[variables('WebSiteName')]",
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('webPlanName'))]",
-        "siteConfig": {
-          "AlwaysOn": true,
-          "WebsocketsEnabled": true,
-          "appSettings": [
-            {
-              "name": "Azure.IoT.IoTHub.EventHub.Name",
-              "value": "[reference(variables('iotHubResourceId')).eventHubEndpoints.events.path]"
-            },
-            {
-              "name": "Azure.IoT.IoTHub.EventHub.ConnectionString",
-              "value": "[concat('Endpoint=', reference(variables('iotHubResourceId')).eventHubEndpoints.events.endpoint, ';SharedAccessKeyName=', variables('iotHubKeyName'), ';SharedAccessKey=', listkeys(variables('iotHubKeyResource'), variables('iotHubVersion')).primaryKey)]"
-            },
-            {
-              "name": "Azure.ServiceBus.EventHub.Name",
-              "value": "[variables('ehOutName')]"
-            },
-            {
-              "name": "Azure.ServiceBus.EventHub.ConnectionString",
-              "value": "[listkeys(variables('sbResourceId'), variables('sbVersion')).primaryConnectionString]"
-            },
-            {
-              "name": "Azure.Storage.ConnectionString",
-              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageName'), ';AccountKey=', listkeys(variables('storageId'), variables('storageVersion')).key1)]"
-            },
-            {
-              "name": "ObjectTypePrefix",
-              "value": ""
-            },
-            {
-              "name": "SolutionName",
-              "value": "[variables('webSiteName')]"
-            }
+      {
+          "name": "[variables('webSiteName')]",
+          "type": "Microsoft.Web/sites",
+          "location": "[variables('location')]",
+          "apiVersion": "2015-08-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/serverfarms', variables('webPlanName'))]",
+            "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
+            "[resourceId('Microsoft.Devices/Iothubs', variables('iotHubName'))]",
+            "[concat('Microsoft.Eventhub/namespaces/', variables('sbName'))]"
+          ],
+          "tags": {
+              "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('webPlanName'))]": "Resource",
+              "displayName": "DashboardWebApp"
+          },
+          "properties": {
+              "name": "[variables('WebSiteName')]",
+              "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('webPlanName'))]",
+              "siteConfig": {
+                  "AlwaysOn": true,
+                  "WebsocketsEnabled": true,
+                  "appSettings": [
+                    {
+                      "name": "Azure.IoT.IoTHub.EventHub.Name",
+                      "value": "[reference(variables('iotHubResourceId')).eventHubEndpoints.events.path]"
+                    },
+                    {
+                      "name": "Azure.IoT.IoTHub.EventHub.ConnectionString",
+                      "value": "[concat('Endpoint=', reference(variables('iotHubResourceId')).eventHubEndpoints.events.endpoint, ';SharedAccessKeyName=', variables('iotHubKeyName'), ';SharedAccessKey=', listkeys(variables('iotHubKeyResource'), variables('iotHubVersion')).primaryKey)]"
+                    },
+                    {
+                      "name": "Azure.ServiceBus.EventHub.Name",
+                      "value": "[variables('ehOutName')]"
+                    },
+                    {
+                      "name": "Azure.ServiceBus.EventHub.ConnectionString",
+                      "value": "[listkeys(variables('sbResourceId'), variables('sbVersion')).primaryConnectionString]"
+                    },
+                    {
+                      "name": "Azure.Storage.ConnectionString",
+                      "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageName'), ';AccountKey=', listkeys(variables('storageId'), variables('storageVersion')).key1)]"
+                    },
+                    {
+                      "name": "ObjectTypePrefix",
+                      "value": ""
+                    },
+                    {
+                      "name": "SolutionName",
+                      "value": "[variables('webSiteName')]"
+                    }
+                  ]
+              }
+          },
+          "resources": [
+              {
+                  "name": "MSDeploy",
+                  "type": "extensions",
+                  "location": "[variables('location')]",
+                  "apiVersion": "2015-08-01",
+                  "dependsOn": [
+                      "[concat('Microsoft.Web/sites/', variables('webSiteName'))]"
+                  ],
+                  "tags": {
+                      "displayName": "Dashboard"
+                  },
+                  "properties": {
+                      "packageUri": "[parameters('packageUri')]",
+                      "dbType": "None",
+                      "connectionString": "",
+                      "setParameters": {
+                          "IIS Web Application Name": "[variables('webSiteName')]"
+                      }
+                  }
+              }
           ]
-        }
-      },
-      "resources": [
-        
-      ]
-    }
+      }
   ],
   "outputs": {
     "iotHubConnectionString": {
