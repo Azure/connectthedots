@@ -1,4 +1,5 @@
-To deploy the ConnectTheDots solution to your Azure Subcsrition you will need to follow the below instructions.
+##How to deploy Azure services for ConnectTheDots.io##
+To deploy the ConnectTheDots solution to your Azure subscription you will need to follow the below instructions.
 We are using Azure Resource Manager to deploy the needed services and connect them to one another.
 We are also using the Azure cross platform CLI tool which will allow you to deploy the services from your favorite development machine, running Windows, Linux or OSX.
 The below services will be deployed in your Azure subscription:
@@ -10,11 +11,15 @@ The below services will be deployed in your Azure subscription:
    
 You can edit the [ARM template](ConnectTheDots.json) if you want to add more services or edit the parameters.
 
-**If you want to make edits to the WebSite before deploying the solution** with the ARM template, here are the few steps you can go through:
-1. Do your changes in the WebSite solution (note that if you want to debug along with actual other services (IotHub, and others), you will need to first deploy the ARM Template.
-1. Export a WebDeploy package (you can find instructions on how to do this from the WebSite project [here](https://msdn.microsoft.com/en-us/library/dd465323%28v=vs.110%29.aspx).
-1. Edit the [ARM template](ConnectTheDots.json), updating the packageUri defaultvalue to point to your local zip package (see [this article](https://blogs.perficient.com/microsoft/2016/03/deploy-azure-web-app-using-arm-template-from-visual-studio-2015/) for details on how to do this).
+##Your connect the dots resource groups##
+All the services will be deployed under a single resource group in Azure.
+The [Azure resource groups](https://azure.microsoft.com/en-us/updates/resource-groups-in-azure-preview-portal/) are a concept allowing to manage a set of resources all together.
+This allows you to easily find the various resources for your ConnectTheDots solution in the Azure portal.
 
+##Editing the deployment ARM template##
+The default ARM template doesn't require editing unless you want to change the architecture of your solution to go from the default ConnectTheDots one to your own version of it.
+
+##Deploy using Azure CLI tool and the ARM template##
 Now here is how to deploy the whole ConnectTheDots solution in a few command lines:
 
 1. Install the Azure CLI tool following the instructions [here](https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-install/).
@@ -24,7 +29,7 @@ Now here is how to deploy the whole ConnectTheDots solution in a few command lin
    ```
    azure config mode arm
    ```
-1. Create a new resource group typing the following command:
+1. Create a new resource group typing the following command (you can replace "ConnectTheDotsRG" with the name of your choice for the resource group):
    ```
    azure group create -n "ConnectTheDotsRG" -l "East US"
    ```
@@ -41,3 +46,21 @@ Now here is how to deploy the whole ConnectTheDots solution in a few command lin
    azure group deployment create -f "ConnectTheDots.json" ConnectTheDotsRG ConnectTheDotsDeploy 
    ```
 1. If you are seeing errors during the deployment, you can diagnose following instructions on how to debug ARM deployments: [http://aka.ms/arm-debug](http://aka.ms/arm-debug).
+
+##Deleting a ConnectTheDots solution from your Azure subscription##
+You can easily delete all the Azure resources at once when you are done with your project and want to clean up your Azure subscirption.
+You can do this using a command line in the Azure CLI tool or in the Azure portal.
+
+###Delete the resources using Azure CLI###
+If you are already logged in in the Azure CLI tool, go directly to step #4
+
+1. Connect to Azure following the instructions [here](https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-connect/).
+1. If you have multiple subscriptions, select the one you want to deploy the solution to following the instructions [here](https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-connect/#multiple-subscriptions) 
+1. Set the Resource Azure Manager mode typing the following command:
+   ```
+   azure config mode arm
+   ```
+1. Delete the resource group typing the following command (you need to replace "ConnectTheDotsRG" with the name you used in step 5 of the deployment if you changed it):
+   ```
+   azure group delete -n "ConnectTheDotsRG"
+   ```

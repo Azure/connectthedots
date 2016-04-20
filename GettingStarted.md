@@ -17,18 +17,16 @@ If you are going to deploy the starter solution, you need to procure an Arduino 
 In order to reproduce one of the ConnectTheDots.io scenarios, you will need the following:
 
 1. Microsoft Azure subscription ([free trial subscription](http://azure.microsoft.com/en-us/pricing/free-trial/) is sufficient)
-1. Visual Studio 2013 or above – [Community Edition](http://www.visualstudio.com/downloads/download-visual-studio-vs) is sufficient
-1. [WiX Toolset](http://wixtoolset.org) - if you want to build installer of Gateway for Windows
+1. [optional] Visual Studio 2013 or above – [Community Edition](http://www.visualstudio.com/downloads/download-visual-studio-vs) is sufficient. Note that if you are not planning to use the Gateway nor making changes to the dashboard, you will NOT need Visual Studio.
+1. [optional] [WiX Toolset](http://wixtoolset.org) - if you want to build installer of Gateway for Windows
 
 ## Setup Tasks ##
 Setting up your IoT solution involves several distinct steps, each of which is fully described in this project:
 
 
 1. Clone or copy the project to your machine (NOTE: place the project in a folder as close to the root of your file system as possible. Some paths in the project are very long and you might encounter issues with long path names when restoring NuGet packages)
-1. [Azure prep](Azure/AzurePrep/AzurePrep.md) - Creating basic Azure resources
+1. [Deploy Azure services](Azure/ARMTemplate/Readme.md) - Creating Azure resources
 1. [Device setup](Devices/DeviceSetup.md) - Configuring your device(s)
-1. [Sample website deployment](Azure/WebSite/WebsitePublish.md) - Publishing a generic sample website for viewing the data
-2. [Stream Analytics integration](Azure/StreamAnalyticsQueries/SA_setup.md) - Configuring Stream Analytics to send alerts and averages to the sample website.
   
 To get started with our simple example, complete the tasks above in order. Navigation is provided on each page to get to the next topic.
 

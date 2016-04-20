@@ -13,8 +13,6 @@ For this project, follow the instructions for configuring the following:
 1. [Arduino UNO with weather shield](GatewayConnectedDevices/Arduino%20UNO/Weather/WeatherShieldJson/Arduino-and-Weather-Shield-setup.md) 
 2. [Raspberry Pi](Gateways/GatewayService/RaspberryPi-Gateway-setup.md) 
 
-If you're following the getting started project, the next task is the [sample website deployment](../Azure/WebSite/WebsitePublish.md).
-
 ## Build your own 
 
 To build your own end-to-end configuration you need to identify and configure the device(s) that will be producing the data to be pushed to Azure and displayed/analyzed. Devices fall generally into two categories - those that can connect directly to the Internet, and those that need to connect to the Internet through some intermediate device or gateway. Sample code and documentation can be found in the following folders:
@@ -25,4 +23,4 @@ To build your own end-to-end configuration you need to identify and configure th
 
 
 ### Build a sensor infrastructure ###
-For additional scenarios, or more advanced configurations, follow the setup instructions in the folders for the devices or gateways listed above. For example, to include a Gadgeteer using the .NET Microframework code, follow [these instructions](DirectlyConnectedDevices/NETMF/ConnectTheDotsGadgeteer/Docs/NETMF%20Gadgeteer%20setup.md).
+For additional scenarios, or more advanced configurations, follow the setup instructions in the folders for the devices or gateways listed above.
