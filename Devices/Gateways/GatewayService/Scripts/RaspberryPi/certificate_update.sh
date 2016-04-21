@@ -25,5 +25,5 @@
 
 # stuff that should be done once on a device
 
-# import root certificates into the mono trust store (AMQP connection will fail with a certificate trust error if this is not done)
+# import root certificates into the mono trust store (IoT Hub connection will fail with a certificate trust error if this is not done)
 mozroots --import --ask-remove

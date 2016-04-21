@@ -41,31 +41,19 @@ To build the project you will need Visual Studio 2013 [Community Edition](http:/
                   echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list 
 
 
-
+* Create a device ID and retreive a connection string for the gateway following the instructions in the [Device Setup](../../DeviceSetup.md) guide.
 * Open the `Devices\Gateways\GatewayService\GatewayService.sln` solution in Visual Studio
-* In Visual Studio, update `\GatewayService\Gateway\Microsoft.ConnectTheDots.GatewayService\App.config` with any one of the four amqp address strings returned by AzurePrep.exe, i.e. `amqps://D1:xxxxxxxx@yyyyyyyy.servicebus.windows.net`, and the 
-name that you assigned to your gateway. It is important that the key is being url-encoded, meaning all special characters should be replaced by their ASCII code (e.g. "=" should be replaced by "%3D". You can use tools like [http://meyerweb.com/eric/tools/dencoder/](http://meyerweb.com/eric/tools/dencoder/) to url-encode the key. The four strings you can use are in the file created on your desktop by the AzurePrep.exe utility used earlier. Copy one of those strings and replace the relevant line in App.config:
+* In Visual Studio, update `\GatewayService\Gateway\Microsoft.ConnectTheDots.GatewayService\App.config` pasting your device connection string:
 
 	Before:
     
- 
-		<AMQPServiceConfig
-		AMQPSAddress="amqps://[keyname]:[key]@[namespace].servicebus.windows.net"
-		EventHubName="ehdevices"
-		EventHubMessageSubject="gtsv"
-		EventHubDeviceId="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-		EventHubDeviceDisplayName="SensorGatewayService"/>
+		<IotHubConfig IotHubConnectionString="[IoTHubConnectionString]"/>
+
 
 	After:
  
-		<AMQPServiceConfig
-		AMQPSAddress="amqps://D1:iKwblb9AwHD2GPzu1TRF5Jz76QiSynsjbuWbdxsIi98%3D@sstest20-ns.servicebus.windows.net"
-		EventHubName="ehdevices"
-		EventHubMessageSubject="gtsv"
-		EventHubDeviceId="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-		EventHubDeviceDisplayName="SensorGatewayService"/>
+		<IotHubConfig IotHubConnectionString="HostName=connectthedotsiothub.azure-devices.net;DeviceId=MyDevice;SharedAccessKey=qCkdQE8wo/9LO9bJRVSWgecHvlmlc/fTRBKhNnN7zMQ="/>
 
-	You can also replace the EventHubDeviceId with an ID of your choice.
 
 * Use  the file `\Scripts\RaspberryPi\deploy.cmd` to copy all requisite files from your computer to the Pi. To use the .CMD file, you will need to 
         

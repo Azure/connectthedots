@@ -149,7 +149,7 @@ namespace Microsoft.ConnectTheDots.Gateway
                     try
                     {
                         // If there are no tasks to be served, wait for some events to process
-                        // Use a timeout to prevent race conditions on teh outstanding tasks count
+                        // Use a timeout to prevent race conditions on the outstanding tasks count
                         // and the actual queue count
                         _doWork.WaitOne( WAIT_TIMEOUT );
 
@@ -217,7 +217,7 @@ namespace Microsoft.ConnectTheDots.Gateway
                                 // adding, we should never incur a negative count 
                                 Debug.Assert( _outstandingTasks >= 0 );
 
-                                if ( popped != null && popped.Result != null && popped.Result.IsSuccess )
+                                if ( popped?.Result != null && popped.Result.IsSuccess )
                                 {
                                     if( _dataTransform != null )
                                     {

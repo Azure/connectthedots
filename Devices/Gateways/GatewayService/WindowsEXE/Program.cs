@@ -45,7 +45,7 @@ namespace Microsoft.ConnectTheDots.GatewayExe
 
         private static ILogger                        _logger;
         private static GatewayQueue<QueuedItem>       _gatewayQueue;
-        private static AMQPSender<SensorDataContract> _AMPQSender;
+        private static MessageSender<SensorDataContract> _MessageSender;
         private static EventProcessor                 _batchSenderThread;
         private static DeviceAdapterLoader            _dataIntakeLoader;
         private static Func<string, QueuedItem>       _gatewayTransform;
@@ -76,25 +76,18 @@ namespace Microsoft.ConnectTheDots.GatewayExe
                 // Name the Windows Service
                 
                 _gatewayQueue = new GatewayQueue<QueuedItem>( );
-                AMQPConfig amqpConfig = Loader.GetAMQPConfig( );
+                IotHubConfig iotHubConfig = Loader.GetIotHubConfig();
 
-                if( amqpConfig == null )
+                if( iotHubConfig == null )
                 {
-                    _logger.LogError( "AMQP configuration is missing" );
+                    _logger.LogError( "IoT Hub connection configuration is missing" );
                     return;
                 }
-                _AMPQSender = new AMQPSender<SensorDataContract>(
-                                                    amqpConfig.AMQPSAddress,
-                                                    amqpConfig.EventHubName,
-                                                    amqpConfig.EventHubMessageSubject,
-                                                    amqpConfig.EventHubDeviceId,
-                                                    amqpConfig.EventHubDeviceDisplayName,
-                                                    _logger
-                                                    );
+                _MessageSender = new MessageSender<SensorDataContract>(iotHubConfig.IotHubConnectionString, _logger);
                 
                 _batchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>(
                                                     _gatewayQueue,
-                                                    _AMPQSender,
+                                                    _MessageSender,
                                                     null,//m => DataTransforms.AddTimeCreated(DataTransforms.SensorDataContractFromQueuedItem(m, _Logger)),
                                                     new Func<QueuedItem, string>( m => m.JsonData ),
                                                     _logger );
@@ -176,9 +169,9 @@ namespace Microsoft.ConnectTheDots.GatewayExe
             _batchSenderThread.Stop( STOP_TIMEOUT_MS );
 
             // shut down connection to event hub last
-            if( _AMPQSender != null )
+            if( _MessageSender != null )
             {
-                _AMPQSender.Close( );
+                _MessageSender.Close( );
             }
 
             _logger.LogInfo( "...stopped" );

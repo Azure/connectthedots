@@ -73,8 +73,8 @@ namespace Microsoft.ConnectTheDots.Test
             _sender = new MockSender<QueuedItem>( this );
             //
             // To test with actual event hub, use the code below
-            //  _sender = new AMQPSender<SensorDataContract>(Constants.AMQPSAddress, Constants.EventHubName, Constants.EventHubMessageSubject, Constants.EventHubDeviceId, Constants.EventHubDeviceDisplayName);
-            //  ((AMQPSender<QueuedItem>)_Sender).Logger = new TestLogger();
+            //  _sender = new MessageSender<SensorDataContract>(Constants.IotHubConnectionString);
+            //  ((MessageSender<QueuedItem>)_Sender).Logger = new TestLogger();
             // 
 
             _batchSenderThread = new BatchSenderThread<QueuedItem, QueuedItem>( _gatewayQueue, _sender, m => m, null, _logger );
@@ -82,10 +82,10 @@ namespace Microsoft.ConnectTheDots.Test
 
         public void Run( )
         {
-            TestRecieveMessagesFromSocketDevice( );
+            TestReceiveMessagesFromSocketDevice( );
         }
 
-        public void TestRecieveMessagesFromSocketDevice( )
+        public void TestReceiveMessagesFromSocketDevice( )
         {
             const int MESSAGES_TO_SEND_BY_SOCKET = 5;
             try

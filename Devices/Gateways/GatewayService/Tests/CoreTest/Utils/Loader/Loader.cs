@@ -32,14 +32,14 @@ namespace Microsoft.ConnectTheDots.Test
 
     //--//
 
-    internal class AMQPConfig
-    {
-        public string AMQPSAddress;
-        public string EventHubName;
-        public string EventHubMessageSubject;
-        public string EventHubDeviceId;
-        public string EventHubDeviceDisplayName;
-    };
+    //internal class AMQPConfig
+    //{
+    //    public string AMQPSAddress;
+    //    public string EventHubName;
+    //    public string EventHubMessageSubject;
+    //    public string EventHubDeviceId;
+    //    public string EventHubDeviceDisplayName;
+    //};
 
     internal class DataTransformsConfig
     {
@@ -89,24 +89,36 @@ namespace Microsoft.ConnectTheDots.Test
             return sensorEndpoints;
         }
 
-        internal static AMQPConfig GetAMQPConfig( )
+        internal static IotHubConfig GetIotHubConfig( )
         {
-            AMQPServiceConfigSection section = ConfigurationManager.GetSection( "AMQPServiceConfig" ) as AMQPServiceConfigSection;
-            AMQPConfig configData = null;
+            IotHubConfigSection section = ConfigurationManager.GetSection("IotHubConfig") as IotHubConfigSection;
+            IotHubConfig configData = null;
 
             if( section != null )
             {
-                configData = new AMQPConfig
+                configData = new IotHubConfig
                 {
-                    AMQPSAddress = section.AMQPSAddress,
-                    EventHubName = section.EventHubName,
-                    EventHubMessageSubject = section.EventHubMessageSubject,
-                    EventHubDeviceId = section.EventHubDeviceId,
-                    EventHubDeviceDisplayName = section.EventHubDeviceDisplayName
+                    IotHubConnectionString = section.IotHubConnectionString,
                 };
             }
 
             return configData;
+        }
+
+        internal class IotHubConfigSection : ConfigurationSection
+        {
+            [ConfigurationProperty("IotHubConnectionString", DefaultValue = "IotHubConnectionString", IsRequired = true)]
+            public string IotHubConnectionString
+            {
+                get
+                {
+                    return (string)this["IotHubConnectionString"];
+                }
+                set
+                {
+                    this["IotHubConnectionString"] = value;
+                }
+            }
         }
 
         internal static DataTransformsConfig GetDataTransformsConfig( )
@@ -132,74 +144,6 @@ namespace Microsoft.ConnectTheDots.Test
             }
 
             return configData;
-        }
-    }
-
-    internal class AMQPServiceConfigSection : ConfigurationSection
-    {
-        [ConfigurationProperty( "AMQPSAddress", DefaultValue = "AMQPSAddress", IsRequired = true )]
-        public string AMQPSAddress
-        {
-            get
-            {
-                return ( string )this[ "AMQPSAddress" ];
-            }
-            set
-            {
-                this[ "AMQPSAddress" ] = value;
-            }
-        }
-
-        [ConfigurationProperty( "EventHubName", DefaultValue = "EventHubName", IsRequired = true )]
-        public string EventHubName
-        {
-            get
-            {
-                return ( string )this[ "EventHubName" ];
-            }
-            set
-            {
-                this[ "EventHubName" ] = value;
-            }
-        }
-
-        [ConfigurationProperty( "EventHubMessageSubject", DefaultValue = "EventHubMessageSubject", IsRequired = true )]
-        public string EventHubMessageSubject
-        {
-            get
-            {
-                return ( string )this[ "EventHubMessageSubject" ];
-            }
-            set
-            {
-                this[ "EventHubMessageSubject" ] = value;
-            }
-        }
-
-        [ConfigurationProperty( "EventHubDeviceId", DefaultValue = "EventHubDeviceId", IsRequired = true )]
-        public string EventHubDeviceId
-        {
-            get
-            {
-                return ( string )this[ "EventHubDeviceId" ];
-            }
-            set
-            {
-                this[ "EventHubDeviceId" ] = value;
-            }
-        }
-
-        [ConfigurationProperty( "EventHubDeviceDisplayName", DefaultValue = "EventHubDeviceDisplayName", IsRequired = true )]
-        public string EventHubDeviceDisplayName
-        {
-            get
-            {
-                return ( string )this[ "EventHubDeviceDisplayName" ];
-            }
-            set
-            {
-                this[ "EventHubDeviceDisplayName" ] = value;
-            }
         }
     }
 

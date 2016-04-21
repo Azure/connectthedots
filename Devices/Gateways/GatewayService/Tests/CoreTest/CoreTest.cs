@@ -82,16 +82,9 @@ namespace Microsoft.ConnectTheDots.Test
             _sender = new MockSender<SensorDataContract>(this);
 #else
 
-            AMQPConfig amqpConfig = Loader.GetAMQPConfig( );
+            IotHubConfig iotHubConfig = Loader.GetIotHubConfig( );
 
-            _sender = new AMQPSender<SensorDataContract>(
-                                                amqpConfig.AMQPSAddress,
-                                                amqpConfig.EventHubName,
-                                                amqpConfig.EventHubMessageSubject,
-                                                amqpConfig.EventHubDeviceId,
-                                                amqpConfig.EventHubDeviceDisplayName,
-                                                _logger
-                                                );
+            _sender = new MessageSender<SensorDataContract>(iotHubConfig.IotHubConnectionString, _logger);
 #endif
 
             _batchSenderThread = new BatchSenderThread<QueuedItem, SensorDataContract>(

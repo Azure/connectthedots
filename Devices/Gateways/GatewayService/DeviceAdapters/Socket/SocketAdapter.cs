@@ -281,7 +281,7 @@ namespace Microsoft.ConnectTheDots.Adapters
                                     jsonBuilder.Append( m.Captures[ 0 ].Value.Trim( ).Substring( 1, m.Captures[ 0 ].Value.Trim( ).Length - 2 ) );
                                     //jsonBuilder.Append("}");
                                     string jsonString = jsonBuilder.ToString( );
-                                    //logger.Info("About to call SendAMQPMessage with JSON string: " + jsonString);
+                                    //logger.Info("About to send message with JSON string: " + jsonString);
                                     _enqueue( jsonString );
 
                                     matchCount++;
