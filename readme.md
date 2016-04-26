@@ -21,7 +21,8 @@ Here is a list of what's new in V2
     - Updated all the node.js samples to use the Azure IoT Hub SDK
     - Removed old devices samples (Galileo, .Net Micro Framework)
     - Updated the Gateway code to use Azure IoT Hub device SDK
-    - Updated WP8 samples to UWP 
+    - Updated WP8 samples (Simulated Sensors and MS Band) to Windows 10 UWP apps
+    - Added Xamarin samples 
 
 ##Where is the V1 if I still want to use the old fashion way?##
 The V1 has been tagged and you can find it [here](https://github.com/Azure/connectthedots/releases/tag/1.0)
