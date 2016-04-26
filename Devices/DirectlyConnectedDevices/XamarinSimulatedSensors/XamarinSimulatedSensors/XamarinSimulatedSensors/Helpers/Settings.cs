@@ -21,24 +21,24 @@ namespace XamarinSimulatedSensors.Helpers
 
     #region Setting Constants
 
-    private const string DeviceNameKey = "DeviceName";
-    private static readonly string DeviceNameDefault = string.Empty;
+    private const string DisplayNameKey = "DisplayName";
+    private static readonly string DisplayNameDefault = string.Empty;
 
-    private const string DeviceConnectionStringKey = "DeviceName";
-    private static readonly string DeviceConnectionStringDefault = string.Empty;
+    private const string ConnectionStringKey = "ConnectionString";
+    private static readonly string ConnectionStringDefault = string.Empty;
 
     #endregion
 
-    public static string DeviceName
+    public static string DisplayName
     {
-            get { return AppSettings.GetValueOrDefault<string>(DeviceNameKey, DeviceNameDefault); }
-            set { AppSettings.AddOrUpdateValue<string>(DeviceNameKey, value); }
+            get { return AppSettings.GetValueOrDefault<string>(DisplayNameKey, DisplayNameDefault); }
+            set { AppSettings.AddOrUpdateValue<string>(DisplayNameKey, value); }
     }
 
-    public static string DeviceConnectionString
+    public static string ConnectionString
     {
-        get { return AppSettings.GetValueOrDefault<string>(DeviceConnectionStringKey, DeviceConnectionStringDefault); }
-        set { AppSettings.AddOrUpdateValue<string>(DeviceConnectionStringKey, value); }
+        get { return AppSettings.GetValueOrDefault<string>(ConnectionStringKey, ConnectionStringDefault); }
+        set { AppSettings.AddOrUpdateValue<string>(ConnectionStringKey, value); }
     }
 
   }

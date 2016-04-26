@@ -5,32 +5,33 @@
     android:layout_height="fill_parent"
     android:minWidth="25px"
     android:minHeight="25px">
-    <TextView
-        android:text="Device Name:"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+    <ImageView
+        android:src="@drawable/ctdlogomedium"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/textView1" />
+        android:id="@+id/imageView1" />
     <TextView
-        android:text="Droid"
-        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Display Name:"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/lblDisplayName" />
+    <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/textDeviceName"
         android:editable="true" />
     <TextView
         android:text="Connection String:"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/textView3" />
-    <TextView
-        android:text="[Enter a connection string]"
-        android:textAppearance="?android:attr/textAppearanceSmall"
+    <EditText
+        android:inputType="textMultiLine"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/textConnectionString"
-        android:layout_marginBottom="32.5dp"
         android:editable="true" />
     <Button
         android:text="Press to Connect The Dots"

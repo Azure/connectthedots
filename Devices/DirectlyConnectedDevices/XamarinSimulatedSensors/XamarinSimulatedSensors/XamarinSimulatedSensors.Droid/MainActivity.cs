@@ -13,14 +13,15 @@ namespace XamarinSimulatedSensors.Droid
 	[Activity (Label = "XamarinSimulatedSensors.Droid", MainLauncher = true, Icon = "@drawable/icon")]
 	public class MainActivity : Activity
 	{
-		int count = 1;
-
         MyClass Device;
 
         Button buttonConnect;
         Button buttonSend;
         TextView textDeviceName;
         TextView textConnectionString;
+
+        TextView lblTemperature;
+        TextView lblHumidity;
 
         protected override void OnCreate (Bundle bundle)
 		{
@@ -32,97 +33,108 @@ namespace XamarinSimulatedSensors.Droid
             // Initialize IoT Hub client
             Device = new MyClass();
 
-            Device.DisplayName = "Droid";
-            Device.ConnectionString = "HostName=ctdoli1010hub.azure-devices.net;DeviceId=Droid;SharedAccessKey=mBg1YJbnl2SrvDuE+ix7ZIwimsfaJ9aDidiuCpCe3l0=";
+            // If you are developing and want to avoid having to enter the full connection string on the device,
+            // you can temporarily hard code it here. Comment this when done!
+            //Device.DisplayName = "[DisplayName]";
+            //Device.ConnectionString = "[ConnectionString]";
 
-
-            // Set the callbacks for the text fields changes
-            textDeviceName = FindViewById<TextView>(Resource.Id.textDeviceName);
-            textDeviceName.Text = Device.DisplayName;
-            textDeviceName.TextChanged += (object sender, Android.Text.TextChangedEventArgs e) =>
-            {
-                Device.DisplayName = e.Text.ToString();
-            };
-
-            textConnectionString = FindViewById<TextView>(Resource.Id.textConnectionString);
-            textConnectionString.Text = Device.ConnectionString;
-            textConnectionString.TextChanged += (object sender, Android.Text.TextChangedEventArgs e) =>
-            {
-                Device.ConnectionString = e.Text.ToString();
-            };
-
+            // Prepare UI elements
             buttonConnect = FindViewById<Button>(Resource.Id.buttonConnect);
-            buttonConnect.Enabled = Device.checkConfig();
-            buttonConnect.Click += (object sender, EventArgs e)=>
-            {
-                if (Device.Connected)
-                {
-                    if (Device.CTDDisconnect())
-                    {
-                        buttonSend.Enabled = false;
-                        textDeviceName.Enabled = true;
-                        textConnectionString.Enabled = true;
-                        buttonConnect.Text = "Press to connect the dots";
-                    }
-                }
-                else
-                {
-                    if (Device.Connect())
-                    {
-                        buttonSend.Enabled = true;
-                        textDeviceName.Enabled = false;
-                        textConnectionString.Enabled = false;
-                        buttonConnect.Text = "Dots connected";
-
-                    }
-                }
-            };
+            buttonConnect.Enabled = false;
+            buttonConnect.Click += ButtonConnect_Click;
 
             buttonSend = FindViewById<Button>(Resource.Id.buttonSend);
             buttonSend.Enabled = false;
-            buttonSend.Click += (object sender, EventArgs e) =>
-            {
-                if (Device.Sending)
-                {
-                    Device.SendTelemetryData = false;
-                    Device.Sending = false;
-                    buttonSend.Text = "Press to send telemetry data";
-                }
-                else
-                {
-                    Device.SendTelemetryData = true;
-                    Device.Sending = true;
-                    buttonSend.Text = "Sending telemetry data";
-                }
-            };
+            buttonSend.Click += ButtonSend_Click;
 
-            // Set the Temperature UI
-            TextView lblTemperature = FindViewById<TextView>(Resource.Id.lblTemperature);
+            textDeviceName = FindViewById<TextView>(Resource.Id.textDeviceName);
+            textDeviceName.TextChanged += TextDeviceName_TextChanged;
+            textDeviceName.Text = Device.DisplayName;
+
+            textConnectionString = FindViewById<TextView>(Resource.Id.textConnectionString);
+            textConnectionString.TextChanged += TextConnectionString_TextChanged;
+            textConnectionString.Text = Device.ConnectionString;
+
+            lblTemperature = FindViewById<TextView>(Resource.Id.lblTemperature);
             SeekBar seekTemperature = FindViewById<SeekBar>(Resource.Id.seekBarTemperature);
+            seekTemperature.ProgressChanged += SeekTemperature_ProgressChanged;
             seekTemperature.Progress = 50;
 
-            Device.UpdateSensorData("Temperature", seekTemperature.Progress);
-
-            seekTemperature.ProgressChanged += (object sender, SeekBar.ProgressChangedEventArgs e) =>
-            {
-                lblTemperature.Text = "Temperature: " + e.Progress;
-                Device.UpdateSensorData("Temperature", e.Progress);
-            };
-
-            // Set the Humidity UI
-            TextView lblHumidity = FindViewById<TextView>(Resource.Id.lblHumidity);
+            lblHumidity = FindViewById<TextView>(Resource.Id.lblHumidity);
             SeekBar seekHumidity = FindViewById<SeekBar>(Resource.Id.seekBarHumidity);
+            seekHumidity.ProgressChanged += SeekHumidity_ProgressChanged;
             seekHumidity.Progress = 50;
 
-            Device.UpdateSensorData("Humidity", seekHumidity.Progress);
+            // Set focus to the connect button
+            buttonConnect.RequestFocus();
+        }
 
-            seekHumidity.ProgressChanged += (object sender, SeekBar.ProgressChangedEventArgs e) =>
+        private void SeekHumidity_ProgressChanged(object sender, SeekBar.ProgressChangedEventArgs e)
+        {
+            lblHumidity.Text = "Humidity: " + e.Progress;
+            Device.UpdateSensorData("Humidity", e.Progress);
+        }
+
+        private void SeekTemperature_ProgressChanged(object sender, SeekBar.ProgressChangedEventArgs e)
+        {
+            lblTemperature.Text = "Temperature: " + e.Progress;
+            Device.UpdateSensorData("Temperature", e.Progress);
+        }
+
+        private void ButtonSend_Click(object sender, EventArgs e)
+        {
+            if (Device.SendTelemetryData)
             {
-                lblHumidity.Text = "Humidity: " + e.Progress;
-                Device.UpdateSensorData("Humidity", e.Progress);
-            };
-		}
+                
+                Device.SendTelemetryData = false;
+                buttonSend.Text = "Press to send telemetry data";
+            }
+            else
+            {
+                Device.SendTelemetryData = true;
+                buttonSend.Text = "Sending telemetry data";
+            }
+        }
 
+        private void ButtonConnect_Click(object sender, EventArgs e)
+        {
+            if (Device.IsConnected)
+            {
+                Device.SendTelemetryData = false;
+                if (Device.Disconnect())
+                {
+                    buttonSend.Enabled = false;
+                    textDeviceName.Enabled = true;
+                    textConnectionString.Enabled = true;
+                    buttonConnect.Text = "Press to connect the dots";
+                }
+            }
+            else
+            {
+                if (Device.Connect())
+                {
+                    buttonSend.Enabled = true;
+                    textDeviceName.Enabled = false;
+
+                    textConnectionString.Enabled = false;
+                    buttonConnect.Text = "Dots connected";
+
+                }
+            }
+
+        }
+
+        private void TextConnectionString_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
+        {
+            Device.ConnectionString = e.Text.ToString();
+            buttonConnect.Enabled = Device.checkConfig();
+        }
+
+        private void TextDeviceName_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
+        {
+            Device.DisplayName = e.Text.ToString();
+            buttonConnect.Enabled = Device.checkConfig();
+        }
     }
 }
 

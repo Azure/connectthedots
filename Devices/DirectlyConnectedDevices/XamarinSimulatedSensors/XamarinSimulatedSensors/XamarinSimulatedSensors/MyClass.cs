@@ -8,13 +8,10 @@ namespace XamarinSimulatedSensors
 {
     public class MyClass:ConnectTheDots
     {
-        public bool Connected { get; set; } = false;
-        public bool Sending { get; set; } = false;
-
         public MyClass()
         {
-            this.DisplayName = Settings.DeviceName;
-            this.ConnectionString = Settings.DeviceConnectionString;
+            this.DisplayName = Settings.DisplayName;
+            this.ConnectionString = Settings.ConnectionString;
             this.Organization = "Microsoft";
             this.Location = "My Location";
 
@@ -24,8 +21,17 @@ namespace XamarinSimulatedSensors
 
         public bool checkConfig()
         {
-            return ((this.DisplayName != null) && (this.ConnectionString != null) &&
-                    (this.DisplayName != "") && (this.ConnectionString != ""));
+            if (((this.DisplayName != null) && (this.ConnectionString != null) &&
+                        (this.DisplayName != "") && (this.ConnectionString != "")))
+            {
+                Settings.DisplayName = this.DisplayName;
+                Settings.ConnectionString = this.ConnectionString;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public void UpdateSensorData(string SensorName, double value)
@@ -33,18 +39,6 @@ namespace XamarinSimulatedSensors
             if (this.Sensors.ContainsKey(SensorName))
                 this.Sensors[SensorName].value = value;
         }
-
-        public bool CTDConnect()
-        {
-            Connected = this.Connect();
-            return Connected;
-        }
-        public bool CTDDisconnect()
-        {
-            Connected = !this.Disconnect();
-            return !Connected;
-        }
-
     }
 }
 
