@@ -63,6 +63,7 @@ namespace Microsoft.ConnectTheDots.Gateway
             Logger.LogInfo( "Connecting to IotHub" );
 #endif
             deviceClient = DeviceClient.CreateFromConnectionString(gatewayIotHubConnectionString);
+            deviceClient.OpenAsync();
         }
 
         public TaskWrapper SendMessage( T data )
