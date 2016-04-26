@@ -96,8 +96,9 @@ namespace ConnectTheDotsHelper
         public string DisplayName { get; set; }
         public string Organization { get; set; }
         public string Location { get; set; }
-        public bool SendTelemetryData { private get; set; }
+        public bool SendTelemetryData { get; set; }
         public int SendTelemetryFreq { get; set; } = 1000;
+        public bool IsConnected { get; set; } = false;
 
         // Sending and receiving tasks
         CancellationTokenSource TokenSource = new CancellationTokenSource();
@@ -193,6 +194,7 @@ namespace ConnectTheDotsHelper
                 // Create Azure IoT Hub Client and open messaging channel
                 deviceClient = DeviceClient.CreateFromConnectionString(this.ConnectionString, TransportType.Http1);
                 deviceClient.OpenAsync();
+                IsConnected = true;
 
                 // Create send and receive tasks
                 CancellationToken ct = TokenSource.Token;
@@ -207,6 +209,8 @@ namespace ConnectTheDotsHelper
 
                             foreach (KeyValuePair<string, D2CMessage> sensor in Sensors)
                             {
+                                // Update the values that 
+                                sensor.Value.displayname = DisplayName;
                                 sensor.Value.location = Location;
                                 sensor.Value.timecreated = DateTime.UtcNow.ToString("o");
                                 dataToSend[index++] = sensor.Value;
@@ -282,6 +286,7 @@ namespace ConnectTheDotsHelper
                 {
                     deviceClient.CloseAsync();
                     deviceClient = null;
+                    IsConnected = false;
                 }
                 catch
                 {
