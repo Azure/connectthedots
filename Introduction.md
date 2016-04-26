@@ -2,7 +2,7 @@
 ## Overview ##
 ConnectTheDots is put together to demonstrate the power of Azure IoT and its use of data from various devices.  It's built off the assumption that the sensors get the raw data and format it into a JSON string.  That string is then shuttled off to Azure IoT Hub, where it gathers the data and displays it as a chart.  Optional other functions of the Azure cloud include sending alerts and averages, however this is not required.
 
-The JSON string is sent to Azure IoT Hub whether directly by the sensor device if it is capable of connecting to Azure IoT Hub or through a multi-protocol Gateway, which is how the [Getting Started](Gettingstarted.md) sample does it.  More details on each of those options are below.
+The JSON string is sent to Azure IoT Hub whether directly by the sensor device if it is capable of connecting to Azure IoT Hub or through a multi-protocol Gateway, which is how the [Getting Started](GettingStarted.md) sample does it.  More details on each of those options are below.
 
 We encourage the community to contribute to the project!  See [Contribute](Contribute.md) page for details.
 
