@@ -314,6 +314,10 @@
                       "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageName'), ';AccountKey=', listkeys(variables('storageId'), variables('storageVersion')).key1)]"
                     },
                     {
+                      "name": "Azure.IoT.IoTHub.EventHub.ConsumerGroup",
+                      "value": "[variables('websiteCGName')]"
+                    },
+                    {
                       "name": "ObjectTypePrefix",
                       "value": ""
                     },
