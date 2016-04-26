@@ -143,7 +143,7 @@ namespace ConnectTheDotsHelper
         /// </summary>
         private dynamic DeSerialize(byte[] data)
         {
-            string text = Encoding.UTF8.GetString(data);
+            string text = Encoding.UTF8.GetString(data, 0, data.Length);
             return JsonConvert.DeserializeObject(text);
         }
 
@@ -262,7 +262,7 @@ namespace ConnectTheDotsHelper
             }
             catch
             {
-                Debug.Write("Error while trying to connect to IoT Hub");
+                Debug.WriteLine("Error while trying to connect to IoT Hub");
                 deviceClient = null;
                 return false;
             }
@@ -285,7 +285,7 @@ namespace ConnectTheDotsHelper
                 }
                 catch
                 {
-                    Debug.Write("Error while trying close the IoT Hub connection");
+                    Debug.WriteLine("Error while trying close the IoT Hub connection");
                     return false;
                 }
             }
