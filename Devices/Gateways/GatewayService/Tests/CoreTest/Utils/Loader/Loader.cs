@@ -28,18 +28,8 @@ namespace Microsoft.ConnectTheDots.Test
     using System.Collections.Generic;
     using System.Configuration;
     using Microsoft.ConnectTheDots.Common;
-    using Microsoft.ConnectTheDots.Gateway;
 
     //--//
-
-    //internal class AMQPConfig
-    //{
-    //    public string AMQPSAddress;
-    //    public string EventHubName;
-    //    public string EventHubMessageSubject;
-    //    public string EventHubDeviceId;
-    //    public string EventHubDeviceDisplayName;
-    //};
 
     internal class DataTransformsConfig
     {

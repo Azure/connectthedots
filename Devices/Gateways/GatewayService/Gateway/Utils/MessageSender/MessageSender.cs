@@ -25,19 +25,15 @@
 //#define DEBUG_LOG
 
 
-using System.Collections;
-using System.Collections.Generic;
-//using Amqp.Framing;
-using Microsoft.Azure.Devices.Client;
 
 namespace Microsoft.ConnectTheDots.Gateway
 {
     using System;
     using System.Text;
-    using System.Threading;
     using Newtonsoft.Json;
     using Common;
     using Common.Threading;
+    using Microsoft.Azure.Devices.Client;
 
     //--//
 
