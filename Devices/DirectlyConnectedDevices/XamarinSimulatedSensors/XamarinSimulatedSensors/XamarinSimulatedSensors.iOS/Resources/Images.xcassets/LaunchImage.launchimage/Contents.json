@@ -2,46 +2,47 @@
   "images": [
     {
       "orientation": "portrait",
-      "idiom": "iphone",
       "extent": "full-screen",
-      "filename": "Default.png",
+      "scale": "1x",
       "size": "320x480",
-      "scale": "1x"
+      "idiom": "iphone",
+      "filename": "Default.png"
     },
     {
       "orientation": "portrait",
-      "idiom": "iphone",
       "extent": "full-screen",
-      "filename": "Default@2x.png",
-      "size": "320x480",
-      "scale": "2x"
+      "scale": "2x",
+      "size": "640x960",
+      "idiom": "iphone",
+      "filename": "Default@2x.png"
     },
     {
       "orientation": "portrait",
-      "idiom": "iphone",
       "extent": "full-screen",
-      "filename": "Default-568h@2x.png",
-      "size": "320x568",
       "subtype": "retina4",
-      "scale": "2x"
+      "scale": "2x",
+      "size": "640x1136",
+      "idiom": "iphone",
+      "filename": "Default-568h@2x.png"
     },
     {
       "orientation": "portrait",
-      "idiom": "ipad",
       "extent": "full-screen",
-      "filename": "Default-Portrait.png",
-      "size": "768x1004",
-      "scale": "1x"
+      "scale": "1x",
+      "size": "768x1024",
+      "idiom": "ipad",
+      "filename": "Default-Portrait.png"
     },
     {
       "orientation": "portrait",
-      "idiom": "ipad",
       "extent": "full-screen",
-      "filename": "Default-Portrait@2x.png",
-      "size": "768x1004",
-      "scale": "2x"
+      "scale": "2x",
+      "size": "1536x2048",
+      "idiom": "ipad",
+      "filename": "Default-Portrait@2x.png"
     }
   ],
+  "properties": {},
   "info": {
     "version": 1,
     "author": "xcode"
