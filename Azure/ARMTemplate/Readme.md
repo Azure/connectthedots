@@ -34,9 +34,26 @@ Select the appropriate fields:
 - Directory: this is the Azure Active Directory your account has access to and that you want to use
 - Subscription: if you have several subscriptions, you can pick the one you want to deploy your solution to
 - Resource group/Resource Group Name: the Azure resources/services will all be deployed to a single resource group, allowing for better management of the resources once deployed. You can choose to create a new resource group for your solution or deploy to an existing one.
-- Site Name: this is the name of the website dashboard you want for your solution
-- Site Location: this is the region you want your solution to be deployed to
-- Sku  
+- Region: pick the region you want to deploy your services to.
+- Solution Name: this is the name for your connectthedots solution. This name has to be **all lower case** and **less than 16 characters**
+- IoT Hub Sku: you can select F1 (free), S1 or S2 (see [here](https://azure.microsoft.com/en-us/pricing/details/iot-hub/) for details on pricing for these skus). Note that only 1 instance of the free SKU of IoT Hub is allowed per Azure subscription.
+- Package Uri: this is where the Azure Resource Manager will look for the web site WebDeploy package. If you want to customize and deploy/re-deploy the site, read [this](../WebSite/WebSitePublish.md).
+
+Once you have made your selections, click on **Next**
+
+![](images/AzureDeploy2.png)
+
+You can see the list of services that will be deployed.
+
+Click on **Deploy**. You will see the progress of the deployment and if everything goes well, you will see this:
+
+![](images/AzureDeploy3.png)
+
+To access the resource group in the Azure portal directly, you can click on the green **Manage** link.
+
+At this point you can go a start setting up your devices.
+
+Read the chapter after next for instructions on how to clean up your Azure subscription once you are done playing with ConnectTheDots.
 
 ##Deploy using Azure CLI tool and the ARM template##
 Now here is how to deploy the whole ConnectTheDots solution in a few command lines:
@@ -58,6 +75,7 @@ Now here is how to deploy the whole ConnectTheDots solution in a few command lin
    ```
 1. Deploy the solution typing the below command. You will actually be prompted for the following:
 
+   * region: you can use one of the following: "East US", "West US", "North Europe", "West Europe", "East Asia", "South East Asia", "Japan East", "Japan West", "Australia East", "Australia SouthEast", "North Europe"
    * iothub SKU:  you can select F1 (free), S1 or S2 (see [here](https://azure.microsoft.com/en-us/pricing/details/iot-hub/) for details on pricing for these skus). Note that only 1 instance of the free SKU of IoT Hub is allowed per Azure subscription.
    * solution name: this name has to be **all lower case** and **less than 16 characters**
 
