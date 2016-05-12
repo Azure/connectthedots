@@ -2,7 +2,13 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
     "contentVersion": "1.0.0.0",
   "parameters": {
-    "iotHubSku": {
+    "solutionName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of your ConnectTheDots solution (will be used to prefix the services names)"
+      }
+    },
+        "iotHubSku": {
       "type": "string",
       "allowedValues": [
         "F1",
@@ -13,67 +19,21 @@
         "description": "The Iothub Sku"
       }
     },
-    "iotHubTier": {
-      "type": "string",
-      "defaultValue": "Standard",
-      "metadata": {
-        "description": "The Iothub tier"
-      }
-    },
     "packageUri": {
       "type": "string",
       "defaultValue": "http://aka.ms/connectthedotswebsitepackage"
-    },
-    "sbSku": {
-      "type": "int",
-      "defaultValue": 1,
-      "metadata": {
-        "description": "The servicebus Sku"
-      }
-    },
-    "solutionName": {
-      "type": "string",
-      "metadata": {
-        "description": "The name of your ConnectTheDots solution (will be used to prefix the services names)"
-      }
-    },
-    "storageAccountSku": {
-      "type": "string",
-      "defaultValue": "Standard_LRS",
-      "metadata": {
-        "description": "The storage Sku"
-      }
-    },
-    "webSku": {
-      "type": "string",
-      "defaultValue": "Standard",
-      "metadata": {
-        "description": "The Sku type of the webapp"
-      }
-    },
-    "webWorkerCount": {
-      "type": "int",
-      "defaultValue": 2,
-      "metadata": {
-        "description": "The webapp worker count"
-      }
-    },
-    "webWorkerSize": {
-      "type": "int",
-      "defaultValue": 0,
-      "metadata": {
-        "description": "The size of the webapp"
-      }
-    }   
+    }
   },
   "variables": {
     "location": "[resourceGroup().location]",
     "storageVersion": "2015-06-15",
     "storageName": "[concat(parameters('solutionName'), 'storage')]",
     "storageId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
+    "storageAccountSku": "Standard_LRS",
     "sbVersion": "[providers('Microsoft.Eventhub', 'namespaces').apiVersions[0]]",
     "ehOutName": "ehalerts",
     "sbKeyName": "RootManageSharedAccessKey",
+    "sbSku": 1,
     "sbName": "[concat(parameters('solutionName'),'sb')]",
     "sbResourceId": "[resourceId('Microsoft.Eventhub/namespaces/authorizationRules', variables('sbName'), variables('sbKeyName'))]",
     "saVersion": "2015-10-01",
@@ -81,12 +41,16 @@
     "webPlanName": "[concat(parameters('solutionName'), 'plan')]",
     "webSiteName": "[parameters('solutionName')]",
     "iotHubVersion": "2016-02-03",
+    "iotHubTier": "Standard",
     "iotHubName": "[concat(parameters('solutionName'), 'hub')]",
     "iotHubResourceId": "[resourceId('Microsoft.Devices/Iothubs', variables('iotHubName'))]",
     "iotHubKeyName": "iothubowner",
     "iotHubKeyResource": "[resourceId('Microsoft.Devices/Iothubs/Iothubkeys', variables('iotHubName'), variables('iotHubKeyName'))]",
     "saCGName": "streamanalyticscg",
-    "websiteCGName": "websitecg"
+    "websiteCGName": "websitecg",
+    "webSku": "Standard",
+    "webWorkerCount":  2,
+    "webWorkerSize": 0
   },
   "resources": [
     {
@@ -94,7 +58,7 @@
       "location": "[variables('location')]",
       "name": "[variables('storageName')]",
       "properties": {
-        "accountType": "[parameters('storageAccountSku')]"
+        "accountType": "[variables('storageAccountSku')]"
       },
       "type": "Microsoft.Storage/storageAccounts",
       "tags": {
@@ -108,7 +72,7 @@
       "location": "[variables('location')]",
       "sku": {
         "name": "[parameters('iotHubSku')]",
-        "tier": "[parameters('iotHubTier')]",
+        "tier": "[variables('iotHubTier')]",
         "capacity": 1
       },
       "properties": {
@@ -149,7 +113,7 @@
       "type": "Microsoft.Eventhub/namespaces",
       "location": "[variables('location')]",
       "properties": {
-        "messagingSku": "[parameters('sbSku')]",
+        "messagingSku": "[variables('sbSku')]",
         "region": "[variables('location')]"
       },
       "tags": {
@@ -266,9 +230,9 @@
       },
       "properties": {
         "name": "[variables('webPlanName')]",
-        "sku": "[parameters('webSku')]",
-        "workerSize": "[parameters('webWorkerSize')]",
-        "numberOfWorkers": "[parameters('webWorkerCount')]"
+        "sku": "[variables('webSku')]",
+        "workerSize": "[variables('webWorkerSize')]",
+        "numberOfWorkers": "[variables('webWorkerCount')]"
       }
     },
       {
