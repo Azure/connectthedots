@@ -2,6 +2,25 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
     "contentVersion": "1.0.0.0",
   "parameters": {
+   "region": {
+      "type": "string",
+      "allowedValues": [
+        "East US",
+        "West US",
+        "North Europe",
+        "West Europe",
+        "East Asia",
+        "South East Asia",
+        "Japan East",
+        "Japan West",
+        "Australia East",
+        "Australia SouthEast",
+        "North Europe"
+      ],
+      "metadata": {
+        "description": "The Region to deploy the solution to"
+      }
+    },
     "solutionName": {
       "type": "string",
       "metadata": {
@@ -25,7 +44,7 @@
     }
   },
   "variables": {
-    "location": "[resourceGroup().location]",
+    "location": "[parameters('region')]",
     "storageVersion": "2015-06-15",
     "storageName": "[concat(parameters('solutionName'), 'storage')]",
     "storageId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
