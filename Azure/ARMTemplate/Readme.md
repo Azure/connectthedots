@@ -9,7 +9,7 @@ The below services will be deployed in your Azure subscription:
    - 1 Stream Analytics Job (1 streaming unit)
    - 1 App Service plan (Standard: 2 Small SKU) with 1 Web app
    
-You can edit the [ARM template](ConnectTheDots.json) if you want to add more services or edit the parameters.
+You can edit the [ARM template](azuredeploy.json) if you want to add more services or edit the parameters.
 
 ##Your connect the dots resource groups##
 All the services will be deployed under a single resource group in Azure.
@@ -17,13 +17,32 @@ The [Azure resource groups](https://azure.microsoft.com/en-us/updates/resource-g
 This allows you to easily find the various resources for your ConnectTheDots solution in the Azure portal.
 
 ##Editing the deployment ARM template##
-The default ARM template doesn't require editing unless you want to change the architecture of your solution to go from the default ConnectTheDots one to your own version of it.
+The default Azure Resource Manager template doesn't require editing unless you want to change the architecture of your solution to go from the default ConnectTheDots one to your own version of it.
+You can find information on how to customize the ARM template for ConnectTheDots [here](CustomizeTemplate.md).
+
+##Deploy using the Azure Deploy Button##
+There are several ways to deploy Azure resources to your subscription using Azure Resourre Manager templates. The simplest one is to click on the button below and follow instructions.
+If you prefer command line tools, skip to the next chapter.
+
+[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://azuredeploy.net/?repository=https://github.com/Azure/connectthedots/raw/IoTHub/Azure/ARMTemplate)
+
+Once you have clicked on the button, login to your subscription. You will be directed to the first step of the deployment: the setup.
+
+![](images/AzureDeploy1.png)
+
+Select the appropriate fields:
+- Directory: this is the Azure Active Directory your account has access to and that you want to use
+- Subscription: if you have several subscriptions, you can pick the one you want to deploy your solution to
+- Resource group/Resource Group Name: the Azure resources/services will all be deployed to a single resource group, allowing for better management of the resources once deployed. You can choose to create a new resource group for your solution or deploy to an existing one.
+- Site Name: this is the name of the website dashboard you want for your solution
+- Site Location: this is the region you want your solution to be deployed to
+- Sku  
 
 ##Deploy using Azure CLI tool and the ARM template##
 Now here is how to deploy the whole ConnectTheDots solution in a few command lines:
 
 1. Install the Azure CLI tool following the instructions [here](https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-install/).
-1. Connect to Azure following the instructions [here](https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-connect/).
+1. Once you have installed the Azure CLI, you will need to connect to your Azure account. To do so, follow the instructions [here](https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-connect/).
 1. If you have multiple subscriptions, select the one you want to deploy the solution to following the instructions [here](https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-connect/#multiple-subscriptions) 
 1. Set the Resource Azure Manager mode typing the following command:
    ```
@@ -43,7 +62,7 @@ Now here is how to deploy the whole ConnectTheDots solution in a few command lin
    * solution name: this name has to be **all lower case** and **less than 16 characters**
 
    ```
-   azure group deployment create -f "ConnectTheDots.json" ConnectTheDotsRG ConnectTheDotsDeploy 
+   azure group deployment create -f "azuredeploy.json" ConnectTheDotsRG ConnectTheDotsDeploy 
    ```
 1. If you are seeing errors during the deployment, you can diagnose following instructions on how to debug ARM deployments: [http://aka.ms/arm-debug](http://aka.ms/arm-debug).
 
