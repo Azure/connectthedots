@@ -33,7 +33,7 @@ To build the project you will need Visual Studio 2013 [Community Edition](http:/
 				  sudo mozroots --import --machine --ask-remove
 				  sudo apt-get -y install python libusb-1.0
 				  sudo apt-get -y install python-pip
-				  sudo pip install pyusb
+				  sudo pip install --pre pyusb
 
     * This will install the regular build of Mono on the Pi, which may have some limitations. If you want to run the latest build of mono instead, which may work better for you, run the following commands before running the above. Note that the latest build below may not work with all the functions in the Connect The Dots project for your specific model of Pi, so using it is for the advanced user only. 
     
