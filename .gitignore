@@ -124,3 +124,6 @@ node_modules/
 # Visual Studio config files
 .vs/
 Azure/WebSite/ConnectTheDotsWebSite/Web.config
+
+# VS Code config files
+.vscode
