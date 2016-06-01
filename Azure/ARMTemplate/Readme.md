@@ -9,7 +9,7 @@ The below services will be deployed in your Azure subscription:
    - 1 Stream Analytics Job (1 streaming unit)
    - 1 App Service plan (Standard: 2 Small SKU) with 1 Web app
    
-You can edit the [ARM template](azuredeploy.json) if you want to add more services or edit the parameters.
+You can edit the [ARM template](azuredeploy.json) if you want to add more services or edit the parameters. If you edit the ARM template manually, you will have to deploy it using the command line instructions, not the "Azure Deploy Button". 
 
 ##Your connect the dots resource groups##
 All the services will be deployed under a single resource group in Azure.
@@ -19,6 +19,7 @@ This allows you to easily find the various resources for your ConnectTheDots sol
 ##Editing the deployment ARM template##
 The default Azure Resource Manager template doesn't require editing unless you want to change the architecture of your solution to go from the default ConnectTheDots one to your own version of it.
 You can find information on how to customize the ARM template for ConnectTheDots [here](CustomizeTemplate.md).
+If you edit the template file, then you will have to deploy it using the command line instructions, not the "Azure Deploy Button"
 
 ##Deploy using the Azure Deploy Button##
 There are several ways to deploy Azure resources to your subscription using Azure Resourre Manager templates. The simplest one is to click on the button below and follow instructions.
@@ -39,6 +40,7 @@ Select the appropriate fields:
 - IoT Hub Sku: you can select F1 (free), S1 or S2 (see [here](https://azure.microsoft.com/en-us/pricing/details/iot-hub/) for details on pricing for these skus). Note that only 1 instance of the free SKU of IoT Hub is allowed per Azure subscription.
 - Package Uri: this is where the Azure Resource Manager will look for the web site WebDeploy package. If you want to customize and deploy/re-deploy the site, read [this](../WebSite/WebSitePublish.md).
 
+**Important**: the IoT Hub SKU selected by default is an S1 which has a cost (see pricing details link above). If you want to use the free tier, remember to switch the selection to F1. You will then be limited to 8K messages/day.
 Once you have made your selections, click on **Next**
 
 ![](images/AzureDeploy2.png)
