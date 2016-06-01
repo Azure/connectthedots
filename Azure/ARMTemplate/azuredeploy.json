@@ -34,6 +34,7 @@
         "S1",
         "S2"
       ],
+      "defaultValue": "S1",
       "metadata": {
         "description": "The Iothub Sku"
       }
