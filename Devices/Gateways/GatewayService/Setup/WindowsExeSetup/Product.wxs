@@ -41,9 +41,6 @@
 
 	<Fragment>
 		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-      <Component Id="Amqp.Net.dll" Guid="b56301c3-e896-4313-b081-62201bd045fd">
-        <File Id="Amqp.Net.dll" Name="Amqp.Net.dll" Source="$(var.Microsoft.ConnectTheDots.GatewayExe_BIN)Amqp.Net.dll" />
-      </Component>
       <Component Id="Newtonsoft.Json.dll" Guid="8358d213-7f1c-4598-b56f-1502d3ccf61e">
         <File Id="Newtonsoft.Json.dll" Name="Newtonsoft.Json.dll" Source="$(var.Microsoft.ConnectTheDots.GatewayExe_BIN)Newtonsoft.Json.dll" />
       </Component>

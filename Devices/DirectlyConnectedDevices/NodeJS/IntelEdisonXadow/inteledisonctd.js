@@ -25,7 +25,7 @@
 // We are using the johnny-five library to access the hardware resources,'
 var five = require('johnny-five');
 var Edison = require("edison-io");
-var connectthedots = require('./connectthedots.js');
+var connectthedots = require('connectthedots');
 var devicesettings = require('./settings.json');
 
 // ---------------------------------------------------------------
@@ -90,25 +90,26 @@ function connect_the_dots()
     }, 500);
 }
 
+var initCallback = function (err) {
+    // Init board
+    var board = new five.Board({io: new Edison(Edison.Boards.Xadow)});
+
+    board.on("ready",connect_the_dots);
+    board.on("message", function(event){
+        console.log("Received a %s message, from %s, reporting: %s", event.type, event.class, event.message);
+    } );
+    board.on("fail", function(event) {
+    console.log("%s sent a 'fail' message: %s", event.class, event.message);
+    });
+    board.on("warn", function(event) {
+    console.log("%s sent a 'warn' message: %s", event.class, event.message);
+    });
+}
 // ---------------------------------------------------------------
 // Init app
 
 // Init connection to Azure IoT
-connectthedots.init_connection(devicesettings)
-
-// Init board
-var board = new five.Board({io: new Edison(Edison.Boards.Xadow)});
-
-board.on("ready",connect_the_dots);
-board.on("message", function(event){
-    console.log("Received a %s message, from %s, reporting: %s", event.type, event.class, event.message);
-} );
-board.on("fail", function(event) {
-  console.log("%s sent a 'fail' message: %s", event.class, event.message);
-});
-board.on("warn", function(event) {
-  console.log("%s sent a 'warn' message: %s", event.class, event.message);
-});
+connectthedots.init_connection(devicesettings, initCallback)
 
 
 

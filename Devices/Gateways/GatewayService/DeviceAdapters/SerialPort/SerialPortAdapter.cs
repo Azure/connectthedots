@@ -223,7 +223,7 @@ namespace Microsoft.ConnectTheDots.Adapters
                         {
                             try
                             {
-                                // Show serialPort string that will be sent via AMQP
+                                // Show serialPort string that will be sent via IoT Hub
                                 //_Logger.Info(valuesJson);
 
                                 // Send JSON message to the Cloud
@@ -231,7 +231,7 @@ namespace Microsoft.ConnectTheDots.Adapters
                             }
                             catch( Exception e )
                             {
-                                _logger.LogError( "Error sending AMQP data: " + e.Message );
+                                _logger.LogError( "Error sending message: " + e.Message );
                             }
                         }
                     } while( serialPortAlive );

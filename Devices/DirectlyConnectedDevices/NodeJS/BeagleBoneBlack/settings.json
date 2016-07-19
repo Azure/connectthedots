@@ -1,9 +1,6 @@
 ﻿{
-    "namespace": "{namespace}",
-    "keyname": "{key-name}",
-    "key": "{key}",
-    "eventhubname": "ehdevices",
-    "guid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "iothubconnectionstring": "<connectionstring>",
+    "deviceid": "<deviceid>",
     "displayname": "BeagleBoneBlack",
     "organization": "My Org",
     "location":  "My location"

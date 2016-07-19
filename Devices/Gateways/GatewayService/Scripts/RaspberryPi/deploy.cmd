@@ -25,13 +25,13 @@ REM //  ------------------------------------------------------------------------
 
 set puttydir="C:\Program Files (x86)\PuTTY\"
 set prjdir=..\..\
-set rpi_ip=xxx.xxx.xxx.xxx
+set rpi_ip=10.91.138.120
 set rpi_usr=pi
 set rpi_pw=raspberry
-set Configuration=Release
+set Configuration=Debug
 set GW_Home=ctdgtwy
 set Staging=%GW_Home%/staging
-set PUTTY_CMD=%puttydir%putty %rpi_usr%@%rpi_ip% -pw %rpi_pw% 
+set PUTTY_CMD=%puttydir%putty -ssh %rpi_usr%@%rpi_ip% -pw %rpi_pw% 
 set PSCP_CMD=%puttydir%pscp -pw %rpi_pw% 
 
 echo editing line endings for Pi

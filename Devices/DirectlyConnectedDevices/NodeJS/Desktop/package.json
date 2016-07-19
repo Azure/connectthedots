@@ -1,0 +1,14 @@
+{
+  "name": "ConnectTheDotsDesktop",
+  "version": "1.0.1",
+  "description": "Simple Node app sending fake data from desktop to Azure IoT services",
+  "main": "desktop.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+     "connectthedots":"^1.0.1"
+  }
+}

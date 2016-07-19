@@ -1,10 +1,7 @@
 ﻿{
-    "namespace": "{namespace}",
-    "keyname": "{key-name}",
-    "key": "{key}",
-    "eventhubname": "ehdevices",
-    "guid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "displayname": "Edison",
+    "iothubconnectionstring": "<connectionstring>",
+    "deviceid": "<deviceid>",
+    "displayname": "EdisonSensorTag",
     "organization": "My Org",
     "location":  "My location"
 }

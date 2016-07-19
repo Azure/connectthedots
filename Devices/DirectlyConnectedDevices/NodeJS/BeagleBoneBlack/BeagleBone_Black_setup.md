@@ -1,5 +1,4 @@
 This document explains how to set up a BeagleBone Black board to send data to Azure IoT services Hub using the REST interface. 
-It assumes that you have the right tools installed and that you have cloned or downloaded the ConnectTheDots.io project on your machine.
 
 ##Hardware requirements ##
 Check out the hardware requirements [here](hardware.md).
@@ -24,34 +23,31 @@ To work on the code of the project, you can use your favorite code editor.
     
 The default BBB image comes with node.js preinstalled.
 
-* You will need the IP address of your BeaglBone, which  you can get typing the following command in the remote terminal:
+##Setup the app on the board##
 
-        ifconfig
+* In the remote terminal, type the following commands:
 
-##Prepare settings files##
-You will need to edit the settings file of the application before deploying the application on the board to apply your own connection information for your Azure Event Hub.
+                 mkdir node_app_slot
+                 cd node_app_slot
+                 wget https://github.com/Azure/connectthedots/raw/IoTHub/Devices/DirectlyConnectedDevices/NodeJS/BeagleBoneBlack/beagleboneblackctd.js
+                 wget https://github.com/Azure/connectthedots/raw/IoTHub/Devices/DirectlyConnectedDevices/NodeJS/BeagleBoneBlack/package.json
+                 wget https://github.com/Azure/connectthedots/raw/IoTHub/Devices/DirectlyConnectedDevices/NodeJS/BeagleBoneBlack/settings.json
+                 npm install
+                 
+* Before running the app, you need to update the settings.json file to input the device's connetion string and a unique device id.
+Following the instructions [here](../../../DeviceSetup.md), get the connection string for your device.
+                 
+* In the remote terminal, open the file settings.json and edit the settings based on the configuration of your ehdevices Event Hub (if you want to use nano, just type nano settings.json and once your edits are done, type CTRL+X then Y to save). Note that the device id shall be unique per device so that data is not messed up in the connectthedots portal.
 
-* Open the file connectthedots\Devices\DirectlyConnectedDevices\NodeJS\BeagleBoneBlack\settings.json and edit the settings based on the configuration of your ehdevices Event Hub and create a guid (i.e. using guidgen.com) for the device.
-
-                 "namespace": "{namespace}",
-                 "keyname": "{key-name}",
-                 "key": "{key}",
-                 "eventhubname": "ehdevices",
-                 "guid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+                 "iothubconnectionstring": "<connectionstring>",
+                 "deviceid": "<deviceid>",
                  "displayname": "BeagleBoneBlack",
                  "organization": "My Org",
                  "location":  "My location"
 
-##Deploy the app##
+* Once you have changed the settings file, you can test, you can test the app by typing the following command in the remote terminal (you need to be in the /node_app_slot folder):
 
-The deployment is done using the deploy.cmd file found in the scripts subfolder:
-
-* Edit the deploy.cmd file and enter your BeagleBone's IP address as well as the location on your machine of the PuTTY tools. Note that if you have setup a password for the user "root" on your board, you will have to switch a couple lines in the script (search for comments)
-* Start the deploy.cmd script in a cmd shell. This will copy the app files into the /root/node_app_slot folder on the device and will update the node packages required for the app to run.
-* After the files are copied in the /root/node_app_slot, you can test the app by typing the following commands in the remote terminal:
-
-        cd /root/node_app_slot
-        node beagleboneblackctd.js
+        node .
 
 ##Setup the app to start automatically at boot##
  In order to have the application start automatically at boot, you need to modify the startup script rc.local.

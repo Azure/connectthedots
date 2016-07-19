@@ -16,15 +16,16 @@ If you decide to connect another device, you can check out the samples provided 
 The devices currently showcased are the following:
 
 - [Directly connected devices](Devices/DirectlyConnectedDevices/):
-    - Intel Galileo running a C++ application and sending data from an Arduino compatible Weather Shield over AMQP
-    - Intel Edison running a node.js application sending data from a TI SensorTag BLEn sensor kit over HTTP/REST
-    - BeagleBone Black running a node.js application sending data from Grove sensors over HTTP/REST
-    - Gadgeteer device running a C# .Net Micro Framework application sending Gadgeteer sensors data over AMQP
-    - Raspberry Pi 2 running Windows 10 IoT Core and a Universal Application sending dummy data over HTTP/REST
-    - Windows Phone C# application sending the phone sensors (light and accelerometer) over HTTP/REST
-    - Windows Phone C# application sending a data from a paired Microsoft Band (accelerometer, body temperature, heartbeat)over HTTP/REST
+    - Intel Edison running a node.js application sending data from a TI SensorTag BLE sensor kit
+    - Intel Edison running a node.js application sending data from a Grove sensor kit
+    - Intel Edison running a node.js application sending data from a Xadow sensor kit
+    - node.js application sending data from a TI SensorTag BLE sensor kit
+    - BeagleBone Black running a node.js application sending data from Grove sensors
+    - Windows 10 Universal Application (for Windows 10, Windows 10 IoT Core, Windows 10 Mobile) sending simulated data
+    - Windows 10 Universal Application (for Windows 10, Windows 10 Mobile) sending sensors data from a Microsoft Band
+    - Xamarin application sending simulated data
 - [Gateways](Devices/Gateways/GatewayService/):
-    - Raspberry Pi supporting several types of device connections (see below) and running a C# service on top of Mono, or .NET Framework on Windows, sending data over AMQP. 
+    - Raspberry Pi supporting several types of device connections (see below) and running a C# service on top of Mono, or .NET Framework on Windows. 
 - [Gateway connected devices](Devices/GatewayConnectedDevices/) (devices connecting to a gateway to send their data)
     - Arduino UNO with one or several of the following sensors
         - Accelerometer Memsic2125
@@ -34,5 +35,6 @@ The devices currently showcased are the following:
     - Arduino DUE with one or several of the following sensors:
         - Temperature sensor DS18B20
     - Wensn Sound Level Meter connected to the Gateway over USB
+    - and more...
 
 For all the above mentioned devices setup instructions, see [Device setup](Devices/DeviceSetup.md).

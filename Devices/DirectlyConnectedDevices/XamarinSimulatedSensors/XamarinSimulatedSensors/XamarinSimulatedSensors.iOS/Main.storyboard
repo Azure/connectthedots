@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6750" systemVersion="14C109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6735"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
+                        <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" id="3" translatesAutoresizingMaskIntoConstraints="NO" image="CTDLogoMedium.png" preservesSuperviewLayoutMargins="YES" misplaced="YES">
+                                <rect key="frame" x="85" y="41" width="428" height="213"/>
+                                <constraints>
+                                    <constraint id="97" firstAttribute="width" secondItem="3" secondAttribute="height" multiplier="428:213"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" lineBreakMode="tailTruncation" minimumFontSize="10" id="6" translatesAutoresizingMaskIntoConstraints="NO" text="Temperature" misplaced="YES">
+                                <rect key="frame" x="39" y="418" width="522" height="43"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="lightTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Display Name" lineBreakMode="tailTruncation" minimumFontSize="10" id="8" translatesAutoresizingMaskIntoConstraints="NO" misplaced="YES">
+                                <rect key="frame" x="38" y="256" width="524" height="21"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="lightTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" id="9" translatesAutoresizingMaskIntoConstraints="NO" misplaced="YES">
+                                <rect key="frame" x="39" y="285" width="524" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" id="10" translatesAutoresizingMaskIntoConstraints="NO" misplaced="YES">
+                                <rect key="frame" x="37" y="358" width="524" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <action selector="TextConnectionString_ValueChanged:" destination="BYZ-38-t0r" id="110" eventType="valueChanged"/>
+                                </connections>
+                            </textField>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Connection String" lineBreakMode="tailTruncation" minimumFontSize="10" id="11" translatesAutoresizingMaskIntoConstraints="NO" misplaced="YES">
+                                <rect key="frame" x="39" y="329" width="524" height="21"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="lightTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" lineBreakMode="tailTruncation" minimumFontSize="10" id="12" translatesAutoresizingMaskIntoConstraints="NO" text="Humidity" misplaced="YES">
+                                <rect key="frame" x="39" y="482" width="522" height="43"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="lightTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" id="13" translatesAutoresizingMaskIntoConstraints="NO" misplaced="YES">
+                                <rect key="frame" x="37" y="511" width="526" height="31"/>
+                            </slider>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="14" translatesAutoresizingMaskIntoConstraints="NO" misplaced="YES">
+                                <rect key="frame" x="37" y="399" width="524" height="30"/>
+                                <state key="normal" title="Connect The Dots">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="33" translatesAutoresizingMaskIntoConstraints="NO" misplaced="YES">
+                                <rect key="frame" x="39" y="556" width="523" height="30"/>
+                                <state key="normal" title="Send telemetry data">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                            </button>
+                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" id="114" translatesAutoresizingMaskIntoConstraints="NO" misplaced="YES">
+                                <rect key="frame" x="38" y="457" width="523" height="31"/>
+                            </slider>
+                        </subviews>
+                        <color key="backgroundColor" colorSpace="calibratedRGB" red="0.2" green="0.2" blue="0.2" alpha="1"/>
+                        <constraints>
+                            <constraint id="65" firstItem="9" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="39"/>
+                            <constraint id="66" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="9" secondAttribute="trailing" constant="37"/>
+                            <constraint id="67" firstItem="8" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="38"/>
+                            <constraint id="68" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="8" secondAttribute="trailing" constant="38"/>
+                            <constraint id="69" firstItem="11" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="39"/>
+                            <constraint id="70" firstItem="10" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="37"/>
+                            <constraint id="71" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="10" secondAttribute="trailing" constant="39"/>
+                            <constraint id="78" firstItem="12" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="39"/>
+                            <constraint id="79" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="12" secondAttribute="trailing" constant="39"/>
+                            <constraint id="82" firstItem="33" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="39"/>
+                            <constraint id="83" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="33" secondAttribute="trailing" constant="38"/>
+                            <constraint id="84" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="6" secondAttribute="trailing" constant="39"/>
+                            <constraint id="85" firstItem="6" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="39"/>
+                            <constraint id="95" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="3" secondAttribute="trailing" constant="87"/>
+                            <constraint id="96" firstItem="3" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="85"/>
+                            <constraint id="98" firstItem="14" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="37"/>
+                            <constraint id="99" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="14" secondAttribute="trailing" constant="39"/>
+                            <constraint id="103" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="11" secondAttribute="trailing" constant="37"/>
+                            <constraint id="108" firstItem="13" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="38"/>
+                            <constraint id="109" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="13" secondAttribute="trailing" constant="38"/>
+                            <constraint id="115" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="114" secondAttribute="trailing" constant="39"/>
+                            <constraint id="116" firstItem="114" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="38"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="lblTemperature" destination="6" id="name-outlet-6"/>
+                        <outlet property="textDisplayName" destination="9" id="name-outlet-9"/>
+                        <outlet property="lblConnectionString" destination="11" id="name-outlet-11"/>
+                        <outlet property="textConnectionString" destination="10" id="name-outlet-10"/>
+                        <outlet property="buttonConnect" destination="14" id="name-outlet-14"/>
+                        <outlet property="lblHumidity" destination="12" id="name-outlet-12"/>
+                        <outlet property="sliderHumidity" destination="13" id="name-outlet-13"/>
+                        <outlet property="buttonSend" destination="33" id="name-outlet-33"/>
+                        <outlet property="sliderTemperature" destination="114" id="name-outlet-114"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="0.0" y="0.0"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="CTDLogoMedium.png" width="486" height="236"/>
+    </resources>
+</document>

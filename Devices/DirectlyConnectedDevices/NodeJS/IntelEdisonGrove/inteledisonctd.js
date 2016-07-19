@@ -26,7 +26,7 @@
 var five = require('johnny-five');
 var Edison = require("edison-io");
 var TH02 = require("th02js");
-var connectthedots = require('./connectthedots.js');
+var connectthedots = require('connectthedots');
 var devicesettings = require('./settings.json');
 
 // [Linear Interpolation](https://en.wikipedia.org/wiki/Linear_interpolation)
@@ -37,7 +37,7 @@ function linear(start, end, step, steps) {
 // ---------------------------------------------------------------
 // Let's connect_the_dots
 // You can adapt the below code to your own sensors configuration
-function connect_the_dots()
+var connect_the_dots = function()
 {
     console.log("Device Ready to connect its dots");
     
@@ -128,27 +128,31 @@ function connect_the_dots()
         data_motion.value = 0;
 
     }, 1000);
-}
+};
+
+var initCallback = function (err) {
+    // Init board
+    var board = new five.Board({io: new Edison()});
+
+    board.on("ready",connect_the_dots);
+    board.on("message", function(event){
+        console.log("Received a %s message, from %s, reporting: %s", event.type, event.class, event.message);
+    } );
+    board.on("fail", function(event) {
+    console.log("%s sent a 'fail' message: %s", event.class, event.message);
+    });
+    board.on("warn", function(event) {
+    console.log("%s sent a 'warn' message: %s", event.class, event.message);
+    });
+    
+};
 
 // ---------------------------------------------------------------
 // Init app
 
 // Init connection to Azure IoT
-connectthedots.init_connection(devicesettings)
+connectthedots.init_connection(devicesettings, initCallback);
 
-// Init board
-var board = new five.Board({io: new Edison()});
-
-board.on("ready",connect_the_dots);
-board.on("message", function(event){
-    console.log("Received a %s message, from %s, reporting: %s", event.type, event.class, event.message);
-} );
-board.on("fail", function(event) {
-  console.log("%s sent a 'fail' message: %s", event.class, event.message);
-});
-board.on("warn", function(event) {
-  console.log("%s sent a 'warn' message: %s", event.class, event.message);
-});
 
 
 

@@ -11,8 +11,7 @@
   "dependencies": {
     "johnny-five": "^0.8.91",
     "edison-io": "^0.8.18",
-    "crypto": "^0.0.3",
-    "moment": "^2.10.6",
+    "connectthedots":"^1.0.1",
     "th02js": "^0.0.2"
   }
 }

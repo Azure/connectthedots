@@ -1,0 +1,7 @@
+﻿{
+    "iothubconnectionstring": "<connection-string>",
+    "deviceid": "<deviceid>",
+    "displayname": "My PC",
+    "organization": "My Org",
+    "location":  "My location"
+}

@@ -25,13 +25,13 @@
 // We are using the johnny-five library to access the hardware resources,'
 var five = require('johnny-five');
 var BeagleBone = require("beaglebone-io");
-var connectthedots = require('./connectthedots.js');
+var connectthedots = require('connectthedots');
 var devicesettings = require('./settings.json');
 
 // ---------------------------------------------------------------
 // Let's connect_the_dots
 // You can adapt the below code to your own sensors configuration
-function connect_the_dots()
+var  connect_the_dots=function()
 {
     console.log("Device Ready to connect its dots");
 
@@ -67,26 +67,29 @@ function connect_the_dots()
 
 };
 
+var initCallback = function (err) {
+    // Init board
+    var board = new five.Board({io: new BeagleBone()});
+
+    // Attach callbacks for board events
+    board.on("ready", connect_the_dots);
+    board.on("message", function(event){
+        console.log("Received a %s message, from %s, reporting: %s", event.type, event.class, event.message);
+    } );
+    board.on("fail", function(event) {
+    console.log("%s sent a 'fail' message: %s", event.class, event.message);
+    });
+    board.on("warn", function(event) {
+    console.log("%s sent a 'warn' message: %s", event.class, event.message);
+    });
+};
+
 // ---------------------------------------------------------------
 // Init app
 
 // Init connection to Azure IoT
-connectthedots.init_connection(devicesettings);
+connectthedots.init_connection(devicesettings, initCallback);
 
-// Init board
-var board = new five.Board({io: new BeagleBone()});
-
-// Attach callbacks for board events
-board.on("ready", connect_the_dots);
-board.on("message", function(event){
-    console.log("Received a %s message, from %s, reporting: %s", event.type, event.class, event.message);
-} );
-board.on("fail", function(event) {
-  console.log("%s sent a 'fail' message: %s", event.class, event.message);
-});
-board.on("warn", function(event) {
-  console.log("%s sent a 'warn' message: %s", event.class, event.message);
-});
 
 
 

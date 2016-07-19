@@ -2,7 +2,7 @@
   "name": "ConnectTheDotsIntelEdison",
   "version": "1.0.0",
   "description": "Simple Node app sending data from Arduino Weather Shield to Azure Event Hubs",
-  "main": "ConnectTheDotsEdison.js",
+  "main": "inteledisonsensortagctd.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -12,8 +12,8 @@
     "cylon": "^0.22.1",
     "cylon-gpio": "^0.22.1",
     "cylon-intel-iot": "^0.5.2",
-    "moment": "^2.9.0",
     "noble": "^0.3.11",
-    "noble-device": "^1.0.0"
+    "noble-device": "^1.0.0",
+    "connectthedots":"^1.0.1"
   }
 }
