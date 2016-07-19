@@ -35,7 +35,7 @@ namespace Microsoft.ConnectTheDots.Common
     {
         public static void GetIPAddressString( ref string IPString )
         {
-            const int PING_TIMEOUT = 2000;
+            const int PING_TIMEOUT = 5000;
             const int PING_RETRIES_COUNT = 100;
 
             IPString = string.Empty;
