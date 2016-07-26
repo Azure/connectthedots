@@ -57,6 +57,7 @@
     "sbName": "[concat(parameters('solutionName'),'sb')]",
     "sbResourceId": "[resourceId('Microsoft.Eventhub/namespaces/authorizationRules', variables('sbName'), variables('sbKeyName'))]",
     "saVersion": "2015-10-01",
+    "saName": [ "concat(parameters('solutionName')", "'alerts')" ],
     "webVersion": "2015-04-01",
     "webPlanName": "[concat(parameters('solutionName'), 'plan')]",
     "webSiteName": "[parameters('solutionName')]",
@@ -69,7 +70,7 @@
     "saCGName": "streamanalyticscg",
     "websiteCGName": "websitecg",
     "webSku": "Standard",
-    "webWorkerCount":  2,
+    "webWorkerCount": 2,
     "webWorkerSize": 0
   },
   "resources": [
@@ -260,12 +261,13 @@
           "type": "Microsoft.Web/sites",
           "location": "[variables('location')]",
           "apiVersion": "2015-08-01",
-          "dependsOn": [
-            "[resourceId('Microsoft.Web/serverfarms', variables('webPlanName'))]",
-            "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
-            "[resourceId('Microsoft.Devices/Iothubs', variables('iotHubName'))]",
-            "[concat('Microsoft.Eventhub/namespaces/', variables('sbName'))]"
-          ],
+        "dependsOn": [
+          "[resourceId('Microsoft.Web/serverfarms', variables('webPlanName'))]",
+          "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
+          "[resourceId('Microsoft.Devices/Iothubs', variables('iotHubName'))]",
+          "[concat('Microsoft.Eventhub/namespaces/', variables('sbName'))]",
+          "[resourceId('Microsoft.StreamAnalytics/streamingjobs', variables('saName'))]"
+        ],
           "tags": {
               "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('webPlanName'))]": "Resource",
               "displayName": "DashboardWebApp"
