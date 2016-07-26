@@ -10,7 +10,7 @@
     <ScrollViewer>
         <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
             <Image x:Name="image" Margin="56,10,58,0" Source="Assets/CTD-logo-743x360.png" Height="127" VerticalAlignment="Top" HorizontalAlignment="Center" Width="246"/>
-            <ToggleButton x:Name="SendDataToggle" Content="Press to send data" HorizontalAlignment="Center" Margin="56,573,68,0" VerticalAlignment="Top" Width="236" Checked="toggleButton_Checked" Unchecked="toggleButton_Unchecked" IsEnabled="False" Height="44"/>
+            <ToggleButton x:Name="SendDataToggle" Content="Press to send data" HorizontalAlignment="Center" Margin="56,530,68,0" VerticalAlignment="Top" Width="236" Checked="toggleButton_Checked" Unchecked="toggleButton_Unchecked" IsEnabled="False" Height="44"/>
             <TextBlock x:Name="textBlock1" HorizontalAlignment="Left" Height="25" Margin="10,138,0,0" TextWrapping="Wrap" Text="Device Name" VerticalAlignment="Top" Width="137"/>
             <TextBox x:Name="TBDeviceName" Height="0" Margin="10,163,20,0" TextWrapping="Wrap" Text="" TextChanged="TBDeviceName_TextChanged" VerticalAlignment="Top"/>
             <TextBlock x:Name="textBlock2" HorizontalAlignment="Left" Height="25" Margin="10,205,0,0" TextWrapping="Wrap" Text="Connection String" VerticalAlignment="Top" Width="137"/>

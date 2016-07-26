@@ -182,6 +182,7 @@ namespace ConnectTheDotsHelper
             Match match = pattern.Match(connectionString);
             return match.Groups["deviceId"].Value;
         }
+
         /// <summary>
         /// Connect
         /// Connect to Azure IoT Hub ans start the send and receive loops
@@ -192,7 +193,7 @@ namespace ConnectTheDotsHelper
             try
             {
                 // Create Azure IoT Hub Client and open messaging channel
-                deviceClient = DeviceClient.CreateFromConnectionString(this.ConnectionString, TransportType.Http1);
+                deviceClient = DeviceClient.CreateFromConnectionString(this.ConnectionString);
                 deviceClient.OpenAsync();
                 IsConnected = true;
 
@@ -264,9 +265,9 @@ namespace ConnectTheDotsHelper
                     }
                 }, ct);
             }
-            catch
+            catch (Exception e)
             {
-                Debug.WriteLine("Error while trying to connect to IoT Hub");
+                Debug.WriteLine("Error while trying to connect to IoT Hub: " + e.Message);
                 deviceClient = null;
                 return false;
             }
