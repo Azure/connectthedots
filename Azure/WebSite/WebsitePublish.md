@@ -24,7 +24,7 @@ Once you have made your edits in the settings, you can just restart the site, cl
 
 ## Modifying the dashboard Website ##
 ### Prerequisites ###
-Make sure you have all software installed and necessary subscriptions as indicated in the Introduction.md file for the project. To repeat them here, you need
+Make sure you have all software installed and necessary subscriptions as indicated in the ReadMe.md file for the project. To repeat them here, you need
 
 1. Microsoft Azure subscription ([free trial subscription](http://azure.microsoft.com/en-us/pricing/free-trial/) is sufficient)
 1. Visual Studio – [Community Edition](http://www.visualstudio.com/downloads/download-visual-studio-vs)

@@ -3,17 +3,18 @@ The basic premise of this project is that data from sensing devices can be sent 
 
 ## Creating devices IDs for Azure IoT Hub ##
 The ConnecttheDots project uses Azure IoT Hub to connect devices to the Cloud.
-When deploying the full solution using the ARM template an Azure IoT Hub was deployed as part of your solution. You can find connection information for managing the IoT Hub instance in the [Azure portal](http://portal.azure.com).
+When [deploying the full solution using the ARM template](Azure/ARMTemplate/Readme.md) an Azure IoT Hub is deployed as part of your solution.
+You can find connection information for managing the IoT Hub instance in the [Azure portal](http://portal.azure.com). Search for the Resource Group with the name you used for the solution when deploying the services using the script.
 For each of the devices that you want to connect to your ConnectTheDots solution, you will need to create a new device ID.
 You will find all the instructions to create device IDs and retrieve connection strings [here](https://github.com/Azure/azure-iot-sdks/blob/master/doc/manage_iot_hub.md).
 
-## Connect The Dots getting started project ##
+## ConnectTheDots getting started project using Raspberry Pi and Arduino ##
 For this project, follow the instructions for configuring the following:
 
 1. [Arduino UNO with weather shield](GatewayConnectedDevices/Arduino%20UNO/Weather/WeatherShieldJson/Arduino-and-Weather-Shield-setup.md) 
 2. [Raspberry Pi](Gateways/GatewayService/RaspberryPi-Gateway-setup.md) 
 
-## Build your own 
+## Connect The Dots with all the other devices ##
 
 To build your own end-to-end configuration you need to identify and configure the device(s) that will be producing the data to be pushed to Azure and displayed/analyzed. Devices fall generally into two categories - those that can connect directly to the Internet, and those that need to connect to the Internet through some intermediate device or gateway. Sample code and documentation can be found in the following folders:
 
