@@ -37,6 +37,8 @@ var connect_the_dots=function()
 
     // send data to Azure every 1000 milliseconds    
     setInterval(function(){
+        lght = lght + (Math.random()*2 -1);
+        temp = temp + (Math.random()*2 -1);
         connectthedots.send_message("Light", "L", lght);
         connectthedots.send_message("Temp", "C", temp);
     }, 1000);
