@@ -5,13 +5,13 @@
 #define CONNECT_THE_DOTS_H
 
 #ifdef __cplusplus
-extern "C" {
+//extern "C" {
 #endif
 
     void connect_the_dots_run(void);
 
 #ifdef __cplusplus
-}
+//}
 #endif
 
 #endif /* CONNECT_THE_DOTS_H */
