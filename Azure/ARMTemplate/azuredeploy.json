@@ -331,7 +331,7 @@
                       "dbType": "None",
                       "connectionString": "",
                       "setParameters": {
-                          "IIS Web Application Name": "[variables('webSiteName')]"
+                          "IIS Web Application Name": "ConnecTheDots"
                       }
                   }
               }
