@@ -41,7 +41,7 @@
     },
     "packageUri": {
       "type": "string",
-      "defaultValue": "https://github.com/Azure/connectthedots/blob/debug_ARM/Azure/WebSite/WebDeployPackage.zip"
+      "defaultValue": "https://github.com/Azure/connectthedots/raw/debug_ARM/Azure/WebSite/WebDeployPackage.zip"
     }
   },
   "variables": {
