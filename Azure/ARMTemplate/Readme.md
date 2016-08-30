@@ -25,7 +25,7 @@ If you edit the template file, then you will have to deploy it using the command
 There are several ways to deploy Azure resources to your subscription using Azure Resourre Manager templates. The simplest one is to click on the button below and follow instructions.
 If you prefer command line tools, skip to the next chapter.
 
-[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://github.com/Azure/connectthedots/raw/debug_ARM/Azure/ARMTemplate/azuredeploy.json)
+[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://azuredeploy.net/?repository=https://github.com/Azure/connectthedots/raw/debug_ARM/Azure/ARMTemplate)
 
 Once you have clicked on the button, login to your subscription. You will be directed to the first step of the deployment: the setup.
 
