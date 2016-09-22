@@ -315,25 +315,18 @@
               }
           },
           "resources": [
-              {
-                  "name": "MSDeploy",
-                  "type": "extensions",
-                  "location": "[variables('location')]",
-                  "apiVersion": "2015-08-01",
-                  "dependsOn": [
-                      "[concat('Microsoft.Web/sites/', variables('webSiteName'))]"
-                  ],
-                  "tags": {
-                      "displayName": "Dashboard"
-                  },
-                  "properties": {
-                      "packageUri": "[parameters('packageUri')]",
-                      "dbType": "None",
-                      "connectionString": "",
-                      "setParameters": {
-                          "Application Path": "[variables('webSiteName')]" 
-                      }
-                  }
+            {
+              "apiVersion": "2015-08-01",
+              "name": "web",
+              "type": "sourcecontrols",
+              "dependsOn": [
+                  "[resourceId('Microsoft.Web/sites/', variables('WebSiteName'))]"
+              ],
+              "properties": {
+                  "RepoUrl": "https://github.com/Azure/connectthedots",
+                  "branch": "debug_ARM",
+                  "IsManualIntegration": true
+                }
               }
           ]
       }
