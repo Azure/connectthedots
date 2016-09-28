@@ -1,8 +1,8 @@
 ![](images/CTD-logo-v5-02.png)
 
-[ConnectTheDots.io](http://connectthedots.io) is an open source project created by Microsoft to help you get tiny devices connected to Microsoft Azure IoT, and to implement great IoT solutions taking advantage of Microsoft Azure advanced analytic services such as Azure Stream Analytics and Azure Machine Learning.
+[ConnectTheDots.io](http://connectthedots.io) is an open source project created by Microsoft to help you get tiny devices connected to Microsoft Azure IoT and to implement great IoT solutions taking advantage of Microsoft Azure advanced analytic services such as Azure Stream Analytics and Azure Machine Learning.
 
-The project iss built off the assumption that the sensors get the raw data and format it into a JSON string.  That string is then shuttled off to Azure IoT Hub, from which a Web app gathers the data and displays it as a chart. 
+The project is built with the assumption that the sensors get the raw data and format it into a JSON string. That string is then sent to Azure IoT Hub, from which a Web app gathers the data and displays it as a chart.
 Optional other functions of the Azure cloud include detecting and displaying alerts and averages, however this is not required.
 
 The JSON string is sent to Azure IoT Hub whether directly by the sensor device if it is capable of connecting to Azure IoT Hub or through a multi-protocol Gateway, which is how the [Getting Started with Pi and Arduino](GettingStarted.md) sample does it. 
@@ -13,9 +13,9 @@ More details on each of those options are below.
 
 In this project there are code samples, configuration scripts and guides that will help you set up devices and sensors, and configure Microsoft Azure services to view and analyze the data produced by those devices. Some of these samples have been provided by Microsoft, others by third parties; we encourage everyone to submit code samples or configuration documentation to grow this project.
 
-This project contains several device samples all aimed at helping you connect your devices to Azure IoT, as well as visualize and gain insight from your data.  Check out all the samples below, or follow the getting started walkthrough to learn more.  Then, add some of your devices to the project!
+This project contains several device samples all aimed at helping you connect your devices to Azure IoT, as well as visualize and gain insight from your data.  Check out all the samples below, or follow the getting started walkthrough to learn more. Then, add some of your devices to the project!
 
-We encourage the community to contribute to the project!  See [Contribute](Contribute.md) page for details.
+We encourage the community to contribute to the project! See [Contribute](Contribute.md) page for details.
 
 ## What's new in the V2? ##
 
@@ -39,7 +39,7 @@ We also created a [branch](https://github.com/Azure/connectthedots/tree/V1) that
 ## Device basics ##
 
 ### Data format ###
-ConnectTheDots is built on the premise that data from sensors is sent to Azure IoT Hub in a prescribed JSON format. The minimum structure, with required attribute names, is 
+ConnectTheDots is built on the assumption that data from sensors is sent to Azure IoT Hub in a prescribed JSON format. The minimum structure, with required attribute names, is 
 
 ```
 {
@@ -63,7 +63,7 @@ or
     {"guid":"62X74059-A444-4797-8A7E-526C3EF9D64B","organization":"my org name","displayname":"sensor name","location":"sensor location","measurename":"Temperature","unitofmeasure":"F","timecreated":"1975-09-16T12:00:00Z", "value":74.0001}
 
 
-Furthermore, the project is built upon the premise that the *sensors* create and format this JSON string.
+Furthermore, the project is built upon the assumption that the *sensors* create and format this JSON string.
 For example, if using a sensor attached to an Arduino, the code running on the Arduino would send successive JSON strings, CRLF ended, out the serial port to a gateway such as a Raspberry Pi or Windows Tablet. The gateway does nothing other than receive the JSON string, package that into the right message format, adds the timecreated time stamp, and send it to Azure.
 
 In the case of a directly connected device, the latest needs to send the JSON package to the IoT Hub leveraging one of the existing Azure IoT Hub device client SDKs.
@@ -71,7 +71,7 @@ In the case of a directly connected device, the latest needs to send the JSON pa
 All the device code included in this project, or submitted for inclusion, must conform to the JSON format requirement above. 
 
 ### Devices and Gateway ###
-ConnectTheDots provides a Multi-protocol Gateway to collect data from devices that cannot, or should not, target the cloud directly. The Gateway code is tested on Mono for Linux and on the .NET Framework on Windows. It is located at in the source tree under [Devices/Gateways/GatewayService](Devices/Gateways/GatewayService/), and is a simple system service. 
+ConnectTheDots provides a Multi-protocol Gateway to collect data from devices that cannot, or should not, target the cloud directly. The Gateway code is tested on Mono for Linux and on the .NET Framework on Windows and is located in the source tree under [Devices/Gateways/GatewayService](Devices/Gateways/GatewayService/), and is a simple system service. 
 
 To send data from a device to a gateway, you can just use the same exact data format and a device protocol adapter to implement any transport of your choice. The device protocol adapter is an assembly that implements the DeviceAdapterAbstract type to collect data from the device and enqueue them to the gateway for upload to the cloud. The Gateway automatically loads the device adapters from the Gateway binary directory, so deployment is extremely simple. 
 You can find some examples under [Devices/Gateways/GatewayService/DeviceAdapters](Devices/Gateways/GatewayService/DeviceAdapters), and the matching devices under  [Devices/GatewayConnectedDevices](Devices/GatewayConnectedDevices). 
