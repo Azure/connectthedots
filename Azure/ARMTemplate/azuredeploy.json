@@ -260,7 +260,7 @@
           "name": "[variables('webSiteName')]",
           "type": "Microsoft.Web/sites",
           "location": "[variables('location')]",
-          "apiVersion": "2015-08-01",
+          "apiVersion": "[variables('webVersion')]",
         "dependsOn": [
           "[concat('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
           "[concat('Microsoft.Devices/Iothubs/', variables('iotHubName'))]",
@@ -316,16 +316,15 @@
           },
           "resources": [
             {
-              "apiVersion": "2015-08-01",
+              "apiVersion": "[variables('webVersion')]",
               "name": "web",
               "type": "sourcecontrols",
               "dependsOn": [
-                  "[resourceId('Microsoft.Web/sites/', variables('WebSiteName'))]"
+                  "[resourceId('Microsoft.Web/sites/', variables('webSiteName'))]"
               ],
               "properties": {
-                  "RepoUrl": "https://github.com/Azure/connectthedots",
-                  "branch": "debug_ARM",
-                  "IsManualIntegration": true
+                  "RepoUrl": "https://github.com/Azure/connectthedots.git",
+                  "branch": "debug_ARM"
                 }
               }
           ]
