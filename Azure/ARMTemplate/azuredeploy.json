@@ -45,7 +45,7 @@
     },
     "branch": {
       "type": "string",
-      "defaultValue": "debug_ARM"
+      "defaultValue": "master"
     }
 
   },
