@@ -32,7 +32,7 @@ Make sure you have all software installed and necessary subscriptions as indicat
 
 ## Publish the Azure Website ##
 
-* Open the `ConnectTheDots\Azure\WebSite\ConnectTheDotsWebSite.sln` solution in Visual Studio
+* Open the `ConnectTheDots\Azure\WebSite\source\ConnectTheDotsWebSite.sln` solution in Visual Studio
 * In VS, Right-click on the project name and select *Publish*.
 * In the Profile tab, select the publish target **Microsoft Azure Web Apps**
 * Select your subscription

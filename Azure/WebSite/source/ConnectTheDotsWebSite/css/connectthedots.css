@@ -1,0 +1,248 @@
+body {
+    font: 16px sans-serif;
+    color: #333;
+    width: 95%;
+}
+
+#header {
+    width: 100%;
+    border-bottom: 1px #cdcdcd solid;
+}
+
+h3 {
+    width: 100%;
+    background-color: #f7f7f7;
+    border-bottom: 1px #ddd solid;
+    padding: 10px;
+}
+
+h4 {
+    width: 100%;
+    background-color: #f7f7f7;
+    border-bottom: 1px #ddd solid;
+    margin-top: 0;
+}
+
+.big-block {
+    margin-left: 10px;
+}
+
+ul {
+    list-style-type: none;
+    padding-left: 0;
+    font: 12px sans-serif;
+    color: #666;
+    left: 0
+}
+
+li {
+    cursor: pointer;
+    font-weight: normal;
+}
+
+.selected {
+    font-weight: bold;
+}
+
+
+li.selected:before {
+    content: "\25BA \0020";
+}
+
+/*styles for D3 charts*/
+.axis {
+    shape-rendering: crispEdges;
+}
+
+    .axis text {
+        font: 10px sans-serif;
+        font-weight: normal;
+        fill: #787878;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #787878;
+        shape-rendering: crispEdges;
+    }
+
+.y.axis {
+}
+
+.x.axis {
+}
+
+path.line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+}
+
+.legend {
+    font: 10px sans-serif;
+}
+
+/*for "loading" gif */
+#loading {
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    position: fixed;
+    display: block;
+    background-color: #777;
+    background-color: rgba(155, 155, 155, 0.4);
+    z-index: 99;
+    text-align: center;
+}
+
+#loading-inner {
+    background-color: #fff;
+    border-style: solid;
+    border-width: 1px;
+    width: 400px;
+    height: 200px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -200px;
+    margin-top: -100px;
+}
+
+#loading-image {
+    position: relative;
+    top: 10px;
+    left: 10px;
+    z-index: 100;
+}
+
+#loading-text {
+    position: relative;
+    top: 10px;
+    left: 10px;
+    z-index: 100;
+}
+
+#alerts {
+    height: 15%;
+    width: 100%;
+}
+
+#Charts {
+    height: 100%;
+    position: relative;
+}
+
+#Graphics {
+    height: 80%;
+    width: 100%;
+    position: absolute;
+}
+
+#controllersContainer {
+    position: relative;
+    text-align: center;
+}
+
+.controller {
+    height: 300px;
+    right : 10px;
+    position: absolute;
+    text-align: left;
+}
+
+#chartsContainer {
+    margin-left: 200px;
+    position: relative;
+}
+
+.chart {
+    height: 300px;
+    width: 100%;
+    position: absolute;
+}
+
+#chartTwo {
+    top: 40%;
+}
+
+#chartOne {
+    top: 0;
+}
+
+#alertTable td {
+    font-size: 12px;
+    text-align: center;
+}
+
+.d3-tip {
+    line-height: 1;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #000;
+    border-radius: 2px;
+}
+
+    .d3-tip .time_header {
+        color: grey;
+        font-size: 8px;
+        display: block;
+    }
+
+    .d3-tip .value_circle {
+        color: #006fc7;
+        font-size: 20px;
+    }
+
+    .d3-tip .value {
+        color: black;
+        font-size: 14px;
+        margin-left: 5px;
+    }
+
+    .d3-tip .message {
+        color: black;
+        font-size: 10px;
+        display: block;
+    }
+
+    /* Creates a small triangle extender for the tooltip */
+    .d3-tip:after {
+        box-sizing: border-box;
+        display: inline;
+        font-size: 8px;
+        width: 100%;
+        line-height: 1;
+        color: rgba(255, 255, 255, 0.9);
+        content: "\25BC";
+        position: absolute;
+        text-align: center;
+    }
+
+    /* Style northward tooltips differently */
+    .d3-tip.n:after {
+        margin: -1px 0 0 0;
+        top: 100%;
+        left: 0;
+    }
+
+.sensorTip {
+    z-index: 10000;
+    position: absolute;
+    white-space: pre;
+    overflow: hidden;
+    margin-top: -22px;
+    float: right;
+    margin-left: 200px;
+    /*background: #eee;*/
+    color: #000;
+    padding: 5px;
+    padding-right: 10px;
+    padding-left: 10px;
+    pointer-events:none;
+    border: solid;
+    border-width: thin;
+    border-color: #000;
+    background: rgba(243, 233, 6, 0.9);
+}
