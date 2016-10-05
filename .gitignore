@@ -126,3 +126,6 @@ node_modules/
 
 # VS Code config files
 .vscode
+
+# Website exception for bin
+!/Azure/Website/site/bin/

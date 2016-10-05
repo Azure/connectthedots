@@ -27,7 +27,7 @@
         "description": "The name of your ConnectTheDots solution (will be used to prefix the services names)"
       }
     },
-        "iotHubSku": {
+    "iotHubSku": {
       "type": "string",
       "allowedValues": [
         "F1",
@@ -39,10 +39,15 @@
         "description": "The Iothub Sku"
       }
     },
-    "packageUri": {
+    "repoUrl": {
       "type": "string",
-      "defaultValue": "http://aka.ms/connectthedotswebsitepackage"
+      "defaultValue": "https://github.com/Azure/connectthedots"
+    },
+    "branch": {
+      "type": "string",
+      "defaultValue": "master"
     }
+
   },
   "variables": {
     "location": "[parameters('region')]",
@@ -260,7 +265,7 @@
           "name": "[variables('webSiteName')]",
           "type": "Microsoft.Web/sites",
           "location": "[variables('location')]",
-          "apiVersion": "2015-08-01",
+          "apiVersion": "[variables('webVersion')]",
         "dependsOn": [
           "[concat('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
           "[concat('Microsoft.Devices/Iothubs/', variables('iotHubName'))]",
@@ -315,26 +320,20 @@
               }
           },
           "resources": [
-              {
-                  "name": "MSDeploy",
-                  "type": "extensions",
-                  "location": "[variables('location')]",
-                  "apiVersion": "2015-08-01",
-                  "dependsOn": [
-                      "[concat('Microsoft.Web/sites/', variables('webSiteName'))]"
-                  ],
-                  "tags": {
-                      "displayName": "Dashboard"
-                  },
-                  "properties": {
-                      "packageUri": "[parameters('packageUri')]",
-                      "dbType": "None",
-                      "connectionString": "",
-                      "setParameters": {
-                          "IIS Web Application Name": "ConnectTheDotsWebSite"
-                      }
-                  }
+            {
+
+              "apiVersion":"[variables('webVersion')]",
+              "name":"web",
+              "type":"sourcecontrols",
+              "dependsOn":[
+                "[concat('Microsoft.Web/sites/', variables('webSiteName'))]"
+              ],
+              "properties":{
+                "repoUrl":"[parameters('repoUrl')]",
+                "branch":"[parameters('branch')]",
+                "isManualIntegration": true
               }
+            }
           ]
       }
   ],
