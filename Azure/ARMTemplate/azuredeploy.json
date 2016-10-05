@@ -27,7 +27,7 @@
         "description": "The name of your ConnectTheDots solution (will be used to prefix the services names)"
       }
     },
-        "iotHubSku": {
+    "iotHubSku": {
       "type": "string",
       "allowedValues": [
         "F1",
@@ -39,10 +39,15 @@
         "description": "The Iothub Sku"
       }
     },
-    "packageUri": {
+    "repoUrl": {
       "type": "string",
-      "defaultValue": "https://github.com/Azure/connectthedots/raw/debug_ARM/Azure/WebSite/WebDeployPackage.zip"
+      "defaultValue": "https://github.com/Azure/connectthedots"
+    },
+    "branch": {
+      "type": "string",
+      "defaultValue": "debug_ARM"
     }
+
   },
   "variables": {
     "location": "[parameters('region')]",
@@ -316,24 +321,18 @@
           },
           "resources": [
             {
-                "name": "MSDeploy",
-                "type": "extensions",
-                "location": "[variables('location')]",
-                "apiVersion": "2015-08-01",
-                "dependsOn": [
-                    "[concat('Microsoft.Web/sites/', variables('webSiteName'))]"
-                ],
-                "tags": {
-                    "displayName": "webDeploy"
-                },
-                "properties": {
-                    "packageUri": "[parameters('packageUri')]",
-                    "dbType": "None",
-                    "connectionString": "",
-                    "setParameters": {
-                        "IIS Web Application Name": "[variables('webSiteName')]"
-                    }
-                }
+
+              "apiVersion":"[variables('webVersion')]",
+              "name":"web",
+              "type":"sourcecontrols",
+              "dependsOn":[
+                "[concat('Microsoft.Web/sites/', variables('webSiteName'))]"
+              ],
+              "properties":{
+                "repoUrl":"[parameters('repoUrl')]",
+                "branch":"[parameters('branch')]",
+                "isManualIntegration": false
+              }
             }
           ]
       }
