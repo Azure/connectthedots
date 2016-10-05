@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <sitemanifest>
-  <IisApp path="C:\IoT\connectthedots\Azure\WebSite\ConnectTheDotsWebSite\obj\Release\Package\PackageTmp" managedRuntimeVersion="v4.0" />
-  <setAcl path="C:\IoT\connectthedots\Azure\WebSite\ConnectTheDotsWebSite\obj\Release\Package\PackageTmp" setAclResourceType="Directory" />
-  <setAcl path="C:\IoT\connectthedots\Azure\WebSite\ConnectTheDotsWebSite\obj\Release\Package\PackageTmp" setAclUser="anonymousAuthenticationUser" setAclResourceType="Directory" />
+  <IisApp path="C:\IoT\connectthedots\Azure\WebSite\ConnectTheDotsWebSite\obj\Debug\Package\PackageTmp" managedRuntimeVersion="v4.0" />
+  <setAcl path="C:\IoT\connectthedots\Azure\WebSite\ConnectTheDotsWebSite\obj\Debug\Package\PackageTmp" setAclResourceType="Directory" />
+  <setAcl path="C:\IoT\connectthedots\Azure\WebSite\ConnectTheDotsWebSite\obj\Debug\Package\PackageTmp" setAclUser="anonymousAuthenticationUser" setAclResourceType="Directory" />
 </sitemanifest>

@@ -316,17 +316,25 @@
           },
           "resources": [
             {
-              "apiVersion": "[variables('webVersion')]",
-              "name": "web",
-              "type": "sourcecontrols",
-              "dependsOn": [
-                  "[resourceId('Microsoft.Web/sites/', variables('webSiteName'))]"
-              ],
-              "properties": {
-                  "RepoUrl": "https://github.com/Azure/connectthedots.git",
-                  "branch": "debug_ARM"
+                "name": "MSDeploy",
+                "type": "extensions",
+                "location": "[variables('location')]",
+                "apiVersion": "2015-08-01",
+                "dependsOn": [
+                    "[concat('Microsoft.Web/sites/', variables('webSiteName'))]"
+                ],
+                "tags": {
+                    "displayName": "webDeploy"
+                },
+                "properties": {
+                    "packageUri": "[parameters('packageUri')]",
+                    "dbType": "None",
+                    "connectionString": "",
+                    "setParameters": {
+                        "IIS Web Application Name": "[variables('webSiteName')]"
+                    }
                 }
-              }
+            }
           ]
       }
   ],
