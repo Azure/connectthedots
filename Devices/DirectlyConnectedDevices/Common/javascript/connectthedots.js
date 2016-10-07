@@ -22,7 +22,7 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-var clientFromConnectionString = require('azure-iot-device-amqp').clientFromConnectionString;
+var clientFromConnectionString = require('azure-iot-device-mqtt').clientFromConnectionString;
 var Message = require('azure-iot-device').Message;
 
 // Using a json settings file for Events Hub connectivity
