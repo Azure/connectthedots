@@ -1,16 +1,16 @@
 {
   "name": "connectthedots",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Simple library to connect a node app to Azure IoT Hub using ConnectTheDots.io",
   "main": "connectthedots.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "azure-iot-device": "1.0.3",
-    "azure-iot-device-amqp": "1.0.3",
-    "azure-iot-device-http": "1.0.3",
-    "azure-iot-device-mqtt": "1.0.3"
+    "azure-iot-device": "1.0.15",
+    "azure-iot-device-amqp": "1.0.15",
+    "azure-iot-device-http": "1.0.15",
+    "azure-iot-device-mqtt": "1.0.15"
   },
   "author": "Microsoft",
   "license": "MIT"
