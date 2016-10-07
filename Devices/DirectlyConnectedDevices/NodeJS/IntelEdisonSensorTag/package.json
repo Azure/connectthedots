@@ -14,6 +14,6 @@
     "cylon-intel-iot": "^0.5.2",
     "noble": "^0.3.11",
     "noble-device": "^1.0.0",
-    "connectthedots":"^1.0.1"
+    "connectthedots":"^1.0.2"
   }
 }

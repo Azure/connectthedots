@@ -9,6 +9,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-     "connectthedots":"^1.0.1"
+     "connectthedots":"^1.0.2"
   }
 }
