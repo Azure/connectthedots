@@ -32,13 +32,15 @@ var connect_the_dots=function()
 {
     console.log("Device Ready to connect its dots");
 
-    var lght = 0;
+    var lght = 10;
     var temp = 25;
 
     // send data to Azure every 1000 milliseconds    
     setInterval(function(){
         lght = lght + (Math.random()*2 -1);
+        if (lght < 0 ) lght = 0;
         temp = temp + (Math.random()*2 -1);
+        if (temp < 0 ) temp = 0;
         connectthedots.send_message("Light", "L", lght);
         connectthedots.send_message("Temp", "C", temp);
     }, 1000);
