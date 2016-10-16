@@ -164,7 +164,7 @@
           "resources": [
             {
               "apiVersion": "[variables('sbVersion')]",
-              "name": "[variables('websiteCGName'))]",
+              "name": "[variables('websiteCGName')]",
               "type": "ConsumerGroups",
               "dependsOn": [
                 "[variables('ehOutName')]"
