@@ -280,6 +280,8 @@
           "[concat('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
           "[concat('Microsoft.Devices/Iothubs/', variables('iotHubName'))]",
           "[concat('Microsoft.Eventhub/namespaces/', variables('sbName'))]",
+          "[variables('ehOutName')]",
+          "[variables('websiteCGName')]",
           "[concat('Microsoft.Web/serverfarms/', variables('webPlanName'))]",
           "[concat('Microsoft.StreamAnalytics/streamingjobs/', variables('saName'))]"
         ],
