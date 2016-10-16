@@ -57,7 +57,7 @@ namespace ConnectTheDotsWebSite
 		struct MinMax { public double min; public double max;};
 		private static Dictionary<string, MinMax> MinMaxValue = new Dictionary<string, MinMax>();
 
-        private static IoTHubHelper IoTHub = new IoTHubHelper(Microsoft.Azure.CloudConfigurationManager.GetSetting("Azure.IoT.IoTHub.ConnectionString"));
+        private static IoTHubHelper IoTHub = null;
 
         public async Task ProcessEventsAsync(PartitionContext context, IEnumerable<EventData> events)
 		{
@@ -121,6 +121,12 @@ namespace ConnectTheDotsWebSite
                             if (messagePayload.ContainsKey("alerttype") && messagePayload.ContainsKey("timecreated"))
 							{
                                 Debug.Print("Alert message received!");
+
+                                // If the IoTHub service client has not yet been created, go create it.
+                                if (IoTHub == null)
+                                {
+                                    IoTHub = new IoTHubHelper(Microsoft.Azure.CloudConfigurationManager.GetSetting("Azure.IoT.IoTHub.ConnectionString"));
+                                }
 
                                 // Send alert to device
                                 if (IoTHub != null)
