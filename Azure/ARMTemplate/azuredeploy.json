@@ -285,6 +285,10 @@
                   "WebsocketsEnabled": true,
                   "appSettings": [
                     {
+                      "name": "Azure.IoT.IoTHub.ConnectionString",
+                      "value": "[concat('HostName=', reference(variables('iotHubResourceId')).hostName, ';SharedAccessKeyName=', variables('iotHubKeyName'), ';SharedAccessKey=', listkeys(variables('iotHubKeyResource'), variables('iotHubVersion')).primaryKey)]"
+                    },
+                    {
                       "name": "Azure.IoT.IoTHub.EventHub.Name",
                       "value": "[reference(variables('iotHubResourceId')).eventHubEndpoints.events.path]"
                     },
