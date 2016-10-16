@@ -162,7 +162,17 @@
             "displayName": "Alerts Event Hub"
           },
           "resources": [
-
+            {
+              "apiVersion": "[variables('sbVersion')]",
+              "name": "[variables('websiteCGName'))]",
+              "type": "ConsumerGroups",
+              "dependsOn": [
+                "[variables('ehOutName')]"
+              ],
+              "tags": {
+                "displayName": "Website Consumer Group"
+              }
+            }
           ]
 
         }
@@ -297,6 +307,10 @@
                       "value": "[concat('Endpoint=', reference(variables('iotHubResourceId')).eventHubEndpoints.events.endpoint, ';SharedAccessKeyName=', variables('iotHubKeyName'), ';SharedAccessKey=', listkeys(variables('iotHubKeyResource'), variables('iotHubVersion')).primaryKey)]"
                     },
                     {
+                      "name": "Azure.IoT.IoTHub.EventHub.ConsumerGroup",
+                      "value": "[variables('websiteCGName')]"
+                    },
+                    {
                       "name": "Azure.ServiceBus.EventHub.Name",
                       "value": "[variables('ehOutName')]"
                     },
@@ -305,12 +319,12 @@
                       "value": "[listkeys(variables('sbResourceId'), variables('sbVersion')).primaryConnectionString]"
                     },
                     {
-                      "name": "Azure.Storage.ConnectionString",
-                      "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageName'), ';AccountKey=', listkeys(variables('storageId'), variables('storageVersion')).key1)]"
+                      "name": "Azure.ServiceBus.EventHub.ConsumerGroup",
+                      "value": "[variables('websiteCGName')]"
                     },
                     {
-                      "name": "Azure.IoT.IoTHub.EventHub.ConsumerGroup",
-                      "value": "[variables('websiteCGName')]"
+                      "name": "Azure.Storage.ConnectionString",
+                      "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageName'), ';AccountKey=', listkeys(variables('storageId'), variables('storageVersion')).key1)]"
                     },
                     {
                       "name": "ObjectTypePrefix",
