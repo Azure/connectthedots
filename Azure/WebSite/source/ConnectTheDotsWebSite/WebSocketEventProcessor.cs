@@ -34,6 +34,7 @@ using System.Web;
 using Microsoft.ServiceBus.Messaging;
 
 using Newtonsoft.Json;
+using ConnectTheDotsWebSite.Helpers;
 
 namespace ConnectTheDotsWebSite
 {
@@ -56,8 +57,9 @@ namespace ConnectTheDotsWebSite
 		struct MinMax { public double min; public double max;};
 		private static Dictionary<string, MinMax> MinMaxValue = new Dictionary<string, MinMax>();
 
+        private static IoTHubHelper IoTHub = new IoTHubHelper(Microsoft.Azure.CloudConfigurationManager.GetSetting("Azure.IoT.IoTHub.ConnectionString"));
 
-		public async Task ProcessEventsAsync(PartitionContext context, IEnumerable<EventData> events)
+        public async Task ProcessEventsAsync(PartitionContext context, IEnumerable<EventData> events)
 		{
 			try
 			{
@@ -119,6 +121,13 @@ namespace ConnectTheDotsWebSite
                             if (messagePayload.ContainsKey("alerttype") && messagePayload.ContainsKey("timecreated"))
 							{
                                 Debug.Print("Alert message received!");
+
+                                // Send alert to device
+                                if (IoTHub != null)
+                                {
+                                    var alertMessage = JsonConvert.SerializeObject(messagePayload).ToString();
+                                    IoTHub.SendMessage(messagePayload["guid"].ToString(), alertMessage);
+                                }
 
                                 DateTime time = DateTime.Parse(messagePayload["timecreated"].ToString());
 								// find the nearest point
