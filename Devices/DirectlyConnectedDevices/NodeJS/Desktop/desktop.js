@@ -33,7 +33,7 @@ var connect_the_dots=function()
     console.log("Device Ready to connect its dots");
 
     var lght = 10;
-    var temp = 25;
+    var temp = 80;
 
     // send data to Azure every 1000 milliseconds    
     setInterval(function(){
@@ -42,7 +42,7 @@ var connect_the_dots=function()
         temp = temp + (Math.random()*2 -1);
         if (temp < 0 ) temp = 0;
         connectthedots.send_message("Light", "L", lght);
-        connectthedots.send_message("Temp", "C", temp);
+        connectthedots.send_message("Temperature", "C", temp);
     }, 1000);
 
 };
@@ -53,11 +53,16 @@ var initCallback = function (err) {
     connect_the_dots();
 };
 
+var receiveCallback = function (msg) {
+    // A message was received
+    console.log("Message Id: " + msg.messageId + " ; Message data:" + msg.data.toString() );
+};
+
 // ---------------------------------------------------------------
 // Init app
 
 // Init connection to Azure IoT
-connectthedots.init_connection(devicesettings, initCallback);
+connectthedots.init_connection(devicesettings, initCallback, receiveCallback);
 
 
 
