@@ -33,6 +33,7 @@ var client;
 
 var is_connected = false;
 var init_callback;
+var receive_callback;
 
 // ---------------------------------------------------------------
 // validate settings from JSON file  passed as a parameter to the app
@@ -75,7 +76,12 @@ var connectCallback = function (err) {
     console.log('IoT Hub Client connected');
 
     client.on('message', function (msg) {
-      console.log('Id: ' + msg.messageId + ' Body: ' + msg.data);
+      
+      // Invoke receive callback to notify the user of a new message
+      if (receive_callback!==undefined) {
+          receive_callback(msg);
+      }  
+
       client.complete(msg, printResultFor('completed'));
       // TODO:Implement sending the received message up to the connectthedots user
       // reject and abandon follow the same pattern.
@@ -97,7 +103,7 @@ var connectCallback = function (err) {
   }
 }
 
-exports.init_connection = function(settings, initCallback)
+exports.init_connection = function(settings, initCallback, receiveCallback)
 {
     console.log("Initializig the connection with Azure IoT Hub");
     devicesettings = settings;
@@ -110,11 +116,14 @@ exports.init_connection = function(settings, initCallback)
     // Create Iot Hub Client instance 
     client = clientFromConnectionString(devicesettings.iothubconnectionstring);
     init_callback = initCallback;
+
+    if (receiveCallback!==undefined) receive_callback = receiveCallback;  
     
     // Open the transport stack
     client.open(connectCallback);
 };
- 
+
+
 function send_raw_message(raw_message)
 {
     if (is_connected)
