@@ -107,6 +107,7 @@ namespace ConnectTheDotsWebSite
 							}
 
 							break;
+
                         //case "AnomaliesControl":
                         //    string newState = messageDictionary["State"] as string;
 
@@ -237,8 +238,5 @@ namespace ConnectTheDotsWebSite
 				}
 			}
 		}
-
-
 	}
-
 }

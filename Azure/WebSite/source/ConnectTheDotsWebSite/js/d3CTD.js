@@ -317,4 +317,32 @@ $(document).ready(function () {
             }
         }, ]
     });
+
+    // create devices table
+    var table = $('#devicesTable').DataTable({
+        "bAutoWidth": false,
+        "bFilter": true,
+        "bInfo": true,
+        "paging": true,
+        "order": [
+            [0, "desc"]
+        ],
+        "columnDefs": [{
+            "targets": "numberFixed",
+            "data": function (row, type, val, meta) {
+                if (type === 'set') {
+                    row[meta.col] = val;
+                    return;
+                } else if (type === 'display') {
+                    return row[meta.col].toFixed(1);
+                }
+                return row[meta.col];
+            }
+        }, ]
+    });
+});
+
+$(window).load(function () {
+    // Update the devices list when page is loaded
+    updateDevicesList();
 });

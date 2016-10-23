@@ -23,21 +23,42 @@
 //  ---------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
+//using System.Collections.Generic;
+//using System.Linq;
+using System.Threading;
+//using System.Web;
+//using System.Web.UI;
+//using System.Web.UI.WebControls;
+using System.Web.Services;
+using Newtonsoft.Json;
+
 
 namespace ConnectTheDotsWebSite
 {
+
+
     public partial class Default : System.Web.UI.Page
     {
         protected string ForceSocketCloseOnUserActionsTimeout = "false";
+
         protected void Page_Load(object sender, EventArgs e)
         {
             ForceSocketCloseOnUserActionsTimeout =
                 Global.globalSettings.ForceSocketCloseOnUserActionsTimeout.ToString();
+
+//            TokenCloudCredentials toFoundSubscriptions = AzureAuthenticationHelper.GetCredentialsByUserADAuth();
+
+        }
+
+        [WebMethod]
+        public static string GetDevicesList()
+        {
+            // Set the flag for the server to refresh the devices list from IoTHub and wait till its done
+            Global.DevicesListRefreshed = false;
+            Global.refreshDevicesList = true;
+            while (!Global.DevicesListRefreshed) Thread.Sleep(1000);
+            
+            return JsonConvert.SerializeObject(Global.devicesList);
         }
 
     }

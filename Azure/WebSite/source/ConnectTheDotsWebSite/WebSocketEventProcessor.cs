@@ -57,8 +57,6 @@ namespace ConnectTheDotsWebSite
 		struct MinMax { public double min; public double max;};
 		private static Dictionary<string, MinMax> MinMaxValue = new Dictionary<string, MinMax>();
 
-        private static IoTHubHelper IoTHub = null;
-
         public async Task ProcessEventsAsync(PartitionContext context, IEnumerable<EventData> events)
 		{
 			try
@@ -122,18 +120,9 @@ namespace ConnectTheDotsWebSite
 							{
                                 Debug.Print("Alert message received!");
 
-                                // If the IoTHub service client has not yet been created, go create it.
-                                if (IoTHub == null)
-                                {
-                                    IoTHub = new IoTHubHelper(Microsoft.Azure.CloudConfigurationManager.GetSetting("Azure.IoT.IoTHub.ConnectionString"));
-                                }
-
                                 // Send alert to device
-                                if (IoTHub != null)
-                                {
-                                    var alertMessage = JsonConvert.SerializeObject(messagePayload).ToString();
-                                    IoTHub.SendMessage(messagePayload["guid"].ToString(), alertMessage);
-                                }
+                                var alertMessage = JsonConvert.SerializeObject(messagePayload).ToString();
+                                IoTHubHelper.SendMessage(messagePayload["guid"].ToString(), alertMessage);
 
                                 DateTime time = DateTime.Parse(messagePayload["timecreated"].ToString());
 								// find the nearest point
@@ -228,7 +217,12 @@ namespace ConnectTheDotsWebSite
 								string guid = messagePayload["guid"].ToString();
 								if (guid != null)
 								{
-									WebSocketEventProcessor.g_devices.TryAdd(guid, messagePayload);
+                                    // Add device to event processor list of devices if not already in there
+                                    if (WebSocketEventProcessor.g_devices.TryAdd(guid, messagePayload))
+                                    {
+                                        // New device guid received. Update the Global devices list
+                                        Global.AddToDeviceList(messagePayload);
+                                    }
 								}
 							}
 

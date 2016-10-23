@@ -57,6 +57,7 @@
     </div>
 
     <form id="form2" runat="server">
+        <asp:ScriptManager ID='ScriptManager1' runat='server' EnablePageMethods='true' />
         <a target="_blank" href="http://connectthedots.io"><img style="position: absolute; top: 0; right: 0; border: 0;" src="img/forkme_CTD.png" alt="Fork me on GitHub" /></a>
 
         <div class="big-block">
@@ -94,6 +95,26 @@
         </div>
 
         <div class="big-block">
+            <h3>Devices List</h3>
+            <div id="devices">
+                <table id="devicesTable">
+                    <thead>
+                        <tr>
+                            <th>Display Name</th>
+                            <th>Location</th>
+                            <th>IP Address</th>
+                            <th>IoTHub Device ID</th>
+                            <th>Connection String</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+        <div class="big-block">
             <h3>Messages</h3>
             <div id="messages"></div>
         </div>
@@ -110,6 +131,7 @@
     <script type="text/javascript" src="js/d3DataSourceSocket.js"></script>
     <script type="text/javascript" src="js/d3CTDDataSourceSocket.js"></script>
     <script type="text/javascript" src="js/d3CTDDataSourceFilter.js"></script>
+    <script type="text/javascript" src="js/devicesList.js"></script>
     <script type="text/javascript" src="js/d3CTD.js"></script>
 </body>
 </html>

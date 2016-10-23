@@ -25,7 +25,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+//using System.Linq;
 using System.Web.Http;
 using System.Web.Routing;
 using Microsoft.ServiceBus.Messaging;
@@ -35,6 +35,7 @@ using Microsoft.Azure;
 using Microsoft.WindowsAzure.Storage.Blob;
 
 using ConnectTheDotsWebSite.Helpers;
+using System.Timers;
 
 namespace ConnectTheDotsWebSite
 {
@@ -55,11 +56,80 @@ namespace ConnectTheDotsWebSite
         public bool ForceSocketCloseOnUserActionsTimeout { get; set; }
     }
 
+    public class DeviceDetails
+    {
+        public string guid { get; set; }
+        public string displayname { get; set; }
+        public string location { get; set; }
+        public string ipaddress { get; set; }
+        public string connectionstring { get; set; }
+
+        public DeviceDetails(IDictionary<string, object> deviceInfo)
+        {
+            if (deviceInfo.ContainsKey("guid")) guid = deviceInfo["guid"].ToString();
+            if (deviceInfo.ContainsKey("displayname")) displayname = deviceInfo["displayname"].ToString();
+            if (deviceInfo.ContainsKey("location")) location = deviceInfo["location"].ToString();
+            if (deviceInfo.ContainsKey("ipaddress")) ipaddress = deviceInfo["ipaddress"].ToString();
+            if (deviceInfo.ContainsKey("connectionstring")) connectionstring = deviceInfo["connectionstring"].ToString();
+        }
+
+    }
+
     public class Global : System.Web.HttpApplication
     {
         EventHubSettings eventHubDevicesSettings;
         EventHubSettings eventHubAlertsSettings;
         public static GlobalSettings globalSettings;
+                public static List<DeviceDetails> devicesList = new List<DeviceDetails>();
+        private static Timer pingIoTHubTimer;
+        public static bool refreshDevicesList = true;
+        public static bool DevicesListRefreshed = false;
+
+        public static void AddToDeviceList(IDictionary<string, object> deviceInfo)
+        {
+            // if the passed Dictionnary doesn't contain a guid key, there is nothing for us to do here...
+            if (!deviceInfo.ContainsKey("guid")) return;
+
+            var device = devicesList.Find(item => item.guid == deviceInfo["guid"].ToString());
+            if (device != null)
+            {
+                // Device exists, update its fields
+                if (deviceInfo.ContainsKey("connectionstring"))
+                {
+                    // If the updateConnectionString is set we only need/want to update the connection string...
+                    device.connectionstring = deviceInfo["connectionstring"].ToString();
+                }
+                else
+                {
+                    // otherwise we will update the data for the device
+                    device.displayname = deviceInfo["displayname"].ToString();
+                    device.location = deviceInfo["location"].ToString();
+                    device.ipaddress = deviceInfo["ipaddress"].ToString();
+                }
+            }
+            else
+            {
+                devicesList.Add(new DeviceDetails(deviceInfo));
+            }
+        }
+
+        public static void UpdateDeviceListFromIoTHub()
+        {
+            List<IDictionary<string, object>> devices = IoTHubHelper.ListDevices(100);
+            if (devices != null)
+            {
+                foreach (IDictionary<string, object> device in devices)
+                {
+                    AddToDeviceList(device);
+                }
+
+                // Clean up the list of devices removing devices that are no longer provisionned in IoT Hub
+                devicesList.RemoveAll(device => devices.Find(item => item["guid"].ToString() == device.guid) == null);
+
+                Global.DevicesListRefreshed = true;
+            }
+        }
+
 
         protected void Application_Start(Object sender, EventArgs e)
         {
@@ -71,19 +141,27 @@ namespace ConnectTheDotsWebSite
                 defaults: new { id = RouteParameter.Optional }
             );
 
-            // Read connectiong strings and Event Hubs names from app.config file
+            // Read connection strings and Event Hubs names from app.config file
             GetAppSettings();
 
             // Create EventProcessorHost clients
             CreateEventProcessorHostClient(ref eventHubAlertsSettings);
             CreateEventProcessorHostClient(ref eventHubDevicesSettings);
+
+            // Setup a timer to ping IoTHub for list of devices every second (will effectively ping IoTHub if flag refreshDevicesList is true)
+            // TODO : need to remove this timer and have the refresh happens on client load events only
+            pingIoTHubTimer = new System.Timers.Timer(1000);
+            pingIoTHubTimer.Elapsed += (Object source, ElapsedEventArgs args) => { if (Global.refreshDevicesList) { Global.refreshDevicesList = false; Global.UpdateDeviceListFromIoTHub(); }  };
+            pingIoTHubTimer.Enabled = true;
         }
 
         protected void Application_End(Object sender, EventArgs e)
         {
             Trace.TraceInformation("Unregistering EventProcessorHosts");
-            eventHubDevicesSettings.processorHost.UnregisterEventProcessorAsync().Wait();
-            eventHubAlertsSettings.processorHost.UnregisterEventProcessorAsync().Wait();
+            if (eventHubDevicesSettings.processorHost!=null)
+                eventHubDevicesSettings.processorHost.UnregisterEventProcessorAsync().Wait();
+            if (eventHubAlertsSettings.processorHost != null)
+                eventHubAlertsSettings.processorHost.UnregisterEventProcessorAsync().Wait();
         }
         
         private void CreateEventProcessorHostClient(ref EventHubSettings eventHubSettings)
