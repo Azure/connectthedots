@@ -76,8 +76,6 @@ For this project, we'll  need the following libraries:
 
  - DHT Sensor Library
  - AzureIoTHub
- - Adafruit DHT Unified
- - Adafruit Unified Sensor
  - ArduinoJSON
 
 To install them, click on the `Sketch -> Include Library -> Manage Libraries`. Search for each library using the box in the upper-right to filter your search, click on the found library, and click the "Install" button. 

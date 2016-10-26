@@ -7,7 +7,11 @@
 #define JSON_BUFFER_SIZE 512
 StaticJsonBuffer<JSON_BUFFER_SIZE> jsonBuffer;
 
-#include "dht22.h"
+// Includes and variables for the DHT22 temperature/humidity sensor
+#include <DHT.h>
+#define DHTPIN 2        // Digital pin the sensor is connected to
+#define DHTTYPE DHT22   // You'd need to change this one if you want to use a DHT1 or DHT21 sensor
+DHT dht(DHTPIN, DHTTYPE);
 
 // Find under Microsoft Azure IoT Suite -> DEVICES -> <your device> -> Device Details and Authentication Keys
 static const char* deviceId = "[device-id]";
@@ -77,7 +81,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubMessage(IOTHUB_MESSAGE_HANDLE mess
 
 void connect_the_dots_run(void)
 {
-    initDht();
+    dht.begin();
 
     IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol);
     if (iotHubClientHandle == NULL)
@@ -136,7 +140,8 @@ void connect_the_dots_run(void)
             while (1)
             {
                 // Get sensor data
-                getNextSample(&Temp, &Hmdt);
+                Temp = dht.readTemperature();
+                Hmdt = dht.readHumidity();
 
                 // Get current time stamp
                 epochTime = time(NULL);
