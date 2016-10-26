@@ -83,7 +83,7 @@ namespace ConnectTheDotsWebSite
                 public static List<DeviceDetails> devicesList = new List<DeviceDetails>();
         private static Timer pingIoTHubTimer;
         public static bool refreshDevicesList = true;
-        public static bool DevicesListRefreshed = false;
+        public static bool devicesListRefreshed = false;
 
         public static void AddToDeviceList(IDictionary<string, object> deviceInfo)
         {
@@ -126,7 +126,7 @@ namespace ConnectTheDotsWebSite
                 // Clean up the list of devices removing devices that are no longer provisionned in IoT Hub
                 devicesList.RemoveAll(device => devices.Find(item => item["guid"].ToString() == device.guid) == null);
 
-                Global.DevicesListRefreshed = true;
+                Global.devicesListRefreshed = true;
             }
         }
 
@@ -149,7 +149,6 @@ namespace ConnectTheDotsWebSite
             CreateEventProcessorHostClient(ref eventHubDevicesSettings);
 
             // Setup a timer to ping IoTHub for list of devices every second (will effectively ping IoTHub if flag refreshDevicesList is true)
-            // TODO : need to remove this timer and have the refresh happens on client load events only
             pingIoTHubTimer = new System.Timers.Timer(1000);
             pingIoTHubTimer.Elapsed += (Object source, ElapsedEventArgs args) => { if (Global.refreshDevicesList) { Global.refreshDevicesList = false; Global.UpdateDeviceListFromIoTHub(); }  };
             pingIoTHubTimer.Enabled = true;

@@ -54,10 +54,10 @@ namespace ConnectTheDotsWebSite
         public static string GetDevicesList()
         {
             // Set the flag for the server to refresh the devices list from IoTHub and wait till its done
-            Global.DevicesListRefreshed = false;
+            Global.devicesListRefreshed = false;
             Global.refreshDevicesList = true;
-            while (!Global.DevicesListRefreshed) Thread.Sleep(1000);
-            
+            while (!Global.devicesListRefreshed) Thread.Sleep(1000);
+
             return JsonConvert.SerializeObject(Global.devicesList);
         }
 
