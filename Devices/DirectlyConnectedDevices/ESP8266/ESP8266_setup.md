@@ -70,20 +70,14 @@ You will need to install the Adafruit Huzzah ESP8266 board extension for the Ard
 
 ### Install Library Dependencies
 
-Open the file Devices\DirectlyConnectedDevices\ESP8266\connect_the_dots\connect_the_dots.ino in the Ardduino IDE.
+Open the file Devices\DirectlyConnectedDevices\ESP8266\connect_the_dots\connect_the_dots.ino in the Arduino IDE.
 
 For this project, we'll  need the below libraries. To install them, click on the `Sketch -> Include Library -> Manage Libraries`. Search for each library using the box in the upper-right to filter your search, click on the found library, and click the "Install" button. 
 
  - DHT Sensor Library
+ - Adafruit Unified Sensor
  - AzureIoTHub
  - ArduinoJSON
-
-You will also need to manually install the following library:
-
- - [Adafruit Unified Sensor Driver](https://github.com/adafruit/Adafruit_Sensor)
-
-In order to do so, visit the Github repo for the library, download as a zip and unzip the content of the package in the Arduino libraries folder (located in the Documents\Arduino folder). 
-
 
 ### Modify the code
 
