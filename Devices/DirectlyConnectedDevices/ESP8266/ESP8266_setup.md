@@ -7,7 +7,7 @@ This document explains how to connect a ESP8266 Adafruit Huzzah device to Connec
 - Azure Subscription (this is the subscription you want the services to be deployed to if you have several Azure subscriptions)
 - [Git](https://git-scm.com/downloads) - For cloning the current repository
 - Arduino IDE, version 1.6.8. (Earlier versions will not work with the Azure IoT library)
-- Sensor libraries from Adafruit: DHT Sensor library, Adafruit DHT Unified, Adafruit Unified Sensor
+- Sensor libraries from Adafruit: DHT Sensor library, Adafruit Unified Sensor
 - Deploy an instance of ConnectTheDots (see related chapter below) 
 
 ### Required Hardware
@@ -72,19 +72,18 @@ You will need to install the Adafruit Huzzah ESP8266 board extension for the Ard
 
 Open the file Devices\DirectlyConnectedDevices\ESP8266\connect_the_dots\connect_the_dots.ino in the Ardduino IDE.
 
-For this project, we'll  need the following libraries:
+For this project, we'll  need the below libraries. To install them, click on the `Sketch -> Include Library -> Manage Libraries`. Search for each library using the box in the upper-right to filter your search, click on the found library, and click the "Install" button. 
 
  - DHT Sensor Library
  - AzureIoTHub
  - ArduinoJSON
 
-To install them, click on the `Sketch -> Include Library -> Manage Libraries`. Search for each library using the box in the upper-right to filter your search, click on the found library, and click the "Install" button. 
+You will also need to manually install the following library:
 
-![Install Libraries][1]
+ - [Adafruit Unified Sensor Driver](https://github.com/adafruit/Adafruit_Sensor)
 
-***
-**Note**: If you have an earlier version of the IoT library, navigate to your Arduino documents directory. Inside the "Libraries" folder, there will be a number of installed libraries. Simply delete the `AzureIoT` folder.
-***
+In order to do so, visit the Github repo for the library, download as a zip and unzip the content of the package in the Arduino libraries folder (located in the Documents\Arduino folder). 
+
 
 ### Modify the code
 
