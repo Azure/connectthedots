@@ -102,12 +102,20 @@ namespace ConnectTheDotsWebSite
                     // If the updateConnectionString is set we only need/want to update the connection string...
                     device.connectionstring = deviceInfo["connectionstring"].ToString();
                 }
-                else
-                {
+                else {
                     // otherwise we will update the data for the device
-                    device.displayname = deviceInfo["displayname"].ToString();
-                    device.location = deviceInfo["location"].ToString();
-                    device.ipaddress = deviceInfo["ipaddress"].ToString();
+                    if (deviceInfo.ContainsKey("displayname"))
+                    {
+                        device.displayname = deviceInfo["displayname"].ToString();
+                    }
+                    if (deviceInfo.ContainsKey("location"))
+                    {
+                        device.location = deviceInfo["location"].ToString();
+                    }
+                    if (deviceInfo.ContainsKey("ipaddress"))
+                    {
+                        device.ipaddress = deviceInfo["ipaddress"].ToString();
+                    }
                 }
             }
             else

@@ -86,8 +86,8 @@ namespace ConnectTheDotsWebSite
         public static string AddDevice(string deviceName)
         {
             // Check if user is authorized, then create a new device
-            //            if (!IsUserAdmin())
-            //                return "{\"Error\": \"User not authorized to add device.\"}";
+            if (!IsUserAdmin())
+                return "{\"Error\": \"User not authorized to add device.\"}";
 
             string returnMessage;
 
