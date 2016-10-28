@@ -121,6 +121,17 @@
         },
         {
           "apiVersion": "[variables('iotHubVersion')]",
+          "name": "[concat(variables('iotHubName'), '/events/', 'debug')]",
+          "type": "Microsoft.Devices/Iothubs/eventhubEndpoints/ConsumerGroups",
+          "dependsOn": [
+            "[concat('Microsoft.Devices/Iothubs/', variables('iotHubName'))]"
+          ],
+          "tags": {
+            "displayName": "Debug Consumer Group"
+          }
+        },
+        {
+          "apiVersion": "[variables('iotHubVersion')]",
           "name": "[concat(variables('iotHubName'), '/events/', variables('saCGName'))]",
           "type": "Microsoft.Devices/Iothubs/eventhubEndpoints/ConsumerGroups",
           "dependsOn": [
@@ -172,7 +183,19 @@
               "tags": {
                 "displayName": "Website Consumer Group"
               }
+            },
+            {
+              "apiVersion": "[variables('sbVersion')]",
+              "name": "debug",
+              "type": "ConsumerGroups",
+              "dependsOn": [
+                "[variables('ehOutName')]"
+              ],
+              "tags": {
+                "displayName": "Debug Consumer Group"
+              }
             }
+
           ]
 
         }
