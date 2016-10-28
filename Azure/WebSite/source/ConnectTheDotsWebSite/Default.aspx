@@ -56,7 +56,11 @@
         </div>
     </div>
 
+
     <form id="form2" runat="server">
+        <div id="user" runat="server">
+        </div>
+
         <asp:ScriptManager ID='ScriptManager1' runat='server' EnablePageMethods='true' />
         <a target="_blank" href="http://connectthedots.io"><img style="position: absolute; top: 0; right: 0; border: 0;" src="img/forkme_CTD.png" alt="Fork me on GitHub" /></a>
 
@@ -110,8 +114,8 @@
                     <tbody>
                     </tbody>
                 </table>
-
             </div>
+            <input type="button" value="Add Device To IoTHub" onclick="addDevice();" />
         </div>
 
         <div class="big-block">
@@ -120,10 +124,11 @@
         </div>
     </form>
 
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-1.11.3.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.9/js/jquery.dataTables.min.js"></script>
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+    <script type="text/javascript" src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.js"></script>
+
     <script type="text/javascript" src="js/d3utils.js"></script>
     <script type="text/javascript" src="js/d3DataFlow.js"></script>
     <script type="text/javascript" src="js/d3Chart.js"></script>

@@ -88,11 +88,11 @@ function onLoaded(evt) {
 }
 
 function onError(evt) {
-    $('#messages').prepend('<div>ERROR ' + evt.owner + '</div>');
+    addOutputToConsole('ERROR ' + evt.owner);
 }
 
 function onOpen(evt) {
-    $('#messages').prepend('<div>Connected.</div>');
+    addOutputToConsole('Connected.');
 }
 
 function addNewDataFlow(eventObject) {
@@ -263,6 +263,11 @@ function timerIncrement() {
     }
 }
 
+function addOutputToConsole(text){
+    $('#messages').prepend('<div>' + text + '</div>');
+}
+
+
 $(document).ready(function () {
     var globalSettings = $('.globalSettings');
     var forceSocketCloseOnUserActionsTimeout = globalSettings.find('.ForceSocketCloseOnUserActionsTimeout').text().toLowerCase() == 'true';
@@ -277,7 +282,8 @@ $(document).ready(function () {
     var sss = (window.location.protocol.indexOf('s') > 0 ? "s" : "");
     var uri = 'ws' + sss + '://' + window.location.host + '/api/websocketconnect?clientId=none';
 
-    $('#messages').prepend('<div> Connecting to ' + uri + '<div>');
+    addOutputToConsole('Connecting to ' + uri);
+
     dataFlows.dataSource = new d3CTDDataSourceSocket(uri).addEventListeners({ 'eventObject': onNewEvent, 'error': onError, 'open': onOpen });
 
     $('#selectAllOpt').on('click', function () {

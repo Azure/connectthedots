@@ -25,17 +25,13 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-//using System.Linq;
 using System.Web.Http;
 using System.Web.Routing;
 using Microsoft.ServiceBus.Messaging;
-using Microsoft.WindowsAzure;
-using Microsoft.ServiceBus;
 using Microsoft.Azure;
-using Microsoft.WindowsAzure.Storage.Blob;
 
 using ConnectTheDotsWebSite.Helpers;
-using System.Timers;
+using System.Threading;
 
 namespace ConnectTheDotsWebSite
 {
@@ -54,6 +50,13 @@ namespace ConnectTheDotsWebSite
     public struct GlobalSettings
     {
         public bool ForceSocketCloseOnUserActionsTimeout { get; set; }
+        public bool RefreshDevicesList { get; set; }
+        public bool DevicesListRefreshed { get; set; }
+        public string AdminName { get; set; }
+        public bool AddDevice { get; set; }
+        public bool DeviceAdded { get; set; }
+        public IoTHubHelper.AddDeviceResult DeviceAddedResult { get; set; }
+        public string NewDeviceName { get; set; }
     }
 
     public class DeviceDetails
@@ -79,11 +82,11 @@ namespace ConnectTheDotsWebSite
     {
         EventHubSettings eventHubDevicesSettings;
         EventHubSettings eventHubAlertsSettings;
-        public static GlobalSettings globalSettings;
-                public static List<DeviceDetails> devicesList = new List<DeviceDetails>();
-        private static Timer pingIoTHubTimer;
-        public static bool refreshDevicesList = true;
-        public static bool devicesListRefreshed = false;
+
+        public static GlobalSettings globalSettings = new GlobalSettings() { ForceSocketCloseOnUserActionsTimeout = true, DevicesListRefreshed = false, RefreshDevicesList = true, AddDevice = false, DeviceAdded=false  };
+
+        public static List<DeviceDetails> devicesList = new List<DeviceDetails>();
+        private static System.Timers.Timer pingIoTHubTimer;
 
         public static void AddToDeviceList(IDictionary<string, object> deviceInfo)
         {
@@ -113,7 +116,7 @@ namespace ConnectTheDotsWebSite
             }
         }
 
-        public static void UpdateDeviceListFromIoTHub()
+        private static void UpdateDeviceListFromIoTHub()
         {
             List<IDictionary<string, object>> devices = IoTHubHelper.ListDevices(100);
             if (devices != null)
@@ -126,10 +129,40 @@ namespace ConnectTheDotsWebSite
                 // Clean up the list of devices removing devices that are no longer provisionned in IoT Hub
                 devicesList.RemoveAll(device => devices.Find(item => item["guid"].ToString() == device.guid) == null);
 
-                Global.devicesListRefreshed = true;
+                Global.globalSettings.DevicesListRefreshed = true;
             }
         }
 
+        public static bool TriggerAndWaitDeviceListRefresh(int timeout)
+        {
+            // Set the flag for the server to refresh the devices list from IoTHub and wait till its done
+            Global.globalSettings.DevicesListRefreshed = false;
+            Global.globalSettings.RefreshDevicesList = true;
+
+            // Init counter (timeout is expressed in seconds)
+            int tick = 0;
+
+            // Wait till list is refreshed or till timeout is hit
+            while ((!Global.globalSettings.DevicesListRefreshed) && (tick++<timeout)) Thread.Sleep(1000);
+
+            return Global.globalSettings.DevicesListRefreshed;
+        }
+
+        public static IoTHubHelper.AddDeviceResult TriggerAndWaitAddDevice(int timeout, string deviceName)
+        {
+            // Set the flag for the server to refresh the devices list from IoTHub and wait till its done
+            Global.globalSettings.DeviceAdded = false;
+            Global.globalSettings.NewDeviceName = deviceName; 
+            Global.globalSettings.AddDevice = true;
+
+            // Init counter (timeout is expressed in seconds)
+            int tick = 0;
+
+            // Wait till list is refreshed or till timeout is hit
+            while ((!Global.globalSettings.DeviceAdded) && (tick++ < timeout)) Thread.Sleep(1000);
+
+            return Global.globalSettings.DeviceAddedResult;
+        }
 
         protected void Application_Start(Object sender, EventArgs e)
         {
@@ -139,6 +172,7 @@ namespace ConnectTheDotsWebSite
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
+                
             );
 
             // Read connection strings and Event Hubs names from app.config file
@@ -150,8 +184,26 @@ namespace ConnectTheDotsWebSite
 
             // Setup a timer to ping IoTHub for list of devices every second (will effectively ping IoTHub if flag refreshDevicesList is true)
             pingIoTHubTimer = new System.Timers.Timer(1000);
-            pingIoTHubTimer.Elapsed += (Object source, ElapsedEventArgs args) => { if (Global.refreshDevicesList) { Global.refreshDevicesList = false; Global.UpdateDeviceListFromIoTHub(); }  };
+            pingIoTHubTimer.Elapsed += PingIoTHubTimer_Elapsed;
+            pingIoTHubTimer.Elapsed += (Object source, System.Timers.ElapsedEventArgs args) => { if (Global.globalSettings.RefreshDevicesList) { Global.globalSettings.RefreshDevicesList = false; Global.UpdateDeviceListFromIoTHub(); }  };
             pingIoTHubTimer.Enabled = true;
+        }
+
+        private void PingIoTHubTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (Global.globalSettings.RefreshDevicesList)
+            {
+                Global.globalSettings.RefreshDevicesList = false;
+                Global.UpdateDeviceListFromIoTHub();
+            }
+
+            if (Global.globalSettings.AddDevice)
+            {
+                Global.globalSettings.AddDevice = false;
+
+                Global.globalSettings.DeviceAddedResult = IoTHubHelper.AddDevice(Global.globalSettings.NewDeviceName);
+                Global.globalSettings.DeviceAdded = true;
+            }
         }
 
         protected void Application_End(Object sender, EventArgs e)
@@ -170,7 +222,6 @@ namespace ConnectTheDotsWebSite
             {
                 eventHubSettings.client = EventHubClient.CreateFromConnectionString(eventHubSettings.connectionString,
                                                                                 eventHubSettings.name);
-//                eventHubSettings.consumerGroup = EventHubConsumerGroup.DefaultGroupName;
             }
             catch (Exception ex)
             {
@@ -189,19 +240,16 @@ namespace ConnectTheDotsWebSite
                     eventHubSettings.name,
                     eventHubSettings.consumerGroup,
                     eventHubSettings.connectionString,
-                    eventHubSettings.storageConnectionString);
+                    eventHubSettings.storageConnectionString
+                    );
 
-                //                eventHubSettings.processorHostOptions = new EventProcessorOptions();
-                //                eventHubSettings.processorHostOptions.ExceptionReceived += WebSocketEventProcessor.ExceptionReceived;
-                //                eventHubSettings.processorHostOptions.InitialOffsetProvider = (partitionId) => DateTime.UtcNow;
-                //eventHubSettings.processorHostOptions.InitialOffsetProvider = partitionId =>
-                //{
-                //    return eventHubSettings.namespaceManager.GetEventHubPartition(eventHubSettings.client.Path, partitionId).LastEnqueuedOffset;
-                //};
+                eventHubSettings.processorHostOptions = new EventProcessorOptions();
+                eventHubSettings.processorHostOptions.InitialOffsetProvider = (partitionId) => DateTime.UtcNow;
+                eventHubSettings.processorHostOptions.ExceptionReceived += WebSocketEventProcessor.ExceptionReceived;
 
                 Trace.TraceInformation("Registering EventProcessor for " + eventHubSettings.name);
-                //                eventHubSettings.processorHost.RegisterEventProcessorAsync<WebSocketEventProcessor>(eventHubSettings.processorHostOptions).Wait();
-                eventHubSettings.processorHost.RegisterEventProcessorAsync<WebSocketEventProcessor>().Wait();
+                eventHubSettings.processorHost.RegisterEventProcessorAsync<WebSocketEventProcessor>(eventHubSettings.processorHostOptions).Wait();
+                //eventHubSettings.processorHost.RegisterEventProcessorAsync<WebSocketEventProcessor>().Wait();
             }
             catch (Exception e)
             {
@@ -216,36 +264,29 @@ namespace ConnectTheDotsWebSite
             {
                 globalSettings.ForceSocketCloseOnUserActionsTimeout =
                     CloudConfigurationManager.GetSetting("ForceSocketCloseOnUserActionsTimeout") == "true";
+
+                // Read settings for Devices Event Hub (IoTHub event hub compatible endpoint)
+                eventHubDevicesSettings.name = CloudConfigurationManager.GetSetting("Azure.IoT.IoTHub.EventHub.Name");
+                eventHubDevicesSettings.connectionString = CloudConfigurationManager.GetSetting("Azure.IoT.IoTHub.EventHub.ConnectionString");
+                eventHubDevicesSettings.consumerGroup = CloudConfigurationManager.GetSetting("Azure.IoT.IoTHub.EventHub.ConsumerGroup");
+                eventHubDevicesSettings.storageConnectionString = CloudConfigurationManager.GetSetting("Azure.Storage.ConnectionString");
+                // eventHubDevicesSettings.namespaceManager = NamespaceManager.CreateFromConnectionString(CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString"));
+
+                // Read settings for Alerts Event Hub
+                eventHubAlertsSettings.name = CloudConfigurationManager.GetSetting("Azure.ServiceBus.EventHub.Name");
+                eventHubAlertsSettings.connectionString = CloudConfigurationManager.GetSetting("Azure.ServiceBus.EventHub.ConnectionString");
+                eventHubAlertsSettings.consumerGroup = CloudConfigurationManager.GetSetting("Azure.ServiceBus.EventHub.ConsumerGroup");
+                eventHubAlertsSettings.storageConnectionString = CloudConfigurationManager.GetSetting("Azure.Storage.ConnectionString");
+                //eventHubAlertsSettings.namespaceManager = NamespaceManager.CreateFromConnectionString(CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString"));
+
+                // Read other settings
+                globalSettings.AdminName = CloudConfigurationManager.GetSetting("AdminName");
             }
             catch (Exception)
             {
+                // TODO : display error on site
             }
 
-            // Read settings for Devices Event Hub (IoTHub event hub compatible endpoint)
-            eventHubDevicesSettings.name = CloudConfigurationManager.GetSetting("Azure.IoT.IoTHub.EventHub.Name");
-            eventHubDevicesSettings.connectionString = CloudConfigurationManager.GetSetting("Azure.IoT.IoTHub.EventHub.ConnectionString");
-            eventHubDevicesSettings.consumerGroup = CloudConfigurationManager.GetSetting("Azure.IoT.IoTHub.EventHub.ConsumerGroup");
-            eventHubDevicesSettings.storageConnectionString = CloudConfigurationManager.GetSetting("Azure.Storage.ConnectionString");
-            // eventHubDevicesSettings.namespaceManager = NamespaceManager.CreateFromConnectionString(CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString"));
-
-            // Read settings for Alerts Event Hub
-            eventHubAlertsSettings.name = CloudConfigurationManager.GetSetting("Azure.ServiceBus.EventHub.Name");
-            eventHubAlertsSettings.connectionString = CloudConfigurationManager.GetSetting("Azure.ServiceBus.EventHub.ConnectionString");
-            eventHubAlertsSettings.consumerGroup = CloudConfigurationManager.GetSetting("Azure.ServiceBus.EventHub.ConsumerGroup");
-            eventHubAlertsSettings.storageConnectionString = CloudConfigurationManager.GetSetting("Azure.Storage.ConnectionString");
-            //eventHubAlertsSettings.namespaceManager = NamespaceManager.CreateFromConnectionString(CloudConfigurationManager.GetSetting("Microsoft.ServiceBus.ConnectionString"));
-
-            //if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")))
-            //{
-            //    // Assume we are running local: use different consumer groups to avoid colliding with a cloud instance
-            //    eventHubDevicesSettings.consumerGroup = "local";
-            //    eventHubAlertsSettings.consumerGroup = "local";
-            //}
-            //else
-            //{
-            //    eventHubDevicesSettings.consumerGroup = "website";
-            //    eventHubAlertsSettings.consumerGroup = "website";
-            //}
         }
 
     }

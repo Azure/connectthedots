@@ -23,42 +23,95 @@
 //  ---------------------------------------------------------------------------------
 
 using System;
-//using System.Collections.Generic;
-//using System.Linq;
 using System.Threading;
-//using System.Web;
-//using System.Web.UI;
-//using System.Web.UI.WebControls;
 using System.Web.Services;
 using Newtonsoft.Json;
-
+using System.Security.Claims;
+using System.Collections.Generic;
 
 namespace ConnectTheDotsWebSite
 {
-
-
     public partial class Default : System.Web.UI.Page
     {
         protected string ForceSocketCloseOnUserActionsTimeout = "false";
+
+        protected static bool IsUserAuthenticated()
+        {
+            var claimsPrincipal = Thread.CurrentPrincipal as ClaimsPrincipal;
+            return (claimsPrincipal != null && claimsPrincipal.Identity.IsAuthenticated);
+        }
+
+        protected static bool IsUserAdmin()
+        {
+            var claimsPrincipal = Thread.CurrentPrincipal as ClaimsPrincipal;
+            if (claimsPrincipal != null && claimsPrincipal.Identity.IsAuthenticated)
+            {
+                return (Global.globalSettings.AdminName == claimsPrincipal.Identity.Name);
+            }
+            else
+                return false;
+        }
 
         protected void Page_Load(object sender, EventArgs e)
         {
             ForceSocketCloseOnUserActionsTimeout =
                 Global.globalSettings.ForceSocketCloseOnUserActionsTimeout.ToString();
 
-//            TokenCloudCredentials toFoundSubscriptions = AzureAuthenticationHelper.GetCredentialsByUserADAuth();
-
+            var claimsPrincipal = Thread.CurrentPrincipal as ClaimsPrincipal;
+            user.InnerHtml = (IsUserAuthenticated())?(claimsPrincipal.Identity.Name + (IsUserAdmin() ? " (ADMIN)" : " (USER)")) : "User Not Authenticated";
         }
 
         [WebMethod]
         public static string GetDevicesList()
         {
             // Set the flag for the server to refresh the devices list from IoTHub and wait till its done
-            Global.devicesListRefreshed = false;
-            Global.refreshDevicesList = true;
-            while (!Global.devicesListRefreshed) Thread.Sleep(1000);
+            if (Global.TriggerAndWaitDeviceListRefresh(10))
+            {
+                // We need to Filter the devices secret information in case the user is not an admin
+                List<DeviceDetails> devicesList = Global.devicesList;
+                if (!IsUserAdmin())
+                {
+                    foreach (DeviceDetails device in devicesList)
+                    {
+                        device.connectionstring = "User not allowed to access";
+                    }
+                }
 
-            return JsonConvert.SerializeObject(Global.devicesList);
+                return JsonConvert.SerializeObject(devicesList);
+            }
+            return null;
+        }
+
+        [WebMethod]
+        public static string AddDevice(string deviceName)
+        {
+            // Check if user is authorized, then create a new device
+            //            if (!IsUserAdmin())
+            //                return "{\"Error\": \"User not authorized to add device.\"}";
+
+            string returnMessage;
+
+            // Add device
+            switch (Global.TriggerAndWaitAddDevice(10, deviceName))
+            {
+                case Helpers.IoTHubHelper.AddDeviceResult.Success:
+                    Global.TriggerAndWaitDeviceListRefresh(3);
+                    returnMessage  = "{\"Device\": \"" + deviceName + "\"}";
+                    break;
+
+                case Helpers.IoTHubHelper.AddDeviceResult.DeviceAlreadyExists:
+                    returnMessage = "{\"Error\": \"Device already exists.\"}";
+                    break;
+
+                case Helpers.IoTHubHelper.AddDeviceResult.Unknown:
+                    returnMessage = "{\"Error\": \"It's taking longer than expected to create a new device ID.\"}";
+                    break;
+
+                default:
+                    returnMessage = "{\"Error\": \"An error occured when trying to add new device.\"}";
+                    break;
+            }
+            return returnMessage;
         }
 
     }
