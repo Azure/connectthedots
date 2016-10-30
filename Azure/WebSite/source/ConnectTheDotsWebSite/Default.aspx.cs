@@ -52,13 +52,35 @@ namespace ConnectTheDotsWebSite
                 return false;
         }
 
+
         protected void Page_Load(object sender, EventArgs e)
         {
             ForceSocketCloseOnUserActionsTimeout =
                 Global.globalSettings.ForceSocketCloseOnUserActionsTimeout.ToString();
 
-            var claimsPrincipal = Thread.CurrentPrincipal as ClaimsPrincipal;
-            user.InnerHtml = (IsUserAuthenticated())?(claimsPrincipal.Identity.Name + (IsUserAdmin() ? " (ADMIN)" : " (USER)")) : "User Not Authenticated";
+            // Manage what's displayed depending on the user's permissions
+            if (IsUserAuthenticated())
+            {
+                var claimsPrincipal = Thread.CurrentPrincipal as ClaimsPrincipal;
+                if (IsUserAdmin())
+                {
+                    user.InnerHtml = claimsPrincipal.Identity.Name + " (ADMIN)";
+                    adminbuttons.Visible = true;
+                    cscolumn.Visible = true;
+                }
+                else
+                {
+                    user.InnerHtml = claimsPrincipal.Identity.Name + " (USER)";
+                    adminbuttons.Visible = false;
+                    cscolumn.Visible = false;
+                }
+            }
+            else
+            {
+                user.InnerHtml = "User Not Authenticated";
+                adminbuttons.Visible = false;
+                cscolumn.Visible = false;
+            }
         }
 
         [WebMethod]
@@ -73,7 +95,7 @@ namespace ConnectTheDotsWebSite
                 {
                     foreach (DeviceDetails device in devicesList)
                     {
-                        device.connectionstring = "User not allowed to access";
+                        device.connectionstring = "";
                     }
                 }
 
@@ -95,16 +117,11 @@ namespace ConnectTheDotsWebSite
             switch (Global.TriggerAndWaitAddDevice(10, deviceName))
             {
                 case Helpers.IoTHubHelper.AddDeviceResult.Success:
-                    Global.TriggerAndWaitDeviceListRefresh(3);
                     returnMessage  = "{\"Device\": \"" + deviceName + "\"}";
                     break;
 
                 case Helpers.IoTHubHelper.AddDeviceResult.DeviceAlreadyExists:
                     returnMessage = "{\"Error\": \"Device already exists.\"}";
-                    break;
-
-                case Helpers.IoTHubHelper.AddDeviceResult.Unknown:
-                    returnMessage = "{\"Error\": \"It's taking longer than expected to create a new device ID.\"}";
                     break;
 
                 default:
@@ -113,6 +130,34 @@ namespace ConnectTheDotsWebSite
             }
             return returnMessage;
         }
+
+        [WebMethod]
+        public static string DeleteDevice(string deviceName)
+        {
+            // Check if user is authorized, then create a new device
+            if (!IsUserAdmin())
+                return "{\"Error\": \"User not authorized to remove device.\"}";
+
+            string returnMessage;
+
+            // Delete device
+            switch (Global.TriggerAndWaitDeleteDevice(10, deviceName))
+            {
+                case Helpers.IoTHubHelper.DeleteDeviceResult.Success:
+                    returnMessage = "{\"Device\": \"" + deviceName + "\"}";
+                    break;
+
+                case Helpers.IoTHubHelper.DeleteDeviceResult.DeviceNotRegistered:
+                    returnMessage = "{\"Error\": \"Device not registered.\"}";
+                    break;
+
+                default:
+                    returnMessage = "{\"Error\": \"An error occured when trying to delete device.\"}";
+                    break;
+            }
+            return returnMessage;
+        }
+
 
     }
 }

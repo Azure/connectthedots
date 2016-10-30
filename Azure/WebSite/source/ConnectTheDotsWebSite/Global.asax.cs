@@ -57,6 +57,11 @@ namespace ConnectTheDotsWebSite
         public bool DeviceAdded { get; set; }
         public IoTHubHelper.AddDeviceResult DeviceAddedResult { get; set; }
         public string NewDeviceName { get; set; }
+        public bool DeleteDevice { get; set; }
+        public bool DeviceDeleted { get; set; }
+        public IoTHubHelper.DeleteDeviceResult DeviceDeletedResult { get; set; }
+        public string DeviceToDeleteName { get; set; }
+
     }
 
     public class DeviceDetails
@@ -171,6 +176,21 @@ namespace ConnectTheDotsWebSite
 
             return Global.globalSettings.DeviceAddedResult;
         }
+        public static IoTHubHelper.DeleteDeviceResult TriggerAndWaitDeleteDevice(int timeout, string deviceName)
+        {
+            // Set the flag for the server to refresh the devices list from IoTHub and wait till its done
+            Global.globalSettings.DeviceDeleted = false;
+            Global.globalSettings.DeviceToDeleteName = deviceName;
+            Global.globalSettings.DeleteDevice = true;
+
+            // Init counter (timeout is expressed in seconds)
+            int tick = 0;
+
+            // Wait till list is refreshed or till timeout is hit
+            while ((!Global.globalSettings.DeviceDeleted) && (tick++ < timeout)) Thread.Sleep(1000);
+
+            return Global.globalSettings.DeviceDeletedResult;
+        }
 
         protected void Application_Start(Object sender, EventArgs e)
         {
@@ -212,6 +232,16 @@ namespace ConnectTheDotsWebSite
                 Global.globalSettings.DeviceAddedResult = IoTHubHelper.AddDevice(Global.globalSettings.NewDeviceName);
                 Global.globalSettings.DeviceAdded = true;
             }
+
+            if (Global.globalSettings.DeleteDevice)
+            {
+                Global.globalSettings.DeleteDevice = false;
+
+                Global.globalSettings.DeviceDeletedResult = IoTHubHelper.DeleteDevice(Global.globalSettings.DeviceToDeleteName);
+                Global.globalSettings.DeviceDeleted = true;
+            }
+
+
         }
 
         protected void Application_End(Object sender, EventArgs e)
@@ -251,13 +281,13 @@ namespace ConnectTheDotsWebSite
                     eventHubSettings.storageConnectionString
                     );
 
-                eventHubSettings.processorHostOptions = new EventProcessorOptions();
-                eventHubSettings.processorHostOptions.InitialOffsetProvider = (partitionId) => DateTime.UtcNow;
-                eventHubSettings.processorHostOptions.ExceptionReceived += WebSocketEventProcessor.ExceptionReceived;
+                //eventHubSettings.processorHostOptions = new EventProcessorOptions();
+                //eventHubSettings.processorHostOptions.InitialOffsetProvider = (partitionId) => DateTime.UtcNow;
+                //eventHubSettings.processorHostOptions.ExceptionReceived += WebSocketEventProcessor.ExceptionReceived;
 
                 Trace.TraceInformation("Registering EventProcessor for " + eventHubSettings.name);
-                eventHubSettings.processorHost.RegisterEventProcessorAsync<WebSocketEventProcessor>(eventHubSettings.processorHostOptions).Wait();
-                //eventHubSettings.processorHost.RegisterEventProcessorAsync<WebSocketEventProcessor>().Wait();
+                //eventHubSettings.processorHost.RegisterEventProcessorAsync<WebSocketEventProcessor>(eventHubSettings.processorHostOptions).Wait();
+                eventHubSettings.processorHost.RegisterEventProcessorAsync<WebSocketEventProcessor>().Wait();
             }
             catch (Exception e)
             {

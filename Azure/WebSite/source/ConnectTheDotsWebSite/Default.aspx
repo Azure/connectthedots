@@ -108,14 +108,17 @@
                             <th>Location</th>
                             <th>IP Address</th>
                             <th>IoTHub Device ID</th>
-                            <th>Connection String</th>
+                            <th id="cscolumn" runat="server">Connection String</th>
                         </tr>
                     </thead>
                     <tbody>
                     </tbody>
                 </table>
             </div>
-            <input type="button" value="Add Device To IoTHub" onclick="addDevice();" />
+            <div id="adminbuttons" runat="server">
+            <input type="button" value="Add Device" onclick="addDevice();" />
+            <input type="button" value="Delete Device" onclick="deleteDevice();" />
+            </div>
         </div>
 
         <div class="big-block">

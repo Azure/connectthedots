@@ -5,17 +5,39 @@
 
 function addDevice()
 {
-    var deviceName = prompt("Enter a unique Device Name");
+    var deviceName = prompt("Enter a unique Device Id");
     if (deviceName)
         PageMethods.AddDevice(deviceName, AddSuccess, Failure);
+}
+
+function deleteDevice() {
+    var deviceName = prompt("Enter the IoT Hub ID of the device you want to remove");
+    if (deviceName)
+        PageMethods.DeleteDevice(deviceName, DeleteSuccess, Failure);
 }
 
 function ListSuccess(result) {
     if (result) {
         var devicesList = JSON.parse(result);
         var table = $('#devicesTable').DataTable();
-        var addRow = true;
 
+        // Check if we need to remove a row from the table
+        var rowsToRemove=[];
+        for (var rowIndex = 0; rowIndex < table.rows().eq(0).length; rowIndex++) {
+            for (var deviceIdx = 0 ; deviceIdx < devicesList.length ; deviceIdx++)
+            {
+                if (devicesList[deviceIdx]['guid'] == table.cell(rowIndex, 3).data()) {
+                    rowsToRemove[rowsToRemove.length] = rowIndex;
+                    break;
+                }
+            }
+        }
+        for (var idx = rowsToRemove.length; idx > 0 ; idx--)
+        {
+            table.rows(idx).remove().draw();
+        }
+
+        // Check if we need to update or add a row in the table
         for (var deviceIndex = 0 ; deviceIndex < devicesList.length; deviceIndex++) {
             var device = devicesList[deviceIndex];
             var location = 'unknown';
@@ -27,6 +49,8 @@ function ListSuccess(result) {
             var connectionstring = 'unknown';
             if (device['connectionstring'] != null) connectionstring = device['connectionstring'];
 
+            var addRow = true;
+
             if (table.rows().length > 0) {
                 // Check if we already have this one in the table already to prevent duplicates
                 var indexes = table.rows().eq(0).filter(function (rowIdx) {
@@ -36,7 +60,7 @@ function ListSuccess(result) {
                         table.cell(rowIdx, 0).innerHTML = displayname;
                         table.cell(rowIdx, 1).innerHTML = location;
                         table.cell(rowIdx, 2).innerHTML = ipaddress;
-                        table.cell(rowIdx, 4).innerHTML = connectionstring;
+                        if ($('#cscolumn').is(':visible')) table.cell(rowIdx, 4).innerHTML = connectionstring;
                         return true;
                     }
                     return false;
@@ -47,13 +71,22 @@ function ListSuccess(result) {
 
             // The device is a new one, lets add it to the table
             if (addRow == true) {
-                table.row.add([
-                    displayname,
-                    location,
-                    ipaddress,
-                    device['guid'],
-                    connectionstring
-                ]).draw();
+                if ($('#cscolumn').is(':visible')) {
+                    table.row.add([
+                        displayname,
+                        location,
+                        ipaddress,
+                        device['guid'],
+                        connectionstring
+                    ]).draw();
+                } else {
+                    table.row.add([
+                        displayname,
+                        location,
+                        ipaddress,
+                        device['guid']
+                    ]).draw();
+                }
             }
         }
     }
@@ -68,11 +101,27 @@ function AddSuccess(result) {
             alert(resultObject.Error);
         } else {
             addOutputToConsole('Device ' + resultObject.Device + ' added to IoT Hub');
-            alert("Device " + resultObject.Device + " added to IoT Hub");
+            updateDevicesList();
         }
     } else {
         addOutputToConsole('An error happened while trying to add a new device');
         alert("An error happened while trying to add a new device");
+    }
+}
+
+function DeleteSuccess(result) {
+    if (result) {
+        var resultObject = JSON.parse(result);
+        if (resultObject.Error) {
+            addOutputToConsole('ERROR ' + resultObject.Error);
+            alert(resultObject.Error);
+        } else {
+            addOutputToConsole('Device ' + resultObject.Device + ' deleted from IoT Hub');
+            updateDevicesList();
+        }
+    } else {
+        addOutputToConsole('An error happened while trying to delete the device');
+        alert('An error happened while trying to delete the device');
     }
 }
 

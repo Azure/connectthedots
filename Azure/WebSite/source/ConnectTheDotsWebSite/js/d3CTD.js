@@ -243,6 +243,10 @@ function onNewEvent(evt) {
     }
 }
 
+function addOutputToConsole(text) {
+    $('#messages').prepend('<div>' + text + '</div>');
+}
+
 //
 // JQuery ready function
 //
@@ -261,10 +265,6 @@ function timerIncrement() {
         alert('Connection was closed due to user inactivity.');
         location.reload();
     }
-}
-
-function addOutputToConsole(text){
-    $('#messages').prepend('<div>' + text + '</div>');
 }
 
 
@@ -349,6 +349,7 @@ $(document).ready(function () {
 });
 
 $(window).load(function () {
+
     // Update the devices list when page is loaded
     updateDevicesList();
 });

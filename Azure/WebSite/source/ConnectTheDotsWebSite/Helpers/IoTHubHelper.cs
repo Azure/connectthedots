@@ -17,12 +17,36 @@ namespace ConnectTheDotsWebSite.Helpers
             if (serviceClient!=null) serviceClient.SendAsync(deviceId, message).Wait();
         }
 
+        public enum DeleteDeviceResult
+        {
+            Success,
+            DeviceNotRegistered,
+            Error
+        }
+
+        public static DeleteDeviceResult DeleteDevice(string deviceId)
+        {
+            var manager = RegistryManager.CreateFromConnectionString(Microsoft.Azure.CloudConfigurationManager.GetSetting("Azure.IoT.IoTHub.ConnectionString"));
+            if (manager != null)
+            {
+                // Check if device exists
+                Device device = manager.GetDeviceAsync(deviceId).Result;
+                if (device == null)
+                    return DeleteDeviceResult.DeviceNotRegistered;
+                else
+                {
+                    manager.RemoveDeviceAsync(deviceId);
+                    return DeleteDeviceResult.Success;
+                }
+            }
+            return DeleteDeviceResult.Error;
+        }
+
         public enum AddDeviceResult
         {
             Success,
             DeviceAlreadyExists,
-            Error,
-            Unknown
+            Error
         }
 
         public static AddDeviceResult AddDevice(string deviceId)
@@ -43,12 +67,6 @@ namespace ConnectTheDotsWebSite.Helpers
             return AddDeviceResult.Error;
         }
 
-        //public static void RemoveDevice(string deviceId)
-        //{
-        //    var manager = RegistryManager.CreateFromConnectionString(Microsoft.Azure.CloudConfigurationManager.GetSetting("Azure.IoT.IoTHub.ConnectionString"));
-        //    if (manager != null)
-        //        manager.RemoveDeviceAsync(new Device(deviceId));
-        //}
 
         public static List<IDictionary<string, object>> ListDevices(int count)
         {
