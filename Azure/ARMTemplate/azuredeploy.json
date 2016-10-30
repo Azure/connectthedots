@@ -23,6 +23,7 @@
     },
     "solutionName": {
       "type": "string",
+      "maxLength": 16,
       "metadata": {
         "description": "The name of your ConnectTheDots solution (will be used to prefix the services names)"
       }
@@ -38,6 +39,9 @@
       "metadata": {
         "description": "The Iothub Sku"
       }
+    },
+    "adminName": {
+      "type": "string"
     },
     "repoUrl": {
       "type": "string",
@@ -352,6 +356,10 @@
                       "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageName'), ';AccountKey=', listkeys(variables('storageId'), variables('storageVersion')).key1)]"
                     },
                     {
+                      "name": "AdminName",
+                      "value": "[parameters('adminName')]"
+                    },
+                    {
                       "name": "ObjectTypePrefix",
                       "value": ""
                     },
@@ -375,6 +383,42 @@
                 "repoUrl":"[parameters('repoUrl')]",
                 "branch":"[parameters('branch')]",
                 "isManualIntegration": true
+              }
+            },
+            {
+              "apiVersion": "[variables('webVersion')]",
+              "name": "web",
+              "type": "config",
+              "dependsOn": [
+                "[concat('Microsoft.Web/sites/', variables('webSiteName'))]"
+              ],
+              "properties": {
+                "siteAuthEnabled": true,
+                "siteAuthSettings": {
+                  "enabled": true,
+                  "httpApiPrefixPath": null,
+                  "unauthenticatedClientAction": 0 ,
+                  "tokenStoreEnabled": true,
+                  "allowedExternalRedirectUrls": null,
+                  "defaultProvider": 0,
+                  "clientSecret": null,
+                  "issuer": "[concat('https://sts.windows.net/', subscription().tenantId )]",
+                  "allowedAudiences": [ "[concat('https://', variables('webSiteName'), '.azurewebsites.net')]" ],
+                  "additionalLoginParams": null,
+                  "isAadAutoProvisioned": true,
+                  "openIdIssuer": "[concat('https://sts.windows.net/', subscription().tenantId )]",
+                  "googleClientId": null,
+                  "googleClientSecret": null,
+                  "googleOAuthScopes": null,
+                  "facebookAppId": null,
+                  "facebookAppSecret": null,
+                  "facebookOAuthScopes": null,
+                  "twitterConsumerKey": null,
+                  "twitterConsumerSecret": null,
+                  "microsoftAccountClientId": null,
+                  "microsoftAccountClientSecret": null,
+                  "microsoftAccountOAuthScopes": null
+                }
               }
             }
           ]
