@@ -88,11 +88,11 @@ function onLoaded(evt) {
 }
 
 function onError(evt) {
-    $('#messages').prepend('<div>ERROR ' + evt.owner + '</div>');
+    addOutputToConsole('ERROR ' + evt.owner);
 }
 
 function onOpen(evt) {
-    $('#messages').prepend('<div>Connected.</div>');
+    addOutputToConsole('Connected.');
 }
 
 function addNewDataFlow(eventObject) {
@@ -243,6 +243,10 @@ function onNewEvent(evt) {
     }
 }
 
+function addOutputToConsole(text) {
+    $('#messages').prepend('<div>' + text + '</div>');
+}
+
 //
 // JQuery ready function
 //
@@ -263,6 +267,7 @@ function timerIncrement() {
     }
 }
 
+
 $(document).ready(function () {
     var globalSettings = $('.globalSettings');
     var forceSocketCloseOnUserActionsTimeout = globalSettings.find('.ForceSocketCloseOnUserActionsTimeout').text().toLowerCase() == 'true';
@@ -277,7 +282,8 @@ $(document).ready(function () {
     var sss = (window.location.protocol.indexOf('s') > 0 ? "s" : "");
     var uri = 'ws' + sss + '://' + window.location.host + '/api/websocketconnect?clientId=none';
 
-    $('#messages').prepend('<div> Connecting to ' + uri + '<div>');
+    addOutputToConsole('Connecting to ' + uri);
+
     dataFlows.dataSource = new d3CTDDataSourceSocket(uri).addEventListeners({ 'eventObject': onNewEvent, 'error': onError, 'open': onOpen });
 
     $('#selectAllOpt').on('click', function () {
@@ -317,4 +323,33 @@ $(document).ready(function () {
             }
         }, ]
     });
+
+    // create devices table
+    var table = $('#devicesTable').DataTable({
+        "bAutoWidth": false,
+        "bFilter": true,
+        "bInfo": true,
+        "paging": true,
+        "order": [
+            [0, "desc"]
+        ],
+        "columnDefs": [{
+            "targets": "numberFixed",
+            "data": function (row, type, val, meta) {
+                if (type === 'set') {
+                    row[meta.col] = val;
+                    return;
+                } else if (type === 'display') {
+                    return row[meta.col].toFixed(1);
+                }
+                return row[meta.col];
+            }
+        }, ]
+    });
+});
+
+$(window).load(function () {
+
+    // Update the devices list when page is loaded
+    updateDevicesList();
 });
