@@ -11,7 +11,7 @@ The below services will be deployed in your Azure subscription:
    
 You can edit the [ARM template](azuredeploy.json) if you want to add more services or edit the parameters. If you edit the ARM template manually, you will have to deploy it using the command line instructions, not the "Azure Deploy Button". 
 
-The ConnectTheDots website can allow you to manage your IoTHub instance (get devices connection strings, add/remove devices). This feature is NOT enabled by default and requires manually configuration in Active Directory described [below](#enable_iothub_management).
+The ConnectTheDots website can allow you to manage your IoTHub instance (get devices connection strings, add/remove devices). This feature is NOT enabled by default and requires manually configuration in Active Directory described [below](#enable-iothub-management).
 
 ## Your connect the dots resource groups
 All the services will be deployed under a single resource group in Azure.
