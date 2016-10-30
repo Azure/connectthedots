@@ -384,42 +384,6 @@
                 "branch":"[parameters('branch')]",
                 "isManualIntegration": true
               }
-            },
-            {
-              "apiVersion": "[variables('webVersion')]",
-              "name": "web",
-              "type": "config",
-              "dependsOn": [
-                "[concat('Microsoft.Web/sites/', variables('webSiteName'))]"
-              ],
-              "properties": {
-                "siteAuthEnabled": true,
-                "siteAuthSettings": {
-                  "enabled": true,
-                  "httpApiPrefixPath": null,
-                  "unauthenticatedClientAction": 0 ,
-                  "tokenStoreEnabled": true,
-                  "allowedExternalRedirectUrls": null,
-                  "defaultProvider": 0,
-                  "clientSecret": null,
-                  "issuer": "[concat('https://sts.windows.net/', subscription().tenantId )]",
-                  "allowedAudiences": [ "[concat('https://', variables('webSiteName'), '.azurewebsites.net')]" ],
-                  "additionalLoginParams": null,
-                  "isAadAutoProvisioned": true,
-                  "openIdIssuer": "[concat('https://sts.windows.net/', subscription().tenantId )]",
-                  "googleClientId": null,
-                  "googleClientSecret": null,
-                  "googleOAuthScopes": null,
-                  "facebookAppId": null,
-                  "facebookAppSecret": null,
-                  "facebookOAuthScopes": null,
-                  "twitterConsumerKey": null,
-                  "twitterConsumerSecret": null,
-                  "microsoftAccountClientId": null,
-                  "microsoftAccountClientSecret": null,
-                  "microsoftAccountOAuthScopes": null
-                }
-              }
             }
           ]
       }
