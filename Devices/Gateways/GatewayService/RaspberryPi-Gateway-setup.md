@@ -47,8 +47,9 @@ To build the project you will need Visual Studio 2013 [Community Edition](http:/
 
 	After:
  
-		<IotHubConfig IotHubConnectionString="HostName=connectthedotsiothub.azure-devices.net;DeviceId=MyDevice;SharedAccessKey=qCkdQE8wo/9LO9bJRVSWgecHvlmlc/fTRBKhNnN7zMQ="/>
+		<IotHubConfig IotHubConnectionString="HostName=connectthedotsiothub.azure-devices.net;DeviceId=MyDevice;SharedAccessKey=mykeyblablabla"/>
 
+* Build the solution (F5)
 
 * Use  the file `\Scripts\RaspberryPi\deploy.cmd` to copy all requisite files from your computer to the Pi. To use the .CMD file, you will need to 
         
