@@ -3,7 +3,7 @@ The basic premise of this project is that data from sensing devices can be sent 
 
 ## Creating devices IDs for Azure IoT Hub ##
 The ConnecttheDots project uses Azure IoT Hub to connect devices to the Cloud.
-When [deploying the full solution using the ARM template](Azure/ARMTemplate/Readme.md) an Azure IoT Hub is deployed as part of your solution.
+When [deploying the full solution using the ARM template](../Azure/ARMTemplate/Readme.md) an Azure IoT Hub is deployed as part of your solution.
 
 The ConnectTheDots website allows you to manage your IoT Hub (Create/Delete devices, get conneciton strings) directly from the site. But for security reasons, there is a configuration step described in the [service deployment instructions](../Azure/ARMTemplate/readme.md#enable-iothub-management).
 If you have enabled this feature, then you can manage the devices directly from your ConnectTheDots website.
