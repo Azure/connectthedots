@@ -105,8 +105,8 @@ But keep cool, there is a simple process for this:
 1. Look for the resource group created during the deployment of the solution
 1. Select the website in the list of resources to bring up the website blade
 1. In the Settings section, look for and click on "Authentication/Authorization"
-1. Turn "App Service Authentication" to Once
-1. Select "Log in to Azure Active Directory" in the "Action to take when request is not authenticated"
+1. Turn "App Service Authentication" to on
+1. Select "Log in with Azure Active Directory" in the "Action to take when request is not authenticated"
 1. Click on the Azure Active Directory provider to configure it
 1. Select "Express" and "Create new AD App", then click OK
 1. Save the new Authentication/Authorization setting
