@@ -168,6 +168,8 @@
     <Content Include="js\d3DataSourceSocket.js" />
     <Content Include="js\d3utils.js" />
     <Content Include="js\devicesList.js" />
+    <Content Include="js\jquery.ui-contextmenu.js" />
+    <Content Include="js\qrcode.js" />
     <Content Include="packages.config">
       <SubType>Designer</SubType>
     </Content>

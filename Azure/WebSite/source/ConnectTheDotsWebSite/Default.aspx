@@ -33,8 +33,8 @@
     <title>Connect The Dots</title>
 
     <!-- general styles -->
-
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.9/css/jquery.dataTables.css" />
+    <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
     <link rel="stylesheet" type="text/css" href="css/connectthedots.css" />
 </head>
 <body>
@@ -48,6 +48,33 @@
             <p id="loading-sensor"></p>
             <img id="loading-image" src="img/ajax-loader.gif" />
         </div>
+    </div>
+
+    <ul id="deviceMenu" style="display:none;">
+        <li><div>Add a new device</div></li>
+        <li><div>Remove device</div></li>
+        <li><div>Get QRCode</div></li>
+    </ul>
+
+    <div id="qrcode">
+    </div>
+
+    <div id="add-device-dialog-form" title="Add new device" style="display: none;">
+      <p>Type in a unique name for the new device (only characters and numbers).</p>
+ 
+      <form>
+        <fieldset style="padding:0; border:0; margin-top:25px; ">
+          <label style="display:block;" for="newdeviceid">Device ID</label>
+          <input type="text" name="newdeviceid" id="newdeviceid" value="mynewdevice" class="text ui-widget-content ui-corner-all" style="display:block;"/>
+           <!-- Allow form submission with keyboard without duplicating the dialog button -->
+          <input class="popup-input" type="submit" tabindex="-1" style="position:absolute; top:-1000px"/>
+        </fieldset>
+      </form>
+    </div>
+
+    <div id="delete-device-dialog-confirm" title="Delete device?" style="display: none;">
+        <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>This will permanently remove the device from the IoT Hub device registry. Are you sure?</p>
+        <div id="devicetodelete"></div>
     </div>
 
     <div id="header">
@@ -115,10 +142,6 @@
                     </tbody>
                 </table>
             </div>
-            <div id="adminbuttons" runat="server">
-            <input type="button" value="Add Device" onclick="addDevice();" />
-            <input type="button" value="Delete Device" onclick="deleteDevice();" />
-            </div>
         </div>
 
         <div class="big-block">
@@ -127,7 +150,8 @@
         </div>
     </form>
 
-    <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.9/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.js"></script>
@@ -139,7 +163,9 @@
     <script type="text/javascript" src="js/d3DataSourceSocket.js"></script>
     <script type="text/javascript" src="js/d3CTDDataSourceSocket.js"></script>
     <script type="text/javascript" src="js/d3CTDDataSourceFilter.js"></script>
+    <script type="text/javascript" src="js/jquery.ui-contextmenu.js"></script>
     <script type="text/javascript" src="js/devicesList.js"></script>
+    <script type="text/javascript" src="js/qrcode.js"></script>
     <script type="text/javascript" src="js/d3CTD.js"></script>
 </body>
 </html>
