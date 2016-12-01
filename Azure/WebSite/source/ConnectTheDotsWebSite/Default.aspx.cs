@@ -37,12 +37,15 @@ namespace ConnectTheDotsWebSite
 
         protected static bool IsUserAuthenticated()
         {
+            //            return true;
             var claimsPrincipal = Thread.CurrentPrincipal as ClaimsPrincipal;
             return (claimsPrincipal != null && claimsPrincipal.Identity.IsAuthenticated);
         }
 
         protected static bool IsUserAdmin()
         {
+            //            return true;
+
             var claimsPrincipal = Thread.CurrentPrincipal as ClaimsPrincipal;
             if (claimsPrincipal != null && claimsPrincipal.Identity.IsAuthenticated)
             {
@@ -50,6 +53,7 @@ namespace ConnectTheDotsWebSite
             }
             else
                 return false;
+
         }
 
 
@@ -65,20 +69,17 @@ namespace ConnectTheDotsWebSite
                 if (IsUserAdmin())
                 {
                     user.InnerHtml = claimsPrincipal.Identity.Name + " (ADMIN)";
-                    adminbuttons.Visible = true;
                     cscolumn.Visible = true;
                 }
                 else
                 {
                     user.InnerHtml = claimsPrincipal.Identity.Name + " (USER)";
-                    adminbuttons.Visible = false;
                     cscolumn.Visible = false;
                 }
             }
             else
             {
                 user.InnerHtml = "User Not Authenticated";
-                adminbuttons.Visible = false;
                 cscolumn.Visible = false;
             }
         }

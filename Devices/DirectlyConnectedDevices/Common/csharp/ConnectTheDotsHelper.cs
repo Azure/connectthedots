@@ -18,28 +18,28 @@ namespace ConnectTheDotsHelper
     public class D2CMessage
     {
         [DataMember]
-        internal string guid;
+        public string guid;
 
         [DataMember]
-        internal string displayname;
+        public string displayname;
 
         [DataMember]
-        internal string organization;
+        public string organization;
 
         [DataMember]
-        internal string location;
+        public string location;
 
         [DataMember]
-        internal string measurename;
+        public string measurename;
 
         [DataMember]
-        internal string unitofmeasure;
+        public string unitofmeasure;
 
         [DataMember]
-        internal string timecreated;
+        public string timecreated;
 
         [DataMember]
-        internal double value;
+        public double value;
     }
 
     // Data contract defining Connect The Dots Cloud to Device message format
@@ -47,10 +47,35 @@ namespace ConnectTheDotsHelper
     public class C2DMessage
     {
         [DataMember]
-        internal string name;
+        public string alerttype;
 
         [DataMember]
-        internal string message;
+        public string message;
+
+        [DataMember]
+        public string guid;
+
+        [DataMember]
+        public string displayname;
+
+        [DataMember]
+        public string organization;
+
+        [DataMember]
+        public string location;
+
+        [DataMember]
+        public string measurename;
+
+        [DataMember]
+        public string unitofmeasure;
+
+        [DataMember]
+        public string timecreated;
+
+        [DataMember]
+        public double value;
+
     }
 
     /// <summary>
@@ -142,10 +167,10 @@ namespace ConnectTheDotsHelper
         /// <summary>
         /// DeSerialize message
         /// </summary>
-        private dynamic DeSerialize(byte[] data)
+        private C2DMessage DeSerialize(byte[] data)
         {
             string text = Encoding.UTF8.GetString(data, 0, data.Length);
-            return JsonConvert.DeserializeObject(text);
+            return JsonConvert.DeserializeObject<C2DMessage>(text);
         }
 
         /// <summary>
@@ -193,7 +218,7 @@ namespace ConnectTheDotsHelper
             try
             {
                 // Create Azure IoT Hub Client and open messaging channel
-                deviceClient = DeviceClient.CreateFromConnectionString(this.ConnectionString);
+                deviceClient = DeviceClient.CreateFromConnectionString(this.ConnectionString, TransportType.Http1);
                 deviceClient.OpenAsync();
                 IsConnected = true;
 
@@ -211,6 +236,7 @@ namespace ConnectTheDotsHelper
                             foreach (KeyValuePair<string, D2CMessage> sensor in Sensors)
                             {
                                 // Update the values that 
+                                sensor.Value.guid = this.Guid;
                                 sensor.Value.displayname = DisplayName;
                                 sensor.Value.location = Location;
                                 sensor.Value.timecreated = DateTime.UtcNow.ToString("o");
@@ -250,7 +276,7 @@ namespace ConnectTheDotsHelper
                                 // We received the message, indicate IoTHub we treated it
                                 await deviceClient.CompleteAsync(message);
                             }
-                            catch
+                            catch (Exception e)
                             {
                                 // Something went wrong. Indicate the backend that we coudn't accept the message
                                 await deviceClient.RejectAsync(message);

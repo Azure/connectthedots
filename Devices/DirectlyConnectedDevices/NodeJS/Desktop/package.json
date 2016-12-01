@@ -10,5 +10,8 @@
   "license": "MIT",
   "dependencies": {
      "connectthedots":"^1.0.3"
+  },
+  "files": {
+    "settings":"./settings.json"
   }
 }

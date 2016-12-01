@@ -1,12 +1,36 @@
 Third Party Notices for ConnectTheDots.io
 
 This project incorporates material from the project(s) listed below (collectively, “Third Party Code”).
-Microsoft Open Technologies, Inc. (“Microsoft Open Tech”) is not the original author of the Third Party Code.
-The original copyright notice and license, under which Microsoft Open Tech received such Third Party Code, 
+Microsoft Corp.("Microsoft") is not the original author of the Third Party Code.
+The original copyright notice and license, under which Microsoft received such Third Party Code, 
 are set out below.  This Third Party Code is licensed to you under their original license terms set forth below.  
-Microsoft Open Tech reserves all other rights not expressly granted, whether by implication, estoppel or otherwise.  
+Microsoft reserves all other rights not expressly granted, whether by implication, estoppel or otherwise.  
 
-1.	Weather Shield Example, obtained from https://learn.sparkfun.com/tutorials/weather-shield-hookup-guide   
+
+1. QRCodeJS, obtained from https://github.com/davidshimjs/qrcodejs
+
+/*
+The MIT License (MIT)
+
+---------------------
+Copyright (c) 2012 davidshimjs
+
+Permission is hereby granted, free of charge,
+to any person obtaining a copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Contact GitHub API Training Shop Blog About 
+
+© 2016 GitHub, Inc. Terms Privacy Security Status Help 
+*/
+
+2.	Weather Shield Example, obtained from https://learn.sparkfun.com/tutorials/weather-shield-hookup-guide   
 
 /*
 Weather Shield Example
@@ -28,7 +52,7 @@ This example code assumes the GPS module is not used.
 
 */
 
-2.	AnalogReadSerial, obtained from http://arduino.cc/en/Tutorial/AnalogReadSerial 
+3.	AnalogReadSerial, obtained from http://arduino.cc/en/Tutorial/AnalogReadSerial 
 
 /*
   	AnalogReadSerial
@@ -38,7 +62,7 @@ This example code assumes the GPS module is not used.
  	This example code is in the public domain.
 */
 
-3.	Apache Qpid Proton version 0.6, obtained from https://github.com/apache/qpid-proton
+4.	Apache Qpid Proton version 0.6, obtained from https://github.com/apache/qpid-proton
 /*
 
 
@@ -221,7 +245,7 @@ This example code assumes the GPS module is not used.
 
 */
 
-4.	OpenSSL version 1.0.2-beta4-dev, obtained from https://github.com/openssl/openssl/
+5.	OpenSSL version 1.0.2-beta4-dev, obtained from https://github.com/openssl/openssl/
 /*
 	The OpenSSL toolkit stays under a dual license, i.e. both the conditions of
 	  the OpenSSL License and the original SSLeay license apply to the toolkit.
@@ -348,7 +372,7 @@ This example code assumes the GPS module is not used.
 
 */
 
-5. SimpleJSON library, obtained from https://github.com/MJPA/SimpleJSON
+6. SimpleJSON library, obtained from https://github.com/MJPA/SimpleJSON
 /*
 	SimpleJSON Library, copyright (C) 2010 Mike Anchor
 
@@ -377,7 +401,7 @@ This example code assumes the GPS module is not used.
 	THE SOFTWARE.
 */
 
-6. RapidXML version 1.13, obtained from http://rapidxml.sourceforge.net/
+7. RapidXML version 1.13, obtained from http://rapidxml.sourceforge.net/
 /*
 
 	Use of this software is granted under one of the following two licenses,
