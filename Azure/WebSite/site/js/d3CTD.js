@@ -247,10 +247,6 @@ function addOutputToConsole(text) {
     $('#messages').prepend('<div>' + text + '</div>');
 }
 
-//
-// JQuery ready function
-//
-
 var idleTime = 0;
 
 function onUserAction(e) {
@@ -267,6 +263,21 @@ function timerIncrement() {
     }
 }
 
+var qrcode;
+function displayQRCode(title, URI) {
+    // First time called, create the qrcode object
+    if (qrcode == undefined) {
+        qrcode = new QRCode(document.getElementById("qrcode"), URI);
+    } else {
+        // Clean previous code and update title
+        qrcode.clear();
+
+        // Create new code
+        qrcode.makeCode(URI);
+    }
+    // Display QRCode
+    $("#qrcode").dialog({title: title});
+}
 
 $(document).ready(function () {
     var globalSettings = $('.globalSettings');
@@ -346,6 +357,39 @@ $(document).ready(function () {
             }
         }, ]
     });
+
+    $('#devicesTable tbody').on('dblclick', 'tr', function () {
+        if ($('#cscolumn').is(':visible')) {
+            displayQRCode(table.row(this).data()[3], table.row(this).data()[4]);
+        }
+    });
+
+    if ($('#cscolumn').is(':visible')) {
+        $('#devicesTable tbody').contextmenu({
+        menu: [
+            { title: "Add new device", cmd: "add" },
+            { title: "Delete device", cmd: "delete" },
+            { title: "Get QRCode", cmd:"qrcode" }
+        ],
+        select: function (event, ui) {
+            switch (ui.cmd) {
+                case "add":
+                    addDeviceDialog.dialog('open');
+                    break;
+                case "delete":
+                    var deviceID = table.row(ui.target.parent()).data()[3];
+                    var question = "Delete device " + deviceID + "?";
+                    confirmDeleteDeviceDialog.data('deviceID', deviceID);
+                    confirmDeleteDeviceDialog.dialog({ title: question });
+                    confirmDeleteDeviceDialog.dialog('open');
+                    break;
+                case "qrcode":
+                    displayQRCode(table.row(ui.target.parent()).data()[3], table.row(ui.target.parent()).data()[4]);
+                    break;
+                }
+            }
+        });
+    }
 });
 
 $(window).load(function () {

@@ -3,18 +3,72 @@
     PageMethods.GetDevicesList(ListSuccess, Failure);
 }
 
-function addDevice()
+var addDeviceDialog, addDeviceForm, confirmDeleteDeviceDialog;
+
+function addNewDevice()
 {
-    var deviceName = prompt("Enter a unique Device Id");
-    if (deviceName)
-        PageMethods.AddDevice(deviceName, AddSuccess, Failure);
+    var newDeviceID = $("#newdeviceid").val();
+    addDeviceDialog.dialog("close");
+    PageMethods.AddDevice(newDeviceID, AddSuccess, Failure);
 }
 
-function deleteDevice() {
-    var deviceName = prompt("Enter the IoT Hub ID of the device you want to remove");
-    if (deviceName)
-        PageMethods.DeleteDevice(deviceName, DeleteSuccess, Failure);
+function deleteDevice(deviceID)
+{
+    var id = deviceID;
+    confirmDeleteDeviceDialog.dialog("close");
+    PageMethods.DeleteDevice(id, DeleteSuccess, Failure);
 }
+
+addDeviceDialog = $("#add-device-dialog-form").dialog({
+    autoOpen: false,
+    height: "auto",
+    width: 400,
+    modal: true,
+    buttons: {
+        "Ok": addNewDevice,
+        Cancel: function () {
+            addDeviceDialog.dialog("close");
+        }
+    },
+    close: function () {
+        addDeviceForm[0].reset();
+    }
+});
+
+confirmDeleteDeviceDialog = $("#delete-device-dialog-confirm").dialog({
+    autoOpen: false,
+    resizable: false,
+    height: "auto",
+    width: 400,
+    modal: true,
+    buttons: {
+        "Delete device": function () {
+            deleteDevice(confirmDeleteDeviceDialog.data('deviceID'));
+        },
+        Cancel: function () {
+            confirmDeleteDeviceDialog.dialog("close");
+        }
+    }
+});
+
+
+addDeviceForm = addDeviceDialog.find("form").on("submit", function (event) {
+    event.preventDefault();
+    addNewDevice();
+});
+
+//function addDevice()
+//{
+//    var deviceName = prompt("Enter a unique Device Id");
+//    if (deviceName)
+//        PageMethods.AddDevice(deviceName, AddSuccess, Failure);
+//}
+
+//function deleteDevice() {
+//    var deviceName = prompt("Enter the IoT Hub ID of the device you want to remove");
+//    if (deviceName)
+//        PageMethods.DeleteDevice(deviceName, DeleteSuccess, Failure);
+//}
 
 function ListSuccess(result) {
     if (result) {
@@ -60,7 +114,9 @@ function ListSuccess(result) {
                         table.cell(rowIdx, 0).innerHTML = displayname;
                         table.cell(rowIdx, 1).innerHTML = location;
                         table.cell(rowIdx, 2).innerHTML = ipaddress;
-                        if ($('#cscolumn').is(':visible')) table.cell(rowIdx, 4).innerHTML = connectionstring;
+                        if ($('#cscolumn').is(':visible')) {
+                            table.cell(rowIdx, 4).innerHTML = connectionstring;
+                        }
                         return true;
                     }
                     return false;
@@ -129,3 +185,4 @@ function Failure(error) {
     addOutputToConsole(error);
     alert(error);
 }
+
