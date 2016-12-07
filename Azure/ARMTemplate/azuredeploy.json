@@ -23,6 +23,7 @@
     },
     "solutionName": {
       "type": "string",
+      "maxLength": 16,
       "metadata": {
         "description": "The name of your ConnectTheDots solution (will be used to prefix the services names)"
       }
@@ -38,6 +39,9 @@
       "metadata": {
         "description": "The Iothub Sku"
       }
+    },
+    "adminName": {
+      "type": "string"
     },
     "repoUrl": {
       "type": "string",
@@ -121,6 +125,17 @@
         },
         {
           "apiVersion": "[variables('iotHubVersion')]",
+          "name": "[concat(variables('iotHubName'), '/events/', 'debug')]",
+          "type": "Microsoft.Devices/Iothubs/eventhubEndpoints/ConsumerGroups",
+          "dependsOn": [
+            "[concat('Microsoft.Devices/Iothubs/', variables('iotHubName'))]"
+          ],
+          "tags": {
+            "displayName": "Debug Consumer Group"
+          }
+        },
+        {
+          "apiVersion": "[variables('iotHubVersion')]",
           "name": "[concat(variables('iotHubName'), '/events/', variables('saCGName'))]",
           "type": "Microsoft.Devices/Iothubs/eventhubEndpoints/ConsumerGroups",
           "dependsOn": [
@@ -172,7 +187,19 @@
               "tags": {
                 "displayName": "Website Consumer Group"
               }
+            },
+            {
+              "apiVersion": "[variables('sbVersion')]",
+              "name": "debug",
+              "type": "ConsumerGroups",
+              "dependsOn": [
+                "[variables('ehOutName')]"
+              ],
+              "tags": {
+                "displayName": "Debug Consumer Group"
+              }
             }
+
           ]
 
         }
@@ -327,6 +354,10 @@
                     {
                       "name": "Azure.Storage.ConnectionString",
                       "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageName'), ';AccountKey=', listkeys(variables('storageId'), variables('storageVersion')).key1)]"
+                    },
+                    {
+                      "name": "AdminName",
+                      "value": "[parameters('adminName')]"
                     },
                     {
                       "name": "ObjectTypePrefix",

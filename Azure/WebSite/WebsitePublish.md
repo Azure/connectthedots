@@ -11,7 +11,7 @@ If you are willing to change these parameters (for example if you have decided t
 
 - Go to [portal.azure.com](http://portal;.azure.com)
 - Login using your Azure account credentials
-- Find the resource group that was deployed for your ConnectTheDots solution when following the [instructions](../ARMTemplate/Readme.md).
+- Find the resource group that was deployed for your ConnectTheDots solution when following the [instructions](../ARMTemplate/readme.md).
 - Once you have selected the resource group:
    1. Identify and select the Web App
    1. Click on the **settings** button in the Web App blade
@@ -28,7 +28,7 @@ Make sure you have all software installed and necessary subscriptions as indicat
 
 1. Microsoft Azure subscription ([free trial subscription](http://azure.microsoft.com/en-us/pricing/free-trial/) is sufficient)
 1. Visual Studio – [Community Edition](http://www.visualstudio.com/downloads/download-visual-studio-vs)
-1. Deploy the default dashboard Website a first time using the [ARM Template](../ARMTemplate/Readme.md).
+1. Deploy the default dashboard Website a first time using the [ARM Template](../ARMTemplate/readme.md).
 
 ## Publish the Azure Website ##
 

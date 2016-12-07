@@ -90,7 +90,7 @@ In order to reproduce one of the ConnectTheDots.io scenarios, you will need the 
 To get started with ConnectTheDots, you will beed to go through the following basic steps:
 
 1. [Deploying services](Azure/ARMTemplate/Readme.md): this is easily done using the automated deployment script.
-2. [Setup devices](Devices/DeviceSetup.md): follow these instructions to provision devices in the IoT Hub and modify and deploy code sample
+2. [Setup devices](Devices/readme.md): follow these instructions to provision devices in the IoT Hub and modify and deploy code sample
 
 ## Available Devices ##
 For a full list of devices and code samples check out the ever growing list of [supported gateways and sensors](SupportedDevices.md).

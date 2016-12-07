@@ -23,22 +23,142 @@
 //  ---------------------------------------------------------------------------------
 
 using System;
+using System.Threading;
+using System.Web.Services;
+using Newtonsoft.Json;
+using System.Security.Claims;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 
 namespace ConnectTheDotsWebSite
 {
     public partial class Default : System.Web.UI.Page
     {
         protected string ForceSocketCloseOnUserActionsTimeout = "false";
+
+        protected static bool IsUserAuthenticated()
+        {
+            //            return true;
+            var claimsPrincipal = Thread.CurrentPrincipal as ClaimsPrincipal;
+            return (claimsPrincipal != null && claimsPrincipal.Identity.IsAuthenticated);
+        }
+
+        protected static bool IsUserAdmin()
+        {
+            //            return true;
+
+            var claimsPrincipal = Thread.CurrentPrincipal as ClaimsPrincipal;
+            if (claimsPrincipal != null && claimsPrincipal.Identity.IsAuthenticated)
+            {
+                return (Global.globalSettings.AdminName == claimsPrincipal.Identity.Name);
+            }
+            else
+                return false;
+
+        }
+
+
         protected void Page_Load(object sender, EventArgs e)
         {
             ForceSocketCloseOnUserActionsTimeout =
                 Global.globalSettings.ForceSocketCloseOnUserActionsTimeout.ToString();
+
+            // Manage what's displayed depending on the user's permissions
+            if (IsUserAuthenticated())
+            {
+                var claimsPrincipal = Thread.CurrentPrincipal as ClaimsPrincipal;
+                if (IsUserAdmin())
+                {
+                    user.InnerHtml = claimsPrincipal.Identity.Name + " (ADMIN)";
+                    cscolumn.Visible = true;
+                }
+                else
+                {
+                    user.InnerHtml = claimsPrincipal.Identity.Name + " (USER)";
+                    cscolumn.Visible = false;
+                }
+            }
+            else
+            {
+                user.InnerHtml = "User Not Authenticated";
+                cscolumn.Visible = false;
+            }
         }
+
+        [WebMethod]
+        public static string GetDevicesList()
+        {
+            // Set the flag for the server to refresh the devices list from IoTHub and wait till its done
+            if (Global.TriggerAndWaitDeviceListRefresh(10))
+            {
+                // We need to Filter the devices secret information in case the user is not an admin
+                List<DeviceDetails> devicesList = Global.devicesList;
+                if (!IsUserAdmin())
+                {
+                    foreach (DeviceDetails device in devicesList)
+                    {
+                        device.connectionstring = "";
+                    }
+                }
+
+                return JsonConvert.SerializeObject(devicesList);
+            }
+            return null;
+        }
+
+        [WebMethod]
+        public static string AddDevice(string deviceName)
+        {
+            // Check if user is authorized, then create a new device
+            if (!IsUserAdmin())
+                return "{\"Error\": \"User not authorized to add device.\"}";
+
+            string returnMessage;
+
+            // Add device
+            switch (Global.TriggerAndWaitAddDevice(10, deviceName))
+            {
+                case Helpers.IoTHubHelper.AddDeviceResult.Success:
+                    returnMessage  = "{\"Device\": \"" + deviceName + "\"}";
+                    break;
+
+                case Helpers.IoTHubHelper.AddDeviceResult.DeviceAlreadyExists:
+                    returnMessage = "{\"Error\": \"Device already exists.\"}";
+                    break;
+
+                default:
+                    returnMessage = "{\"Error\": \"An error occured when trying to add new device.\"}";
+                    break;
+            }
+            return returnMessage;
+        }
+
+        [WebMethod]
+        public static string DeleteDevice(string deviceName)
+        {
+            // Check if user is authorized, then create a new device
+            if (!IsUserAdmin())
+                return "{\"Error\": \"User not authorized to remove device.\"}";
+
+            string returnMessage;
+
+            // Delete device
+            switch (Global.TriggerAndWaitDeleteDevice(10, deviceName))
+            {
+                case Helpers.IoTHubHelper.DeleteDeviceResult.Success:
+                    returnMessage = "{\"Device\": \"" + deviceName + "\"}";
+                    break;
+
+                case Helpers.IoTHubHelper.DeleteDeviceResult.DeviceNotRegistered:
+                    returnMessage = "{\"Error\": \"Device not registered.\"}";
+                    break;
+
+                default:
+                    returnMessage = "{\"Error\": \"An error occured when trying to delete device.\"}";
+                    break;
+            }
+            return returnMessage;
+        }
+
 
     }
 }

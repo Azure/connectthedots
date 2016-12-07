@@ -129,6 +129,11 @@ path.line {
     width: 100%;
 }
 
+#devices {
+    height: 15%;
+    width: 100%;
+}
+
 #Charts {
     height: 100%;
     position: relative;
@@ -172,6 +177,11 @@ path.line {
 }
 
 #alertTable td {
+    font-size: 12px;
+    text-align: center;
+}
+
+#devicesTable td {
     font-size: 12px;
     text-align: center;
 }

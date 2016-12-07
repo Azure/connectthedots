@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-#include "AzureIoTHub.h"
+
+#include <AzureIoTHub.h>
+#include <AzureIoTUtility.h>
+#include <AzureIoTProtocol_MQTT.h>
 
 // Includes and variables for serializing messages
 #include <ArduinoJson.h>
@@ -83,7 +86,7 @@ void connect_the_dots_run(void)
 {
     dht.begin();
 
-    IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol);
+    IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, MQTT_Protocol);
     if (iotHubClientHandle == NULL)
     {
         LogInfo("Failed on IoTHubClient_CreateFromConnectionString\r\n");

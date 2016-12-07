@@ -89,6 +89,9 @@ namespace XamarinSimulatedSensors.Droid
 			// aapt resource value: 0x7f050007
 			public const int seekBarTemperature = 2131034119;
 			
+			// aapt resource value: 0x7f05000b
+			public const int textAlerts = 2131034123;
+			
 			// aapt resource value: 0x7f050004
 			public const int textConnectionString = 2131034116;
 			

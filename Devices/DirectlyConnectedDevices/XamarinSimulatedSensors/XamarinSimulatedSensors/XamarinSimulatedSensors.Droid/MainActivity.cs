@@ -23,6 +23,8 @@ namespace XamarinSimulatedSensors.Droid
         TextView lblTemperature;
         TextView lblHumidity;
 
+        TextView textAlerts;
+
         protected override void OnCreate (Bundle bundle)
 		{
 			base.OnCreate (bundle);
@@ -65,8 +67,19 @@ namespace XamarinSimulatedSensors.Droid
             seekHumidity.ProgressChanged += SeekHumidity_ProgressChanged;
             seekHumidity.Progress = 50;
 
+            textAlerts = FindViewById<TextView>(Resource.Id.textAlerts);
+
+            Device.ReceivedMessage += Device_ReceivedMessage;
             // Set focus to the connect button
             buttonConnect.RequestFocus();
+        }
+
+        private void Device_ReceivedMessage(object sender, EventArgs e)
+        {
+            ConnectTheDotsHelper.C2DMessage message = ((ConnectTheDotsHelper.ConnectTheDots.ReceivedMessageEventArgs)e).Message;
+            var textToDisplay = message.timecreated + " - Alert received:" + message.message + ": " + message.value + " " + message.unitofmeasure + "\r\n";
+
+            textAlerts.Append(textToDisplay);
         }
 
         private void SeekHumidity_ProgressChanged(object sender, SeekBar.ProgressChangedEventArgs e)

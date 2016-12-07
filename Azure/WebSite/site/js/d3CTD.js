@@ -88,11 +88,11 @@ function onLoaded(evt) {
 }
 
 function onError(evt) {
-    $('#messages').prepend('<div>ERROR ' + evt.owner + '</div>');
+    addOutputToConsole('ERROR ' + evt.owner);
 }
 
 function onOpen(evt) {
-    $('#messages').prepend('<div>Connected.</div>');
+    addOutputToConsole('Connected.');
 }
 
 function addNewDataFlow(eventObject) {
@@ -243,9 +243,9 @@ function onNewEvent(evt) {
     }
 }
 
-//
-// JQuery ready function
-//
+function addOutputToConsole(text) {
+    $('#messages').prepend('<div>' + text + '</div>');
+}
 
 var idleTime = 0;
 
@@ -263,6 +263,22 @@ function timerIncrement() {
     }
 }
 
+var qrcode;
+function displayQRCode(title, URI) {
+    // First time called, create the qrcode object
+    if (qrcode == undefined) {
+        qrcode = new QRCode(document.getElementById("qrcode"), URI);
+    } else {
+        // Clean previous code and update title
+        qrcode.clear();
+
+        // Create new code
+        qrcode.makeCode(URI);
+    }
+    // Display QRCode
+    $("#qrcode").dialog({title: title});
+}
+
 $(document).ready(function () {
     var globalSettings = $('.globalSettings');
     var forceSocketCloseOnUserActionsTimeout = globalSettings.find('.ForceSocketCloseOnUserActionsTimeout').text().toLowerCase() == 'true';
@@ -277,7 +293,8 @@ $(document).ready(function () {
     var sss = (window.location.protocol.indexOf('s') > 0 ? "s" : "");
     var uri = 'ws' + sss + '://' + window.location.host + '/api/websocketconnect?clientId=none';
 
-    $('#messages').prepend('<div> Connecting to ' + uri + '<div>');
+    addOutputToConsole('Connecting to ' + uri);
+
     dataFlows.dataSource = new d3CTDDataSourceSocket(uri).addEventListeners({ 'eventObject': onNewEvent, 'error': onError, 'open': onOpen });
 
     $('#selectAllOpt').on('click', function () {
@@ -317,4 +334,66 @@ $(document).ready(function () {
             }
         }, ]
     });
+
+    // create devices table
+    var table = $('#devicesTable').DataTable({
+        "bAutoWidth": false,
+        "bFilter": true,
+        "bInfo": true,
+        "paging": true,
+        "order": [
+            [0, "desc"]
+        ],
+        "columnDefs": [{
+            "targets": "numberFixed",
+            "data": function (row, type, val, meta) {
+                if (type === 'set') {
+                    row[meta.col] = val;
+                    return;
+                } else if (type === 'display') {
+                    return row[meta.col].toFixed(1);
+                }
+                return row[meta.col];
+            }
+        }, ]
+    });
+
+    $('#devicesTable tbody').on('dblclick', 'tr', function () {
+        if ($('#cscolumn').is(':visible')) {
+            displayQRCode(table.row(this).data()[3], table.row(this).data()[4]);
+        }
+    });
+
+    if ($('#cscolumn').is(':visible')) {
+        $('#devicesTable tbody').contextmenu({
+        menu: [
+            { title: "Add new device", cmd: "add" },
+            { title: "Delete device", cmd: "delete" },
+            { title: "Get QRCode", cmd:"qrcode" }
+        ],
+        select: function (event, ui) {
+            switch (ui.cmd) {
+                case "add":
+                    addDeviceDialog.dialog('open');
+                    break;
+                case "delete":
+                    var deviceID = table.row(ui.target.parent()).data()[3];
+                    var question = "Delete device " + deviceID + "?";
+                    confirmDeleteDeviceDialog.data('deviceID', deviceID);
+                    confirmDeleteDeviceDialog.dialog({ title: question });
+                    confirmDeleteDeviceDialog.dialog('open');
+                    break;
+                case "qrcode":
+                    displayQRCode(table.row(ui.target.parent()).data()[3], table.row(ui.target.parent()).data()[4]);
+                    break;
+                }
+            }
+        });
+    }
+});
+
+$(window).load(function () {
+
+    // Update the devices list when page is loaded
+    updateDevicesList();
 });
