@@ -1,20 +1,14 @@
 ﻿using System;
-using Microsoft.Azure.Devices.Client;
-using Newtonsoft.Json;
 using System.Diagnostics;
-using System.Runtime.Serialization;
-using System.Text;
 using System.Threading.Tasks;
-using Windows.UI.Popups;
 using Windows.Devices.Geolocation;
 using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls.Primitives;
-using System.Text.RegularExpressions;
 using ConnectTheDotsHelper;
-
+using ZXing.Mobile;
 
 namespace UWPSimulatedSensors
 {
@@ -26,6 +20,8 @@ namespace UWPSimulatedSensors
         private GeolocationAccessStatus LocationAccess = GeolocationAccessStatus.Unspecified;
         private Windows.Storage.ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
         private ConnectTheDots CTD;
+        private delegate void AppendAlert(string AlertText);
+        private MobileBarcodeScanner QRCodeScanner;
 
         public MainPage()
         {
@@ -53,6 +49,9 @@ namespace UWPSimulatedSensors
             CTD.Organization = "My Company";
             CTD.Location = "Unknown";
 
+            // Hook up a callback to display message received from Azure
+            CTD.ReceivedMessage += CTD_ReceivedMessage;
+
             // Get user consent for accessing location
             Task.Run(async () =>
             {
@@ -60,6 +59,9 @@ namespace UWPSimulatedSensors
                 async () =>
                 {
                     this.LocationAccess = await Geolocator.RequestAccessAsync();
+                    // Get device location
+                    await updateLocation();
+
                 });
             });
 
@@ -67,19 +69,23 @@ namespace UWPSimulatedSensors
             CTD.AddSensor("Temperature", "C");
             CTD.AddSensor("Humidity", "%");
 
-            // Hook up a callback to display message received from Azure
-            CTD.ReceivedMessage += (object sender, EventArgs e) => {
-                // Received a new message, display it
-                CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-                async () =>
-                {
-                    var dialogbox = new MessageDialog("Received message from Azure IoT Hub: \nName: " +
-                                                      ((ConnectTheDots.ReceivedMessageEventArgs)e).Message.name +
-                                                      "\nMessage: " +
-                                                      ((ConnectTheDots.ReceivedMessageEventArgs)e).Message.message);
-                    await dialogbox.ShowAsync();
-                });
-            };
+            // Initialize QRCode SCanner
+            QRCodeScanner = new MobileBarcodeScanner(this.Dispatcher);
+            QRCodeScanner.UseCustomOverlay = false;
+            QRCodeScanner.TopText = "Hold camera up to QR code";
+            QRCodeScanner.BottomText = "Camera will automatically scan QR code\r\n\rPress the 'Back' button to cancel";
+        }
+
+        private void CTD_ReceivedMessage(object sender, EventArgs e)
+        {
+            CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+            async () =>
+            {
+                ConnectTheDotsHelper.C2DMessage message = ((ConnectTheDotsHelper.ConnectTheDots.ReceivedMessageEventArgs)e).Message;
+                var textToDisplay = message.timecreated + " - Alert received:" + message.message + ": " + message.value + " " + message.unitofmeasure + "\r\n";
+                TBAlerts.Text += textToDisplay;
+            });
+
         }
 
         /// <summary>
@@ -146,7 +152,7 @@ namespace UWPSimulatedSensors
         private void TempSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
             if ((CTD !=null) && (CTD.Sensors["Temperature"] != null))
-                CTD.Sensors["Temperature"].value = TempSlider.Value;
+                CTD.Sensors["Temperature"].message.value = TempSlider.Value;
         }
         /// <summary>
         /// HmdtSlider_ValueChanged
@@ -156,7 +162,7 @@ namespace UWPSimulatedSensors
         private void HmdtSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
             if ((CTD != null) && (CTD.Sensors["Humidity"] != null))
-                CTD.Sensors["Humidity"].value = HmdtSlider.Value;
+                CTD.Sensors["Humidity"].message.value = HmdtSlider.Value;
         }
         /// <summary>
         /// TBDeviceName_TextChanged
@@ -210,6 +216,16 @@ namespace UWPSimulatedSensors
                 TBDeviceName.IsEnabled = true;
                 TBConnectionString.IsEnabled = true;
                 ConnectToggle.Content = "Press to connect the dots";
+            }
+        }
+
+        private void TBConnectionString_DoubleTapped(object sender, Windows.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
+        {
+            var result = QRCodeScanner.Scan().Result;
+
+            if (result != null)
+            {
+                TBConnectionString.Text = result.Text;
             }
         }
     }

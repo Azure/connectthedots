@@ -8,18 +8,19 @@
     mc:Ignorable="d">
 
     <ScrollViewer>
-        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid Background="#FF333333">
             <Image x:Name="image" Margin="56,10,58,0" Source="Assets/CTD-logo-743x360.png" Height="127" VerticalAlignment="Top" HorizontalAlignment="Center" Width="246"/>
-            <Slider x:Name="TempSlider" Height="31" Margin="10,414,20,0" VerticalAlignment="Top" Value="50" ValueChanged="TempSlider_ValueChanged"/>
-            <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="10,396,0,0" TextWrapping="Wrap" Text="Temperature" VerticalAlignment="Top"/>
-            <Slider x:Name="HmdtSlider" Height="31" Margin="10,471,20,0" VerticalAlignment="Top" Value="50" ValueChanged="HmdtSlider_ValueChanged"/>
-            <TextBlock x:Name="HmdtTB" HorizontalAlignment="Left" Margin="10,453,0,0" TextWrapping="Wrap" Text="Humidity" VerticalAlignment="Top"/>
-            <ToggleButton x:Name="SendDataToggle" Content="Press to send data" HorizontalAlignment="Center" Margin="56,507,68,0" VerticalAlignment="Top" Width="236" Checked="toggleButton_Checked" Unchecked="toggleButton_Unchecked" IsEnabled="False" Height="44"/>
-            <TextBlock x:Name="textBlock1" HorizontalAlignment="Left" Height="25" Margin="10,138,0,0" TextWrapping="Wrap" Text="Device Name" VerticalAlignment="Top" Width="137"/>
+            <Slider x:Name="TempSlider" Height="31" Margin="10,378,20,0" VerticalAlignment="Top" Value="50" ValueChanged="TempSlider_ValueChanged"/>
+            <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="10,360,0,0" TextWrapping="Wrap" Text="Temperature" VerticalAlignment="Top" Foreground="White"/>
+            <Slider x:Name="HmdtSlider" Height="31" Margin="10,435,20,0" VerticalAlignment="Top" Value="50" ValueChanged="HmdtSlider_ValueChanged"/>
+            <TextBlock x:Name="HmdtTB" HorizontalAlignment="Left" Margin="10,417,0,0" TextWrapping="Wrap" Text="Humidity" VerticalAlignment="Top" Foreground="White"/>
+            <ToggleButton x:Name="SendDataToggle" Content="Press to send data" HorizontalAlignment="Center" Margin="56,471,68,0" VerticalAlignment="Top" Width="236" Checked="toggleButton_Checked" Unchecked="toggleButton_Unchecked" IsEnabled="False" Height="44" Foreground="White"/>
+            <TextBlock x:Name="textBlock1" HorizontalAlignment="Left" Height="25" Margin="10,138,0,0" TextWrapping="Wrap" Text="Device Name" VerticalAlignment="Top" Width="137" Foreground="White"/>
             <TextBox x:Name="TBDeviceName" Height="0" Margin="10,163,20,0" TextWrapping="Wrap" Text="" TextChanged="TBDeviceName_TextChanged" VerticalAlignment="Top"/>
-            <TextBlock x:Name="textBlock2" HorizontalAlignment="Left" Height="25" Margin="10,205,0,0" TextWrapping="Wrap" Text="Connection String" VerticalAlignment="Top" Width="137"/>
-            <TextBox x:Name="TBConnectionString" Height="85" Margin="10,230,20,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" TextChanged="TBConnectionString_TextChanged"/>
-            <ToggleButton x:Name="ConnectToggle" Content="Press to connect the dots" HorizontalAlignment="Center" Margin="56,339,68,0" VerticalAlignment="Top" Checked="ConnectToggle_Checked" Unchecked="ConnectToggle_Unchecked" Height="44" Width="236"/>
+            <TextBlock x:Name="textBlock2" HorizontalAlignment="Left" Height="25" Margin="10,205,0,0" TextWrapping="Wrap" Text="Connection String" VerticalAlignment="Top" Width="137" Foreground="White"/>
+            <TextBox x:Name="TBConnectionString" Height="61" Margin="10,230,20,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" TextChanged="TBConnectionString_TextChanged" DoubleTapped="TBConnectionString_DoubleTapped"/>
+            <ToggleButton x:Name="ConnectToggle" Content="Press to connect the dots" HorizontalAlignment="Center" Margin="56,303,68,0" VerticalAlignment="Top" Checked="ConnectToggle_Checked" Unchecked="ConnectToggle_Unchecked" Height="44" Width="236" Foreground="White"/>
+            <TextBox x:Name="TBAlerts" Margin="10,533,20,10" TextWrapping="Wrap" Text="" TextChanged="TBConnectionString_TextChanged" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
         </Grid>
     </ScrollViewer>
 
