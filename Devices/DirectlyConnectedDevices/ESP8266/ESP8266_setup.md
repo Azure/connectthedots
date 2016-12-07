@@ -77,6 +77,8 @@ For this project, we'll  need the below libraries. To install them, click on the
  - DHT Sensor Library
  - Adafruit Unified Sensor
  - AzureIoTHub
+ - AzureIoTUtility
+ - AzureIoTProtocol_MQTT
  - ArduinoJSON
 
 ### Modify the code
