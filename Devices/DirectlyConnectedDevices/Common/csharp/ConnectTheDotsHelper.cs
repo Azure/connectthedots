@@ -222,7 +222,7 @@ namespace ConnectTheDotsHelper
         /// </summary>
         /// <param name="connectionString"></param>
         /// <returns></returns>
-        private string ExtractDeviceIdFromConnectionString(string connectionString)
+        public string ExtractDeviceIdFromConnectionString(string connectionString)
         {
             Regex pattern = new Regex(@"HostName=(?<hostName>[^\s/]*);DeviceId=(?<deviceId>[^\s/]*);SharedAccessKey=(?<shareAccessKey>[^\s/]*)");
             Match match = pattern.Match(connectionString);
