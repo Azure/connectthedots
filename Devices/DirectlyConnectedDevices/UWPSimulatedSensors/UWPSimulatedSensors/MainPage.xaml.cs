@@ -9,6 +9,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls.Primitives;
 using ConnectTheDotsHelper;
 using ZXing.Mobile;
+using Windows.UI.Popups;
 
 namespace UWPSimulatedSensors
 {
@@ -20,42 +21,46 @@ namespace UWPSimulatedSensors
         private GeolocationAccessStatus LocationAccess = GeolocationAccessStatus.Unspecified;
         private Windows.Storage.ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
         private ConnectTheDots CTD;
-        private delegate void AppendAlert(string AlertText);
-        private MobileBarcodeScanner QRCodeScanner;
+        private MobileBarcodeScanner Scanner;
 
         public MainPage()
         {
             this.InitializeComponent();
 
+            // Initialize QRCode Scanner
+            Scanner = new MobileBarcodeScanner(Dispatcher);
+            Scanner.Dispatcher = Dispatcher;
+
             // Initialize ConnectTheDots Helper
             CTD = new ConnectTheDots();
 
+            // Hook up a callback to display message received from Azure
+            CTD.ReceivedMessage += CTD_ReceivedMessage;
+
             // Restore local settings
-            if (localSettings.Values.ContainsKey("DisplayName"))
-            {
-                CTD.DisplayName = (string)localSettings.Values["DisplayName"];
-                this.TBDeviceName.Text = CTD.DisplayName;
-            }
             if (localSettings.Values.ContainsKey("ConnectionString"))
             {
                 CTD.ConnectionString = (string)localSettings.Values["ConnectionString"];
                 this.TBConnectionString.Text = CTD.ConnectionString;
             }
 
+            if (localSettings.Values.ContainsKey("DisplayName"))
+            {
+                CTD.DisplayName = (string)localSettings.Values["DisplayName"];
+                this.TBDeviceName.Text = CTD.DisplayName;
+            }
+
             // Check configuration settings
             ConnectToggle.IsEnabled = checkConfig();
-            CTD.DisplayName = this.TBDeviceName.Text;
             CTD.ConnectionString = this.TBConnectionString.Text;
+            CTD.DisplayName = this.TBDeviceName.Text;
             CTD.Organization = "My Company";
             CTD.Location = "Unknown";
-
-            // Hook up a callback to display message received from Azure
-            CTD.ReceivedMessage += CTD_ReceivedMessage;
 
             // Get user consent for accessing location
             Task.Run(async () =>
             {
-                await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                 async () =>
                 {
                     this.LocationAccess = await Geolocator.RequestAccessAsync();
@@ -69,19 +74,18 @@ namespace UWPSimulatedSensors
             CTD.AddSensor("Temperature", "C");
             CTD.AddSensor("Humidity", "%");
 
-            // Initialize QRCode SCanner
-            QRCodeScanner = new MobileBarcodeScanner(this.Dispatcher);
-            QRCodeScanner.UseCustomOverlay = false;
-            QRCodeScanner.TopText = "Hold camera up to QR code";
-            QRCodeScanner.BottomText = "Camera will automatically scan QR code\r\n\rPress the 'Back' button to cancel";
         }
 
-        private void CTD_ReceivedMessage(object sender, EventArgs e)
+        /// <summary>
+        /// CTD_ReceivedMessage
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void CTD_ReceivedMessage(object sender, EventArgs e)
         {
-            CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-            async () =>
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                ConnectTheDotsHelper.C2DMessage message = ((ConnectTheDotsHelper.ConnectTheDots.ReceivedMessageEventArgs)e).Message;
+                C2DMessage message = ((ConnectTheDots.ReceivedMessageEventArgs)e).Message;
                 var textToDisplay = message.timecreated + " - Alert received:" + message.message + ": " + message.value + " " + message.unitofmeasure + "\r\n";
                 TBAlerts.Text += textToDisplay;
             });
@@ -183,10 +187,14 @@ namespace UWPSimulatedSensors
         /// <param name="e"></param>
         private void TBConnectionString_TextChanged(object sender, TextChangedEventArgs e)
         {
-            CTD.ConnectionString = TBConnectionString.Text;
+            if (CTD.ConnectionString != TBConnectionString.Text)
+            {
+                CTD.ConnectionString = TBConnectionString.Text;
+            }
             localSettings.Values["ConnectionString"] = CTD.ConnectionString;
             ConnectToggle.IsEnabled = checkConfig();
         }
+
         /// <summary>
         /// ConnectToggle_Checked
         /// </summary>
@@ -200,8 +208,10 @@ namespace UWPSimulatedSensors
                 TBDeviceName.IsEnabled = false;
                 TBConnectionString.IsEnabled = false;
                 ConnectToggle.Content = "Dots connected";
+                buttonScanCode.IsEnabled = false;
             }
         }
+
         /// <summary>
         /// ConnectToggle_Unchecked
         /// </summary>
@@ -216,16 +226,53 @@ namespace UWPSimulatedSensors
                 TBDeviceName.IsEnabled = true;
                 TBConnectionString.IsEnabled = true;
                 ConnectToggle.Content = "Press to connect the dots";
+                buttonScanCode.IsEnabled = true;
             }
         }
 
-        private void TBConnectionString_DoubleTapped(object sender, Windows.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
-        {
-            var result = QRCodeScanner.Scan().Result;
 
-            if (result != null)
+        /// <summary>
+        /// ScanCode
+        /// Scan a QR Code using the ZXing library
+        /// </summary>
+        /// <returns></returns>
+        private async Task ScanCode()
+        {
+            Scanner.UseCustomOverlay = false;
+            Scanner.TopText = "Hold camera up to QR code";
+            Scanner.BottomText = "Camera will automatically scan QR code\r\n\rPress the 'Back' button to cancel";
+
+            ZXing.Result result = await Scanner.Scan().ConfigureAwait(true);
+
+            if (result == null || (string.IsNullOrEmpty(result.Text)))
             {
-                TBConnectionString.Text = result.Text;
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
+                    {
+                        MessageDialog dialog = new MessageDialog("An error occured while scanning the QRCode. Try again");
+                        await dialog.ShowAsync();
+                    });
+            }
+            else
+            {
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                {
+                    TBConnectionString.Text = result.Text;
+                    TBDeviceName.Text = CTD.ExtractDeviceIdFromConnectionString(result.Text);
+                });
+            }
+        }
+
+        /// <summary>
+        /// buttonScanCode_Tapped
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        private async void buttonScanCode_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        {
+            if (SendDataToggle.IsEnabled == false)
+            {
+                await ScanCode();
             }
         }
     }
