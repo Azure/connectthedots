@@ -37,7 +37,7 @@ namespace XamarinSimulatedSensors
         public void UpdateSensorData(string SensorName, double value)
         {
             if (this.Sensors.ContainsKey(SensorName))
-                this.Sensors[SensorName].value = value;
+                this.Sensors[SensorName].message.value = value;
         }
     }
 }

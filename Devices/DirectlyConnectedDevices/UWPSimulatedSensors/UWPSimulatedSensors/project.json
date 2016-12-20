@@ -1,11 +1,13 @@
 ﻿{
   "dependencies": {
-    "Microsoft.ApplicationInsights": "1.0.0",
-    "Microsoft.ApplicationInsights.PersistenceChannel": "1.0.0",
-    "Microsoft.ApplicationInsights.WindowsApps": "1.0.0",
-    "Microsoft.Azure.Devices.Client.PCL": "1.0.4",
-    "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0",
-    "Newtonsoft.Json": "8.0.3"
+    "Microsoft.ApplicationInsights": "2.1.0",
+    "Microsoft.ApplicationInsights.PersistenceChannel": "1.2.3",
+    "Microsoft.ApplicationInsights.WindowsApps": "1.1.1",
+    "Microsoft.Azure.Devices.Client": "1.1.1",
+    "Microsoft.Azure.Devices.Shared": "1.0.2",
+    "Microsoft.NETCore.UniversalWindowsPlatform": "5.2.2",
+    "Newtonsoft.Json": "9.0.1",
+    "ZXing.Net.Mobile": "2.1.47"
   },
   "frameworks": {
     "uap10.0": {}

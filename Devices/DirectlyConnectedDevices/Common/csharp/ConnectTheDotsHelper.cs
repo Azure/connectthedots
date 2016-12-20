@@ -42,6 +42,16 @@ namespace ConnectTheDotsHelper
         public double value;
     }
 
+    [DataContract]
+    public class CTDSensor
+    {
+        [DataMember]
+        public D2CMessage message;
+
+        [DataMember]
+        public bool send;
+    }
+
     // Data contract defining Connect The Dots Cloud to Device message format
     [DataContract]
     public class C2DMessage
@@ -88,11 +98,11 @@ namespace ConnectTheDotsHelper
         private DeviceClient deviceClient;
 
         // Collection of sensors
-        public Dictionary<string, D2CMessage> Sensors { get; set; } = new Dictionary<string, D2CMessage>();
-        public void AddSensor(string MeasureName, string UnitOfMeasure)
+        public Dictionary<string, CTDSensor> Sensors { get; set; } = new Dictionary<string, CTDSensor>();
+        public void AddSensor(string MeasureName, string UnitOfMeasure, bool send = true)
         {
-            Sensors.Add(MeasureName, new D2CMessage
-            {
+            CTDSensor sensor = new CTDSensor();
+            sensor.message = new D2CMessage {
                 guid = Guid,
                 displayname = DisplayName,
                 location = Location,
@@ -101,7 +111,18 @@ namespace ConnectTheDotsHelper
                 unitofmeasure = UnitOfMeasure,
                 timecreated = DateTime.UtcNow.ToString("o"),
                 value = 0
-            });
+            };
+            sensor.send = send;
+
+            Sensors.Add(MeasureName, sensor);
+        }
+
+        public void setSensorStreaming(string MeasureName, bool on)
+        {
+            if ((Sensors != null) && (Sensors[MeasureName] != null))
+            {
+                Sensors[MeasureName].send = on;
+            }
         }
 
         // ConnectTheDots properties
@@ -201,7 +222,7 @@ namespace ConnectTheDotsHelper
         /// </summary>
         /// <param name="connectionString"></param>
         /// <returns></returns>
-        private string ExtractDeviceIdFromConnectionString(string connectionString)
+        public string ExtractDeviceIdFromConnectionString(string connectionString)
         {
             Regex pattern = new Regex(@"HostName=(?<hostName>[^\s/]*);DeviceId=(?<deviceId>[^\s/]*);SharedAccessKey=(?<shareAccessKey>[^\s/]*)");
             Match match = pattern.Match(connectionString);
@@ -219,6 +240,7 @@ namespace ConnectTheDotsHelper
             {
                 // Create Azure IoT Hub Client and open messaging channel
                 deviceClient = DeviceClient.CreateFromConnectionString(this.ConnectionString, TransportType.Http1);
+
                 deviceClient.OpenAsync();
                 IsConnected = true;
 
@@ -233,14 +255,15 @@ namespace ConnectTheDotsHelper
                             D2CMessage[] dataToSend = new D2CMessage[Sensors.Count];
                             int index = 0;
 
-                            foreach (KeyValuePair<string, D2CMessage> sensor in Sensors)
+                            foreach (KeyValuePair<string, CTDSensor> sensor in Sensors)
                             {
                                 // Update the values that 
-                                sensor.Value.guid = this.Guid;
-                                sensor.Value.displayname = DisplayName;
-                                sensor.Value.location = Location;
-                                sensor.Value.timecreated = DateTime.UtcNow.ToString("o");
-                                dataToSend[index++] = sensor.Value;
+                                sensor.Value.message.guid = this.Guid;
+                                sensor.Value.message.displayname = DisplayName;
+                                sensor.Value.message.location = Location;
+                                sensor.Value.message.timecreated = DateTime.UtcNow.ToString("o");
+                                if (sensor.Value.send)
+                                    dataToSend[index++] = sensor.Value.message;
                             }
                             // Send message
                             sendDeviceTelemetryData(dataToSend);
@@ -261,27 +284,44 @@ namespace ConnectTheDotsHelper
                 {
                     while (true)
                     {
-                        // Receive message from Cloud (for now this is a pull because only HTTP is available for UWP applications)
-                        Message message = await deviceClient.ReceiveAsync();
-                        if (message != null)
+                        if (deviceClient != null)
                         {
+                            Message message = null;
                             try
                             {
-                                // Read message and deserialize
-                                C2DMessage command = DeSerialize(message.GetBytes());
-
-                                // Invoke message received callback
-                                OnReceivedMessage(new ReceivedMessageEventArgs(command));
-
-                                // We received the message, indicate IoTHub we treated it
-                                await deviceClient.CompleteAsync(message);
+                                // Receive message from Cloud (for now this is a pull because only HTTP is available for UWP applications)
+                                message = await deviceClient.ReceiveAsync();
                             }
                             catch (Exception e)
                             {
                                 // Something went wrong. Indicate the backend that we coudn't accept the message
-                                await deviceClient.RejectAsync(message);
+                                Debug.WriteLine("Something went wrong when receiving message from IoT Hub: " + e.Message);
                             }
+
+                            if (message != null)
+                            {
+                                try
+                                {
+                                    // Read message and deserialize
+                                    C2DMessage command = DeSerialize(message.GetBytes());
+                                    // Invoke message received callback
+                                    OnReceivedMessage(new ReceivedMessageEventArgs(command));
+
+                                    // We received the message, indicate IoTHub we treated it
+                                    await deviceClient.CompleteAsync(message);
+                                }
+                                catch (Exception e)
+                                {
+                                    Debug.WriteLine("Something went wrong when receiving message from IoT Hub: " + e.Message);
+                                    // Something went wrong. Indicate the backend that we coudn't accept the message
+                                    await deviceClient.RejectAsync(message);
+                                }
+                            }
+                        } else
+                        {
+                            await Task.Delay(200);
                         }
+
                         if (ct.IsCancellationRequested)
                         {
                             // Cancel was called

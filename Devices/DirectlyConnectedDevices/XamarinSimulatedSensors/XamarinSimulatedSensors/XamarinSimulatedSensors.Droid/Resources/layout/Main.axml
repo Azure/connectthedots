@@ -8,8 +8,9 @@
     <ImageView
         android:src="@drawable/ctdlogomedium"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/imageView1" />
+        android:layout_height="105.5dp"
+        android:id="@+id/imageView1"
+        android:scaleType="fitCenter" />
     <TextView
         android:text="Display Name:"
         android:textAppearance="?android:attr/textAppearanceLarge"
@@ -27,12 +28,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/textView3" />
-    <EditText
-        android:inputType="textMultiLine"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/textConnectionString"
-        android:editable="true" />
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <EditText
+            android:inputType="textMultiLine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textConnectionString"
+            android:editable="true"
+            android:layout_marginLeft="0.0dp"
+            android:layout_marginRight="77.5dp" />
+        <Button
+            android:text="Scan"
+            android:layout_width="77.5dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonScan"
+            android:layout_marginRight="0.0dp"
+            android:layout_alignParentRight="true" />
+    </RelativeLayout>
     <Button
         android:text="Press to Connect The Dots"
         android:layout_width="match_parent"
