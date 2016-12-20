@@ -8,6 +8,8 @@ using Android.Views;
 using Android.Widget;
 using Android.OS;
 
+using ZXing.Mobile;
+
 namespace XamarinSimulatedSensors.Droid
 {
 	[Activity (Label = "XamarinSimulatedSensors.Droid", MainLauncher = true, Icon = "@drawable/icon")]
@@ -17,6 +19,7 @@ namespace XamarinSimulatedSensors.Droid
 
         Button buttonConnect;
         Button buttonSend;
+        Button buttonScan;
         TextView textDeviceName;
         TextView textConnectionString;
 
@@ -49,12 +52,17 @@ namespace XamarinSimulatedSensors.Droid
             buttonSend.Enabled = false;
             buttonSend.Click += ButtonSend_Click;
 
+            buttonScan = FindViewById<Button>(Resource.Id.buttonScan);
+            buttonScan.Enabled = true;
+            buttonScan.Click += ButtonScan_Click;
+
             textDeviceName = FindViewById<TextView>(Resource.Id.textDeviceName);
             textDeviceName.TextChanged += TextDeviceName_TextChanged;
             textDeviceName.Text = Device.DisplayName;
 
             textConnectionString = FindViewById<TextView>(Resource.Id.textConnectionString);
             textConnectionString.TextChanged += TextConnectionString_TextChanged;
+            textConnectionString.SetSingleLine(true);
             textConnectionString.Text = Device.ConnectionString;
 
             lblTemperature = FindViewById<TextView>(Resource.Id.lblTemperature);
@@ -72,6 +80,48 @@ namespace XamarinSimulatedSensors.Droid
             Device.ReceivedMessage += Device_ReceivedMessage;
             // Set focus to the connect button
             buttonConnect.RequestFocus();
+        }
+
+        /// <summary>
+        /// ScanCode
+        /// Scan a QR Code using the ZXing library
+        /// </summary>
+        /// <returns></returns>
+        private async Task ScanCode()
+        {
+            MobileBarcodeScanner.Initialize(Application);
+
+            MobileBarcodeScanner Scanner = new MobileBarcodeScanner();
+            Scanner.UseCustomOverlay = false;
+            Scanner.TopText = "Hold camera up to QR code";
+            Scanner.BottomText = "Camera will automatically scan QR code\r\n\rPress the 'Back' button to cancel";
+
+            ZXing.Result result = await Scanner.Scan().ConfigureAwait(true);
+
+            if (result == null || (string.IsNullOrEmpty(result.Text)))
+            {
+                //await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
+                //{
+                    //MessageDialog dialog = new MessageDialog("An error occured while scanning the QRCode. Try again");
+                    //await dialog.ShowAsync();
+                //});
+            }
+            else
+            {
+                //await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                //{
+                    textConnectionString.Text = result.Text;
+                    textDeviceName.Text = Device.ExtractDeviceIdFromConnectionString(result.Text);
+                //});
+            }
+        }
+
+        private async void ButtonScan_Click(object sender, EventArgs e)
+        {
+            if (buttonSend.Enabled == false)
+            {
+                await ScanCode();
+            }
         }
 
         private void Device_ReceivedMessage(object sender, EventArgs e)
@@ -118,7 +168,8 @@ namespace XamarinSimulatedSensors.Droid
                 {
                     buttonSend.Enabled = false;
                     textDeviceName.Enabled = true;
-                    textConnectionString.Enabled = true;
+                    textConnectionString.Enabled = true
+                    buttonScan.Enabled = true;
                     buttonConnect.Text = "Press to connect the dots";
                 }
             }
@@ -130,6 +181,7 @@ namespace XamarinSimulatedSensors.Droid
                     textDeviceName.Enabled = false;
 
                     textConnectionString.Enabled = false;
+                    buttonScan.Enabled = false;
                     buttonConnect.Text = "Dots connected";
 
                 }
