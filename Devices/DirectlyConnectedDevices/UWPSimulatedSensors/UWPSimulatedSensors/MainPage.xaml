@@ -22,7 +22,7 @@
             <TextBox x:Name="TBConnectionString" Height="61" Margin="10,230,95,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" TextChanged="TBConnectionString_TextChanged" />
             <ToggleButton x:Name="ConnectToggle" Content="Press to connect the dots" HorizontalAlignment="Center" Margin="56,303,68,0" VerticalAlignment="Top" Checked="ConnectToggle_Checked" Unchecked="ConnectToggle_Unchecked" Height="44" Width="236" Foreground="White"/>
             <TextBox x:Name="TBAlerts" Margin="10,533,20,10" TextWrapping="Wrap" Text="" TextChanged="TBConnectionString_TextChanged" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-            <Button x:Name="buttonScanCode" Content="Scan" HorizontalAlignment="Right" Margin="0,230,20,0" VerticalAlignment="Top" Height="61" Tapped="buttonScanCode_Tapped" Width="68"/>
+            <Button x:Name="buttonScanCode" Content="Scan" HorizontalAlignment="Right" Margin="0,230,20,0" VerticalAlignment="Top" Height="61" Tapped="buttonScanCode_Tapped" Width="68" Foreground="White"/>
         </Grid>
     </ScrollViewer>
 

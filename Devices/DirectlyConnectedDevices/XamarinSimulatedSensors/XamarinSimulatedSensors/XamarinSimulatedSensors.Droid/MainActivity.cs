@@ -168,7 +168,7 @@ namespace XamarinSimulatedSensors.Droid
                 {
                     buttonSend.Enabled = false;
                     textDeviceName.Enabled = true;
-                    textConnectionString.Enabled = true
+                    textConnectionString.Enabled = true;
                     buttonScan.Enabled = true;
                     buttonConnect.Text = "Press to connect the dots";
                 }
