@@ -15,7 +15,7 @@ You will find all the instructions to create device IDs and retrieve connection 
 ## ConnectTheDots getting started project using Raspberry Pi and Arduino ##
 For this project, follow the instructions for configuring the following:
 
-1. [Arduino UNO with weather shield](GatewayConnectedDevices/Arduino%20UNO/Weather/WeatherShieldJson/Arduino-and-Weather-Shield-setup.md) 
+1. [Arduino UNO with weather shield](GatewayConnectedDevices/Arduino UNO/Weather/WeatherShieldJson/Arduino-and-Weather-Shield-setup.md) 
 2. [Raspberry Pi](Gateways/GatewayService/RaspberryPi-Gateway-setup.md) 
 
 ## Connect The Dots with all the other devices ##

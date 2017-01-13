@@ -5,7 +5,7 @@ Below you'll find a list of supported devices, which can be found under each par
 ### Connect The Dots Getting Started With RPi and Arduino project ###
 If you are going to deploy the getting started project, you need to procure an Arduino UNO and Raspberry Pi, as shown in the documentation for those devices in the appropriate folders:
 
-- [Arduino UNO R3 and weather shield](Devices/GatewayConnectedDevices/Arduino%20UNO/Weather/WeatherShieldJson/Hardware.md)
+- [Arduino UNO R3 and weather shield](./Devices/GatewayConnectedDevices/Arduino UNO/Weather/WeatherShieldJson/Hardware.md)
 - [Raspberry Pi](Devices/Gateways/GatewayService/Hardware.md)
 
 Once you have these, head over to the [Getting Started With RPi and Arduino project](GettingStarted.md) to get going.
