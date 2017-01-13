@@ -66,7 +66,7 @@ To work on the code of the project, you can use your favorite editor... or lever
                  npm install
                  
 * Before running the app, you need to update the settings.json file to input the device's connetion string and a unique device id.
-Following the instructions [here](../../../DeviceSetup.md), get the connection string for your device.
+Following the instructions [here](../../../readme.md), get the connection string for your device.
                  
 * In the remote terminal, open the file settings.json and edit the settings based on the configuration of your ehdevices Event Hub (if you want to use nano, just type nano settings.json and once your edits are done, type CTRL+X then Y to save). Note that the device id shall be unique per device so that data is not messed up in the connectthedots portal.
 

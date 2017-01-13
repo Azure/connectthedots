@@ -36,7 +36,7 @@ To build the project you will need Visual Studio 2013 [Community Edition](http:/
 				  sudo pip install --pre pyusb
 
 
-* Create a device ID and retreive a connection string for the gateway following the instructions in the [Device Setup](../../DeviceSetup.md) guide.
+* Create a device ID and retreive a connection string for the gateway following the instructions in the [Device Setup](../../readme.md) guide.
 * Open the `Devices\Gateways\GatewayService\GatewayService.sln` solution in Visual Studio
 * In Visual Studio, update `\GatewayService\Gateway\Microsoft.ConnectTheDots.GatewayService\App.config` pasting your device connection string:
 

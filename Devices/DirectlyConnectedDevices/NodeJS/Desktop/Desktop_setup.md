@@ -14,7 +14,7 @@ To work on the code of the project, you can use your favorite code editor.
                  npm install
                  
 * Before running the app, you need to update the settings.json file to input the device's connection string and a unique device id.
-Following the instructions [here](../../../DeviceSetup.md), get the connection string for your device.
+Following the instructions [here](../../../readme.md), get the connection string for your device.
                  
 * Open the file settings.json in your favorite text editor and edit the settings using the device id and connection string generated following the previous instructions.
 
