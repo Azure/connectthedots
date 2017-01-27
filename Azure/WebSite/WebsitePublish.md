@@ -11,7 +11,7 @@ If you are willing to change these parameters (for example if you have decided t
 
 - Go to [portal.azure.com](http://portal;.azure.com)
 - Login using your Azure account credentials
-- Find the resource group that was deployed for your ConnectTheDots solution when following the [instructions](../ARMTemplate/readme.md).
+- Find the resource group that was deployed for your ConnectTheDots solution when following the [instructions](../ARMTemplate/Readme.md).
 - Once you have selected the resource group:
    1. Identify and select the Web App
    1. Click on the **settings** button in the Web App blade
