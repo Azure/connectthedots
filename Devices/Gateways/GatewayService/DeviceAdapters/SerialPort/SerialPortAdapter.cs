@@ -156,12 +156,12 @@ namespace Microsoft.ConnectTheDots.Adapters
                     _logger.LogError( "No connected serial ports" );
                 }
 #else
-                if(_ListeningThreads.Count == 0)
+                if(_listeningThreads.Count == 0)
                 {
                     // Start a unique thread simulating data
                     var listeningThread = new Thread(() => ListeningForSensors("Simulated"));
                     listeningThread.Start();
-                    _ListeningThreads.Add(new SerialPortListeningThread("Simulated", listeningThread));
+                    _listeningThreads.Add(new SerialPortListeningThread("Simulated", listeningThread));
                 }
 #endif
                 // Every 5 seconds we scan Serial COM ports
