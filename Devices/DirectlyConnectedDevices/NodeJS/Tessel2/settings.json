@@ -1,0 +1,7 @@
+﻿{
+    "iothubconnectionstring": "<connection-string>",
+    "deviceid": "<deviceid>",
+    "displayname": "My Tessel 2",
+    "organization": "My Org",
+    "location":  "My location"
+}
