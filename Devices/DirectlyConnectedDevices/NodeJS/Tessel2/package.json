@@ -1,0 +1,16 @@
+{
+  "name": "ConnectTheDotsTessel2",
+  "version": "1.0.0",
+  "description": "Simple Node app sending data from a Tessel 2 + Ambient Module to Azure IoT services",
+  "main": "tessel2ctd.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ambient-attx4": "^0.2.11",
+    "connectthedots": "^1.0.3",
+    "tessel": "^0.3.25"
+  }
+}
