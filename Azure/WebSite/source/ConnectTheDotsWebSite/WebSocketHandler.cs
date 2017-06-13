@@ -197,7 +197,9 @@ namespace ConnectTheDotsWebSite
 			TimeSpan bufferTime = new TimeSpan(0, 10, 0);
 			DateTime now = DateTime.UtcNow;
 
-			if (message.ContainsKey("time"))
+            if (message.ContainsKey("unitofmeasure") && message.ContainsKey("value"))
+                message["value"] = float.Parse(message["value"].ToString());
+            if (message.ContainsKey("time"))
 				messageTime = DateTime.Parse(message["time"].ToString());
 			else if (message.ContainsKey("timestart"))
 				messageTime = DateTime.Parse(message["timestart"].ToString());
