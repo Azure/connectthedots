@@ -122,7 +122,15 @@ namespace ConnectTheDotsWebSite
 
                                 // Send alert to device
                                 var alertMessage = JsonConvert.SerializeObject(messagePayload).ToString();
-                                IoTHubHelper.SendMessage(messagePayload["guid"].ToString(), alertMessage);
+
+                                try
+                                {
+                                    IoTHubHelper.SendMessage(messagePayload["guid"].ToString(), alertMessage);
+                                }
+                                catch (Exception e)
+                                {
+                                    Trace.TraceError("Error notifying device {0}, check that message receiving is implemented on the device", messagePayload["guid"].ToString());
+                                }
 
                                 DateTime time = DateTime.Parse(messagePayload["timecreated"].ToString());
 								// find the nearest point
