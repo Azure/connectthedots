@@ -59,7 +59,7 @@
     "storageName": "[concat(parameters('solutionName'), 'storage')]",
     "storageId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
     "storageAccountSku": "Standard_LRS",
-    "sbVersion": "[providers('Microsoft.Eventhub', 'namespaces').apiVersions[0]]",
+    "sbVersion": "[providers('Microsoft.Eventhub', 'namespaces').apiVersions[1]]",
     "ehOutName": "ehalerts",
     "sbKeyName": "RootManageSharedAccessKey",
     "sbSku": 1,
