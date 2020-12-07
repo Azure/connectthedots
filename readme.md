@@ -90,7 +90,7 @@ In order to reproduce one of the ConnectTheDots.io scenarios, you will need the 
 
 ## Getting Started ##
 
-To get started with ConnectTheDots, you will beed to go through the following basic steps:
+To get started with ConnectTheDots, you will need to go through the following basic steps:
 
 1. [Deploying services](Azure/ARMTemplate/Readme.md): this is easily done using the automated deployment script.
 2. [Setup devices](Devices/readme.md): follow these instructions to provision devices in the IoT Hub and modify and deploy code sample
